@@ -3,7 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
+import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 // components
 import { Button } from "@/components/ui/button";
@@ -13,8 +16,8 @@ import FormCheckbox from "@/components/form/form-checkbox";
 
 // icons
 import { GoogleIcon } from "@/assets/icons/logo";
-import { api } from "@/lib/api";
-import { useRouter } from "next/navigation";
+import { useRegistrationMutation } from "@/store/services/auth";
+import { userLoggedIn } from "@/store/slices/auth-slice";
 
 type RegisterFormValues = {
   first_name: string;
@@ -26,6 +29,8 @@ type RegisterFormValues = {
 };
 
 const RegisterPage = () => {
+  const router = useRouter();
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -34,21 +39,34 @@ const RegisterPage = () => {
     formState: { errors },
   } = useForm<RegisterFormValues>();
 
-  const router = useRouter();
+  const [registration, { isLoading }] = useRegistrationMutation();
 
   const onSubmit = async (data: RegisterFormValues) => {
     const { accept_terms, ...formData } = data;
 
-    if (accept_terms) {
-      console.log("term was accepted!");
+    if (formData.confirm_password !== formData.password) {
+      toast.error("Password did not match with confirm password");
+      return;
     }
 
-    const res = await api.post("/auth/register", formData);
-    if (res && res.success) {
-      console.log("Registration successful:", res?.data);
+    if (!accept_terms) {
+      toast.warning("Please accept our terms before creating accounts");
+      return;
+    }
+
+    const res = await registration(formData);
+    if (res && res.data?.success) {
+      dispatch(
+        userLoggedIn({
+          accessToken: res.data.data.access_token,
+          refreshToken: res.data.data.refresh_token,
+          rememberMe: false,
+        })
+      );
+      toast.success("You are Successfully Logged In");
       router.push("/");
     } else {
-      console.log("Registration successful:", res?.data);
+      toast.error(res.error?.data.message || "Registration Failed!");
     }
   };
 
@@ -139,7 +157,12 @@ const RegisterPage = () => {
             />
 
             {/* SUBMIT */}
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full"
+              isLoading={isLoading}
+              loadingText="Creating account..."
+            >
               Create a new account
             </Button>
           </form>

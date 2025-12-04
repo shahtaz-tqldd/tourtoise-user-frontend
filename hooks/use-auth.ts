@@ -1,47 +1,47 @@
 import { decodeJWT } from "@/lib/jwt-decoder";
 
-export const setAuthCookie = (auth: { accessToken: string; refreshToken: string }, name = "tourtoise", path = "/") => {
+interface AuthTokens {
+	accessToken: string;
+	refreshToken?: string;
+}
+
+export const setAuthCookie = (auth: AuthTokens, name = "tourtoise", path = "/") => {
+	if (typeof document === "undefined") return; // <-- SSR SAFE
+	if (typeof window === "undefined") return;
+
 	const { accessToken, refreshToken } = auth;
 
-	try {
-		const { exp } = decodeJWT(accessToken);
-		const millisecondsUntilExpiration = exp ? exp * 1000 - Date.now() : 0;
+	const { exp } = decodeJWT(accessToken);
+	const ms = exp ? exp * 1000 - Date.now() : 0;
 
-		// Set secure defaults
-		let cookieFlags = "; SameSite=Strict";
+	let cookieFlags = "; SameSite=Strict";
+	if (process.env.PROD) cookieFlags += "; Secure";
 
-		// Add Secure flag in production
-		if (process.env.PROD) {
-			cookieFlags += "; Secure";
-		}
+	const accessExpires = new Date(Date.now() + ms);
+	document.cookie = `${name}_access=${accessToken}; expires=${accessExpires.toUTCString()}; path=${path}${cookieFlags}`;
 
-		// Set access token with appropriate expiration
-		const accessExpires = new Date(Date.now() + millisecondsUntilExpiration);
-		document.cookie = `${name}_access=${accessToken}; expires=${accessExpires.toUTCString()}; path=${path}${cookieFlags}`;
-
-		if (refreshToken) {
-			// Set refresh token with longer expiration (15 days)
-			const refreshExpires = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-			document.cookie = `${name}_refresh=${refreshToken}; expires=${refreshExpires.toUTCString()}; path=${path}${cookieFlags}`;
-		}
-
-		// Store token expiration time in localStorage for quick validation
-		localStorage.setItem(`${name}_exp`, exp.toString());
-	} catch (error) {
-		console.error("Failed to set authentication cookies:", error);
-		throw error;
+	if (refreshToken) {
+		const refreshExpires = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+		document.cookie = `${name}_refresh=${refreshToken}; expires=${refreshExpires.toUTCString()}; path=${path}${cookieFlags}`;
 	}
+
+	localStorage.setItem(`${name}_exp`, exp.toString());
 };
 
 export const getAuthCookie = (name = "tourtoise") => {
+	if (typeof document === "undefined") {
+		return { accessToken: null, refreshToken: null, isExpired: true };
+	}
+
+	if (typeof window === "undefined") {
+		return { accessToken: null, refreshToken: null, isExpired: true };
+	}
+
 	const getCookie = (cookieName: string) => {
 		const value = `; ${document.cookie}`;
 		const parts = value.split(`; ${cookieName}=`);
 		if (parts.length === 2) {
-			const part = parts.pop();
-			if (!part) return null;
-			const val = part.split(";").shift();
-			return val ?? null;
+			return parts.pop()?.split(";").shift() ?? null;
 		}
 		return null;
 	};
@@ -50,7 +50,6 @@ export const getAuthCookie = (name = "tourtoise") => {
 	const refreshToken = getCookie(`${name}_refresh`);
 	const tokenExp = localStorage.getItem(`${name}_exp`);
 
-	// Quick expiration check without decoding token
 	const isExpired = tokenExp && parseInt(tokenExp) * 1000 < Date.now();
 
 	return {
@@ -60,18 +59,21 @@ export const getAuthCookie = (name = "tourtoise") => {
 	};
 };
 
+
 export const removeAuthCookie = (name = "tourtoise", path = "/") => {
+	if (typeof document === "undefined") return;
+	if (typeof window === "undefined") return;
+
 	const cookieFlags = process.env.PROD
 		? "; Secure; SameSite=Strict"
 		: "; SameSite=Strict";
 
-	// Remove cookies by setting immediate expiration
 	document.cookie = `${name}_access=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}${cookieFlags}`;
 	document.cookie = `${name}_refresh=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}${cookieFlags}`;
 
-	// Clear localStorage
 	localStorage.removeItem(`${name}_exp`);
 };
+
 
 // New function to check if user is authenticated
 export const isAuthenticated = (name = "tourtoise") => {
