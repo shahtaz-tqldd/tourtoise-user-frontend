@@ -28,14 +28,14 @@ export default function Hero() {
           <Typography
             as="h1"
             size="xxl"
-            className="mt-8 leading-[1.15] max-w-2xl !font-bold bg-gradient-to-br from-green-400 via-emerald-600 to-cyan-500 bg-clip-text text-transparent"
+            className="mt-8 leading-[1.15] max-w-2xl !font-bold bg-gradient-to-br from-yellow-500 via-emerald-600 to-purple-500 bg-clip-text text-transparent"
           >
             Your personalized tour guide with AI assistance
           </Typography>
           <Typography
             as="p"
             size="base"
-            className="mt-6 text-gray-500 max-w-xl mx-auto leading-relaxed"
+            className="mt-6 text-gray-500 max-w-2xl mx-auto leading-relaxed"
           >
             Explore destinations, plan your trips, and get real‑time guidance —
             all with the help of an intelligent travel assistant.
@@ -46,7 +46,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/50 rounded-2xl p-2 flex items-center gap-2 max-w-2xl mt-10 w-full border border-gray-100/50"
+          className="bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/50 rounded-2xl p-2 flex items-center gap-2 max-w-2xl mt-16 w-full border border-gray-100/50"
         >
           <div className="flex items-center gap-3 flex-1 px-3">
             <MapPin size={20} className="text-gray-400 flex-shrink-0" />
@@ -69,18 +69,20 @@ export default function Hero() {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="flex flex-wrap items-center gap-1.5 mt-6"
         >
-          <span className="text-sm text-gray-500 font-medium">Popular:</span>
-          <button className="py-1.5 px-4 text-xs border border-gray-400/50 bg-white/60 text-gray-600 rounded-full hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all">
-            Bali
+          <span className="text-sm text-gray-500 font-medium">
+            Popular Search:
+          </span>
+          <button className="py-1.5 px-4 text-xs border border-gray-400/50 bg-white/60 text-gray-600 rounded-full hover:border-primary/75 hover:text-primary hover:bg-emerald-50/50 transition-all">
+            ABC, Nepal
           </button>
-          <button className="py-1.5 px-4 text-xs border border-gray-400/50 bg-white/60 text-gray-600 rounded-full hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all">
-            Nepal
-          </button>
-          <button className="py-1.5 px-4 text-xs border border-gray-400/50 bg-white/60 text-gray-600 rounded-full hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all">
+          <button className="py-1.5 px-4 text-xs border border-gray-400/50 bg-white/60 text-gray-600 rounded-full hover:border-primary/75 hover:text-primary hover:bg-emerald-50/50 transition-all">
             Phi Phi Island
           </button>
-          <button className="py-1.5 px-4 text-xs border border-gray-400/50 bg-white/60 text-gray-600 rounded-full hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all">
-            Sundarban
+          <button className="py-1.5 px-4 text-xs border border-gray-400/50 bg-white/60 text-gray-600 rounded-full hover:border-primary/75 hover:text-primary hover:bg-emerald-50/50 transition-all">
+            Bali Indonasia
+          </button>
+          <button className="py-1.5 px-4 text-xs border border-gray-400/50 bg-white/60 text-gray-600 rounded-full hover:border-primary/75 hover:text-primary hover:bg-emerald-50/50 transition-all">
+            Bandarban
           </button>
         </motion.div>
       </div>
@@ -93,8 +95,8 @@ export default function Hero() {
         className="hidden lg:block absolute -mt-24 bg-white/60 backdrop-blur-md rounded-2xl p-6 pl-4 shadow-xl shadow-gray-200/40 space-y-5 top-1/2 -translate-y-1/2 left-[5%] border border-gray-100/50 max-w-[280px]"
       >
         <div className="flex gap-4 items-start">
-          <div className="bg-blue-50 rounded-xl p-3 flex-shrink-0">
-            <Compass className="text-blue-600" size={22} />
+          <div className="bg-orange-50 rounded-xl p-3 flex-shrink-0">
+            <Compass className="text-orange-600" size={22} />
           </div>
           <div className="text-left">
             <h2 className="font-semibold text-gray-800 text-sm">
@@ -107,8 +109,8 @@ export default function Hero() {
         </div>
         <div className="h-px bg-gray-100" />
         <div className="flex gap-4 items-start">
-          <div className="bg-purple-50 rounded-xl p-3 flex-shrink-0">
-            <Sparkles className="text-purple-600" size={22} />
+          <div className="bg-emerald-50 rounded-xl p-3 flex-shrink-0">
+            <Sparkles className="text-primary" size={22} />
           </div>
           <div className="text-left">
             <h2 className="font-semibold text-gray-800 text-sm">
@@ -126,11 +128,11 @@ export default function Hero() {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.4, duration: 0.6 }}
-        className="hidden lg:block max-w-[240px] absolute bg-white/60 backdrop-blur-md rounded-2xl p-6 shadow-xl shadow-gray-200/40 top-1/2 -translate-y-1/2 right-[5%] border border-gray-100/50"
+        className="hidden lg:block max-w-[240px] absolute bg-white/40 backdrop-blur-md rounded-2xl p-6 top-1/2 -translate-y-1/2 right-[5%]"
       >
         <div className="flex flex-col items-center gap-4">
           <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4">
-            <div className="h-12 w-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+            <div className="h-12 w-12 bg-gradient-to-br from-primary to-cyan-600 rounded-xl flex items-center justify-center">
               <svg
                 className="h-7 w-7 text-white"
                 fill="none"

@@ -1,5 +1,4 @@
 import React from "react";
-import Container from "../ui/container";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import Image from "next/image";
@@ -17,12 +16,12 @@ const Header = () => {
               height={40}
               className="inline-block mr-2"
             />
-            <span className="text-xl font-bold text-emerald-600">
+            <span className="text-xl font-bold text-primary">
               tourtoise
             </span>
           </Link>
 
-          <div className="flx gap-8 text-sm font-medium text-gray-600">
+          <div className="flx gap-6 font-medium text-gray-600">
             <Link href="/">Destinations</Link>
             <Link href="/">About</Link>
             <Link href="/">Pricing</Link>
@@ -30,12 +29,12 @@ const Header = () => {
           </div>
 
           <div className="flx gap-3">
+            <Button variant="outline" className="rounded-full">
+              AI Agent
+            </Button>
             <Link href="/login">
-              <Button variant="outline" className="rounded-full">
-                AI Agent
-              </Button>
+              <Button className="rounded-full">Get Started</Button>
             </Link>
-            <Button className="rounded-full">Get Started</Button>
           </div>
         </div>
       </div>

@@ -3,16 +3,21 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
 
 // components
+import FormInput from "@/components/form/form-input";
+import FormCheckbox from "@/components/form/form-checkbox";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 
 // icons
 import { GoogleIcon } from "@/assets/icons/logo";
-import FormInput from "@/components/form/form-input";
-import FormCheckbox from "@/components/form/form-checkbox";
+import { useLoginMutation } from "@/store/services/auth";
+import { userLoggedIn } from "@/store/slices/auth-slice";
 
 type LoginFormValues = {
   email: string;
@@ -21,6 +26,8 @@ type LoginFormValues = {
 };
 
 const LoginPage = () => {
+  const router = useRouter();
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -29,9 +36,24 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm<LoginFormValues>();
 
-  const onSubmit = (data: LoginFormValues) => {
-    console.log("FORM DATA:", data);
-    // TODO: send to API
+  const [login, { isLoading }] = useLoginMutation();
+
+  const onSubmit = async (data: LoginFormValues) => {
+    const { remember, ...loginData } = data;
+    const res = await login(loginData);
+    if (res && res.data?.success) {
+      dispatch(
+        userLoggedIn({
+          accessToken: res.data.data.access_token,
+          refreshToken: res.data.data.refresh_token,
+          rememberMe: remember,
+        })
+      );
+      toast.success("You are Successfully Logged In");
+      router.push("/");
+    } else {
+      toast.error(res.error?.data.message || "Login Failed!");
+    }
   };
 
   return (
@@ -97,13 +119,18 @@ const LoginPage = () => {
               {/* Your existing link */}
               <Link
                 href="/forgot-password"
-                className="text-sm text-emerald-700"
+                className="text-sm text-primary"
               >
                 Forgot Password
               </Link>
             </div>
 
-            <Button type="submit" className="w-full mt-4">
+            <Button
+              type="submit"
+              className="w-full mt-4"
+              isLoading={isLoading}
+              loadingText="Logging In..."
+            >
               Login
             </Button>
           </form>
@@ -121,7 +148,7 @@ const LoginPage = () => {
           {/* Register Link */}
           <Link
             href="/register"
-            className="block text-center text-emerald-800 mt-12 text-sm"
+            className="block text-center text-primary font-medium mt-10"
           >
             Create a new account
           </Link>

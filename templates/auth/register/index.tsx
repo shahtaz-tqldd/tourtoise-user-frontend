@@ -156,7 +156,7 @@ const RegisterPage = () => {
 
           <Link
             href="/login"
-            className="block text-center text-emerald-800 mt-8 text-sm"
+            className="block text-center text-primary mt-8 font-medium"
           >
             Login to your account
           </Link>
