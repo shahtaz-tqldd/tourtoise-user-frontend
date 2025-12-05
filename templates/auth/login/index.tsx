@@ -40,6 +40,10 @@ const LoginPage = () => {
 
   const onSubmit = async (data: LoginFormValues) => {
     const { remember, ...loginData } = data;
+    if (!loginData.email || !loginData.password) {
+      toast.warning("Please put your email and password");
+      return;
+    }
     const res = await login(loginData);
     if (res && res.data?.success) {
       dispatch(
@@ -117,10 +121,7 @@ const LoginPage = () => {
               />
 
               {/* Your existing link */}
-              <Link
-                href="/forgot-password"
-                className="text-sm text-primary"
-              >
+              <Link href="/forgot-password" className="text-sm text-primary">
                 Forgot Password
               </Link>
             </div>

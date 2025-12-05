@@ -10,15 +10,24 @@ import {
   MapPin,
   Plane,
 } from "lucide-react";
+import { Typography } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
+import BasicInfo from "./basic-info";
+import PasswordUpdate from "./password-update";
 
 interface UserData {
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  phone: string;
-  location: string;
-  preferredTourType: string;
-  bio: string;
+  language: string;
+  timezone: string;
+  travel_style: string[];
+  budget_level: string;
+  prefered_group: string[];
+  food_preferences: string[];
+  interests: string[];
+  email_verified: boolean;
+  account_type: string;
 }
 
 const UserProfile = () => {
@@ -30,13 +39,18 @@ const UserProfile = () => {
 
   // User data state
   const [userData, setUserData] = useState<UserData>({
-    firstName: "John",
-    lastName: "Doe",
+    first_name: "John",
+    last_name: "Doe",
     email: "john.doe@example.com",
-    phone: "+1 234 567 8900",
-    location: "New York, USA",
-    preferredTourType: "Adventure",
-    bio: "Travel enthusiast who loves exploring new places and cultures.",
+    language: "en",
+    timezone: "Asia/Dhaka",
+    travel_style: ["adventure", "relaxed"],
+    budget_level: "medium",
+    prefered_group: ["solo", "friends"],
+    food_preferences: ["halal", "vegan"],
+    interests: ["museums", "nature", "hiking"],
+    email_verified: true,
+    account_type: "regular",
   });
 
   // Password state
@@ -46,21 +60,16 @@ const UserProfile = () => {
     confirmPassword: "",
   });
 
-  const tourTypes = [
-    "Adventure",
-    "Cultural",
-    "Beach",
-    "Wildlife",
-    "Historical",
-    "Luxury",
-    "Budget",
-  ];
-
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle profile update logic here
     console.log("Profile updated:", userData);
     setIsEditing(false);
+  };
+
+  const handleUpdateClick = () => {
+    console.log("Update profile clicked");
+    // This will open your modal in the parent component
   };
 
   const handlePasswordChange = (e: React.FormEvent) => {
@@ -86,20 +95,22 @@ const UserProfile = () => {
   };
 
   return (
-    <section className="max-w-5xl mx-auto mt-24 px-4 pb-12">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+    <section className="max-w-4xl mx-auto mt-28 px-4 pb-12">
+      <div className="bg-white rounded-2xl overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-8">
+        <div className="bg-primary px-6 py-8">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-blue-600 text-2xl font-bold">
-              {userData.firstName[0]}
-              {userData.lastName[0]}
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-primary text-2xl font-bold">
+              {userData.first_name[0]}
+              {userData.last_name[0]}
             </div>
             <div className="text-white">
-              <h1 className="text-3xl font-bold">
-                {userData.firstName} {userData.lastName}
-              </h1>
-              <p className="text-blue-100 mt-1">{userData.email}</p>
+              <Typography as="h2" className="text-white">
+                {userData.first_name} {userData.last_name}
+              </Typography>
+              <Typography as="p" size="sm" className="text-white/75">
+                {userData.email}
+              </Typography>
             </div>
           </div>
         </div>
@@ -111,7 +122,7 @@ const UserProfile = () => {
               onClick={() => setActiveTab("profile")}
               className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
                 activeTab === "profile"
-                  ? "border-b-2 border-blue-500 text-blue-600"
+                  ? "border-b-2 border-primary/80 text-primary"
                   : "text-gray-600 hover:text-gray-800"
               }`}
             >
@@ -122,7 +133,7 @@ const UserProfile = () => {
               onClick={() => setActiveTab("password")}
               className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
                 activeTab === "password"
-                  ? "border-b-2 border-blue-500 text-blue-600"
+                  ? "border-b-2 border-primary/80 text-primary"
                   : "text-gray-600 hover:text-gray-800"
               }`}
             >
@@ -133,7 +144,7 @@ const UserProfile = () => {
               onClick={() => setActiveTab("account")}
               className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
                 activeTab === "account"
-                  ? "border-b-2 border-blue-500 text-blue-600"
+                  ? "border-b-2 border-primary/80 text-primary"
                   : "text-gray-600 hover:text-gray-800"
               }`}
             >
@@ -144,238 +155,14 @@ const UserProfile = () => {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="px-12 py-8">
           {/* Profile Tab */}
           {activeTab === "profile" && (
-            <form onSubmit={handleProfileUpdate} className="space-y-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold text-gray-800">
-                  Basic Information
-                </h2>
-                {!isEditing ? (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    Edit Profile
-                  </button>
-                ) : (
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsEditing(false)}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    value={userData.firstName}
-                    onChange={(e) =>
-                      setUserData({ ...userData, firstName: e.target.value })
-                    }
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    value={userData.lastName}
-                    onChange={(e) =>
-                      setUserData({ ...userData, lastName: e.target.value })
-                    }
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <Mail size={16} />
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={userData.email}
-                    onChange={(e) =>
-                      setUserData({ ...userData, email: e.target.value })
-                    }
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <Phone size={16} />
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    value={userData.phone}
-                    onChange={(e) =>
-                      setUserData({ ...userData, phone: e.target.value })
-                    }
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <MapPin size={16} />
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    value={userData.location}
-                    onChange={(e) =>
-                      setUserData({ ...userData, location: e.target.value })
-                    }
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <Plane size={16} />
-                    Preferred Tour Type
-                  </label>
-                  <select
-                    value={userData.preferredTourType}
-                    onChange={(e) =>
-                      setUserData({
-                        ...userData,
-                        preferredTourType: e.target.value,
-                      })
-                    }
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                  >
-                    {tourTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bio
-                </label>
-                <textarea
-                  value={userData.bio}
-                  onChange={(e) =>
-                    setUserData({ ...userData, bio: e.target.value })
-                  }
-                  disabled={!isEditing}
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="Tell us about yourself and your travel interests..."
-                />
-              </div>
-            </form>
+            <BasicInfo userData={userData} onUpdateClick={handleUpdateClick} />
           )}
 
           {/* Password Tab */}
-          {activeTab === "password" && (
-            <form
-              onSubmit={handlePasswordChange}
-              className="max-w-md space-y-6"
-            >
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-                Change Password
-              </h2>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Current Password
-                </label>
-                <input
-                  type="password"
-                  value={passwordData.currentPassword}
-                  onChange={(e) =>
-                    setPasswordData({
-                      ...passwordData,
-                      currentPassword: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  value={passwordData.newPassword}
-                  onChange={(e) =>
-                    setPasswordData({
-                      ...passwordData,
-                      newPassword: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Must be at least 8 characters long
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) =>
-                    setPasswordData({
-                      ...passwordData,
-                      confirmPassword: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-              >
-                Update Password
-              </button>
-            </form>
-          )}
+          {activeTab === "password" && <PasswordUpdate />}
 
           {/* Account Tab */}
           {activeTab === "account" && (
