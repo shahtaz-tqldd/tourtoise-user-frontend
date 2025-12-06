@@ -3,6 +3,7 @@ import { TourDestination } from "./_types";
 export const DESTINATIONS: TourDestination[] = [
 	{
 		id: "1",
+		slug:"bali-paradise-retreat",
 		name: "Bali Paradise Retreat",
 		location: {
 			country: "Indonesia",
@@ -95,6 +96,7 @@ export const DESTINATIONS: TourDestination[] = [
 	},
 	{
 		id: "2",
+		slug:"swiss-alps-adventure",
 		name: "Swiss Alps Adventure",
 		location: {
 			country: "Switzerland",
@@ -186,6 +188,7 @@ export const DESTINATIONS: TourDestination[] = [
 	},
 	{
 		id: "3",
+		slug:"cairo-egypt",
 		name: "Cairo, Egypt",
 		location: {
 			country: "Egypt",
@@ -277,6 +280,7 @@ export const DESTINATIONS: TourDestination[] = [
 	},
 	{
 		id: "4",
+		slug:"japanese-culture-journey",
 		name: "Japanese Cultural Journey",
 		location: {
 			country: "Japan",
@@ -369,6 +373,7 @@ export const DESTINATIONS: TourDestination[] = [
 	},
 	{
 		id: "5",
+		slug:"phi-phi-isand",
 		name: "Phi Phi Island",
 		location: {
 			country: "Thailand",
@@ -460,6 +465,7 @@ export const DESTINATIONS: TourDestination[] = [
 	},
 	{
 		id: "6",
+		slug:"greek-island-hopping",
 		name: "Greek Islands Hopping",
 		location: {
 			country: "Greece",

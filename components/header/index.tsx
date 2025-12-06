@@ -37,10 +37,10 @@ const Header = () => {
           </Link>
 
           <div className="flx gap-6 font-medium text-gray-600">
-            <Link href="/">Destinations</Link>
-            <Link href="/">About</Link>
-            <Link href="/">Pricing</Link>
-            <Link href="/">FAQ</Link>
+            <Link href="/destinations">Destinations</Link>
+            <Link href="/about">About</Link>
+            <Link href="/pricing">Pricing</Link>
+            <Link href="/faq">FAQ</Link>
           </div>
 
           <div className="flx gap-3">

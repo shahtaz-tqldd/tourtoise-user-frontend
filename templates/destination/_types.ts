@@ -1,6 +1,7 @@
 export interface TourDestination {
 	id: string;
 	name: string;
+	slug: string;
 	location: {
 		country: string;
 		region: string;

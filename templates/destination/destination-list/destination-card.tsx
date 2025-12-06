@@ -1,17 +1,33 @@
+"use client";
+
 import React from "react";
 import { MapPin } from "lucide-react";
 
 import { Typography } from "@/components/ui/typography";
-import { TourDestination } from "./_types";
+import { TourDestination } from "../_types";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface DestinationCardProps {
   destination: TourDestination;
+  role?: string;
 }
 
-const DestinationCard: React.FC<DestinationCardProps> = ({ destination }) => {
+const DestinationCard: React.FC<DestinationCardProps> = ({
+  destination,
+  role = "listitems",
+}) => {
+  const router = useRouter();
+
+  const handleDestinationCardClick = (slug: string) => {
+    router.push(`destinations/${slug}`);
+  };
   return (
-    <div className="bg-white rounded-3xl overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer group">
+    <div
+      onClick={() => handleDestinationCardClick(destination.slug)}
+      role={role}
+      className="bg-white rounded-3xl overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer group"
+    >
       {/* Image Container */}
       <div className="relative h-80 w-full overflow-hidden">
         <Image

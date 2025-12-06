@@ -1,6 +1,6 @@
 import React from "react";
 import Container from "@/components/ui/container";
-import DestinationCard from "@/templates/destination/destination-card";
+import DestinationCard from "@/templates/destination/destination-list/destination-card";
 import { Typography } from "@/components/ui/typography";
 import { DESTINATIONS } from "@/templates/destination/_demo-data";
 
