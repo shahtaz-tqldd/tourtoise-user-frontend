@@ -1,5 +1,6 @@
 import FormInput from "@/components/form/form-input";
 import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
 import React from "react";
 import { useForm } from "react-hook-form";
 
@@ -20,11 +21,10 @@ const PasswordUpdate = () => {
 
   return (
     <div>
-      <div className="max-w-md space-y-6 mx-auto">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-          Change Password
-        </h2>
-
+      <Typography as="h3" size="base">
+        Change Password
+      </Typography>
+      <div className="max-w-md space-y-6 mt-12">
         <FormInput
           label="Password"
           name="old_password"

@@ -10,37 +10,37 @@ import {
   DollarSign,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
+import { UserData } from "./_types";
 
-const BasicInfo = ({ userData, onUpdateClick }) => {
-  const formatArray = (arr) => {
+interface InfoRowProps {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}
+
+interface BasicInfoProps {
+  userData: UserData;
+}
+
+const BasicInfo: React.FC<BasicInfoProps> = ({ userData }) => {
+  const formatArray = (arr: string[] | undefined): string => {
     if (!arr || arr.length === 0) return "Not specified";
     return arr
       .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
       .join(", ");
   };
 
-  const InfoRow = ({ icon: Icon, label, value }) => (
-    <div className="flex items-start gap-3 py-3">
-      <div className="mt-1">
-        <Icon size={18} className="text-gray-500" />
-      </div>
-      <div className="flex-1">
-        <p className="text-sm font-medium text-gray-500 mb-1">{label}</p>
-        <p className="text-base text-gray-900">{value || "Not specified"}</p>
-      </div>
-    </div>
-  );
-
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">
+      <div className="flbx">
+        <Typography as="h3" size="base">
           Basic Information
-        </h2>
-        <Button onClick={onUpdateClick}>Update Profile</Button>
+        </Typography>
+        <Button>Update Profile</Button>
       </div>
 
-      <div className="space-y-1 divide-y divide-gray-100">
+      <div className="space-y-1 divide-y divide-gray-100 mt-12">
         {/* Personal Information */}
         <div className="grid md:grid-cols-2 gap-x-8">
           <InfoRow
@@ -146,3 +146,15 @@ const BasicInfo = ({ userData, onUpdateClick }) => {
 };
 
 export default BasicInfo;
+
+const InfoRow: React.FC<InfoRowProps> = ({ icon: Icon, label, value }) => (
+  <div className="flex items-start gap-3 py-3">
+    <div className="mt-1">
+      <Icon size={18} className="text-gray-500" />
+    </div>
+    <div className="flex-1">
+      <p className="text-sm font-medium text-gray-500 mb-1">{label}</p>
+      <p className="text-base text-gray-900">{value || "Not specified"}</p>
+    </div>
+  </div>
+);
