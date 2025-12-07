@@ -9,7 +9,8 @@ const nextConfig: NextConfig = {
       "www.winetraveler.com",
       "img.pikbest.com",
       "simbaseatrips.com",
-      "sunsettravellers.com"
+      "sunsettravellers.com",
+      "dynamic-media-cdn.tripadvisor.com",
     ]
   }
 };

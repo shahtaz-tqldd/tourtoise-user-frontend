@@ -3,7 +3,7 @@ import { TourDestination } from "./_types";
 export const DESTINATIONS: TourDestination[] = [
 	{
 		id: "1",
-		slug:"bali-paradise-retreat",
+		slug: "bali-paradise-retreat",
 		name: "Bali Paradise Retreat",
 		location: {
 			country: "Indonesia",
@@ -17,9 +17,9 @@ export const DESTINATIONS: TourDestination[] = [
 		images: {
 			thumbnail: "https://www.outlooktravelmag.com/media/bali-1-1679062958.profileImage.2x-scaled-webp.webp",
 			gallery: [
-				"https://picsum.photos/seed/bali1/800/600.jpg",
-				"https://picsum.photos/seed/bali2/800/600.jpg",
-				"https://picsum.photos/seed/bali3/800/600.jpg"
+				"https://www.outlooktravelmag.com/media/bali-1-1679062958.profileImage.2x-scaled-webp.webp",
+				"https://www.winetraveler.com/wp-content/uploads/2023/03/prettiest-swiss-mountain-villages-to-visit.jpg",
+				"https://www.theultimatetravelcompany.co.uk/wp-content/uploads/2023/12/pyramids-giza-egypt-holidays.jpg",
 			]
 		},
 		rating: 4.8,
@@ -96,7 +96,7 @@ export const DESTINATIONS: TourDestination[] = [
 	},
 	{
 		id: "2",
-		slug:"swiss-alps-adventure",
+		slug: "swiss-alps-adventure",
 		name: "Swiss Alps Adventure",
 		location: {
 			country: "Switzerland",
@@ -188,7 +188,7 @@ export const DESTINATIONS: TourDestination[] = [
 	},
 	{
 		id: "3",
-		slug:"cairo-egypt",
+		slug: "cairo-egypt",
 		name: "Cairo, Egypt",
 		location: {
 			country: "Egypt",
@@ -280,7 +280,7 @@ export const DESTINATIONS: TourDestination[] = [
 	},
 	{
 		id: "4",
-		slug:"japanese-culture-journey",
+		slug: "japanese-culture-journey",
 		name: "Japanese Cultural Journey",
 		location: {
 			country: "Japan",
@@ -373,7 +373,7 @@ export const DESTINATIONS: TourDestination[] = [
 	},
 	{
 		id: "5",
-		slug:"phi-phi-isand",
+		slug: "phi-phi-isand",
 		name: "Phi Phi Island",
 		location: {
 			country: "Thailand",
@@ -465,7 +465,7 @@ export const DESTINATIONS: TourDestination[] = [
 	},
 	{
 		id: "6",
-		slug:"greek-island-hopping",
+		slug: "greek-island-hopping",
 		name: "Greek Islands Hopping",
 		location: {
 			country: "Greece",
