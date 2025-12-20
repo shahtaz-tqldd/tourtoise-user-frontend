@@ -4,12 +4,12 @@ import React from "react";
 import { MapPin } from "lucide-react";
 
 import { Typography } from "@/components/ui/typography";
-import { TourDestination } from "../_types";
+import { TourDestinationBase } from "../_types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 interface DestinationCardProps {
-  destination: TourDestination;
+  destination: TourDestinationBase;
   role?: string;
 }
 
@@ -22,6 +22,11 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
   const handleDestinationCardClick = (slug: string) => {
     router.push(`destinations/${slug}`);
   };
+
+  // Get the first image from the images array
+  const firstImage =
+    destination.images[0]?.image_url || "/placeholder-image.jpg";
+
   return (
     <div
       onClick={() => handleDestinationCardClick(destination.slug)}
@@ -31,7 +36,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
       {/* Image Container */}
       <div className="relative h-80 w-full overflow-hidden">
         <Image
-          src={destination.images.thumbnail}
+          src={firstImage}
           alt={destination.name}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           height={500}
@@ -58,7 +63,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
             </Typography>
             <div className="flex items-center text-sm text-gray-200">
               <MapPin size={14} className="mr-1" />
-              <span>{destination.location.country}</span>
+              <span>{destination.country}</span>
             </div>
           </div>
         </div>

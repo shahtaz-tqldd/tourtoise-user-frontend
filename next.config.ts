@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     domains: [
+      "res.cloudinary.com",
       "picsum.photos",
       "www.outlooktravelmag.com",
       "www.theultimatetravelcompany.co.uk",

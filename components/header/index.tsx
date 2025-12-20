@@ -22,8 +22,8 @@ const Header = () => {
   console.log(user, isAuthenticated);
 
   return (
-    <header className="fixed top-5 w-full z-10">
-      <div className="max-w-4xl mx-auto bg-white py-4 px-6 rounded-full">
+    <header className="fixed top-5 w-full z-50">
+      <div className="max-w-4xl mx-auto bg-white py-4 px-6 rounded-full border">
         <div className="flbx">
           <Link href="/" className="flx">
             <Image

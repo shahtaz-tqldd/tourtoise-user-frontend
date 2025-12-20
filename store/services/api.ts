@@ -128,11 +128,12 @@ export const apiSlice = createApi({
 	tagTypes: [
 		"auth",
 		"user",
+		"destination-list"
 	],
-	keepUnusedDataFor: 30, // Keep data for 30 seconds
+	keepUnusedDataFor: 60,
 	refetchOnMountOrArgChange: true,
 	refetchOnReconnect: true,
-	refetchOnFocus: false, // Disable refetch on window focus to avoid unnecessary calls
+	refetchOnFocus: false,
 	endpoints: () => ({}),
 });
 

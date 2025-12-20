@@ -30,7 +30,7 @@ const SearchFilters = () => {
   const [selectedFilters, setSelectedFilters] = useState({
     location: [],
     activities: [],
-    priceRange: [0, 5000],
+    price_range: [0, 5000],
     rating: 0,
     duration: "",
     season: [],
@@ -65,7 +65,7 @@ const SearchFilters = () => {
     setSelectedFilters({
       location: [],
       activities: [],
-      priceRange: [0, 5000],
+      price_range: [0, 5000],
       rating: 0,
       duration: "",
       season: [],
@@ -78,8 +78,8 @@ const SearchFilters = () => {
     if (selectedFilters.location.length > 0) count++;
     if (selectedFilters.activities.length > 0) count++;
     if (
-      selectedFilters.priceRange[0] > 0 ||
-      selectedFilters.priceRange[1] < 5000
+      selectedFilters.price_range[0] > 0 ||
+      selectedFilters.price_range[1] < 5000
     )
       count++;
     if (selectedFilters.rating > 0) count++;
@@ -268,10 +268,10 @@ const SearchFilters = () => {
                 <div className="mt-3 pl-7">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-500">
-                      ${selectedFilters.priceRange[0]}
+                      ${selectedFilters.price_range[0]}
                     </span>
                     <span className="text-sm text-gray-500">
-                      ${selectedFilters.priceRange[1]}
+                      ${selectedFilters.price_range[1]}
                     </span>
                   </div>
                   <div className="relative">
@@ -280,10 +280,10 @@ const SearchFilters = () => {
                       className="absolute h-2 bg-primary rounded-full"
                       style={{
                         left: `${
-                          (selectedFilters.priceRange[0] / 5000) * 100
+                          (selectedFilters.price_range[0] / 5000) * 100
                         }%`,
                         right: `${
-                          100 - (selectedFilters.priceRange[1] / 5000) * 100
+                          100 - (selectedFilters.price_range[1] / 5000) * 100
                         }%`,
                       }}
                     ></div>
@@ -293,11 +293,11 @@ const SearchFilters = () => {
                       type="range"
                       min="0"
                       max="5000"
-                      value={selectedFilters.priceRange[0]}
+                      value={selectedFilters.price_range[0]}
                       onChange={(e) =>
-                        handleFilterChange("priceRange", [
+                        handleFilterChange("price_range", [
                           parseInt(e.target.value),
-                          selectedFilters.priceRange[1],
+                          selectedFilters.price_range[1],
                         ])
                       }
                       className="w-5/12 -mt-6 relative z-10 opacity-0 cursor-pointer"
@@ -306,10 +306,10 @@ const SearchFilters = () => {
                       type="range"
                       min="0"
                       max="5000"
-                      value={selectedFilters.priceRange[1]}
+                      value={selectedFilters.price_range[1]}
                       onChange={(e) =>
-                        handleFilterChange("priceRange", [
-                          selectedFilters.priceRange[0],
+                        handleFilterChange("price_range", [
+                          selectedFilters.price_range[0],
                           parseInt(e.target.value),
                         ])
                       }

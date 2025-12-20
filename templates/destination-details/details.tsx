@@ -58,15 +58,14 @@ const DestinationDetailsSection: React.FC = () => {
       <div className="relative">
         <ImageSlider images={destination.images} title={destination.name} />
 
-        <div className="pointer-events-none absolute bottom-0 z-10 pt-32 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/90 to-transparent p-6 text-white">
+        <div className="pointer-events-none absolute bottom-0 z-10 pt-28 left-0 right-0 rounded-b-2xl bg-gradient-to-t from-black/90 to-transparent p-6 text-white">
           <Typography as="h1" size="xl" className="!text-white font-bold mb-1">
             {destination.name}
           </Typography>
           <div className="flex items-center gap-2 text-lg mb-3 opacity-80">
             <MapPin size={16} />
             <span>
-              {destination.location.city}, {destination.location.region},{" "}
-              {destination.location.country}
+              {destination.location.region}, {destination.location.country}
             </span>
           </div>
           <div className="flex flex-wrap gap-2 mt-6">
@@ -101,7 +100,7 @@ const DestinationDetailsSection: React.FC = () => {
                 Best Time
               </Typography>
               <Typography as="p" size="xs">
-                {destination.highlights.bestTime}
+                {destination.highlights.best_time}
               </Typography>
             </div>
           </div>
@@ -113,7 +112,7 @@ const DestinationDetailsSection: React.FC = () => {
                 Duration
               </Typography>
               <Typography as="p" size="xs">
-                {destination.highlights.avgDuration}
+                {destination.highlights.avg_duration}
               </Typography>
             </div>
           </div>
@@ -125,7 +124,7 @@ const DestinationDetailsSection: React.FC = () => {
                 Perfect For
               </Typography>
               <Typography as="p" size="xs">
-                {destination.highlights.suitableFor.join(", ")}
+                {destination.highlights.suitable_for.join(", ")}
               </Typography>
             </div>
           </div>
@@ -138,10 +137,10 @@ const DestinationDetailsSection: React.FC = () => {
               </Typography>
               <span
                 className={`text-sm px-2 py-1 rounded ${getCostColor(
-                  destination.highlights.costLevel
+                  destination.highlights.cost_level
                 )}`}
               >
-                {destination.highlights.costLevel}
+                {destination.highlights.cost_level}
               </span>
             </div>
           </div>
@@ -210,7 +209,7 @@ const DestinationDetailsSection: React.FC = () => {
                 </Typography>
               </div>
               <div className="text-sm font-medium text-primary">
-                {type.priceRange}
+                {type.price_range}
               </div>
             </div>
           ))}
@@ -236,7 +235,7 @@ const DestinationDetailsSection: React.FC = () => {
             How to Reach
           </Typography>
           <Typography as="p" size="sm" className="!text-gray-600">
-            {destination.transportation.howToReach}
+            {destination.transportation.how_to_reach}
           </Typography>
         </div>
         <div className="mt-6">
@@ -245,7 +244,7 @@ const DestinationDetailsSection: React.FC = () => {
           </Typography>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-            {destination.transportation.localOptions.map((option, idx) => (
+            {destination.transportation.local_options.map((option, idx) => (
               <div
                 key={idx}
                 className="flex justify-between items-center p-4 bg-white rounded-lg"
@@ -255,7 +254,7 @@ const DestinationDetailsSection: React.FC = () => {
                 </Typography>
 
                 <Typography as="p" size="xs">
-                  {option.priceRange}
+                  {option.price_range}
                 </Typography>
               </div>
             ))}
@@ -283,7 +282,7 @@ const DestinationDetailsSection: React.FC = () => {
                   <Typography as="h3" size="sm">
                     {dish.name}
                   </Typography>
-                  {dish.isRecommended && <Badge>Recommended</Badge>}
+                  {dish.is_recommended && <Badge>Recommended</Badge>}
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {dish.tags?.map((tag, i) => (
@@ -322,7 +321,7 @@ const DestinationDetailsSection: React.FC = () => {
               </Typography>
 
               <Typography as="p" size="xs">
-                {ativity.priceRange}
+                {ativity.price_range}
               </Typography>
             </div>
           ))}
@@ -332,21 +331,21 @@ const DestinationDetailsSection: React.FC = () => {
       {/* Visit Info */}
       <div className="p-6 mt-6 bg-primary/10 rounded-xl">
         <Typography as="h2" size="base" className="flx gap-3">
-          <Calendar className="text-primary" size={24} />
+          <Calendar className="text-primary" size={20} />
           When to Visit
         </Typography>
         <div className="space-y-2 text-base mt-4">
           <div>
             <span className="font-semibold">Weather:</span>{" "}
-            {destination.visitInfo.weather}
+            {destination.visit_info.weather}
           </div>
           <div>
             <span className="font-semibold">Peak Season:</span>{" "}
-            {destination.visitInfo.peakSeason}
+            {destination.visit_info.peak_season}
           </div>
           <div>
             <span className="font-semibold">Festivals:</span>{" "}
-            {destination.visitInfo.festivals}
+            {destination.visit_info.festivals}
           </div>
         </div>
       </div>
@@ -364,7 +363,7 @@ const DestinationDetailsSection: React.FC = () => {
               Languages
             </Typography>
             <Typography as="p" size="sm">
-              {destination.practicalInfo.languages.join(", ")}
+              {destination.practical_info.languages.join(", ")}
             </Typography>
           </div>
           <div className="space-y-1.5">
@@ -372,7 +371,7 @@ const DestinationDetailsSection: React.FC = () => {
               Payment Methods
             </Typography>
             <Typography as="p" size="sm">
-              {destination.practicalInfo.payment.join(", ")}
+              {destination.practical_info.payment.join(", ")}
             </Typography>
           </div>
 
@@ -381,7 +380,7 @@ const DestinationDetailsSection: React.FC = () => {
               <AlertCircle size={16} /> Safety Tips
             </Typography>
             <ul className="text-sm space-y-1 ml-5">
-              {destination.practicalInfo.safety.map((tip, idx) => (
+              {destination.practical_info.safety.map((tip, idx) => (
                 <li key={idx} className="list-disc">
                   <Typography as="p" size="sm">
                     {tip}
@@ -395,7 +394,7 @@ const DestinationDetailsSection: React.FC = () => {
               Local Customs
             </Typography>
             <ul className="text-sm space-y-1 ml-5">
-              {destination.practicalInfo.customs.map((custom, idx) => (
+              {destination.practical_info.customs.map((custom, idx) => (
                 <li key={idx} className="list-disc">
                   <Typography as="p" size="sm">
                     {custom}
@@ -471,7 +470,7 @@ const StayOverRecommendation = ({
                   </div>
                   <div className="space-y-3 mt-1">
                     <Typography as="p" size="sm" className="!text-primary">
-                      {stay.priceRange}
+                      {stay.price_range}
                     </Typography>
                     <Typography as="p" size="xs">
                       {stay.distance}
@@ -519,7 +518,7 @@ const RestaurantRecommendation = ({
             className="overflow-hidden"
           >
             <div className="grid grid-cols-2 gap-3 pt-2">
-              {destination.cuisine.mustTryPlaces.map((item, idx) => (
+              {destination.cuisine.restaurants.map((item, idx) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 10 }}

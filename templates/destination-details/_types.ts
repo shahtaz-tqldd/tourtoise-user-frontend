@@ -9,31 +9,32 @@ export interface Destination {
   id: string;
   name: string;
   location: {
-    city: string;
     region: string;
     country: string;
+    long: number;
+    lat: number;
   };
   tags: string[];
   description: string;
   images: string[];
 
   highlights: {
-    bestTime: string;
-    suitableFor: string[];
-    popularFor: string[];
-    costLevel: "Low" | "Medium" | "High";
-    avgDuration: string;
+    best_time: string;
+    suitable_for: string[];
+    popular_for: string[];
+    cost_level: "Low" | "Medium" | "High";
+    avg_duration: string;
   };
 
   stays: {
     types: Array<{
       category: string;
       description: string;
-      priceRange: string;
+      price_range: string;
     }>;
     suggested: Array<{
       name: string;
-      priceRange: string;
+      price_range: string;
       rating: number;
       distance: string;
     }>;
@@ -48,10 +49,10 @@ export interface Destination {
   }>;
 
   transportation: {
-    howToReach: string;
-    localOptions: Array<{
+    how_to_reach: string;
+    local_options: Array<{
       type: string;
-      priceRange: string;
+      price_range: string;
     }>;
   };
 
@@ -59,9 +60,9 @@ export interface Destination {
     signature: Array<{
       name: string;
       tags: string[];
-      isRecommended: boolean;
+      is_recommended: boolean;
     }>;
-    mustTryPlaces: Array<{
+    restaurants: Array<{
       name: string;
       signature_dish: string[];
       rating: number;
@@ -75,16 +76,16 @@ export interface Destination {
 
   activities: Array<{
     name: string;
-    priceRange: string;
+    price_range: string;
   }>;
 
-  visitInfo: {
+  visit_info: {
     weather: string;
-    peakSeason: string;
+    peak_season: string;
     festivals: string;
   };
 
-  practicalInfo: {
+  practical_info: {
     languages: string[];
     payment: string[];
     safety: string[];

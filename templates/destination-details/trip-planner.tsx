@@ -51,7 +51,7 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ destination }) => {
     }, 1000);
   };
   return (
-    <div className="lg:col-span-2 fixed md:static inset-0 md:inset-unset bg-black/50 md:bg-transparent z-50 flex md:block items-end">
+    <div className="lg:col-span-2 fixed md:static inset-0 md:inset-unset bg-black/50 md:bg-transparent z-20 flex md:block items-end">
       <div className="sticky top-24 bg-white rounded-2xl border border-gray-100 h-[calc(100vh-8rem)] flex flex-col">
         <div className="p-4 border-b border-gray-100">
           <Typography as="h2" size="sm" className="font-semibold">

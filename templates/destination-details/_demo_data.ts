@@ -5,9 +5,10 @@ export const DEMO_DESTINATION: Destination = {
   id: "cox-bazar-001",
   name: "Cox's Bazar",
   location: {
-    city: "Cox's Bazar",
-    region: "Chittagong Division",
+    region: "Cox's Bazar, Chittagong Division",
     country: "Bangladesh",
+    long: 20.12,
+    lat: 11.23
   },
   tags: ["Beach", "Nature", "Seafood", "Budget-Friendly", "Family"],
   description:
@@ -20,17 +21,17 @@ export const DEMO_DESTINATION: Destination = {
   ],
 
   highlights: {
-    bestTime: "November to March (cool & dry)",
-    suitableFor: ["Families", "Couples", "Solo Travelers", "Groups"],
-    popularFor: [
+    best_time: "November to March (cool & dry)",
+    suitable_for: ["Families", "Couples", "Solo Travelers", "Groups"],
+    popular_for: [
       "Beaches",
       "Sunsets",
       "Seafood",
       "Water Sports",
       "Photography",
     ],
-    costLevel: "Low",
-    avgDuration: "2-3 days",
+    cost_level: "Low",
+    avg_duration: "2-3 days",
   },
 
   stays: {
@@ -38,41 +39,41 @@ export const DEMO_DESTINATION: Destination = {
       {
         category: "Hotels",
         description: "Beachfront & city center options",
-        priceRange: "1,500 - 8,000 BDT/night",
+        price_range: "1,500 - 8,000 BDT/night",
       },
       {
         category: "Resorts",
         description: "Luxury beachside properties",
-        priceRange: "5,000 - 20,000 BDT/night",
+        price_range: "5,000 - 20,000 BDT/night",
       },
       {
         category: "Guesthouses",
         description: "Budget-friendly local stays",
-        priceRange: "800 - 2,500 BDT/night",
+        price_range: "800 - 2,500 BDT/night",
       },
     ],
     suggested: [
       {
         name: "Ocean Paradise Hotel & Resort",
-        priceRange: "8,000 - 15,000 BDT",
+        price_range: "8,000 - 15,000 BDT",
         rating: 4.5,
         distance: "2 km from beach",
       },
       {
         name: "Long Beach Hotel",
-        priceRange: "3,500 - 6,000 BDT",
+        price_range: "3,500 - 6,000 BDT",
         rating: 4.2,
         distance: "Beachfront",
       },
       {
         name: "Sea Pearl Beach Resort",
-        priceRange: "12,000 - 25,000 BDT",
+        price_range: "12,000 - 25,000 BDT",
         rating: 4.7,
         distance: "Beachfront",
       },
       {
         name: "Hotel The Cox Today",
-        priceRange: "2,000 - 4,000 BDT",
+        price_range: "2,000 - 4,000 BDT",
         rating: 4.0,
         distance: "1 km from beach",
       },
@@ -107,13 +108,13 @@ export const DEMO_DESTINATION: Destination = {
   ],
 
   transportation: {
-    howToReach:
+    how_to_reach:
       "Fly to Cox's Bazar Airport (1h from Dhaka) or take bus/train to Chittagong then bus (4h)",
-    localOptions: [
-      { type: "CNG/Auto-rickshaw", priceRange: "100 - 300 BDT" },
-      { type: "Taxi/Ride-share", priceRange: "300 - 800 BDT" },
-      { type: "Motorcycle rental", priceRange: "500 - 1,000 BDT/day" },
-      { type: "Private car rental", priceRange: "2,500 - 4,000 BDT/day" },
+    local_options: [
+      { type: "CNG/Auto-rickshaw", price_range: "100 - 300 BDT" },
+      { type: "Taxi/Ride-share", price_range: "300 - 800 BDT" },
+      { type: "Motorcycle rental", price_range: "500 - 1,000 BDT/day" },
+      { type: "Private car rental", price_range: "2,500 - 4,000 BDT/day" },
     ],
   },
 
@@ -122,31 +123,31 @@ export const DEMO_DESTINATION: Destination = {
       {
         name: "Shutki (dried fish)",
         tags: ["seafood", "nonveg"],
-        isRecommended: true,
+        is_recommended: true,
       },
       {
         name: "Fried Pomfret",
         tags: ["seafood", "nonveg", "halal"],
-        isRecommended: false,
+        is_recommended: false,
       },
       {
         name: "Prawn Curry",
         tags: ["seafood", "nonveg", "halal"],
-        isRecommended: false,
+        is_recommended: false,
       },
       {
         name: "Lobster BBQ",
         tags: ["seafood", "nonveg", "halal"],
-        isRecommended: false,
+        is_recommended: false,
       },
       {
         name: "Chitol Fish",
         tags: ["seafood", "nonveg", "halal"],
-        isRecommended: false,
+        is_recommended: false,
       },
     ],
 
-    mustTryPlaces: [
+    restaurants: [
       {
         name: "Jhawban Restaurant",
         signature_dish: ["Shutki Bhorta", "Chingri Malai Curry", "Hilsha Fry"],
@@ -199,20 +200,20 @@ export const DEMO_DESTINATION: Destination = {
   },
 
   activities: [
-    { name: "Surfing lessons", priceRange: "500 - 1,500 BDT" },
-    { name: "Beach bike riding", priceRange: "200 - 400 BDT/hour" },
-    { name: "Boat trip to islands", priceRange: "1,000 - 3,000 BDT" },
-    { name: "Paragliding", priceRange: "2,000 - 4,000 BDT" },
+    { name: "Surfing lessons", price_range: "500 - 1,500 BDT" },
+    { name: "Beach bike riding", price_range: "200 - 400 BDT/hour" },
+    { name: "Boat trip to islands", price_range: "1,000 - 3,000 BDT" },
+    { name: "Paragliding", price_range: "2,000 - 4,000 BDT" },
   ],
 
-  visitInfo: {
+  visit_info: {
     weather:
       "Tropical climate. Hot & humid in summer (Apr-Sep), pleasant in winter (Nov-Mar)",
-    peakSeason: "November to February (crowded, higher prices)",
+    peak_season: "November to February (crowded, higher prices)",
     festivals: "Pohela Boishakh (Bengali New Year - April)",
   },
 
-  practicalInfo: {
+  practical_info: {
     languages: ["Bengali", "English (tourist areas)", "Chittagonian dialect"],
     payment: ["Cash (primary)", "bKash/Nagad", "Cards (major hotels only)"],
     safety: [

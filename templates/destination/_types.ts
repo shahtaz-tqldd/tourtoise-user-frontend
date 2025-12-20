@@ -1,3 +1,24 @@
+// types.ts
+export interface DestinationImage {
+  image_url: string;
+  alt_text: string;
+}
+
+export interface TourDestinationBase {
+  id: string;
+  name: string;
+  description: string;
+  tags: string[];
+  images: DestinationImage[];
+  best_time: string;
+  cost_level: string;
+  avg_duration: string;
+  country: string;
+  region: string;
+  slug: string;
+  featured?: boolean;
+}
+
 export interface TourDestination {
 	id: string;
 	name: string;
