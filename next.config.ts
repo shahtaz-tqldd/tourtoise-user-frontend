@@ -4,14 +4,6 @@ const nextConfig: NextConfig = {
   images: {
     domains: [
       "res.cloudinary.com",
-      "picsum.photos",
-      "www.outlooktravelmag.com",
-      "www.theultimatetravelcompany.co.uk",
-      "www.winetraveler.com",
-      "img.pikbest.com",
-      "simbaseatrips.com",
-      "sunsettravellers.com",
-      "dynamic-media-cdn.tripadvisor.com",
     ]
   }
 };

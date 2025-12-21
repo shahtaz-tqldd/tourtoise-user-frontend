@@ -128,7 +128,8 @@ export const apiSlice = createApi({
 	tagTypes: [
 		"auth",
 		"user",
-		"destination-list"
+		"destination-list",
+		"destination-details"
 	],
 	keepUnusedDataFor: 60,
 	refetchOnMountOrArgChange: true,

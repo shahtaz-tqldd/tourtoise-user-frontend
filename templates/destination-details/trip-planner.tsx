@@ -3,10 +3,10 @@ import { ChatMessage } from "./_types";
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
-import { TourDestination } from "../destination/_types";
+import { DestinationDetails } from "../destination/_types";
 
 interface TripPlannerProps {
-  destination: TourDestination;
+  destination: DestinationDetails;
 }
 
 const TripPlanner: React.FC<TripPlannerProps> = ({ destination }) => {

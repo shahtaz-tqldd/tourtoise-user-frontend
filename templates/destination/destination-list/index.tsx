@@ -1,11 +1,11 @@
 import React from "react";
 import Container from "@/components/ui/container";
 import DestinationCard from "./destination-card";
-import { TourDestination } from "../_types";
+import { TourDestinationBase } from "../_types";
 
 // Use the interface you defined
 interface DestinationListProps {
-  data: TourDestination[];
+  data: TourDestinationBase[];
 }
 
 const DestinationList: React.FC<DestinationListProps> = ({ data }) => {
@@ -27,7 +27,7 @@ const DestinationList: React.FC<DestinationListProps> = ({ data }) => {
         role="list"
         aria-label="Destinations grid"
       >
-        {data.map((destination) => (
+        {data?.map((destination) => (
           <DestinationCard
             key={destination.id}
             destination={destination}

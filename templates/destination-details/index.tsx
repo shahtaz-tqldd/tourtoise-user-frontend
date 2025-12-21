@@ -5,15 +5,20 @@ import React, { useState } from "react";
 import { MessageSquare } from "lucide-react";
 import Container from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
-import { TourDestination } from "../destination/_types";
-import { DESTINATIONS } from "../destination/_demo-data";
 import TripPlanner from "./trip-planner";
 import DestinationDetailsSection from "./details";
+import { useDestinationDetailsQuery } from "@/store/services/destination";
 
 // Chat message interface
 
-const DestinationDetailsPage = () => {
-  const [destination] = useState<TourDestination>(DESTINATIONS[0]);
+const DestinationDetailsPage = ({
+  destination_slug,
+}: {
+  destination_slug: string;
+}) => {
+  const { data } = useDestinationDetailsQuery({ destination_slug });
+
+  const destination = data?.data || {};
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   return (
@@ -21,7 +26,7 @@ const DestinationDetailsPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* Left Column - Destination Details */}
         <div className="lg:col-span-3 space-y-8">
-          <DestinationDetailsSection />
+          <DestinationDetailsSection destination={destination} />
         </div>
         {/* Right Column - Chat Interface (Desktop) */}
         <TripPlanner destination={destination} />

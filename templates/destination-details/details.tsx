@@ -12,22 +12,25 @@ import {
   Info,
   ChevronRight,
   Hotel,
-  CupSoda,
 } from "lucide-react";
 import ImageSlider from "./image-gallery";
 import { Typography } from "@/components/ui/typography";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { DEMO_DESTINATION } from "./_demo_data";
-import { Destination } from "./_types";
+import { Accommodation, DestinationDetails } from "../destination/_types";
+
+interface DestinationDetailsProps {
+  destination: DestinationDetails;
+}
 
 // Component
-const DestinationDetailsSection: React.FC = () => {
+const DestinationDetailsSection: React.FC<DestinationDetailsProps> = ({
+  destination,
+}) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set()
   );
-  const destination = DEMO_DESTINATION;
 
   const toggleSection = (section: string) => {
     const newExpanded = new Set(expandedSections);
@@ -65,11 +68,11 @@ const DestinationDetailsSection: React.FC = () => {
           <div className="flex items-center gap-2 text-lg mb-3 opacity-80">
             <MapPin size={16} />
             <span>
-              {destination.location.region}, {destination.location.country}
+              {destination.region}, {destination.country}
             </span>
           </div>
           <div className="flex flex-wrap gap-2 mt-6">
-            {destination.tags.map((tag, idx) => (
+            {destination.tags?.map((tag, idx) => (
               <span
                 key={idx}
                 className="px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs"
@@ -100,7 +103,7 @@ const DestinationDetailsSection: React.FC = () => {
                 Best Time
               </Typography>
               <Typography as="p" size="xs">
-                {destination.highlights.best_time}
+                {destination.best_time}
               </Typography>
             </div>
           </div>
@@ -112,7 +115,7 @@ const DestinationDetailsSection: React.FC = () => {
                 Duration
               </Typography>
               <Typography as="p" size="xs">
-                {destination.highlights.avg_duration}
+                {destination.avg_duration}
               </Typography>
             </div>
           </div>
@@ -124,7 +127,7 @@ const DestinationDetailsSection: React.FC = () => {
                 Perfect For
               </Typography>
               <Typography as="p" size="xs">
-                {destination.highlights.suitable_for.join(", ")}
+                {destination.suitable_for?.join(", ")}
               </Typography>
             </div>
           </div>
@@ -137,10 +140,10 @@ const DestinationDetailsSection: React.FC = () => {
               </Typography>
               <span
                 className={`text-sm px-2 py-1 rounded ${getCostColor(
-                  destination.highlights.cost_level
+                  destination.cost_level
                 )}`}
               >
-                {destination.highlights.cost_level}
+                {destination.cost_level}
               </span>
             </div>
           </div>
@@ -154,7 +157,7 @@ const DestinationDetailsSection: React.FC = () => {
           Must-See Spots
         </Typography>
         <div className="grid lg:grid-cols-3 md:grid-cols-2 gird-cols-1 gap-4 mt-8">
-          {destination.attractions.map((spot, idx) => (
+          {destination.attractions?.map((spot, idx) => (
             <div
               key={idx}
               className="relative rounded-2xl overflow-hidden group cursor-pointer"
@@ -166,7 +169,7 @@ const DestinationDetailsSection: React.FC = () => {
 
               {/* Image */}
               <Image
-                src={spot.image_url}
+                src={spot.images[0].image_url}
                 className="h-64 w-full object-cover"
                 height={400}
                 width={400}
@@ -178,7 +181,11 @@ const DestinationDetailsSection: React.FC = () => {
                 <Typography as="h3" size="sm" className="!text-white">
                   {spot.name}
                 </Typography>
-                <Typography as="p" size="xs" className="!text-gray-100">
+                <Typography
+                  as="p"
+                  size="xs"
+                  className="!text-gray-100 line-clamp-2"
+                >
                   {spot.description}
                 </Typography>
               </div>
@@ -195,16 +202,16 @@ const DestinationDetailsSection: React.FC = () => {
 
         {/* Types */}
         <div className="mb-4 grid grid-cols-3 gap-3 mt-4">
-          {destination.stays.types.map((type, idx) => (
+          {destination.accommodation_types?.map((type, idx) => (
             <div
               key={idx}
               className="p-4 bg-white rounded-xl flex flex-col justify-between gap-4"
             >
               <div>
                 <Typography as="h3" size="sm">
-                  {type.category}
+                  {type.type_ref.name}
                 </Typography>
-                <Typography as="p" size="xs">
+                <Typography as="p" size="xs" className="line-clamp-2">
                   {type.description}
                 </Typography>
               </div>
@@ -218,7 +225,7 @@ const DestinationDetailsSection: React.FC = () => {
         {/* Suggested Stays */}
 
         <StayOverRecommendation
-          destination={destination}
+          accommodations={destination.accommodations}
           expandedSections={expandedSections}
           toggleSection={toggleSection}
         />
@@ -235,7 +242,7 @@ const DestinationDetailsSection: React.FC = () => {
             How to Reach
           </Typography>
           <Typography as="p" size="sm" className="!text-gray-600">
-            {destination.transportation.how_to_reach}
+            {destination.how_to_reach}
           </Typography>
         </div>
         <div className="mt-6">
@@ -244,13 +251,13 @@ const DestinationDetailsSection: React.FC = () => {
           </Typography>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-            {destination.transportation.local_options.map((option, idx) => (
+            {destination.transportation_options?.map((option, idx) => (
               <div
                 key={idx}
                 className="flex justify-between items-center p-4 bg-white rounded-lg"
               >
                 <Typography as="h3" size="sm">
-                  {option.type}
+                  {option.transport_ref.name}
                 </Typography>
 
                 <Typography as="p" size="xs">
@@ -276,7 +283,7 @@ const DestinationDetailsSection: React.FC = () => {
           </Typography>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-            {destination.cuisine.signature.map((dish, idx) => (
+            {destination.signature_dishes?.map((dish, idx) => (
               <div key={idx} className="p-4 bg-white rounded-lg">
                 <div className="flbx">
                   <Typography as="h3" size="sm">
@@ -297,11 +304,11 @@ const DestinationDetailsSection: React.FC = () => {
         </div>
 
         {/* Restaurnat Recommendation */}
-        <RestaurantRecommendation
+        {/* <RestaurantRecommendation
           toggleSection={toggleSection}
           destination={destination}
           expandedSections={expandedSections}
-        />
+        /> */}
       </div>
 
       {/* Activities */}
@@ -311,13 +318,13 @@ const DestinationDetailsSection: React.FC = () => {
         </Typography>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6">
-          {destination.activities.map((ativity, idx) => (
+          {destination.activities?.map((ativity, idx) => (
             <div
               key={idx}
               className="flex justify-between items-center p-4 bg-white rounded-lg"
             >
               <Typography as="h3" size="sm">
-                {ativity.name}
+                {ativity.activity_ref.name}
               </Typography>
 
               <Typography as="p" size="xs">
@@ -337,15 +344,15 @@ const DestinationDetailsSection: React.FC = () => {
         <div className="space-y-2 text-base mt-4">
           <div>
             <span className="font-semibold">Weather:</span>{" "}
-            {destination.visit_info.weather}
+            {destination.weather}
           </div>
           <div>
             <span className="font-semibold">Peak Season:</span>{" "}
-            {destination.visit_info.peak_season}
+            {destination.peak_season}
           </div>
           <div>
             <span className="font-semibold">Festivals:</span>{" "}
-            {destination.visit_info.festivals}
+            {destination.festivals}
           </div>
         </div>
       </div>
@@ -363,7 +370,7 @@ const DestinationDetailsSection: React.FC = () => {
               Languages
             </Typography>
             <Typography as="p" size="sm">
-              {destination.practical_info.languages.join(", ")}
+              {destination.languages?.join(", ")}
             </Typography>
           </div>
           <div className="space-y-1.5">
@@ -371,7 +378,7 @@ const DestinationDetailsSection: React.FC = () => {
               Payment Methods
             </Typography>
             <Typography as="p" size="sm">
-              {destination.practical_info.payment.join(", ")}
+              {destination.payment_methods?.join(", ")}
             </Typography>
           </div>
 
@@ -379,29 +386,17 @@ const DestinationDetailsSection: React.FC = () => {
             <Typography as="h3" size="sm" className="flx gap-2">
               <AlertCircle size={16} /> Safety Tips
             </Typography>
-            <ul className="text-sm space-y-1 ml-5">
-              {destination.practical_info.safety.map((tip, idx) => (
-                <li key={idx} className="list-disc">
-                  <Typography as="p" size="sm">
-                    {tip}
-                  </Typography>
-                </li>
-              ))}
-            </ul>
+            <Typography as="p" size="sm">
+              {destination.safety_tips}
+            </Typography>
           </div>
           <div className="space-y-1.5">
             <Typography as="h3" size="sm">
               Local Customs
             </Typography>
-            <ul className="text-sm space-y-1 ml-5">
-              {destination.practical_info.customs.map((custom, idx) => (
-                <li key={idx} className="list-disc">
-                  <Typography as="p" size="sm">
-                    {custom}
-                  </Typography>
-                </li>
-              ))}
-            </ul>
+            <Typography as="p" size="sm">
+              {destination.customs}
+            </Typography>
           </div>
         </div>
       </div>
@@ -413,13 +408,13 @@ export default DestinationDetailsSection;
 
 interface ExpandableComponentProps {
   toggleSection: (section: string) => void;
-  destination: Destination;
+  accommodations: Accommodation[];
   expandedSections: Set<string>;
 }
 
 const StayOverRecommendation = ({
   toggleSection,
-  destination,
+  accommodations,
   expandedSections,
 }: ExpandableComponentProps) => {
   return (
@@ -431,7 +426,7 @@ const StayOverRecommendation = ({
       >
         <Typography as="h3" size="sm" className="flx gap-2">
           <Hotel size={18} />
-          Recommended Stays ({destination.stays.suggested.length})
+          Recommended Stays ({accommodations?.length})
         </Typography>
         <motion.div
           animate={{ rotate: expandedSections.has("stays") ? 90 : 0 }}
@@ -450,7 +445,7 @@ const StayOverRecommendation = ({
             className="overflow-hidden"
           >
             <div className="grid grid-cols-2 gap-3 pt-2">
-              {destination.stays.suggested.map((stay, idx) => (
+              {accommodations?.map((stay, idx) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 10 }}
@@ -486,109 +481,109 @@ const StayOverRecommendation = ({
   );
 };
 
-const RestaurantRecommendation = ({
-  toggleSection,
-  destination,
-  expandedSections,
-}: ExpandableComponentProps) => {
-  return (
-    <>
-      <motion.button
-        onClick={() => toggleSection("restaurant")}
-        className="w-full font-medium text-primary mt-6 mb-4 flbx"
-      >
-        <Typography as="h3" size="sm" className="flx gap-2">
-          <CupSoda size={18} />
-          Recommended Restaurnat ({destination.stays.suggested.length})
-        </Typography>
-        <motion.div
-          animate={{ rotate: expandedSections.has("restaurant") ? 90 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <ChevronRight />
-        </motion.div>
-      </motion.button>
-      <AnimatePresence>
-        {expandedSections.has("restaurant") && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              {destination.cuisine.restaurants.map((item, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2, delay: idx * 0.05 }}
-                  className="p-4 bg-white rounded-2xl tr flex flex-col justify-between"
-                >
-                  {/* Top Section (Name + Rating) */}
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-start mb-1">
-                      <Typography
-                        as="h3"
-                        size="sm"
-                        className="font-semibold text-gray-800"
-                      >
-                        {item.name}
-                      </Typography>
+// const RestaurantRecommendation = ({
+//   toggleSection,
+//   destination,
+//   expandedSections,
+// }: ExpandableComponentProps) => {
+//   return (
+//     <>
+//       <motion.button
+//         onClick={() => toggleSection("restaurant")}
+//         className="w-full font-medium text-primary mt-6 mb-4 flbx"
+//       >
+//         <Typography as="h3" size="sm" className="flx gap-2">
+//           <CupSoda size={18} />
+//           Recommended Restaurnat ({destination.stays.suggested?.length})
+//         </Typography>
+//         <motion.div
+//           animate={{ rotate: expandedSections.has("restaurant") ? 90 : 0 }}
+//           transition={{ duration: 0.3 }}
+//         >
+//           <ChevronRight />
+//         </motion.div>
+//       </motion.button>
+//       <AnimatePresence>
+//         {expandedSections.has("restaurant") && (
+//           <motion.div
+//             initial={{ height: 0, opacity: 0 }}
+//             animate={{ height: "auto", opacity: 1 }}
+//             exit={{ height: 0, opacity: 0 }}
+//             transition={{ duration: 0.3, ease: "easeInOut" }}
+//             className="overflow-hidden"
+//           >
+//             <div className="grid grid-cols-2 gap-3 pt-2">
+//               {destination.cuisine.restaurants.map((item, idx) => (
+//                 <motion.div
+//                   key={idx}
+//                   initial={{ opacity: 0, y: 10 }}
+//                   animate={{ opacity: 1, y: 0 }}
+//                   exit={{ opacity: 0, y: -10 }}
+//                   transition={{ duration: 0.2, delay: idx * 0.05 }}
+//                   className="p-4 bg-white rounded-2xl tr flex flex-col justify-between"
+//                 >
+//                   {/* Top Section (Name + Rating) */}
+//                   <div className="space-y-4">
+//                     <div className="flex justify-between items-start mb-1">
+//                       <Typography
+//                         as="h3"
+//                         size="sm"
+//                         className="font-semibold text-gray-800"
+//                       >
+//                         {item.name}
+//                       </Typography>
 
-                      <span className="text-yellow-500 text-sm font-medium">
-                        ★ {item.rating}
-                      </span>
-                    </div>
+//                       <span className="text-yellow-500 text-sm font-medium">
+//                         ★ {item.rating}
+//                       </span>
+//                     </div>
 
-                    {/* Signature Dishes */}
-                    <div>
-                      <Typography
-                        as="p"
-                        size="xs"
-                        className="text-gray-600 font-medium"
-                      >
-                        Signature Dishes
-                      </Typography>
+//                     {/* Signature Dishes */}
+//                     <div>
+//                       <Typography
+//                         as="p"
+//                         size="xs"
+//                         className="text-gray-600 font-medium"
+//                       >
+//                         Signature Dishes
+//                       </Typography>
 
-                      <ul className="mt-2 flex flex-wrap gap-2">
-                        {item.signature_dish.slice(0, 3).map((dish, i) => (
-                          <li
-                            key={i}
-                            className="text-xs text-gray-700 bg-gray-50 px-2 py-1 rounded-md border border-gray-100"
-                          >
-                            {dish}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
+//                       <ul className="mt-2 flex flex-wrap gap-2">
+//                         {item.signature_dish.slice(0, 3).map((dish, i) => (
+//                           <li
+//                             key={i}
+//                             className="text-xs text-gray-700 bg-gray-50 px-2 py-1 rounded-md border border-gray-100"
+//                           >
+//                             {dish}
+//                           </li>
+//                         ))}
+//                       </ul>
+//                     </div>
+//                   </div>
 
-                  {/* Footer Section */}
-                  <div className="space-y-1 mt-3 pt-2 border-t border-gray-100 flbx">
-                    <Typography
-                      as="p"
-                      size="xs"
-                      className="text-primary font-medium flx gap-2"
-                    >
-                      <MapPin size={14} /> {item.location.area}
-                    </Typography>
+//                   {/* Footer Section */}
+//                   <div className="space-y-1 mt-3 pt-2 border-t border-gray-100 flbx">
+//                     <Typography
+//                       as="p"
+//                       size="xs"
+//                       className="text-primary font-medium flx gap-2"
+//                     >
+//                       <MapPin size={14} /> {item.location.area}
+//                     </Typography>
 
-                    {/* Optional Distance — you can calculate it or replace with static */}
-                    {item.location.long && item.location.lat && (
-                      <Typography as="p" size="xs" className="text-gray-500">
-                        See Map
-                      </Typography>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-};
+//                     {/* Optional Distance — you can calculate it or replace with static */}
+//                     {item.location.long && item.location.lat && (
+//                       <Typography as="p" size="xs" className="text-gray-500">
+//                         See Map
+//                       </Typography>
+//                     )}
+//                   </div>
+//                 </motion.div>
+//               ))}
+//             </div>
+//           </motion.div>
+//         )}
+//       </AnimatePresence>
+//     </>
+//   );
+// };

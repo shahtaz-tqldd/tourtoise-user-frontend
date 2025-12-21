@@ -15,9 +15,20 @@ export const destinationApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: ["destination-list"],
     }),
+
+    destinationDetails: builder.query({
+      query: ({ destination_slug }) => {
+        return {
+          url: `/destinations?destination_slug=${destination_slug}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["destination-details"],
+    }),
   }),
 });
 
 export const {
   useDestinationListQuery,
+  useDestinationDetailsQuery,
 } = destinationApiSlice;

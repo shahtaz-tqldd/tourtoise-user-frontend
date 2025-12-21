@@ -9,9 +9,10 @@ import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { ImageDetails } from "../destination/_types";
 
 interface ImageSliderProps {
-  images: string[];
+  images: ImageDetails[];
   title: string;
 }
 
@@ -25,11 +26,11 @@ const ImageSlider = ({ images, title }: ImageSliderProps) => {
         loop
         className="rounded-2xl overflow-hidden"
       >
-        {images.map((img, index) => (
+        {images?.map((img, index) => (
           <SwiperSlide key={index}>
             <div className="relative w-full h-[460px]">
               <Image
-                src={img}
+                src={img.image_url}
                 alt={`${title} ${index + 1}`}
                 fill
                 className="object-cover"
