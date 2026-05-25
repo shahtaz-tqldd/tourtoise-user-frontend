@@ -10,7 +10,7 @@ import {
   Languages,
   Loader2,
   MapPin,
-  MessageCircle,
+  MessageSquareDot,
   Navigation,
   Plane,
   Star,
@@ -545,7 +545,7 @@ const DestinationDetailPage = () => {
               className="h-12 w-full rounded-full"
               onClick={() => setPlanningOpen(true)}
             >
-              <MessageCircle size={18} />
+              <MessageSquareDot size={18} />
               Start Planning
             </Button>
           </aside>

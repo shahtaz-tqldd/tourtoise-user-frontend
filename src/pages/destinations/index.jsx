@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import React, { useMemo, useState } from "react";
-import { demoDestinations } from "./demo-data";
 import DestinationCard from "./components/destination-card";
 import DestinationFilter from "./filters";
 import { useDestinationListQuery } from "@/features/destination/destinationApiSlice";
@@ -32,6 +31,8 @@ const DestiantionPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [country, setCountry] = useState("");
   const [destinationType, setDestinationType] = useState("");
+  const [budgetTier, setBudgetTier] = useState("");
+  const [difficulty, setDifficulty] = useState("");
 
   const destinationQuery = useMemo(
     () => ({
@@ -40,8 +41,10 @@ const DestiantionPage = () => {
       search: searchQuery || undefined,
       destination_type: destinationType || undefined,
       country_code: country || undefined,
+      budget_tier: budgetTier || undefined,
+      difficulty: difficulty || undefined,
     }),
-    [country, destinationType, searchQuery],
+    [budgetTier, country, destinationType, difficulty, searchQuery],
   );
 
   const { data, isFetching, isError } =
@@ -53,10 +56,12 @@ const DestiantionPage = () => {
     setSearchQuery("");
     setCountry("");
     setDestinationType("");
+    setBudgetTier("");
+    setDifficulty("");
   };
 
   return (
-    <section className="grid gap-6 py-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <section className="grid gap-6 py-5 lg:grid-cols-[minmax(0,1fr)_360px]">
       <div className="space-y-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -114,13 +119,17 @@ const DestiantionPage = () => {
       </div>
 
       <DestinationFilter
-        demoDestinations={demoDestinations}
+        totalDestinations={totalDestinations}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         country={country}
         setCountry={setCountry}
         destinationType={destinationType}
         setDestinationType={setDestinationType}
+        budgetTier={budgetTier}
+        setBudgetTier={setBudgetTier}
+        difficulty={difficulty}
+        setDifficulty={setDifficulty}
         clearFilters={clearFilters}
       />
     </section>

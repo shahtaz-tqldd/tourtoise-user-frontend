@@ -9,6 +9,7 @@ import ResetPasswordPage from "@/pages/auth/reset-password";
 
 import DestiantionPage from "@/pages/destinations";
 import DestinationDetailPage from "@/pages/destinations/destination-detail";
+import TripsPage from "@/pages/trips";
 
 export const routes = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ export const routes = createBrowserRouter([
       {
         path: "/destinations/:destination_id",
         element: <DestinationDetailPage />,
+      },
+      {
+        path: "/trips",
+        element: <TripsPage />,
       },
     ],
   },

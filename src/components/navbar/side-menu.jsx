@@ -3,9 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Bell,
   Bookmark,
-  House,
-  MessageSquare,
-  PawPrint,
+  LandPlot,
+  MessageSquareDot,
+  PlaneTakeoff,
   Settings,
 } from "lucide-react";
 
@@ -16,26 +16,26 @@ const LeftSideMenu = () => {
   const navItems = [
     {
       id: 1,
-      label: "Pick Destinations",
+      label: "Tour Destinations",
       link: "/",
-      icon: <House size={18} />,
+      icon: <LandPlot size={18} />,
     },
     {
       id: 2,
       label: "My Trips",
-      link: "/feeds",
-      icon: <PawPrint size={18} />,
+      link: "/trips",
+      icon: <PlaneTakeoff size={18} />,
     },
     {
       id: 3,
-      label: "Ask an Agent",
+      label: "Tour Agent",
       link: "/chat",
-      icon: <MessageSquare size={18} />,
+      icon: <MessageSquareDot size={18} />,
     },
     {
       id: 5,
       label: "Saved Destinations",
-      link: "/saved-pets",
+      link: "/saved-destinations",
       icon: <Bookmark size={18} />,
     },
     {
@@ -59,8 +59,6 @@ const LeftSideMenu = () => {
 
     return pathname === link || pathname.startsWith(`${link}/`);
   };
-
-  const totalRescued = 200;
 
   return (
     <div className="w-[300px] p-6 h-screen border-r border-primary/10 sticky top-0 flex flex-col justify-between">

@@ -73,7 +73,7 @@ const MainHeader = () => {
   const profilePath = `/profile/${user?.username || "my-profile"}`;
 
   const navigateToSearch = React.useCallback(
-    (searchTerm) => {
+    () => {
       // const search = buildFeedFilterSearch({
       //   ...filters,
       //   searchTerm,
