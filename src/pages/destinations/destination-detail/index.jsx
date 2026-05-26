@@ -20,7 +20,8 @@ import {
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import PlanningDrawer from "./planning-drawer";
+
+import TripPlanningDrawer from "@/pages/trips/create-trip/trip-planning-drawer";
 
 const monthLabels = [
   "Jan",
@@ -311,68 +312,59 @@ const DestinationDetailPage = () => {
   return (
     <>
       <section className="space-y-6 py-5">
-        <div className="relative overflow-hidden rounded-[28px] bg-slate-950">
-          <Link
-            to="/"
-            className="text-sm font-medium absolute top-4 left-4 h-10 w-10 bg-white/40 backdrop-blur-sm rounded-full center cursor-pointer z-20 hover:bg-white/60 tr"
-          >
-            <ArrowLeft size={16} />
-          </Link>
-          <div className="aspect-[16/9] min-h-[420px] md:aspect-[21/9]">
-            <img
-              src={destination.cover_image}
-              alt={destination.name}
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-5 text-white md:p-8">
-            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-              <div className="max-w-3xl">
-                <div className="mb-3 flex flex-wrap gap-2">
-                  <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold capitalize text-slate-950">
-                    {formatLabel(destination.destination_type)}
-                  </span>
-                  <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
-                    {formatLabel(destination.budget_tier)}
-                  </span>
-                </div>
-                <h1 className="text-4xl font-bold leading-tight md:text-6xl">
-                  {destination.name}
-                </h1>
-                <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-white/85 md:text-base">
-                  <MapPin size={18} />
-                  {destination.region}, {destination.country}
-                </p>
-                <p className="mt-4 max-w-2xl text-sm leading-6 text-white/85 md:text-base">
-                  {destination.tagline || destination.overview}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <FactItem
-            icon={CalendarDays}
-            label="Ideal stay"
-            value={getStayLength(destination)}
-          />
-          <FactItem icon={Plane} label="Best time" value={bestTime} />
-          <FactItem
-            icon={WalletCards}
-            label="Budget"
-            value={formatLabel(destination.budget_tier)}
-          />
-          <FactItem
-            icon={Navigation}
-            label="Difficulty"
-            value={destination.difficulty}
-          />
-        </div>
-
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
           <div className="space-y-6">
+            <div className="relative overflow-hidden rounded-[28px] bg-slate-950">
+              <Link
+                to="/"
+                className="text-sm font-medium absolute top-4 left-4 h-10 w-10 bg-white/40 backdrop-blur-sm rounded-full center cursor-pointer z-20 hover:bg-white/60 tr"
+              >
+                <ArrowLeft size={16} />
+              </Link>
+              <div className="aspect-[16/9] min-h-[420px] md:aspect-[21/9]">
+                <img
+                  src={destination.cover_image}
+                  alt={destination.name}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-5 text-white md:p-8">
+                <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                  <div className="max-w-3xl">
+                    <h1 className="text-4xl font-bold leading-tight md:text-6xl">
+                      {destination.name}
+                    </h1>
+                    <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-white/85 md:text-base">
+                      <MapPin size={18} />
+                      {destination.region}, {destination.country}
+                    </p>
+                    <p className="mt-4 max-w-2xl text-sm leading-6 text-white/85 md:text-base">
+                      {destination.tagline || destination.overview}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <FactItem
+                icon={CalendarDays}
+                label="Ideal stay"
+                value={getStayLength(destination)}
+              />
+              <FactItem icon={Plane} label="Best time" value={bestTime} />
+              <FactItem
+                icon={WalletCards}
+                label="Budget"
+                value={formatLabel(destination.budget_tier)}
+              />
+              <FactItem
+                icon={Navigation}
+                label="Difficulty"
+                value={destination.difficulty}
+              />
+            </div>
             <section className="rounded-2xl border border-primary/10 bg-white p-5 shadow-xs">
               <h2 className="text-lg font-bold text-slate-950 mb-2">
                 Overview
@@ -552,7 +544,7 @@ const DestinationDetailPage = () => {
         </div>
       </section>
 
-      <PlanningDrawer
+      <TripPlanningDrawer
         destination={destination}
         open={planningOpen}
         onOpenChange={setPlanningOpen}

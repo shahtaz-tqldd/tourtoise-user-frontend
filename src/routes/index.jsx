@@ -10,6 +10,7 @@ import ResetPasswordPage from "@/pages/auth/reset-password";
 import DestiantionPage from "@/pages/destinations";
 import DestinationDetailPage from "@/pages/destinations/destination-detail";
 import TripsPage from "@/pages/trips";
+import TripDetailPage from "@/pages/trips/detail";
 
 export const routes = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ export const routes = createBrowserRouter([
       {
         path: "/trips",
         element: <TripsPage />,
+      },
+      {
+        path: "/trips/:trip_slug",
+        element: <TripDetailPage />,
       },
     ],
   },
