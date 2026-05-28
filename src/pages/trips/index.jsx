@@ -478,7 +478,7 @@ const TripsPage = () => {
         )}
 
         {!isFetching && !isError && visibleTrips.length > 0 && (
-          <div>
+          <div className="space-y-4">
             {visibleTrips.map((trip) => (
               <TripCard
                 key={trip.id || trip.slug}

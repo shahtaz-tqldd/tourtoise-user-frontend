@@ -9,7 +9,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           page_size = 10,
           search,
           search_query,
-          destination_id,
+          destination_slug,
         } = params;
 
         const queryParams = new URLSearchParams({
@@ -23,7 +23,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
         };
 
         appendParam("search", search || search_query);
-        appendParam("destination_id", destination_id);
+        appendParam("destination_slug", destination_slug);
 
         return {
           url: `/trips/list?${queryParams.toString()}`,
@@ -53,8 +53,22 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: ["trip-detail"],
     }),
+
+    tripAgentConversation: builder.query({
+      query: (trip_id) => {
+        return {
+          url: `/trips/${trip_id}/agent-conversation/`,
+          method: "GET",
+        };
+      },
+      providesTags: ["trip-detail"],
+    }),
   }),
 });
 
-export const { useTripListQuery, useTripDetailQuery, useCreateTripMutation } =
-  tripApiSlice;
+export const {
+  useTripListQuery,
+  useTripDetailQuery,
+  useTripAgentConversationQuery,
+  useCreateTripMutation,
+} = tripApiSlice;

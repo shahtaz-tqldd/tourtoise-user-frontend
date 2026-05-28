@@ -384,7 +384,7 @@ const DestinationSlider = ({ destinations }) => {
     <section className="space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-950">Places</h2>
+          <h2 className="text-lg font-bold text-slate-950">Destinations</h2>
           <p className="mt-1 text-sm text-slate-500">
             {destinations.length} destination
             {destinations.length === 1 ? "" : "s"} added to this plan.
@@ -416,18 +416,20 @@ const DestinationSlider = ({ destinations }) => {
       </div>
 
       <article
-        className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+        className="overflow-hidden bg-white rounded-2xl border border-slate-200"
         onTouchStart={(event) => setTouchStart(event.touches[0].clientX)}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="grid gap-0 md:grid-cols-[300px_minmax(0,1fr)]">
-          <img
-            src={activeDestination.image_url}
-            alt={activeDestination.name}
-            className="h-56 w-full object-cover"
-          />
+        <div className="grid gap-0 md:grid-cols-[320px_minmax(0,1fr)]">
+          <div className="h-56 p-4">
+            <img
+              src={activeDestination.image_url}
+              alt={activeDestination.name}
+              className="h-full w-full object-cover rounded-lg"
+            />
+          </div>
 
-          <div className="flex flex-col justify-between gap-5 bg-white p-5">
+          <div className="flex flex-col justify-between gap-5 bg-white p-4 pl-2">
             <div>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -790,9 +792,7 @@ const NotesAlertsSection = ({ notes, alerts }) => {
                   {alert.severity}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-amber-800">
-                {alert.body}
-              </p>
+              <p className="mt-1 text-sm text-amber-800">{alert.body}</p>
             </article>
           ))}
         </div>

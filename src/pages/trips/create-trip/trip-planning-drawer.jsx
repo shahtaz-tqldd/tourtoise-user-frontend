@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import {
   useCreateTripMutation,
+  useTripAgentConversationQuery,
   useTripListQuery,
 } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
@@ -52,11 +53,10 @@ const initialForm = {
   trip_pace: "balanced",
 };
 
-const getDestinationId = (destination) =>
-  destination?.id || destination?.destination_id || destination?.slug;
-
 const getDestinationSlug = (destination) =>
   destination?.slug || destination?.destination_slug || destination?.id;
+
+const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
 
 const unwrapList = (response) => {
   const data = response?.data || response;
@@ -72,6 +72,49 @@ const unwrapList = (response) => {
 
 const getTripTitle = (trip, destination) =>
   trip?.title || trip?.name || trip?.trip_name || `${destination?.name} plan`;
+
+const getTripDates = (trip) => {
+  const startDate = trip?.start_date;
+  const endDate = trip?.end_date;
+
+  if (startDate && endDate) return `${startDate} to ${endDate}`;
+  if (startDate) return `Starts ${startDate}`;
+  if (trip?.days) return `${trip.days} days`;
+
+  return "Dates not set";
+};
+
+const unwrapConversationMessages = (response) => {
+  const data = response?.data || response;
+  const messages =
+    data?.messages ||
+    data?.conversation ||
+    data?.results ||
+    data?.items ||
+    data?.data?.messages ||
+    data?.data?.conversation;
+
+  if (!Array.isArray(messages)) return [];
+
+  return messages
+    .map((item) => {
+      const role =
+        item?.role ||
+        item?.sender_role ||
+        item?.sender ||
+        (item?.is_user ? "user" : "agent");
+      const content =
+        item?.content || item?.message || item?.text || item?.body || "";
+
+      if (!content) return null;
+
+      return {
+        role: role === "user" || role === "traveler" ? "user" : "agent",
+        content,
+      };
+    })
+    .filter(Boolean);
+};
 
 const getGeneratedTripTitle = (destination) => {
   const placeName = destination?.name || "Destination";
@@ -98,38 +141,57 @@ const getCityFromAddress = (address = {}) =>
   "";
 
 const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
-  const destinationId = getDestinationId(destination);
   const destinationSlug = getDestinationSlug(destination);
   const [form, setForm] = useState(initialForm);
   const [createdTrip, setCreatedTrip] = useState(null);
+  const [selectedTrip, setSelectedTrip] = useState(null);
+  const [isStartingNewPlan, setIsStartingNewPlan] = useState(false);
   const [message, setMessage] = useState("");
   const [threadMessages, setThreadMessages] = useState([]);
   const [isLocating, setIsLocating] = useState(false);
   const [locationStatus, setLocationStatus] = useState("");
 
   const { data: tripListData, isFetching: isCheckingTrips } = useTripListQuery(
-    open && destinationId
-      ? { destination_id: destinationId, page: 1, page_size: 1 }
+    open && destinationSlug
+      ? { destination_slug: destinationSlug, page: 1, page_size: 20 }
       : skipToken,
   );
   const [createTrip, { isLoading: isCreatingTrip }] = useCreateTripMutation();
 
-  const previousTrip = useMemo(() => {
-    const trips = unwrapList(tripListData);
-    return trips[0] || null;
-  }, [tripListData]);
+  const destinationTrips = useMemo(
+    () => unwrapList(tripListData),
+    [tripListData],
+  );
+  const previousTrip = destinationTrips[0] || null;
+  const shouldAutoSelectTrip =
+    destinationTrips.length === 1 && !isStartingNewPlan && !createdTrip;
+  const activeTrip =
+    createdTrip || selectedTrip || (shouldAutoSelectTrip ? previousTrip : null);
+  const activeTripId = getTripId(activeTrip);
+  const {
+    data: conversationData,
+    isFetching: isFetchingConversation,
+    isError: conversationError,
+  } = useTripAgentConversationQuery(
+    open && activeTripId ? activeTripId : skipToken,
+  );
+  const conversationMessages = useMemo(
+    () => unwrapConversationMessages(conversationData),
+    [conversationData],
+  );
 
-  const activeTrip = createdTrip || previousTrip;
   const messages = useMemo(() => {
     if (threadMessages.length) return threadMessages;
+    if (conversationMessages.length) return conversationMessages;
     if (!activeTrip) return [];
+    if (isFetchingConversation && !createdTrip) return [];
 
-    if (previousTrip && !createdTrip) {
+    if (!createdTrip) {
       return [
         {
           role: "agent",
           content: `I found your existing ${getTripTitle(
-            previousTrip,
+            activeTrip,
             destination,
           )}. We can continue refining pickup, documents, itinerary, and final plan details here.`,
         },
@@ -142,7 +204,14 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
         content: `Trip planning has started for ${destination?.name}. I will first shape the route and pace, then we can work through pickup, documents, itinerary, and final locking.`,
       },
     ];
-  }, [activeTrip, createdTrip, destination, previousTrip, threadMessages]);
+  }, [
+    activeTrip,
+    conversationMessages,
+    createdTrip,
+    destination,
+    isFetchingConversation,
+    threadMessages,
+  ]);
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -292,6 +361,8 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
       setCreatedTrip(createdTrip);
       setThreadMessages([]);
       toast.success("Trip planning started.");
+      setIsStartingNewPlan(false);
+      setSelectedTrip(null);
     } catch (error) {
       toast.error(
         error?.data?.message || "Could not start trip planning. Try again.",
@@ -317,11 +388,36 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     setMessage("");
   };
 
-  const showSetupForm = !isCheckingTrips && !previousTrip && !activeTrip;
+  const handleStartNewPlan = () => {
+    setCreatedTrip(null);
+    setSelectedTrip(null);
+    setThreadMessages([]);
+    setMessage("");
+    setIsStartingNewPlan(true);
+  };
+
+  const handleSelectTrip = (trip) => {
+    setCreatedTrip(null);
+    setSelectedTrip(trip);
+    setThreadMessages([]);
+    setMessage("");
+    setIsStartingNewPlan(false);
+  };
+
+  const showTripList =
+    !isCheckingTrips &&
+    !isStartingNewPlan &&
+    !activeTrip &&
+    destinationTrips.length > 1;
+  const showSetupForm =
+    !isCheckingTrips &&
+    (isStartingNewPlan || (!destinationTrips.length && !activeTrip));
   const showAgent = !!activeTrip;
   const handleOpenChange = (nextOpen) => {
     if (!nextOpen) {
       setCreatedTrip(null);
+      setSelectedTrip(null);
+      setIsStartingNewPlan(false);
       setThreadMessages([]);
       setMessage("");
       setForm(initialForm);
@@ -353,6 +449,61 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
             </div>
           )}
 
+          {showTripList && (
+            <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto p-4">
+              <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="mt-0.5 text-primary" size={18} />
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-950">
+                      Choose a plan to continue
+                    </h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                      I found existing plans for {destination?.name}. Continue
+                      one of them or start a separate plan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                className="h-11 w-full rounded-full"
+                onClick={handleStartNewPlan}
+              >
+                <Sparkles size={17} />
+                Start a new plan
+              </Button>
+
+              <div className="grid gap-3">
+                {destinationTrips.map((trip) => (
+                  <button
+                    key={
+                      getTripId(trip) ||
+                      trip?.slug ||
+                      getTripTitle(trip, destination)
+                    }
+                    type="button"
+                    onClick={() => handleSelectTrip(trip)}
+                    className="rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    <p className="text-sm font-semibold text-slate-950">
+                      {getTripTitle(trip, destination)}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {getTripDates(trip)}
+                    </p>
+                    {trip?.trip_pace && (
+                      <p className="mt-2 text-xs font-medium uppercase text-slate-400">
+                        {trip.trip_pace}
+                      </p>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {showSetupForm && (
             <form
               onSubmit={handleCreateTrip}
@@ -363,7 +514,7 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
                   <Sparkles className="mt-0.5 text-primary" size={18} />
                   <div>
                     <h3 className="text-sm font-semibold text-slate-950">
-                      Start a planning session
+                      Start a new plan
                     </h3>
                     <p className="mt-1 text-sm leading-6 text-slate-600">
                       Add the basics so the trip agent can create the first
@@ -531,13 +682,43 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
           {showAgent && (
             <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto p-4">
               <div className="rounded-xl border border-slate-200 bg-white p-3">
-                <p className="text-xs font-medium uppercase text-slate-500">
-                  Active planning
-                </p>
-                <p className="mt-1 text-sm font-semibold text-slate-950">
-                  {getTripTitle(activeTrip, destination)}
-                </p>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-medium uppercase text-slate-500">
+                      Active planning
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-slate-950">
+                      {getTripTitle(activeTrip, destination)}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {getTripDates(activeTrip)}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleStartNewPlan}
+                  >
+                    <Sparkles size={15} />
+                    New plan
+                  </Button>
+                </div>
               </div>
+
+              {isFetchingConversation && (
+                <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-600">
+                  <Loader2 className="animate-spin text-primary" size={16} />
+                  Loading agent conversation...
+                </div>
+              )}
+
+              {conversationError && !threadMessages.length && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-800">
+                  Could not load the saved agent conversation. You can still
+                  continue from this plan.
+                </div>
+              )}
 
               {messages.map((item, index) => (
                 <div
