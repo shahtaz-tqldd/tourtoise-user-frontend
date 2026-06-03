@@ -44,6 +44,17 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ["trip-list"],
     }),
 
+    updateTrip: builder.mutation({
+      query: ({ trip_id, ...payload }) => {
+        return {
+          url: `/trips/${trip_id}/update/`,
+          method: "PATCH",
+          body: payload,
+        };
+      },
+      invalidatesTags: ["trip-list", "trip-detail"],
+    }),
+
     tripDetail: builder.query({
       query: (trip_slug) => {
         return {
@@ -63,6 +74,27 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: ["trip-detail"],
     }),
+
+    tripAgentActive: builder.mutation({
+      query: (payload) => {
+        return {
+          url: `/trips/agent-active/`,
+          method: "POST",
+          body: payload,
+        };
+      },
+      invalidatesTags: ["trip-list"],
+    }),
+
+    tripAgentCreateMessage: builder.mutation({
+      query: (payload) => {
+        return {
+          url: `/trips/agent/create-message/`,
+          method: "POST",
+          body: payload,
+        };
+      },
+    }),
   }),
 });
 
@@ -71,4 +103,7 @@ export const {
   useTripDetailQuery,
   useTripAgentConversationQuery,
   useCreateTripMutation,
+  useUpdateTripMutation,
+  useTripAgentActiveMutation,
+  useTripAgentCreateMessageMutation
 } = tripApiSlice;

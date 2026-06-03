@@ -1,13 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -15,48 +6,145 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  CheckCircle2,
-  LocateFixed,
-  Loader2,
-  LockKeyhole,
-  MapPin,
-  Send,
-  Sparkles,
-} from "lucide-react";
+import { Pencil, Loader2, Sparkles, Plus } from "lucide-react";
 import {
   useCreateTripMutation,
-  useTripAgentConversationQuery,
+  useTripDetailQuery,
   useTripListQuery,
 } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
+import DocumentsPackupStep from "./components/documents-packup-step";
+import InitialInfoStep from "./components/initial-info-step";
+import TripPlanInitialInput from "./components/initial-input";
+import ItineraryStep from "./components/itinerary-step";
+import OverviewLockStep from "./components/overview-lock-step";
+import RecommendationsStep from "./components/recommendations-step";
+import UserProfileStep from "./components/user-profile-step";
 
-const tripPaces = [
-  { value: "relaxed", label: "Relaxed" },
-  { value: "balanced", label: "Balanced" },
-  { value: "packed", label: "Packed" },
-];
-
-const initialForm = {
+const createInitialForm = () => ({
   total_budget: "",
   budget_currency: "USD",
-  origin_city: "",
-  origin_country: "",
-  origin_latitude: "",
-  origin_longitude: "",
-  origin_accuracy: "",
   start_date: "",
   days: "",
   travelers_count: "1",
-  trip_pace: "balanced",
+  traveler_type: "solo",
+  accommodation_preference: "",
+  start_location_address: "",
+  start_location_latitude: "",
+  start_location_longitude: "",
+  start_location_accuracy: "",
+});
+
+const titleTemplates = [
+  "{destination} travel plan",
+  "{destination} getaway",
+  "{destination} itinerary",
+  "{destination} holiday plan",
+  "{destination} trip",
+  "Explore {destination}",
+];
+
+const planningSteps = [
+  {
+    key: "initial_info",
+    title: "Initial info",
+    description: "Initial info taking",
+    component: InitialInfoStep,
+  },
+  {
+    key: "user_profile",
+    title: "Profile",
+    description: "User profile and customization",
+    component: UserProfileStep,
+  },
+  {
+    key: "recommendations",
+    title: "Recommendations",
+    description: "Recommendations for spots, activities and foods",
+    component: RecommendationsStep,
+  },
+  {
+    key: "itinerary",
+    title: "Itinerary",
+    description: "Day wise itineraries planning",
+    component: ItineraryStep,
+  },
+  {
+    key: "documents_packup",
+    title: "Documents",
+    description: "Documents and packup",
+    component: DocumentsPackupStep,
+  },
+  {
+    key: "overview_lock",
+    title: "Overview",
+    description: "Overview and locking up",
+    component: OverviewLockStep,
+  },
+];
+
+const currentStepAliases = {
+  initial_info_taking: "initial_info",
+  initial_information: "initial_info",
+  user_profile_and_customization: "user_profile",
+  profile: "user_profile",
+  customization: "user_profile",
+  recommendations_for_spots_activities_and_foods: "recommendations",
+  spots_activities_foods: "recommendations",
+  activities_foods: "recommendations",
+  day_wise_itineraries_planning: "itinerary",
+  day_wise_itinerary: "itinerary",
+  itineraries: "itinerary",
+  documents_and_packup: "documents_packup",
+  documents_packup: "documents_packup",
+  packup: "documents_packup",
+  overview_and_locking_up: "overview_lock",
+  overview_locking: "overview_lock",
+  locking_up: "overview_lock",
 };
 
 const getDestinationSlug = (destination) =>
   destination?.slug || destination?.destination_slug || destination?.id;
 
 const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
+
+const getTripDetailId = (trip) =>
+  getTripId(trip) || trip?.slug || trip?.trip_slug;
+
+const unwrapDetail = (response) => response?.data || response || null;
+
+const normalizeStepValue = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+const getCurrentStepIndex = (trip) => {
+  const currentStep = trip?.current_step;
+  const numericStep = Number(currentStep);
+
+  if (Number.isInteger(numericStep)) {
+    const oneBasedStep = numericStep - 1;
+    if (oneBasedStep >= 0 && oneBasedStep < planningSteps.length) {
+      return oneBasedStep;
+    }
+
+    if (numericStep >= 0 && numericStep < planningSteps.length) {
+      return numericStep;
+    }
+  }
+
+  const stepKey = normalizeStepValue(currentStep);
+  const aliasedStepKey = currentStepAliases[stepKey] || stepKey;
+  const stepIndex = planningSteps.findIndex(
+    (step) => step.key === aliasedStepKey,
+  );
+
+  return stepIndex >= 0 ? stepIndex : 0;
+};
 
 const unwrapList = (response) => {
   const data = response?.data || response;
@@ -84,41 +172,12 @@ const getTripDates = (trip) => {
   return "Dates not set";
 };
 
-const unwrapConversationMessages = (response) => {
-  const data = response?.data || response;
-  const messages =
-    data?.messages ||
-    data?.conversation ||
-    data?.results ||
-    data?.items ||
-    data?.data?.messages ||
-    data?.data?.conversation;
+const getGeneratedTripTitle = (destinationName) => {
+  const placeName = destinationName || "Destination";
+  const template =
+    titleTemplates[Math.floor(Math.random() * titleTemplates.length)];
 
-  if (!Array.isArray(messages)) return [];
-
-  return messages
-    .map((item) => {
-      const role =
-        item?.role ||
-        item?.sender_role ||
-        item?.sender ||
-        (item?.is_user ? "user" : "agent");
-      const content =
-        item?.content || item?.message || item?.text || item?.body || "";
-
-      if (!content) return null;
-
-      return {
-        role: role === "user" || role === "traveler" ? "user" : "agent",
-        content,
-      };
-    })
-    .filter(Boolean);
-};
-
-const getGeneratedTripTitle = (destination) => {
-  const placeName = destination?.name || "Destination";
-  return `${placeName} trip plan`;
+  return template.replace("{destination}", placeName);
 };
 
 const getEndDate = (startDate, days) => {
@@ -131,25 +190,21 @@ const getEndDate = (startDate, days) => {
   return date.toISOString().slice(0, 10);
 };
 
-const getCityFromAddress = (address = {}) =>
-  address.city ||
-  address.town ||
-  address.village ||
-  address.municipality ||
-  address.county ||
-  address.state_district ||
-  "";
-
 const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
   const destinationSlug = getDestinationSlug(destination);
-  const [form, setForm] = useState(initialForm);
+  const destinationName = destination?.name || "";
+  const [form, setForm] = useState(createInitialForm);
   const [createdTrip, setCreatedTrip] = useState(null);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [isStartingNewPlan, setIsStartingNewPlan] = useState(false);
-  const [message, setMessage] = useState("");
-  const [threadMessages, setThreadMessages] = useState([]);
-  const [isLocating, setIsLocating] = useState(false);
-  const [locationStatus, setLocationStatus] = useState("");
+  const [tripTitle, setTripTitle] = useState(null);
+  const [activeStep, setActiveStep] = useState(null);
+  const [furthestStep, setFurthestStep] = useState(0);
+  const generatedTripTitle = useMemo(
+    () => getGeneratedTripTitle(destinationName),
+    [destinationName],
+  );
+  const currentTripTitle = tripTitle ?? generatedTripTitle;
 
   const { data: tripListData, isFetching: isCheckingTrips } = useTripListQuery(
     open && destinationSlug
@@ -163,143 +218,33 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     [tripListData],
   );
   const previousTrip = destinationTrips[0] || null;
-  const shouldAutoSelectTrip =
+  const shouldLoadSingleTrip =
     destinationTrips.length === 1 && !isStartingNewPlan && !createdTrip;
-  const activeTrip =
-    createdTrip || selectedTrip || (shouldAutoSelectTrip ? previousTrip : null);
-  const activeTripId = getTripId(activeTrip);
+  const detailSourceTrip =
+    !isCheckingTrips && !createdTrip && !isStartingNewPlan
+      ? selectedTrip || (shouldLoadSingleTrip ? previousTrip : null)
+      : null;
+  const detailTripId = getTripDetailId(detailSourceTrip);
   const {
-    data: conversationData,
-    isFetching: isFetchingConversation,
-    isError: conversationError,
-  } = useTripAgentConversationQuery(
-    open && activeTripId ? activeTripId : skipToken,
+    data: tripDetailData,
+    isFetching: isFetchingTripDetail,
+    isError: tripDetailError,
+  } = useTripDetailQuery(open && detailTripId ? detailTripId : skipToken);
+  const detailedTrip = useMemo(
+    () => unwrapDetail(tripDetailData),
+    [tripDetailData],
   );
-  const conversationMessages = useMemo(
-    () => unwrapConversationMessages(conversationData),
-    [conversationData],
-  );
-
-  const messages = useMemo(() => {
-    if (threadMessages.length) return threadMessages;
-    if (conversationMessages.length) return conversationMessages;
-    if (!activeTrip) return [];
-    if (isFetchingConversation && !createdTrip) return [];
-
-    if (!createdTrip) {
-      return [
-        {
-          role: "agent",
-          content: `I found your existing ${getTripTitle(
-            activeTrip,
-            destination,
-          )}. We can continue refining pickup, documents, itinerary, and final plan details here.`,
-        },
-      ];
-    }
-
-    return [
-      {
-        role: "agent",
-        content: `Trip planning has started for ${destination?.name}. I will first shape the route and pace, then we can work through pickup, documents, itinerary, and final locking.`,
-      },
-    ];
-  }, [
-    activeTrip,
-    conversationMessages,
-    createdTrip,
-    destination,
-    isFetchingConversation,
-    threadMessages,
-  ]);
+  const activeTrip = createdTrip || detailedTrip || null;
+  const tripCurrentStep = activeTrip ? getCurrentStepIndex(activeTrip) : 0;
+  const displayedStep = activeStep ?? tripCurrentStep;
+  const unlockedStep = Math.max(furthestStep, tripCurrentStep, displayedStep);
+  const displayedStepConfig = planningSteps[displayedStep];
+  const ActiveStepComponent = displayedStepConfig.component;
+  const activeTripId = getTripId(activeTrip);
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
-
-  const requestCurrentLocation = async ({ silent = false } = {}) => {
-    if (!navigator.geolocation) {
-      if (!silent) toast.error("Current location is not available here.");
-      return;
-    }
-
-    setIsLocating(true);
-    setLocationStatus("Requesting browser location permission...");
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
-
-        setForm((current) => ({
-          ...current,
-          origin_latitude: String(latitude),
-          origin_longitude: String(longitude),
-          origin_accuracy: accuracy ? String(Math.round(accuracy)) : "",
-        }));
-
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
-          );
-
-          if (!response.ok) {
-            throw new Error("Reverse geocoding failed");
-          }
-
-          const location = await response.json();
-          const address = location?.address || {};
-          const city = getCityFromAddress(address);
-          const country = address.country || "";
-
-          setForm((current) => ({
-            ...current,
-            origin_city: city || current.origin_city,
-            origin_country: country || current.origin_country,
-          }));
-
-          setLocationStatus(
-            city && country
-              ? `Using ${city}, ${country} from current location.`
-              : "Coordinates saved. Add city and country manually.",
-          );
-        } catch {
-          setLocationStatus("Coordinates saved. Add city and country manually.");
-        } finally {
-          setIsLocating(false);
-        }
-      },
-      (error) => {
-        setIsLocating(false);
-        setLocationStatus("");
-
-        if (!silent) {
-          toast.error(
-            error?.code === error?.PERMISSION_DENIED
-              ? "Location permission was denied. Add origin manually."
-              : "Could not read current location. Add origin manually.",
-          );
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000,
-      },
-    );
-  };
-
-  useEffect(() => {
-    if (!open || !navigator.permissions || !navigator.geolocation) return;
-
-    navigator.permissions
-      .query({ name: "geolocation" })
-      .then((permission) => {
-        if (permission.state === "granted") {
-          requestCurrentLocation({ silent: true });
-        }
-      })
-      .catch(() => {});
-  }, [open]);
 
   const handleCreateTrip = async (event) => {
     event.preventDefault();
@@ -310,56 +255,60 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     }
 
     if (
-      !form.origin_city ||
-      !form.origin_country ||
       !form.start_date ||
       !form.days ||
-      !form.travelers_count
+      !form.travelers_count ||
+      !form.traveler_type ||
+      !form.accommodation_preference ||
+      !form.start_location_address
     ) {
       toast.error("Fill in the trip basics before starting the plan.");
       return;
     }
 
-    const endDate = getEndDate(form.start_date, form.days);
     const totalBudget = Number(form.total_budget);
-    const latitude = Number(form.origin_latitude);
-    const longitude = Number(form.origin_longitude);
-    const accuracy = Number(form.origin_accuracy);
+    const startLatitude = Number(form.start_location_latitude);
+    const startLongitude = Number(form.start_location_longitude);
+    const startAccuracy = Number(form.start_location_accuracy);
+    const title = currentTripTitle.trim();
+
+    if (!title) {
+      toast.error("Add a trip title before starting the plan.");
+      return;
+    }
 
     try {
       const response = await createTrip({
-        title: getGeneratedTripTitle(destination),
+        title,
         destination_slugs: [destinationSlug],
         start_date: form.start_date,
-        end_date: endDate,
+        days: Number(form.days),
+        traveler_type: form.traveler_type,
         travelers_count: Number(form.travelers_count),
-        trip_pace: form.trip_pace,
-        origin_city: form.origin_city,
-        origin_country: form.origin_country,
+        accommodation_preference: form.accommodation_preference,
+        start_location_address: form.start_location_address,
+        ...(Number.isFinite(startLatitude) && Number.isFinite(startLongitude)
+          ? {
+              start_location_latitude: startLatitude,
+              start_location_longitude: startLongitude,
+              ...(Number.isFinite(startAccuracy)
+                ? { start_location_accuracy: startAccuracy }
+                : {}),
+            }
+          : {}),
         ...(form.total_budget
           ? {
               total_budget: totalBudget,
               budget_currency: form.budget_currency,
             }
           : {}),
-        ...(form.origin_latitude && form.origin_longitude
-          ? {
-              agent_context: {
-                origin: {
-                  latitude,
-                  longitude,
-                  ...(Number.isFinite(accuracy)
-                    ? { accuracy_meters: accuracy }
-                    : {}),
-                },
-              },
-            }
-          : {}),
       }).unwrap();
       const createdTrip = response?.data || response;
+      const currentStep = getCurrentStepIndex(createdTrip);
 
       setCreatedTrip(createdTrip);
-      setThreadMessages([]);
+      setActiveStep(currentStep);
+      setFurthestStep(currentStep);
       toast.success("Trip planning started.");
       setIsStartingNewPlan(false);
       setSelectedTrip(null);
@@ -370,58 +319,85 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     }
   };
 
-  const handleSendMessage = (event) => {
-    event.preventDefault();
-
-    const trimmedMessage = message.trim();
-    if (!trimmedMessage) return;
-
-    setThreadMessages((current) => [
-      ...(current.length ? current : messages),
-      { role: "user", content: trimmedMessage },
-      {
-        role: "agent",
-        content:
-          "Noted. I will use that when generating the next planning step.",
-      },
-    ]);
-    setMessage("");
-  };
-
   const handleStartNewPlan = () => {
     setCreatedTrip(null);
     setSelectedTrip(null);
-    setThreadMessages([]);
-    setMessage("");
     setIsStartingNewPlan(true);
+    setActiveStep(null);
+    setFurthestStep(0);
   };
 
   const handleSelectTrip = (trip) => {
+    const currentStep = getCurrentStepIndex(trip);
+
     setCreatedTrip(null);
     setSelectedTrip(trip);
-    setThreadMessages([]);
-    setMessage("");
     setIsStartingNewPlan(false);
+    setActiveStep(currentStep);
+    setFurthestStep(currentStep);
+  };
+
+  const handleStepSelect = (stepIndex) => {
+    if (stepIndex > unlockedStep) return;
+    setActiveStep(stepIndex);
+  };
+
+  const handleStepComplete = () => {
+    const nextStep = Math.min(displayedStep + 1, planningSteps.length - 1);
+
+    setFurthestStep((current) =>
+      Math.min(Math.max(current, nextStep), planningSteps.length - 1),
+    );
+    setActiveStep(nextStep);
+  };
+
+  const handleTripUpdated = (updatedTrip) => {
+    const updatedTripId = getTripId(updatedTrip);
+
+    if (
+      updatedTripId &&
+      activeTrip &&
+      getTripId(activeTrip) === updatedTripId &&
+      !createdTrip &&
+      !selectedTrip
+    ) {
+      setSelectedTrip({ ...activeTrip, ...updatedTrip });
+    }
+
+    setCreatedTrip((current) =>
+      current && getTripId(current) === updatedTripId
+        ? { ...current, ...updatedTrip }
+        : current,
+    );
+    setSelectedTrip((current) =>
+      current && getTripId(current) === updatedTripId
+        ? { ...current, ...updatedTrip }
+        : current,
+    );
   };
 
   const showTripList =
     !isCheckingTrips &&
     !isStartingNewPlan &&
-    !activeTrip &&
+    !selectedTrip &&
+    !createdTrip &&
     destinationTrips.length > 1;
   const showSetupForm =
     !isCheckingTrips &&
+    !isFetchingTripDetail &&
     (isStartingNewPlan || (!destinationTrips.length && !activeTrip));
-  const showAgent = !!activeTrip;
+  const showAgent = !!activeTrip && !isFetchingTripDetail;
+  const showInitialLoader =
+    isCheckingTrips || (!!detailTripId && isFetchingTripDetail);
   const handleOpenChange = (nextOpen) => {
     if (!nextOpen) {
       setCreatedTrip(null);
       setSelectedTrip(null);
       setIsStartingNewPlan(false);
-      setThreadMessages([]);
-      setMessage("");
-      setForm(initialForm);
-      setLocationStatus("");
+      setForm(createInitialForm());
+      setTripTitle(null);
+      setActiveStep(null);
+      setFurthestStep(0);
     }
     onOpenChange(nextOpen);
   };
@@ -434,22 +410,113 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
       >
         <div className="flex h-full flex-col">
           <SheetHeader className="border-b border-slate-200 pr-12 text-left">
-            <SheetTitle className="text-xl text-slate-950">
-              Plan {destination?.name}
+            <SheetTitle className="flex items-center gap-2">
+              <Pencil
+                aria-hidden="true"
+                className="shrink-0 text-slate-400"
+                size={16}
+              />
+              <input
+                type="text"
+                aria-label="Trip title"
+                value={currentTripTitle}
+                onChange={(event) => setTripTitle(event.target.value)}
+                className="min-w-0 flex-1 bg-transparent p-0 text-xl font-semibold text-slate-950 outline-none"
+              />
             </SheetTitle>
-            <SheetDescription>
-              {destination?.region}, {destination?.country}
-            </SheetDescription>
+            <div className="flbx pl-6">
+              <SheetDescription>
+                {destination?.region}, {destination?.country}
+              </SheetDescription>
+              <button
+                className="text-sm flx gap-2"
+                onClick={handleStartNewPlan}
+              >
+                <Plus size={14} />
+                New Plan
+              </button>
+            </div>
           </SheetHeader>
 
-          {isCheckingTrips && (
-            <div className="center flex-1 text-sm text-slate-500">
-              <Loader2 className="mr-2 animate-spin text-primary" size={18} />
-              Checking previous trip planning...
+          {showAgent && (
+            <div className="border-b border-slate-200 px-4 py-3">
+              <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-300"
+                  style={{
+                    width: `${
+                      (displayedStep / (planningSteps.length - 1)) * 100
+                    }%`,
+                  }}
+                />
+              </div>
+              <div className="grid grid-cols-6 gap-1">
+                {planningSteps.map((step, index) => {
+                  const isReached = index <= unlockedStep;
+                  const isActive = index === displayedStep;
+                  const isComplete = index < displayedStep;
+
+                  return (
+                    <button
+                      key={step.title}
+                      type="button"
+                      onClick={() => handleStepSelect(index)}
+                      disabled={!isReached}
+                      className={`min-w-0 rounded-md px-1 py-1.5 text-center transition ${
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : isComplete
+                            ? "text-slate-700 hover:bg-slate-100"
+                            : "text-slate-400"
+                      } ${!isReached ? "cursor-not-allowed opacity-60" : ""}`}
+                    >
+                      <span className="block truncate text-[11px] font-medium leading-4">
+                        {step.title}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
 
-          {showTripList && (
+          {showInitialLoader && (
+            <div className="center flex-1 text-sm text-slate-500">
+              <Loader2 className="mr-2 animate-spin text-primary" size={18} />
+              {isCheckingTrips
+                ? "Checking previous trip planning..."
+                : "Loading trip details..."}
+            </div>
+          )}
+
+          {tripDetailError && !showInitialLoader && (
+            <div className="flex-1 p-4">
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+                Could not load the selected trip details. Choose another plan or
+                start a new trip.
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-4 w-full"
+                onClick={() => {
+                  if (destinationTrips.length > 1) {
+                    setSelectedTrip(null);
+                    setIsStartingNewPlan(false);
+                    return;
+                  }
+
+                  handleStartNewPlan();
+                }}
+              >
+                {destinationTrips.length > 1
+                  ? "Back to trip list"
+                  : "Start a new trip"}
+              </Button>
+            </div>
+          )}
+
+          {showTripList && !tripDetailError && (
             <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto p-4">
               <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
                 <div className="flex items-start gap-3">
@@ -504,278 +571,28 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
             </div>
           )}
 
-          {showSetupForm && (
-            <form
+          {showSetupForm && !tripDetailError && (
+            <TripPlanInitialInput
+              destination={destination}
+              form={form}
+              onFieldChange={updateField}
               onSubmit={handleCreateTrip}
-              className="custom-scrollbar flex-1 space-y-5 overflow-y-auto p-4"
-            >
-              <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
-                <div className="flex items-start gap-3">
-                  <Sparkles className="mt-0.5 text-primary" size={18} />
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-950">
-                      Start a new plan
-                    </h3>
-                    <p className="mt-1 text-sm leading-6 text-slate-600">
-                      Add the basics so the trip agent can create the first
-                      planning draft for {destination?.name}.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="trip-budget">Budget</Label>
-                  <Input
-                    id="trip-budget"
-                    type="number"
-                    min="0"
-                    placeholder="Total budget"
-                    value={form.total_budget}
-                    onChange={(event) =>
-                      updateField("total_budget", event.target.value)
-                    }
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor="origin-city">Origin</Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => requestCurrentLocation()}
-                      disabled={isLocating}
-                    >
-                      {isLocating ? (
-                        <Loader2 className="animate-spin" size={15} />
-                      ) : (
-                        <LocateFixed size={15} />
-                      )}
-                      Use current
-                    </Button>
-                  </div>
-                  {locationStatus && (
-                    <p className="text-xs leading-5 text-slate-500">
-                      {locationStatus}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="relative">
-                    <MapPin
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                      size={16}
-                    />
-                    <Input
-                      id="origin-city"
-                      placeholder="City"
-                      className="pl-9"
-                      value={form.origin_city}
-                      onChange={(event) =>
-                        updateField("origin_city", event.target.value)
-                      }
-                    />
-                  </div>
-                  <Input
-                    id="origin-country"
-                    placeholder="Country"
-                    value={form.origin_country}
-                    onChange={(event) =>
-                      updateField("origin_country", event.target.value)
-                    }
-                  />
-                </div>
-
-                {form.origin_latitude && form.origin_longitude && (
-                  <p className="-mt-2 text-xs text-slate-500">
-                    Coordinates: {Number(form.origin_latitude).toFixed(5)},{" "}
-                    {Number(form.origin_longitude).toFixed(5)}
-                  </p>
-                )}
-
-                <div className="grid gap-2">
-                  <Label htmlFor="trip-start-date">Start date</Label>
-                  <Input
-                    id="trip-start-date"
-                    type="date"
-                    value={form.start_date}
-                    onChange={(event) =>
-                      updateField("start_date", event.target.value)
-                    }
-                  />
-                  {form.start_date && form.days && (
-                    <p className="text-xs text-slate-500">
-                      End date will be {getEndDate(form.start_date, form.days)}.
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="grid gap-2">
-                    <Label htmlFor="trip-days">Days</Label>
-                    <Input
-                      id="trip-days"
-                      type="number"
-                      min="1"
-                      placeholder="5"
-                      value={form.days}
-                      onChange={(event) =>
-                        updateField("days", event.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="trip-travelers">Travelers</Label>
-                    <Input
-                      id="trip-travelers"
-                      type="number"
-                      min="1"
-                      placeholder="2"
-                      value={form.travelers_count}
-                      onChange={(event) =>
-                        updateField("travelers_count", event.target.value)
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Trip pace</Label>
-                  <Select
-                    value={form.trip_pace}
-                    onValueChange={(value) => updateField("trip_pace", value)}
-                  >
-                    <SelectTrigger className="h-11 w-full">
-                      <SelectValue placeholder="Select trip pace" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tripPaces.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="h-11 w-full rounded-full"
-                disabled={isCreatingTrip}
-              >
-                {isCreatingTrip ? (
-                  <Loader2 className="animate-spin" size={17} />
-                ) : (
-                  <Sparkles size={17} />
-                )}
-                Create trip plan
-              </Button>
-            </form>
+              isSubmitting={isCreatingTrip}
+              getEndDate={getEndDate}
+            />
           )}
 
-          {showAgent && (
+          {showAgent && !tripDetailError && (
             <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto p-4">
-              <div className="rounded-xl border border-slate-200 bg-white p-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-medium uppercase text-slate-500">
-                      Active planning
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-950">
-                      {getTripTitle(activeTrip, destination)}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      {getTripDates(activeTrip)}
-                    </p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleStartNewPlan}
-                  >
-                    <Sparkles size={15} />
-                    New plan
-                  </Button>
-                </div>
-              </div>
-
-              {isFetchingConversation && (
-                <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-600">
-                  <Loader2 className="animate-spin text-primary" size={16} />
-                  Loading agent conversation...
-                </div>
-              )}
-
-              {conversationError && !threadMessages.length && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-800">
-                  Could not load the saved agent conversation. You can still
-                  continue from this plan.
-                </div>
-              )}
-
-              {messages.map((item, index) => (
-                <div
-                  key={`${item.role}-${index}`}
-                  className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 ${
-                    item.role === "user"
-                      ? "ml-auto rounded-tr-md bg-primary text-white"
-                      : "rounded-tl-md bg-slate-100 text-slate-700"
-                  }`}
-                >
-                  {item.content}
-                </div>
-              ))}
-
-              <div className="space-y-2 rounded-xl border border-dashed border-slate-300 p-3">
-                <p className="text-sm font-semibold text-slate-900">
-                  Upcoming agent steps
-                </p>
-                <div className="grid gap-2 text-sm text-slate-600">
-                  <span>Pickup and movement plan</span>
-                  <span>Required documents</span>
-                  <span>Itinerary draft</span>
-                  <span>Final review and lock</span>
-                </div>
-              </div>
+              <ActiveStepComponent
+                key={`${activeTripId}-${displayedStepConfig.key}`}
+                trip={activeTrip}
+                destination={destination}
+                getEndDate={getEndDate}
+                onTripUpdated={handleTripUpdated}
+                onStepComplete={handleStepComplete}
+              />
             </div>
-          )}
-
-          {showAgent && (
-            <>
-              <div className="flex gap-2 border-t border-slate-200 px-4 py-3">
-                <Button type="button" variant="outline" className="flex-1">
-                  <CheckCircle2 size={17} />
-                  Proceed
-                </Button>
-                <Button type="button" className="flex-1">
-                  <LockKeyhole size={17} />
-                  Lock plan
-                </Button>
-              </div>
-
-              <form
-                onSubmit={handleSendMessage}
-                className="flex items-center gap-2 border-t border-slate-200 p-4"
-              >
-                <input
-                  type="text"
-                  value={message}
-                  onChange={(event) => setMessage(event.target.value)}
-                  placeholder="Ask the planning agent..."
-                  className="h-11 min-w-0 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
-                />
-                <Button type="submit" size="icon" className="rounded-full">
-                  <Send size={17} />
-                </Button>
-              </form>
-            </>
           )}
         </div>
       </SheetContent>
