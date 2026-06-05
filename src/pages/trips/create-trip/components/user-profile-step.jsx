@@ -3,7 +3,9 @@ import { FloatingInput } from "@/components/ui/input";
 import {
   useTripAgentActiveMutation,
   useTripAgentCreateMessageMutation,
+  useTripAgentMessageListQuery,
 } from "@/features/trips/tripApiSlice";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { Bot, Loader2, Send, Sparkles } from "lucide-react";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
@@ -93,6 +95,19 @@ const getInitialAgentMessages = (trip) =>
     ? [{ role: "agent", content: trip.agent_message }]
     : [];
 
+const unwrapAgentMessages = (response) => {
+  const messages = Array.isArray(response?.data) ? response.data : [];
+
+  return [...messages]
+    .sort((first, second) => Number(first.sequence) - Number(second.sequence))
+    .map((item) => ({
+      id: item.id,
+      role: item.sender === "user" ? "user" : "agent",
+      content: item.content,
+    }))
+    .filter((item) => item.content);
+};
+
 const ToggleOption = ({ selected, children, onClick }) => {
   return (
     <button
@@ -121,6 +136,7 @@ const OptionGroup = ({ title, children }) => {
 const UserProfileStep = ({ trip, onStepComplete }) => {
   const user = useSelector((state) => state.auth.user);
   const preferences = trip?.preferences || {};
+  const tripId = getTripId(trip);
   const userTravelPace = user?.travel_pace
     ? String(user.travel_pace).toLowerCase()
     : "";
@@ -156,16 +172,23 @@ const UserProfileStep = ({ trip, onStepComplete }) => {
     initialMobilityConstraints.length
       ? initialMobilityConstraints
       : normalizeListToOptions(
-          getUserList(user, "mobility_constraints"),
+          getUserList(user, "mobility_preferences", "mobility_constraints"),
           mobilityOptions,
         ),
   );
   const [mobilityOther, setMobilityOther] = useState(
     preferences.mobility_other || "",
   );
-  const [agentMessages, setAgentMessages] = useState(() =>
-    getInitialAgentMessages(trip),
-  );
+  const { data: messageListData, isFetching: isFetchingMessages } =
+    useTripAgentMessageListQuery(
+      tripId ? { trip_id: tripId, step: 2, page_size: 50 } : skipToken,
+    );
+  const serverMessages = unwrapAgentMessages(messageListData);
+  const [agentMessages, setAgentMessages] = useState([]);
+  const conversationMessages = [
+    ...(serverMessages.length ? serverMessages : getInitialAgentMessages(trip)),
+    ...agentMessages,
+  ];
   const [agentFailureMessage, setAgentFailureMessage] = useState(
     trip?.agent_active === false ? trip?.agent_active_failed_message || "" : "",
   );
@@ -188,7 +211,7 @@ const UserProfileStep = ({ trip, onStepComplete }) => {
 
   const buildPayload = ({ letAgentDecide = false } = {}) => {
     const payload = {
-      trip_id: getTripId(trip),
+      trip_id: tripId,
       current_step: 2,
       let_agent_decide: letAgentDecide,
     };
@@ -236,7 +259,6 @@ const UserProfileStep = ({ trip, onStepComplete }) => {
   };
 
   const handleActivateAgent = async ({ letAgentDecide = false } = {}) => {
-    const tripId = getTripId(trip);
     if (!tripId) {
       toast.error("Trip id is missing.");
       return;
@@ -269,7 +291,7 @@ const UserProfileStep = ({ trip, onStepComplete }) => {
 
     try {
       const response = await createAgentMessage({
-        trip_id: getTripId(trip),
+        trip_id: tripId,
         current_step: 2,
         message: trimmedMessage,
       }).unwrap();
@@ -389,14 +411,21 @@ const UserProfileStep = ({ trip, onStepComplete }) => {
           </div>
         )}
       </div>
-      {isAgentActive && !isStepComplete && (
+      {isAgentActive && (
         <div className="space-y-3 pb-2">
-          {agentMessages.map((item, index) => {
+          {isFetchingMessages && !conversationMessages.length && (
+            <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-600">
+              <Loader2 className="animate-spin text-primary" size={16} />
+              Loading conversation...
+            </div>
+          )}
+
+          {conversationMessages.map((item, index) => {
             const isUser = item.role === "user";
 
             return (
               <div
-                key={`${item.role}-${index}`}
+                key={item.id || `${item.role}-${index}`}
                 className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
               >
                 <div

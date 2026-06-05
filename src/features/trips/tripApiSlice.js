@@ -75,15 +75,15 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       providesTags: ["trip-detail"],
     }),
 
+    // # agent endpoints
     tripAgentActive: builder.mutation({
       query: (payload) => {
         return {
-          url: `/trips/agent-active/`,
+          url: `/trips/agent/active/`,
           method: "POST",
           body: payload,
         };
       },
-      invalidatesTags: ["trip-list"],
     }),
 
     tripAgentCreateMessage: builder.mutation({
@@ -92,6 +92,48 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           url: `/trips/agent/create-message/`,
           method: "POST",
           body: payload,
+        };
+      },
+    }),
+
+    tripAgentMessageList: builder.query({
+      query: (params = {}) => {
+        const { trip_id, step, page = 1, page_size = 10 } = params;
+
+        const queryParams = new URLSearchParams({
+          page: String(page),
+          page_size: String(page_size),
+        });
+
+        const appendParam = (key, value) => {
+          if (!value || (Array.isArray(value) && !value.length)) return;
+          queryParams.set(key, Array.isArray(value) ? value.join(",") : value);
+        };
+
+        appendParam("trip_id", trip_id);
+        appendParam("step", step);
+
+        return {
+          url: `/trips/agent/messages/?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    tripAgentRecommendations: builder.query({
+      query: ({ trip_id }) => {
+        return {
+          url: `/trips/agent/recommendations/?trip_id=${trip_id}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    tripItineraries: builder.query({
+      query: ({ trip_id }) => {
+        return {
+          url: `/trips/agent/itineraries/?trip_id=${trip_id}`,
+          method: "GET",
         };
       },
     }),
@@ -105,5 +147,8 @@ export const {
   useCreateTripMutation,
   useUpdateTripMutation,
   useTripAgentActiveMutation,
-  useTripAgentCreateMessageMutation
+  useTripAgentCreateMessageMutation,
+  useTripAgentMessageListQuery,
+  useTripAgentRecommendationsQuery,
+  useTripItinerariesQuery,
 } = tripApiSlice;
