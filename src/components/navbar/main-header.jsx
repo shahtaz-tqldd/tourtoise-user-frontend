@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { userLoggedOut } from "@/features/auth/authSlice";
-import { cn, fallbackValue, getInitials } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 // import {
 //   buildFeedFilterSearch,
 //   getFeedFiltersFromSearch,
@@ -65,12 +65,11 @@ const MainHeader = () => {
   //   () => getFeedFiltersFromSearch(location.search),
   //   [location.search],
   // );
-  const fullName = fallbackValue(
-    user?.name || `${user?.first_name || ""} ${user?.last_name || ""}`.trim(),
-    "Guest User",
-  );
-  const profileImage = user?.avatar || user?.profile_picture_url;
+  const fullName = user?.name || "Guest User";
+  const profileImage = user?.avatar_url;
   const profilePath = `/profile/${user?.username || "my-profile"}`;
+  const email = user?.email;
+  const username = user?.username;
 
   const navigateToSearch = React.useCallback(
     () => {
@@ -107,7 +106,7 @@ const MainHeader = () => {
           <Input
             // value={filters.searchTerm}
             onChange={(event) => navigateToSearch(event.target.value)}
-            placeholder="Search strays, rescuers, or locations"
+            placeholder="Search destinations, tour plans and posts"
             className="h-11 rounded-full border-primary/15 bg-[#fcfdfb] pl-11 pr-4 text-sm shadow-none focus-visible:ring-2 focus-visible:ring-primary/20"
           />
         </label>
@@ -118,6 +117,8 @@ const MainHeader = () => {
             fullName={fullName}
             profileImage={profileImage}
             profilePath={profilePath}
+            email={email}
+            username={username}
             onLogout={handleLogout}
           />
         </div>
@@ -195,7 +196,14 @@ const AlertMenu = () => (
   </DropdownMenu>
 );
 
-const ProfileMenu = ({ fullName, profileImage, profilePath, onLogout }) => (
+const ProfileMenu = ({
+  fullName,
+  profileImage,
+  profilePath,
+  username,
+  email,
+  onLogout,
+}) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <button
@@ -218,8 +226,8 @@ const ProfileMenu = ({ fullName, profileImage, profilePath, onLogout }) => (
           <span className="block truncate text-sm font-semibold leading-tight text-slate-900">
             {fullName}
           </span>
-          <span className="block truncate text-xs capitalize text-slate-500">
-            Member
+          <span className="block truncate text-xs text-slate-500">
+            @{username}
           </span>
         </span>
         <ChevronDown className="hidden size-4 shrink-0 text-slate-400 sm:block" />
@@ -245,8 +253,8 @@ const ProfileMenu = ({ fullName, profileImage, profilePath, onLogout }) => (
           <span className="block truncate text-sm font-semibold text-slate-900">
             {fullName}
           </span>
-          <span className="block truncate text-xs capitalize text-slate-500">
-            Member
+          <span className="block truncate text-xs text-slate-500">
+            {email}
           </span>
         </span>
       </DropdownMenuLabel>
@@ -254,14 +262,14 @@ const ProfileMenu = ({ fullName, profileImage, profilePath, onLogout }) => (
       <ProfileMenuItem to={profilePath} icon={<UserRound />}>
         My profile
       </ProfileMenuItem>
-      <ProfileMenuItem to="/feeds" icon={<PawPrint />}>
-        Adopt Pets
+      <ProfileMenuItem to="/trips" icon={<PawPrint />}>
+        Tour Plans
       </ProfileMenuItem>
       <ProfileMenuItem to="/" icon={<MessageCircle />}>
         Messages
       </ProfileMenuItem>
       <ProfileMenuItem to="/" icon={<Bookmark />}>
-        Saved pets
+        Saved Destination
       </ProfileMenuItem>
       <ProfileMenuItem to="/settings" icon={<Settings />}>
         Settings

@@ -15,13 +15,15 @@ import {
 import { skipToken } from "@reduxjs/toolkit/query";
 import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
-import DocumentsPackupStep from "./components/documents-packup-step";
+
+// components
 import InitialInfoStep from "./components/initial-info-step";
 import TripPlanInitialInput from "./components/initial-input";
-import ItineraryStep from "./components/itinerary-step";
-import OverviewLockStep from "./components/overview-lock-step";
-import RecommendationsStep from "./components/recommendations-step";
 import UserProfileStep from "./components/user-profile-step";
+import RecommendationsStep from "./components/recommendations-step";
+import ItineraryStep from "./components/itinerary-step";
+import TripPreparationStep from "./components/trip-preparation-step";
+import OverviewLockStep from "./components/overview-lock-step";
 
 const createInitialForm = () => ({
   total_budget: "",
@@ -73,9 +75,9 @@ const planningSteps = [
   },
   {
     key: "documents_packup",
-    title: "Documents",
+    title: "Preparation",
     description: "Documents and packup",
-    component: DocumentsPackupStep,
+    component: TripPreparationStep,
   },
   {
     key: "overview_lock",

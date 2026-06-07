@@ -8,6 +8,7 @@ import { FloatingInput } from "@/components/ui/input";
 import { useRegisterMutation } from "@/features/auth/authApiSlice";
 import { userLoggedIn } from "@/features/auth/authSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
+import GoogleAuthButton from "./google-auth-button";
 
 const RegisterPage = () => {
   const [registerAccount, { isLoading }] = useRegisterMutation();
@@ -61,6 +62,17 @@ const RegisterPage = () => {
     }
   };
 
+  const handleGoogleAuthSuccess = ({ accessToken, refreshToken, rememberMe }) => {
+    dispatch(userLoggedIn({ accessToken, refreshToken, rememberMe }));
+    navigate("/", { replace: true });
+    setError("");
+  };
+
+  const handleAuthError = (message) => {
+    setError(message);
+    setErrorAnimationKey((current) => current + 1);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 flex items-center justify-center px-6 py-10 sm:px-8">
       <div className="w-full max-w-md">
@@ -84,7 +96,22 @@ const RegisterPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="space-y-5">
+            <GoogleAuthButton
+              onAuthenticated={handleGoogleAuthSuccess}
+              onError={handleAuthError}
+            />
+
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-slate-200" />
+              <span className="text-xs font-medium uppercase text-slate-400">
+                Or
+              </span>
+              <div className="h-px flex-1 bg-slate-200" />
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-5">
             <Controller
               name="name"
               control={control}

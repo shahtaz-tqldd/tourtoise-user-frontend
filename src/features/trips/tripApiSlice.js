@@ -79,7 +79,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
     tripAgentActive: builder.mutation({
       query: (payload) => {
         return {
-          url: `/trips/agent/active/`,
+          url: `/trips/planning/agent-init/`,
           method: "POST",
           body: payload,
         };
@@ -89,7 +89,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
     tripAgentCreateMessage: builder.mutation({
       query: (payload) => {
         return {
-          url: `/trips/agent/create-message/`,
+          url: `/trips/planning/create-message/`,
           method: "POST",
           body: payload,
         };
@@ -114,7 +114,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
         appendParam("step", step);
 
         return {
-          url: `/trips/agent/messages/?${queryParams.toString()}`,
+          url: `/trips/planning/messages/?${queryParams.toString()}`,
           method: "GET",
         };
       },
@@ -123,7 +123,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
     tripAgentRecommendations: builder.query({
       query: ({ trip_id }) => {
         return {
-          url: `/trips/agent/recommendations/?trip_id=${trip_id}`,
+          url: `/trips/planning/recommendations/?trip_id=${trip_id}`,
           method: "GET",
         };
       },
@@ -132,8 +132,36 @@ export const tripApiSlice = apiSlice.injectEndpoints({
     tripItineraries: builder.query({
       query: ({ trip_id }) => {
         return {
-          url: `/trips/agent/itineraries/?trip_id=${trip_id}`,
+          url: `/trips/planning/itineraries/?trip_id=${trip_id}`,
           method: "GET",
+        };
+      },
+    }),
+
+    tripPreparation: builder.query({
+      query: ({ trip_id }) => {
+        return {
+          url: `/trips/planning/preparation/?trip_id=${trip_id}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    tripOverview: builder.query({
+      query: ({ trip_id }) => {
+        return {
+          url: `/trips/planning/overview/?trip_id=${trip_id}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    tripActivate: builder.query({
+      query: ({ trip_id }) => {
+        return {
+          url: `/trips/planning/activate/`,
+          method: "POST",
+          body: { trip_id: trip_id },
         };
       },
     }),
@@ -151,4 +179,8 @@ export const {
   useTripAgentMessageListQuery,
   useTripAgentRecommendationsQuery,
   useTripItinerariesQuery,
+  useTripPreparationQuery,
+  useTripOverviewQuery,
+  useTripActivateQuery,
+  useLazyTripActivateQuery,
 } = tripApiSlice;

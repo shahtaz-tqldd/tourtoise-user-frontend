@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { FloatingInput } from "@/components/ui/input";
 import { useLoginMutation } from "@/features/auth/authApiSlice";
 import { userLoggedIn } from "@/features/auth/authSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
+import GoogleAuthButton from "./google-auth-button";
 
 const LoginPage = () => {
   const [login, { isLoading }] = useLoginMutation();
@@ -31,11 +32,22 @@ const LoginPage = () => {
       rememberMe: false,
     },
   });
+  const rememberMe = useWatch({ control, name: "rememberMe" });
 
   // Handle successful authentication
   const handleAuthSuccess = (accessToken, refreshToken, rememberMe) => {
     dispatch(userLoggedIn({ accessToken, refreshToken, rememberMe }));
     navigate("/", { replace: true });
+  };
+
+  const handleGoogleAuthSuccess = ({ accessToken, refreshToken, rememberMe }) => {
+    handleAuthSuccess(accessToken, refreshToken, rememberMe);
+    setError("");
+  };
+
+  const handleAuthError = (message) => {
+    setError(message);
+    setErrorAnimationKey((current) => current + 1);
   };
 
   const onSubmit = async (data) => {
@@ -89,7 +101,23 @@ const LoginPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="space-y-5">
+            <GoogleAuthButton
+              rememberMe={rememberMe}
+              onAuthenticated={handleGoogleAuthSuccess}
+              onError={handleAuthError}
+            />
+
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-slate-200" />
+              <span className="text-xs font-medium uppercase text-slate-400">
+                Or
+              </span>
+              <div className="h-px flex-1 bg-slate-200" />
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-5">
             <Controller
               name="email"
               control={control}
