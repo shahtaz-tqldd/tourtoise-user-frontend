@@ -96,6 +96,7 @@ const TripPlanInitialInput = ({
             onFieldChange("start_location_longitude", location.longitude || "");
             onFieldChange("start_location_accuracy", location.accuracy || "");
           }}
+          className="!mb-6"
         />
 
         <div className="grid grid-cols-2 gap-3">

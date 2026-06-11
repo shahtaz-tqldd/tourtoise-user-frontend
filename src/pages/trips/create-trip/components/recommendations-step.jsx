@@ -13,8 +13,8 @@ import React, { useMemo, useState } from "react";
 
 const categories = [
   {
-    key: "tour_spots",
-    messageKey: "tour_spots",
+    key: "attractions",
+    messageKey: "attractions",
     label: "Spots",
     title: "Recommended spots",
     empty: "No spots recommended yet.",
@@ -27,8 +27,8 @@ const categories = [
     empty: "No activities recommended yet.",
   },
   {
-    key: "food_items",
-    messageKey: "foods",
+    key: "cuisines",
+    messageKey: "cuisines",
     label: "Foods",
     title: "Recommended foods",
     empty: "No foods recommended yet.",
@@ -59,13 +59,13 @@ const getItemImage = (item) =>
   item?.cover_image || item?.images?.[0]?.image_url || "";
 
 const getItemType = (item, categoryKey) => {
-  if (categoryKey === "tour_spots") return item.attraction_type;
+  if (categoryKey === "attractions") return item.attraction_type;
   if (categoryKey === "activities") return item.activity_type;
   return item.cuisine_type || item.meal_type;
 };
 
 const getItemMeta = (item, categoryKey) => {
-  if (categoryKey === "tour_spots") {
+  if (categoryKey === "attractions") {
     return [
       item.avg_duration_hours ? `${item.avg_duration_hours}h` : "",
       item.best_time_of_day ? formatLabel(item.best_time_of_day) : "",
@@ -135,7 +135,7 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
   const price =
     categoryKey === "activities"
       ? formatMoney(item.approx_cost)
-      : categoryKey === "food_items"
+      : categoryKey === "cuisines"
         ? formatLabel(item.approx_price_range)
         : formatLabel(item.budget_tier);
 
@@ -206,7 +206,7 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
               {formatLabel(item.best_season || item.best_time_of_day)}
             </span>
           )}
-          {categoryKey === "food_items" && item.meal_type && (
+          {categoryKey === "cuisines" && item.meal_type && (
             <span className="flex items-center gap-1.5">
               <Utensils size={14} />
               {formatLabel(item.meal_type)}
@@ -220,7 +220,7 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
 
 const RecommendationsStep = ({ trip }) => {
   const tripId = getTripId(trip);
-  const [activeCategory, setActiveCategory] = useState("tour_spots");
+  const [activeCategory, setActiveCategory] = useState("attractions");
   const { data, isLoading, isFetching, isError } =
     useTripAgentRecommendationsQuery(tripId ? { trip_id: tripId } : skipToken);
   const recommendations = useMemo(() => unwrapRecommendations(data), [data]);

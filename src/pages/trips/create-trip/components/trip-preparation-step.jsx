@@ -53,6 +53,18 @@ const groupBy = (items, key) =>
     };
   }, {});
 
+const bySortOrder = (items) =>
+  [...items].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+const getItemNote = (item) =>
+  item.additional_notes || item.additional_note || item.reason || item.details;
+
+const getDocumentName = (document) =>
+  document.document_name || document.document;
+
+const getRevisionInstruction = (preparation) =>
+  preparation.revision_instruction || preparation.metadata?.revision_instruction;
+
 const PrepSkeleton = () => (
   <div className="space-y-4">
     <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
@@ -100,7 +112,7 @@ const SectionHeader = ({ title, count }) => (
 );
 
 const PackingList = ({ items }) => {
-  const groupedItems = groupBy(items, "category");
+  const groupedItems = groupBy(bySortOrder(items), "category");
 
   return (
     <div className="space-y-4">
@@ -116,7 +128,7 @@ const PackingList = ({ items }) => {
           <div className="space-y-3">
             {categoryItems.map((item) => (
               <div
-                key={`${category}-${item.item}`}
+                key={item.id || `${category}-${item.item}`}
                 className="flex items-start gap-3 rounded-xl bg-slate-50 p-3"
               >
                 <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white">
@@ -129,9 +141,11 @@ const PackingList = ({ items }) => {
                     </p>
                     <StatusPill value={item.priority} styles={priorityStyles} />
                   </div>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                    {item.reason}
-                  </p>
+                  {getItemNote(item) && (
+                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                      {getItemNote(item)}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
@@ -144,9 +158,9 @@ const PackingList = ({ items }) => {
 
 const DocumentsList = ({ items }) => (
   <div className="space-y-3">
-    {items.map((item) => (
+    {bySortOrder(items).map((item) => (
       <div
-        key={item.document}
+        key={item.id || getDocumentName(item)}
         className="rounded-xl border border-slate-200 bg-white p-4"
       >
         <div className="flex items-start justify-between gap-3">
@@ -156,11 +170,13 @@ const DocumentsList = ({ items }) => (
             </div>
             <div>
               <p className="text-sm font-semibold text-slate-950">
-                {item.document}
+                {getDocumentName(item)}
               </p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                {item.reason}
-              </p>
+              {getItemNote(item) && (
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  {getItemNote(item)}
+                </p>
+              )}
             </div>
           </div>
           <StatusPill
@@ -175,9 +191,9 @@ const DocumentsList = ({ items }) => (
 
 const HeadsUpList = ({ items }) => (
   <div className="space-y-3">
-    {items.map((item) => (
+    {bySortOrder(items).map((item) => (
       <div
-        key={`${item.category}-${item.title}`}
+        key={item.id || `${item.category}-${item.title}`}
         className="rounded-xl border border-slate-200 bg-white p-4"
       >
         <div className="flex items-start gap-3">
@@ -196,9 +212,11 @@ const HeadsUpList = ({ items }) => (
               </div>
               <StatusPill value={item.severity} styles={severityStyles} />
             </div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              {item.details}
-            </p>
+            {getItemNote(item) && (
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {getItemNote(item)}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -222,6 +240,7 @@ const TripPreparationStep = ({ trip }) => {
   const packingItems = preparation.packing_items || [];
   const documents = preparation.required_documents || [];
   const headsUp = preparation.heads_up || [];
+  const revisionInstruction = getRevisionInstruction(preparation);
 
   if (isLoading || isFetching) {
     return <PrepSkeleton />;
@@ -298,13 +317,13 @@ const TripPreparationStep = ({ trip }) => {
           <EmptyState>No heads-up notes available.</EmptyState>
         ))}
 
-      {preparation.revision_instruction && (
+      {revisionInstruction && (
         <div className="rounded-xl bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">
-          {preparation.revision_instruction}
+          {revisionInstruction}
         </div>
       )}
 
-      {preparation.is_preparation_complete && (
+      {(preparation.is_finalized || preparation.is_preparation_complete) && (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">
           Preparation guide is complete. Review your packing list, documents,
           and important travel notes before locking the plan.

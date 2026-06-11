@@ -33,6 +33,20 @@ const formatDate = (date) => {
   }).format(new Date(`${date}T00:00:00`));
 };
 
+const formatTime = (time) => {
+  if (!time) return "Anytime";
+
+  return String(time).split(":").slice(0, 2).join(":");
+};
+
+const getItineraryDays = (itinerary) =>
+  itinerary.itinerary_days || itinerary.day_wise_plan || [];
+
+const getDayItems = (day) => day.day_items || day.items || [];
+
+const getRoutePlan = (itinerary) =>
+  itinerary.route_plan_items || itinerary.route_plan || [];
+
 const itemTypeStyles = {
   food: "bg-amber-50 text-amber-700",
   transfer: "bg-sky-50 text-sky-700",
@@ -90,7 +104,7 @@ const DayTabs = ({ days, activeDay, onChange }) => (
 const TimelineItem = ({ item, isLast }) => (
   <div className="relative flex gap-3">
     <div className="flex w-16 shrink-0 justify-end pt-1 text-xs font-medium text-slate-500">
-      {item.time || "Anytime"}
+      {formatTime(item.time)}
     </div>
     <div className="relative flex flex-col items-center">
       <span className="size-3 rounded-full border-2 border-primary bg-white" />
@@ -139,7 +153,7 @@ const RouteCard = ({ route }) => (
           {route.from_point} to {route.to_point}
         </p>
         <p className="mt-1 text-xs text-slate-500">
-          {formatDate(route.date)} · {route.start_time}
+          {formatDate(route.date)} · {formatTime(route.start_time)}
         </p>
       </div>
       <span className="rounded-full bg-sky-50 px-2 py-1 text-[11px] font-semibold text-sky-700">
@@ -182,9 +196,11 @@ const ItineraryStep = ({ trip }) => {
     tripId ? { trip_id: tripId } : skipToken,
   );
   const itinerary = useMemo(() => unwrapItinerary(data), [data]);
-  const days = itinerary.day_wise_plan || [];
+  const days = getItineraryDays(itinerary);
+  const routePlan = getRoutePlan(itinerary);
   const [activeDay, setActiveDay] = useState(days[0]?.day || 1);
   const activeDayPlan = days.find((day) => day.day === activeDay) || days[0];
+  const activeDayItems = getDayItems(activeDayPlan || {});
   const budget = itinerary.rough_budget || {};
 
   if (isLoading || isFetching) {
@@ -272,11 +288,11 @@ const ItineraryStep = ({ trip }) => {
               </p>
             </div>
             <div>
-              {activeDayPlan.items.map((item, index) => (
+              {activeDayItems.map((item, index) => (
                 <TimelineItem
                   key={`${item.time}-${item.title}-${index}`}
                   item={item}
-                  isLast={index === activeDayPlan.items.length - 1}
+                  isLast={index === activeDayItems.length - 1}
                 />
               ))}
             </div>
@@ -290,8 +306,8 @@ const ItineraryStep = ({ trip }) => {
             <MapPinned size={16} className="text-primary" />
             Route plan
           </div>
-          {itinerary.route_plan?.length ? (
-            itinerary.route_plan.map((route, index) => (
+          {routePlan.length ? (
+            routePlan.map((route, index) => (
               <RouteCard
                 key={`${route.date}-${route.start_time}-${index}`}
                 route={route}
@@ -340,7 +356,7 @@ const ItineraryStep = ({ trip }) => {
         </div>
       )}
 
-      {itinerary.is_itinerary_complete && (
+      {(itinerary.is_finalized || itinerary.is_itinerary_complete) && (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">
           Itinerary planning is complete. Review the days, routes, and budget
           before moving forward.

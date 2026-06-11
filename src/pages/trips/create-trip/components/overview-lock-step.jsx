@@ -151,7 +151,7 @@ const OverviewLockStep = ({ trip }) => {
   }
 
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-4">
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
         <div className="flex items-start gap-3">
           <AlertTriangle
@@ -291,7 +291,7 @@ const OverviewLockStep = ({ trip }) => {
         </div>
       ) : null}
 
-      <div className="sticky bottom-0 z-10 -mx-4 grid grid-cols-[120px_1fr] gap-3 border-t border-slate-200 bg-white p-4 shadow-[0_-10px_24px_rgba(15,23,42,0.08)]">
+      <div className="sticky bottom-0 z-10 -mx-4 translate-y-4 grid grid-cols-[120px_1fr] gap-3 border-t border-slate-200 bg-white p-4 shadow-[0_-10px_24px_rgba(15,23,42,0.08)]">
         <Button type="button" variant="outline" disabled={isActivating}>
           <Trash2 size={17} />
           Delete
