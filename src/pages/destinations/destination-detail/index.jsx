@@ -22,15 +22,13 @@ import {
   Languages,
   Loader2,
   MapPin,
-  Navigation,
-  Plane,
   Sparkles,
   Star,
   Ticket,
   Utensils,
   WalletCards,
 } from "lucide-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import TripPlanningDrawer from "@/pages/trips/create-trip/trip-planning-drawer";
@@ -38,6 +36,8 @@ import { formatLabel } from "@/lib/utils";
 import { ActivityCard, AttractionCard, CuisineCard } from "./item-cards";
 import { DetailPill } from "@/components/shared/utils";
 import { formatMonths } from "@/lib/date-time";
+import DestinationGallery from "./destination-gallery";
+import CardSlider from "@/components/shared/card-slider";
 
 const getFeatureType = (item) =>
   formatLabel(
@@ -70,26 +70,63 @@ function useMediaQuery(query) {
   return matches;
 }
 
-function FactItem({ icon, label, value }) {
-  return (
-    <div className="rounded-2xl bg-white p-4">
-      {React.createElement(icon, { size: 18, className: "text-primary" })}
-      <p className="mt-3 text-xs font-medium uppercase text-slate-500">
-        {label}
-      </p>
-      <p className="mt-1 text-sm font-semibold capitalize text-slate-900">
-        {value || "N/A"}
-      </p>
-    </div>
-  );
-}
-
 function InfoSection({ title, children }) {
   return (
     <section className="rounded-[28px] bg-white p-5">
       <h2 className="text-lg font-bold text-slate-950">{title}</h2>
       <div className="mt-2 text-slate-600">{children}</div>
     </section>
+  );
+}
+
+function TripBasicsCard({ destination, bestTime, languages }) {
+  return (
+    <div className="rounded-[24px] bg-white p-4 md:rounded-[28px] md:p-6">
+      <h2 className="text-lg font-bold text-slate-950">Trip Basics</h2>
+      <div className="mt-4 grid grid-cols-2 gap-4 md:block md:space-y-4">
+        <div>
+          <p className="text-xs font-medium uppercase text-slate-500">
+            Currency
+          </p>
+          <p className="mt-1 text-sm font-semibold text-slate-900">
+            {destination.currency || destination.currency_code || "N/A"}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs font-medium uppercase text-slate-500">
+            Languages
+          </p>
+          <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <Languages size={16} className="text-primary" />
+            {languages}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs font-medium uppercase text-slate-500">
+            Ideal stay
+          </p>
+          <p className="mt-1 text-sm font-semibold text-slate-900">
+            {getStayLength(destination)}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs font-medium uppercase text-slate-500">
+            Budget
+          </p>
+          <p className="mt-1 text-sm font-semibold text-slate-900">
+            {formatLabel(destination.budget_tier)}
+          </p>
+        </div>
+        <div className="col-span-2 md:col-span-1">
+          <p className="text-xs font-medium uppercase text-slate-500">
+            Best Times
+          </p>
+          <p className="mt-1 text-sm font-semibold text-slate-900">
+            {bestTime}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -279,15 +316,15 @@ function AttractionSection({ attractions, onSelect }) {
       </div>
 
       {attractions?.length ? (
-        <div className="grid gap-4 lg:grid-cols-3">
-          {attractions.map((item) => (
+        <CardSlider
+          items={attractions}
+          renderItem={(item) => (
             <AttractionCard
-              key={item.slug || item.name}
               item={item}
               onSelect={onSelect}
             />
-          ))}
-        </div>
+          )}
+        />
       ) : (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
           No attractions available yet.
@@ -315,78 +352,22 @@ function DestinationFeatureSection({
       </div>
 
       {items?.length ? (
-        <div className="grid gap-4 lg:grid-cols-3">
-          {items.map((item) =>
+        <CardSlider
+          items={items}
+          renderItem={(item) =>
             renderCard({
               item,
               key: item.slug || item.name,
               metaItems: getMetaItems(item),
               onSelect,
-            }),
-          )}
-        </div>
+            })
+          }
+        />
       ) : (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
           {emptyText}
         </div>
       )}
-    </section>
-  );
-}
-
-function DestinationGallery({ destination }) {
-  const images = useMemo(() => {
-    const galleryImages =
-      destination.images?.map((image) => ({
-        url: image.image_url,
-        caption: image.caption,
-        sortOrder: image.sort_order,
-      })) || [];
-
-    return [
-      destination.cover_image && {
-        url: destination.cover_image,
-        caption: `${destination.name} cover`,
-        sortOrder: 0,
-      },
-      ...galleryImages,
-    ]
-      .filter(Boolean)
-      .sort((a, b) => a.sortOrder - b.sortOrder);
-  }, [destination]);
-
-  if (!images.length) return null;
-
-  return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-bold text-slate-950">Gallery</h2>
-        <p className="text-sm text-slate-500">{images.length} images</p>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-4 md:grid-rows-2">
-        {images.slice(0, 5).map((image, index) => (
-          <figure
-            key={`${image.url}-${index}`}
-            className={`relative overflow-hidden rounded-2xl bg-slate-100 ${
-              index === 0
-                ? "aspect-[4/3] md:col-span-2 md:row-span-2 md:aspect-auto"
-                : "aspect-[4/3]"
-            }`}
-          >
-            <img
-              src={image.url}
-              alt={image.caption || `${destination.name} gallery ${index + 1}`}
-              className="h-full w-full object-cover"
-            />
-            {image.caption && (
-              <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-950/75 to-transparent p-3 text-xs font-medium text-white">
-                {image.caption}
-              </figcaption>
-            )}
-          </figure>
-        ))}
-      </div>
     </section>
   );
 }
@@ -520,17 +501,17 @@ const DestinationDetailPage = () => {
 
   return (
     <>
-      <section className="space-y-6 py-5">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="space-y-6">
-            <div className="relative overflow-hidden rounded-[28px]">
+      <section className="space-y-5 pb-6 pt-3 md:space-y-6 md:py-5">
+        <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="min-w-0 space-y-5 md:space-y-6">
+            <div className="relative -mx-4 overflow-hidden rounded-b-[28px] md:mx-0 md:rounded-[28px]">
               <Link
                 to="/"
-                className="text-sm font-medium absolute top-4 left-4 h-10 w-10 bg-white/40 backdrop-blur-sm rounded-full center cursor-pointer z-20 hover:bg-white/60 tr"
+                className="center absolute left-4 top-4 z-20 h-10 w-10 rounded-full bg-white/50 text-sm font-medium backdrop-blur-sm transition hover:bg-white/70"
               >
                 <ArrowLeft size={16} />
               </Link>
-              <div className="aspect-[16/9] min-h-[420px] md:aspect-[21/9]">
+              <div className="aspect-[4/5] md:aspect-[16/9]">
                 <img
                   src={destination.cover_image}
                   alt={destination.name}
@@ -538,17 +519,13 @@ const DestinationDetailPage = () => {
                 />
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5 text-white md:p-8">
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-white md:p-8">
                 <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                   <div className="max-w-3xl">
                     <h1 className="text-3xl font-bold leading-tight md:text-4xl">
                       {destination.name}
                     </h1>
-                    <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-white/85 md:text-base">
-                      <MapPin size={18} />
-                      {destination.region}, {destination.country}
-                    </p>
-                    <p className="mt-4 max-w-2xl text-sm leading-6 text-white/85 md:text-base">
+                    <p className="mt-3 line-clamp-3 max-w-xl text-sm leading-6 text-white/85 md:text-lg md:leading-7">
                       {destination.tagline || destination.overview}
                     </p>
                   </div>
@@ -556,34 +533,67 @@ const DestinationDetailPage = () => {
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <FactItem
-                icon={CalendarDays}
-                label="Ideal stay"
-                value={getStayLength(destination)}
+            <div className="space-y-4 xl:hidden">
+              <TripBasicsCard
+                destination={destination}
+                bestTime={bestTime}
+                languages={languages}
               />
-              <FactItem icon={Plane} label="Best time" value={bestTime} />
-              <FactItem
-                icon={WalletCards}
-                label="Budget"
-                value={formatLabel(destination.budget_tier)}
-              />
-              <FactItem
-                icon={Navigation}
-                label="Difficulty"
-                value={destination.difficulty}
-              />
+              <Button
+                className="h-12 w-full rounded-full"
+                onClick={() => setPlanningOpen(true)}
+              >
+                <Sparkles size={18} />
+                Start Planning with AI
+              </Button>
             </div>
 
-            <InfoSection title="Overview">
-              {destination.overview || "No overview available yet."}
-            </InfoSection>
+            {!!tags.length && (
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
 
-            <InfoSection title="Getting Around">
-              {destination.getting_around || "No transport notes available."}
-            </InfoSection>
+            <div>
+              <p className="text-xs font-medium uppercase text-slate-500">
+                Overview
+              </p>
+              <p className="mt-1 leading-6 text-slate-700">
+                {destination.overview || "No overview available yet."}
+              </p>
+            </div>
 
-            <DestinationGallery destination={destination} />
+            <div className="xl:hidden">
+              <DestinationGallery destination={destination} />
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2 md:gap-6">
+              <div>
+                <p className="text-xs font-medium uppercase text-slate-500">
+                  Getting Around
+                </p>
+                <p className="mt-1 leading-6 text-slate-700">
+                  {destination.getting_around ||
+                    "No transport notes available."}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase text-slate-500">
+                  Visa notes
+                </p>
+                <p className="mt-1 leading-6 text-slate-700">
+                  {destination.visa_notes || "N/A"}
+                </p>
+              </div>
+            </div>
+
             <AttractionSection
               attractions={attractions}
               onSelect={openFeatureDetail({
@@ -627,80 +637,34 @@ const DestinationDetailPage = () => {
                 />
               )}
             />
+          </div>
 
+          <aside className="min-w-0 space-y-4 xl:sticky xl:top-24 xl:self-start">
+            <div className="hidden xl:block">
+              <DestinationGallery destination={destination} />
+            </div>
+            <div className="hidden xl:block">
+              <TripBasicsCard
+                destination={destination}
+                bestTime={bestTime}
+                languages={languages}
+              />
+            </div>
             <InfoSection title="Cultural Tips">
               {destination.cultural_tips?.length ? (
-                <ul className="list-disc space-y-2 pl-5">
+                <ul className="list-disc space-y-1 pl-5">
                   {destination.cultural_tips.map((tip) => (
-                    <li key={tip}>{tip}</li>
+                    <li key={tip} className="text-sm">
+                      {tip}
+                    </li>
                   ))}
                 </ul>
               ) : (
                 <p>No cultural tips available.</p>
               )}
             </InfoSection>
-          </div>
-
-          <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
-            <div className="rounded-[28px] bg-white p-6">
-              <h2 className="text-lg font-bold text-slate-950">Trip Basics</h2>
-              <div className="mt-4 space-y-4">
-                <div>
-                  <p className="text-xs font-medium uppercase text-slate-500">
-                    Currency
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {destination.currency || destination.currency_code || "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium uppercase text-slate-500">
-                    Languages
-                  </p>
-                  <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <Languages size={16} className="text-primary" />
-                    {languages}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium uppercase text-slate-500">
-                    Coordinates
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {destination.latitude && destination.longitude
-                      ? `${destination.latitude}, ${destination.longitude}`
-                      : "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium uppercase text-slate-500">
-                    Visa notes
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-slate-700">
-                    {destination.visa_notes || "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {!!tags.length && (
-              <div className="rounded-[28px] bg-white p-6">
-                <h2 className="text-lg font-bold text-slate-950">Tags</h2>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <Button
-              className="h-12 w-full rounded-full"
+              className="hidden h-12 w-full rounded-full xl:flex"
               onClick={() => setPlanningOpen(true)}
             >
               <Sparkles size={18} />

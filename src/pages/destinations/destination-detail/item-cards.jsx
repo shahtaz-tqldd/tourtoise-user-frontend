@@ -17,7 +17,7 @@ export const AttractionCard = ({ item, onSelect }) => {
     <button
       type="button"
       onClick={() => onSelect(item)}
-      className="group overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
+      className="group h-full w-full overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
     >
       <div className="relative aspect-[1] bg-slate-100">
         {item.cover_image ? (
@@ -83,7 +83,7 @@ export const ActivityCard = ({ item, onSelect }) => {
     <button
       type="button"
       onClick={() => onSelect(item)}
-      className="group overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
+      className="group h-full w-full overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
     >
       <div className="relative aspect-[5/3] overflow-hidden bg-slate-100">
         {coverImage ? (
@@ -141,7 +141,7 @@ export const CuisineCard = ({ item, metaItems, onSelect }) => {
     <button
       type="button"
       onClick={() => onSelect(item)}
-      className="group overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 p-4"
+      className="group h-full w-full overflow-hidden rounded-[24px] bg-white p-4 text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
     >
       <div className="relative aspect-[7/6] overflow-hidden bg-slate-100 rounded-xl">
         {item.cover_image ? (
@@ -179,7 +179,7 @@ export const CuisineCard = ({ item, metaItems, onSelect }) => {
 
         <div className="mt-4 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5 text-xs font-semibold text-slate-600">
           {visibleMetaItems.map((meta) => (
-            <DetailPill className="flx gap-1">
+            <DetailPill key={meta.label} className="flx gap-1">
               {React.createElement(meta.icon, {
                 size: 12,
                 className: "shrink-0 text-primary",
