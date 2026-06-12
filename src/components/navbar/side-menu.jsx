@@ -61,7 +61,7 @@ const LeftSideMenu = () => {
   };
 
   return (
-    <div className="w-[300px] p-6 h-screen border-r border-primary/10 sticky top-0 flex flex-col justify-between">
+    <div className="hidden md:flex flex-col justify-between w-[300px] p-6 h-screen border-r border-primary/10 sticky top-0">
       <div className="space-y-6">
         <Link to="/" className="flex items-center gap-3" aria-label="tourtoise">
           <img src="/logo.png" className="h-8" alt="" />

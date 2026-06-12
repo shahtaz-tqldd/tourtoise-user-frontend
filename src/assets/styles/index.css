@@ -139,3 +139,24 @@ button {
   background: linear-gradient(45deg, #004f3baf, #004f3baf);
   border-radius: 8px;
 }
+
+.card-slider {
+  width: 100%;
+  min-width: 0;
+}
+
+.card-slider .swiper-wrapper {
+  min-width: 0;
+}
+
+.card-slider .swiper-scrollbar {
+  left: 0;
+  right: 0;
+  width: auto;
+  height: 3px;
+  background: rgb(226 232 240);
+}
+
+.card-slider .swiper-scrollbar-drag {
+  background: var(--primary);
+}
