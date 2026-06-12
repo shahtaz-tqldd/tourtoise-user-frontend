@@ -1,4 +1,26 @@
 import moment from "moment";
+const monthLabels = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+export const formatMonths = (months) =>
+  months?.length
+    ? months
+        .map((month) => monthLabels[Number(month) - 1])
+        .filter(Boolean)
+        .join(", ")
+    : "N/A";
 
 export const duration = (time) => {
   const duration = moment.duration(moment().diff(moment(time)));

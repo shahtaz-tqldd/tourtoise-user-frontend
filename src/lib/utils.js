@@ -26,3 +26,5 @@ export const titleCase = (value) =>
         .replace(/_/g, " ")
         .replace(/\b\w/g, (letter) => letter.toUpperCase())
     : "";
+
+export const formatLabel = (value) => value?.replaceAll("_", " ") || "N/A";

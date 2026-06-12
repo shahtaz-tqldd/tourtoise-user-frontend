@@ -18,7 +18,6 @@ import {
   Activity,
   ArrowLeft,
   CalendarDays,
-  ChevronRight,
   Clock,
   Languages,
   Loader2,
@@ -35,34 +34,15 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import TripPlanningDrawer from "@/pages/trips/create-trip/trip-planning-drawer";
-
-const monthLabels = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
-const formatLabel = (value) => value?.replaceAll("_", " ") || "N/A";
+import { formatLabel } from "@/lib/utils";
+import { ActivityCard, AttractionCard, CuisineCard } from "./item-cards";
+import { DetailPill } from "@/components/shared/utils";
+import { formatMonths } from "@/lib/date-time";
 
 const getFeatureType = (item) =>
-  formatLabel(item?.attraction_type || item?.activity_type || item?.cuisine_type);
-
-const formatMonths = (months) =>
-  months?.length
-    ? months
-        .map((month) => monthLabels[Number(month) - 1])
-        .filter(Boolean)
-        .join(", ")
-    : "N/A";
+  formatLabel(
+    item?.attraction_type || item?.activity_type || item?.cuisine_type,
+  );
 
 const getStayLength = (destination) => {
   if (destination.min_stay_days && destination.max_stay_days) {
@@ -110,16 +90,6 @@ function InfoSection({ title, children }) {
       <h2 className="text-lg font-bold text-slate-950">{title}</h2>
       <div className="mt-2 text-slate-600">{children}</div>
     </section>
-  );
-}
-
-function DetailPill({ children }) {
-  if (!children) return null;
-
-  return (
-    <span className="rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold capitalize text-slate-800 shadow-sm">
-      {children}
-    </span>
   );
 }
 
@@ -179,160 +149,6 @@ function FeatureMetaList({ metaItems = [], compact = false }) {
   );
 }
 
-function AttractionCard({ item, onSelect }) {
-  const fallbackIcon = <MapPin size={34} />;
-
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(item)}
-      className="group overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
-    >
-      <div className="relative aspect-[4/3] bg-slate-100">
-        {item.cover_image ? (
-          <img
-            src={item.cover_image}
-            alt={item.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
-            {fallbackIcon}
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
-        <div className="absolute left-3 top-3">
-          <FeatureBadges item={item} value={formatLabel(item.attraction_type)} />
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <h3 className="text-lg font-bold leading-tight">{item.name}</h3>
-          {item.address && (
-            <p className="mt-2 flex items-start gap-1.5 text-xs font-semibold text-white/80">
-              <MapPin size={13} className="mt-0.5 shrink-0" />
-              <span className="line-clamp-2">{item.address}</span>
-            </p>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center justify-between gap-3 p-4">
-        <p className="line-clamp-2 text-sm leading-6 text-slate-600">
-          {item.description || "View attraction details."}
-        </p>
-        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-white">
-          <ChevronRight size={18} />
-        </span>
-      </div>
-    </button>
-  );
-}
-
-function ActivityCard({ item, metaItems, onSelect }) {
-  const visibleMetaItems = metaItems.filter((meta) => meta.value);
-
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(item)}
-      className="group flex min-h-[250px] flex-col rounded-[24px] border border-primary/10 bg-white p-4 text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md focus-visible:ring-2"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
-          <Activity size={24} />
-        </div>
-        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-600 transition group-hover:bg-primary group-hover:text-white">
-          <ChevronRight size={18} />
-        </span>
-      </div>
-
-      <div className="mt-5">
-        <p className="text-xs font-semibold uppercase text-primary">
-          {formatLabel(item.activity_type)}
-        </p>
-        <h3 className="mt-1 text-xl font-bold leading-tight text-slate-950">
-          {item.name}
-        </h3>
-      </div>
-
-      {item.description && (
-        <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
-          {item.description}
-        </p>
-      )}
-
-      <div className="mt-auto pt-5">
-        {!!visibleMetaItems.length && (
-          <div className="grid grid-cols-2 gap-2">
-            {visibleMetaItems.slice(0, 4).map((meta) => (
-              <div
-                key={meta.label}
-                className="rounded-2xl bg-slate-50 px-3 py-2"
-              >
-                <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                  {React.createElement(meta.icon, {
-                    size: 13,
-                    className: "shrink-0 text-primary",
-                  })}
-                  {meta.label}
-                </p>
-                <p className="mt-1 truncate text-sm font-semibold capitalize text-slate-900">
-                  {meta.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </button>
-  );
-}
-
-function CuisineCard({ item, metaItems, onSelect }) {
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(item)}
-      className="group overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
-    >
-      <div className="grid grid-cols-[200px_minmax(0,1fr)]">
-        <div className="relative min-h-[190px] bg-slate-100">
-          {item.cover_image ? (
-            <img
-              src={item.cover_image}
-              alt={item.name}
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-              <Utensils size={30} />
-            </div>
-          )}
-          {item.is_must_try && (
-            <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[11px] font-bold text-slate-800 shadow-sm">
-              Must try
-            </span>
-          )}
-        </div>
-        <div className="flex min-w-0 flex-col p-4">
-          <p className="text-xs font-semibold uppercase text-primary">
-            {formatLabel(item.cuisine_type)}
-          </p>
-          <h3 className="mt-1 text-lg font-bold leading-tight text-slate-950">
-            {item.name}
-          </h3>
-          {item.description && (
-            <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">
-              {item.description}
-            </p>
-          )}
-          <div className="mt-auto pt-4">
-            <FeatureMetaList metaItems={metaItems.slice(0, 3)} compact />
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-}
-
 function FeatureDetailContent({ feature }) {
   if (!feature) return null;
 
@@ -368,9 +184,7 @@ function FeatureDetailContent({ feature }) {
 
       <div className="space-y-5 p-5">
         {item.description && (
-          <p className="text-sm leading-6 text-slate-600">
-            {item.description}
-          </p>
+          <p className="text-sm leading-6 text-slate-600">{item.description}</p>
         )}
 
         <FeatureMetaList metaItems={metaItems} />
@@ -501,7 +315,7 @@ function DestinationFeatureSection({
       </div>
 
       {items?.length ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-3">
           {items.map((item) =>
             renderCard({
               item,
@@ -633,11 +447,6 @@ const DestinationDetailPage = () => {
   const cuisines = destination.cuisines || [];
   const getActivityMetaItems = (activity) => [
     {
-      icon: Navigation,
-      label: "Difficulty",
-      value: formatLabel(activity.difficulty_level),
-    },
-    {
       icon: Clock,
       label: "Duration",
       value: activity.duration_hours
@@ -697,14 +506,16 @@ const DestinationDetailPage = () => {
             attraction.ticket_price,
     },
   ];
-  const openFeatureDetail = ({ title, icon, getMetaItems }) => (item) => {
-    setActiveFeature({
-      title,
-      icon,
-      item,
-      metaItems: getMetaItems(item),
-    });
-  };
+  const openFeatureDetail =
+    ({ title, icon, getMetaItems }) =>
+    (item) => {
+      setActiveFeature({
+        title,
+        icon,
+        item,
+        metaItems: getMetaItems(item),
+      });
+    };
   const featureDetailOpen = Boolean(activeFeature);
 
   return (
@@ -730,7 +541,7 @@ const DestinationDetailPage = () => {
               <div className="absolute bottom-0 left-0 right-0 p-5 text-white md:p-8">
                 <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                   <div className="max-w-3xl">
-                    <h1 className="text-4xl font-bold leading-tight md:text-5xl">
+                    <h1 className="text-3xl font-bold leading-tight md:text-4xl">
                       {destination.name}
                     </h1>
                     <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-white/85 md:text-base">
@@ -792,13 +603,8 @@ const DestinationDetailPage = () => {
                 icon: Activity,
                 getMetaItems: getActivityMetaItems,
               })}
-              renderCard={({ item, key, metaItems, onSelect }) => (
-                <ActivityCard
-                  key={key}
-                  item={item}
-                  metaItems={metaItems}
-                  onSelect={onSelect}
-                />
+              renderCard={({ item, key, onSelect }) => (
+                <ActivityCard key={key} item={item} onSelect={onSelect} />
               )}
             />
 
