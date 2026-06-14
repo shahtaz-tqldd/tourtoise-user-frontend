@@ -90,7 +90,7 @@ const DayTabs = ({ days, activeDay, onChange }) => (
           key={day.day}
           type="button"
           onClick={() => onChange(day.day)}
-          className={`min-w-[92px] rounded-xl border px-3 py-2 text-left transition ${
+          className={`min-w-[92px] rounded-lg border px-3 py-2 text-left transition ${
             isActive
               ? "border-primary bg-primary/10 text-primary"
               : "border-slate-200 bg-white text-slate-600 hover:border-primary/40"

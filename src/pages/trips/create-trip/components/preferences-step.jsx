@@ -580,7 +580,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
                           <br />
                         </>
                       )}
-                      <p className=" leading-6">{item.content}</p>
+                      <p className="md:leading-6">{item.content}</p>
                     </div>
                   </div>
                 </div>

@@ -47,7 +47,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
               accessToken:
                 refreshData.access_token || refreshData.accessToken,
               refreshToken:
-                refreshData.refresh_token || refreshData.refreshToken,
+                refreshData.refresh_token || refreshData.refreshToken || refreshToken,
               rememberMe,
             })
           );

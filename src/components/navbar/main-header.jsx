@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { userLoggedOut } from "@/features/auth/authSlice";
 import { cn, getInitials } from "@/lib/utils";
+import { Logo } from "../shared/utils";
 // import {
 //   buildFeedFilterSearch,
 //   getFeedFiltersFromSearch,
@@ -61,10 +62,6 @@ const MainHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
-  // const filters = React.useMemo(
-  //   () => getFeedFiltersFromSearch(location.search),
-  //   [location.search],
-  // );
   const fullName = user?.name || "Guest User";
   const profileImage = user?.avatar_url;
   const profilePath = `/profile/${user?.username || "my-profile"}`;
@@ -100,6 +97,7 @@ const MainHeader = () => {
   return (
     <header className="sticky top-0 z-40">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-3 border-b border-b-primary/10 bg-white/10 backdrop-blur-xl px-5 py-3">
+        <Logo />
         <label className="relative hidden min-w-0 max-w-xl flex-1 md:block">
           <span className="sr-only">Search feed</span>
           <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-primary/55" />
@@ -208,7 +206,7 @@ const ProfileMenu = ({
     <DropdownMenuTrigger asChild>
       <button
         type="button"
-        className="flex max-w-[12rem] items-center gap-2 rounded-full border border-primary/10 bg-white p-1.5 pr-2.5 text-left transition hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+        className="flex max-w-[12rem] items-center gap-2 rounded-full border border-primary/10 bg-white p-[2px] md:p-1.5 md:pr-2.5 text-left transition hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
         aria-label="Open profile menu"
       >
         {profileImage ? (
@@ -253,9 +251,7 @@ const ProfileMenu = ({
           <span className="block truncate text-sm font-semibold text-slate-900">
             {fullName}
           </span>
-          <span className="block truncate text-xs text-slate-500">
-            {email}
-          </span>
+          <span className="block truncate text-xs text-slate-500">{email}</span>
         </span>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />

@@ -74,7 +74,7 @@ function SheetContent({
             data-slot="sheet-close"
             className="ring-offset-background focus:ring-ring absolute right-4 top-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none"
           >
-            <XIcon className="size-4" />
+            <XIcon className="size-4 hidden md:block" />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         )}
