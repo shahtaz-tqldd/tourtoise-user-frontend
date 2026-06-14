@@ -8,23 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import StatusBadge from "@/components/ui/status";
+
 import { useTripListQuery } from "@/features/trips/tripApiSlice";
-import {
-  ArrowRight,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Clock3,
-  DollarSign,
-  Luggage,
-  MapPin,
-  Search,
-  Users,
-  X,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Luggage, Search, X } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import TripCard from "./trip-details/trip-card";
+import TabMenu from "@/components/ui/tab";
 
 const pageSize = 24;
 const historyPageSize = 12;
@@ -44,50 +33,6 @@ const unwrapTrips = (response) => {
 };
 
 const getMeta = (response) => response?.meta || response?.data?.meta || {};
-
-const formatDate = (value) => {
-  if (!value) return "Not set";
-
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(`${value}T00:00:00`));
-};
-
-const formatUpdatedAt = (value) => {
-  if (!value) return "Recently updated";
-
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(value));
-};
-
-const formatMoney = (amount, currency) => {
-  if (!amount) return "Budget not set";
-
-  return new Intl.NumberFormat("en", {
-    style: "currency",
-    currency: currency || "USD",
-    maximumFractionDigits: 0,
-  }).format(Number(amount));
-};
-
-const getTripUrl = (trip) => `/trips/${trip.slug || trip.id}`;
-
-const getDestinationLabel = (trip) => {
-  if (trip.primary_destination?.name) return trip.primary_destination.name;
-  if (trip.destinations_count) {
-    return `${trip.destinations_count} destination${
-      trip.destinations_count === 1 ? "" : "s"
-    }`;
-  }
-
-  return "Destination pending";
-};
 
 const isPastTrip = (trip) => {
   const status = trip.status?.toLowerCase();
@@ -122,7 +67,7 @@ const SearchField = ({
   placeholder,
   className = "",
 }) => (
-  <div className={`relative ${className}`}>
+  <div className={`relative w-full min-w-0 ${className}`}>
     <Search
       size={17}
       className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -131,7 +76,7 @@ const SearchField = ({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      className="h-12 rounded-full border-slate-200 bg-slate-50 pl-11 pr-11 text-sm shadow-none focus-visible:ring-primary/15"
+      className="h-12 w-full rounded-full border-slate-200 bg-slate-50 pl-11 pr-11 text-sm shadow-none focus-visible:ring-primary/15"
     />
     {value && (
       <button
@@ -157,66 +102,6 @@ const TripListLoader = ({ compact = false }) => (
       />
     ))}
   </div>
-);
-
-const TripCard = ({ trip, compact = false }) => (
-  <article className="rounded-[28px] bg-white p-6 border border-transparent transition hover:border-primary/40 shadow-sm">
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge status={trip.status || "draft"} />
-          {trip.visibility && (
-            <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize text-slate-600">
-              {trip.visibility}
-            </span>
-          )}
-        </div>
-        <h2 className="mt-3 line-clamp-2 text-lg font-semibold text-slate-950">
-          {trip.title || "Untitled trip"}
-        </h2>
-        <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
-          <MapPin size={15} />
-          {getDestinationLabel(trip)}
-        </p>
-      </div>
-    </div>
-
-    <div
-      className={`mt-4 grid gap-3 text-sm text-slate-600 ${
-        compact ? "sm:grid-cols-2" : "sm:grid-cols-4"
-      }`}
-    >
-      <span className="flex items-center gap-2">
-        <CalendarDays size={16} className="text-slate-400" />
-        {formatDate(trip.start_date)}
-      </span>
-      <span className="flex items-center gap-2">
-        <Clock3 size={16} className="text-slate-400" />
-        {trip.nights ? `${trip.nights} nights` : "Duration pending"}
-      </span>
-      <span className="flex items-center gap-2">
-        <Users size={16} className="text-slate-400" />
-        {trip.travelers_count || 1} traveler
-        {Number(trip.travelers_count) === 1 ? "" : "s"}
-      </span>
-      <span className="flex items-center gap-2">
-        <DollarSign size={16} className="text-slate-400" />
-        {formatMoney(trip.total_budget, trip.budget_currency)}
-      </span>
-    </div>
-
-    <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
-      <p className="text-xs text-slate-500">
-        Updated {formatUpdatedAt(trip.updated_at)}
-      </p>
-      <Button asChild variant="outline" size="sm">
-        <Link to={getTripUrl(trip)}>
-          Details
-          <ArrowRight size={15} />
-        </Link>
-      </Button>
-    </div>
-  </article>
 );
 
 const EmptyState = ({ title, description, onClear, compact = false }) => (
@@ -248,6 +133,7 @@ const TripsPage = () => {
   const [activeSearch, setActiveSearch] = useState("");
   const [activeStatus, setActiveStatus] = useState("all");
   const [historySearch, setHistorySearch] = useState("");
+  const [mobileTab, setMobileTab] = useState("active");
 
   const queryArgs = useMemo(
     () => ({
@@ -310,106 +196,131 @@ const TripsPage = () => {
   };
 
   return (
-    <section className="grid gap-6 py-5 lg:grid-cols-[minmax(0,1fr)_420px]">
-      <div className="space-y-6">
-        <PageTitle
-          title="Trip Plans"
-          text="Resume current plans and drafts from one focused list."
-        />
+    <section className="space-y-6 py-5 relative">
+      <PageTitle
+        title="Trip Plans"
+        text="Resume current plans and drafts from one focused list."
+      />
 
-        <div className="flx gap-2">
-          <SearchField
-            value={activeSearch}
-            onChange={updateActiveSearch}
-            onClear={() => updateActiveSearch("")}
-            placeholder="Search active trips..."
-            className="flex-1"
-          />
-          <Select value={activeStatus} onValueChange={updateActiveStatus}>
-            <SelectTrigger className="!h-12 w-full rounded-full border-slate-200 bg-slate-50 px-4 shadow-none sm:w-36">
-              <SelectValue placeholder="Trip status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All current</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-            </SelectContent>
-          </Select>
+      <TabMenu
+        tabs={[
+          {
+            label: "Active Plan",
+            value: "active",
+          },
+          {
+            label: "Trip History",
+            value: "history",
+          },
+        ]}
+        activeTab={mobileTab}
+        setActiveTab={setMobileTab}
+        className="flex md:hidden"
+      />
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
+        <div
+          className={`space-y-6 ${
+            mobileTab === "active" ? "block" : "hidden"
+          } lg:block`}
+        >
+          <div className="flex w-full gap-3">
+            <SearchField
+              value={activeSearch}
+              onChange={updateActiveSearch}
+              onClear={() => updateActiveSearch("")}
+              placeholder="Search active trips..."
+              className="flex-1"
+            />
+            <Select value={activeStatus} onValueChange={updateActiveStatus}>
+              <SelectTrigger className="!h-12 rounded-full border-slate-200 bg-slate-50 px-4 shadow-none">
+                <SelectValue placeholder="Trip status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {isFetching && <TripListLoader />}
+
+          {isError && !isFetching && (
+            <EmptyState
+              title="Could not load active trips"
+              description="Check the trips endpoint and try again."
+            />
+          )}
+
+          {!isFetching && !isError && activeTrips.length > 0 && (
+            <div className="space-y-4">
+              {activeTrips.map((trip) => (
+                <TripCard key={trip.id || trip.slug} trip={trip} />
+              ))}
+            </div>
+          )}
+
+          {!isFetching && !isError && !activeTrips.length && (
+            <EmptyState
+              title="No active trips"
+              description={
+                hasActiveFilters
+                  ? "No current trips match the search and status filter."
+                  : "Start planning from a destination page and active trips or drafts will appear here."
+              }
+              onClear={hasActiveFilters ? clearActiveFilters : undefined}
+            />
+          )}
+
+          {!isFetching && !isError && trips.length > 0 && (
+            <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+              <p className="text-sm text-slate-500">
+                Showing page {meta.page || page}
+                {meta.count ? ` of ${meta.count} trips` : ""}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  disabled={page <= 1 || isFetching}
+                >
+                  <ChevronLeft size={16} />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((current) => current + 1)}
+                  disabled={
+                    (!meta.next && page >= (meta.num_pages || page)) ||
+                    isFetching
+                  }
+                >
+                  Next
+                  <ChevronRight size={16} />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {isFetching && <TripListLoader />}
-
-        {isError && !isFetching && (
-          <EmptyState
-            title="Could not load active trips"
-            description="Check the trips endpoint and try again."
-          />
-        )}
-
-        {!isFetching && !isError && activeTrips.length > 0 && (
-          <div className="space-y-4">
-            {activeTrips.map((trip) => (
-              <TripCard key={trip.id || trip.slug} trip={trip} />
-            ))}
-          </div>
-        )}
-
-        {!isFetching && !isError && !activeTrips.length && (
-          <EmptyState
-            title="No active trips"
-            description={
-              hasActiveFilters
-                ? "No current trips match the search and status filter."
-                : "Start planning from a destination page and active trips or drafts will appear here."
-            }
-            onClear={hasActiveFilters ? clearActiveFilters : undefined}
-          />
-        )}
-
-        {!isFetching && !isError && trips.length > 0 && (
-          <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-            <p className="text-sm text-slate-500">
-              Showing page {meta.page || page}
-              {meta.count ? ` of ${meta.count} trips` : ""}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
-                disabled={page <= 1 || isFetching}
-              >
-                <ChevronLeft size={16} />
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((current) => current + 1)}
-                disabled={
-                  (!meta.next && page >= (meta.num_pages || page)) || isFetching
-                }
-              >
-                Next
-                <ChevronRight size={16} />
-              </Button>
-            </div>
-          </div>
-        )}
+        <TripHistory
+          className={`${mobileTab === "history" ? "block" : "hidden"} lg:block`}
+          trips={pastTrips}
+          search={historySearch}
+          onSearchChange={setHistorySearch}
+          isFetching={isHistoryFetching}
+          isError={isHistoryError}
+        />
       </div>
-
-      <TripHistory
-        trips={pastTrips}
-        search={historySearch}
-        onSearchChange={setHistorySearch}
-        isFetching={isHistoryFetching}
-        isError={isHistoryError}
-      />
     </section>
   );
 };
 
 const TripHistory = ({
+  className = "",
   trips,
   search,
   onSearchChange,
@@ -417,8 +328,10 @@ const TripHistory = ({
   isError,
 }) => {
   return (
-    <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
-      <div className="flex items-start justify-between gap-3">
+    <aside
+      className={`${className} space-y-5 lg:sticky lg:top-24 lg:self-start`}
+    >
+      <div className="hidden md:flex items-start justify-between gap-3">
         <div className="flex gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Luggage size={18} />

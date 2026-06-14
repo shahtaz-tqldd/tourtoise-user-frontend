@@ -32,12 +32,14 @@ const DestinationCard = ({ destination }) => {
           )}
 
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <h2 className="text-2xl font-bold leading-tight">
+            <h2 className="text-2xl font-bold leading-tight truncate">
               {destination.name}
             </h2>
             <p className="mt-2 flex items-center gap-1.5 text-sm text-white/85">
               <MapPin size={15} />
-              {destination.region}, {destination.country}
+              <span className="truncate">
+                {destination.region}, {destination.country}
+              </span>
             </p>
             {!!destination?.tags?.length && (
               <div className="flex flex-wrap gap-1 mt-3">
