@@ -61,9 +61,13 @@ export const NotificationCard = ({
   );
 };
 
-export const Logo = () => {
+export const Logo = ({ className = "flex" }) => {
   return (
-    <Link to="/" className="flex items-center gap-2" aria-label="tourtoise">
+    <Link
+      to="/"
+      className={cn("items-center gap-2", className)}
+      aria-label="tourtoise"
+    >
       <img src="/logo.png" className="h-7 md:h-8" alt="" />
       <span className="min-w-0">
         <span className="block md:pt-1 truncate text-xl md:text-2xl logo-font font-bold text-primary">
@@ -71,5 +75,16 @@ export const Logo = () => {
         </span>
       </span>
     </Link>
+  );
+};
+
+export const PageTitle = ({ title, text }) => {
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h1 className="mt-1 text-3xl font-bold text-slate-800">{title}</h1>
+        <p className="mt-2 max-w-xl text-base text-slate-600 leading-7">{text}</p>
+      </div>
+    </div>
   );
 };

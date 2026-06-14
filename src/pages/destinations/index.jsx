@@ -3,6 +3,7 @@ import React, { useMemo, useState } from "react";
 import DestinationCard from "./components/destination-card";
 import DestinationFilter from "./filters";
 import { useDestinationListQuery } from "@/features/destination/destinationApiSlice";
+import { PageTitle } from "@/components/shared/utils";
 
 const getDestinationRows = (response) => {
   const payload = response?.data || response;
@@ -63,17 +64,11 @@ const DestiantionPage = () => {
   return (
     <section className="grid gap-6 py-5 lg:grid-cols-[minmax(0,1fr)_360px]">
       <div className="space-y-8">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="mt-1 text-3xl font-bold text-slate-800">
-              Where's Next?
-            </h1>
-            <p className="mt-2 max-w-xl text-lg text-slate-600">
-              Let's find your next travel destination and make a fantastic tour
-              plan with our smart tour assistant
-            </p>
-          </div>
-        </div>
+        <PageTitle
+          title="Where's Next?"
+          text="Let's find your next travel destination and make a fantastic tour
+              plan with our smart tour assistant"
+        />
 
         <div className="grid gap-4 xl:grid-cols-2">
           {destinations.map((destination) => (

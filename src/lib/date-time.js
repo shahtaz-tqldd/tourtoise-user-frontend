@@ -22,6 +22,27 @@ export const formatMonths = (months) =>
         .join(", ")
     : "N/A";
 
+export const formatDate = (value) => {
+  if (!value) return "Not set";
+
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${value}T00:00:00`));
+};
+
+export const formatUpdatedAt = (value) => {
+  if (!value) return "Recently updated";
+
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+};
+
 export const duration = (time) => {
   const duration = moment.duration(moment().diff(moment(time)));
 
