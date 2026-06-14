@@ -97,7 +97,7 @@ const MainHeader = () => {
   return (
     <header className="sticky top-0 z-40">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-3 border-b border-b-primary/10 bg-white/10 backdrop-blur-xl px-5 py-3">
-        <Logo />
+        <Logo className="flex md:hidden" />
         <label className="relative hidden min-w-0 max-w-xl flex-1 md:block">
           <span className="sr-only">Search feed</span>
           <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-primary/55" />

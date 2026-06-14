@@ -9,6 +9,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           page_size = 10,
           search,
           search_query,
+          status,
           destination_slug,
         } = params;
 
@@ -23,6 +24,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
         };
 
         appendParam("search", search || search_query);
+        appendParam("status", status);
         appendParam("destination_slug", destination_slug);
 
         return {
