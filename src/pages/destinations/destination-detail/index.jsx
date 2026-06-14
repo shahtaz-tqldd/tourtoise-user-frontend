@@ -84,8 +84,11 @@ function TripBasicsCard({ destination, bestTime, languages, setPlanningOpen }) {
     <div className="rounded-[24px] bg-white p-4 md:rounded-[28px] md:p-6">
       <div className="flbx">
         <h2 className="text-lg font-bold text-slate-950">Trip Basics</h2>
-        <Button onClick={() => setPlanningOpen(true)} className="rounded-full hidden md:block">
-          Plan a Trip
+        <Button
+          onClick={() => setPlanningOpen(true)}
+          className="rounded-full hidden md:block"
+        >
+          Start Planning
         </Button>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-4 md:block md:space-y-4">
@@ -560,7 +563,7 @@ const DestinationDetailPage = () => {
                 onClick={() => handlePlanningOpenChange(true)}
               >
                 <Sparkles size={18} />
-                Start Planning with AI
+                Start Planning your Trip
               </Button>
             </div>
 
@@ -671,7 +674,7 @@ const DestinationDetailPage = () => {
               onClick={() => handlePlanningOpenChange(true)}
             >
               <Sparkles size={18} />
-              Start Planning with AI
+              Start Planning your Trip
             </Button>
           </aside>
         </div>

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const DetailPill = ({ children, className }) => {
   if (!children) return null;
@@ -18,7 +19,7 @@ export const DetailPill = ({ children, className }) => {
 
 export const AuthorMessage = ({ message, title = null, author = "turtle" }) => {
   return (
-    <div className="flex gap-3 max-w-[88%]">
+    <div className="flex gap-3 w-fit md:max-w-[88%]">
       <div className="mt-1 flex h-8 w-8 shrink-0">
         <img src="/logo.png" className="h-full object-contain" />
       </div>
@@ -29,7 +30,7 @@ export const AuthorMessage = ({ message, title = null, author = "turtle" }) => {
         {title && (
           <h3 className="text-sm font-semibold text-slate-950 mb-1">{title}</h3>
         )}
-        <p className="text-sm leading-6 text-slate-700">{message}</p>
+        <p className="text-sm md:leading-6 text-slate-700">{message}</p>
       </div>
     </div>
   );
@@ -57,5 +58,18 @@ export const NotificationCard = ({
         </div>
       </div>
     </div>
+  );
+};
+
+export const Logo = () => {
+  return (
+    <Link to="/" className="flex items-center gap-2" aria-label="tourtoise">
+      <img src="/logo.png" className="h-7 md:h-8" alt="" />
+      <span className="min-w-0">
+        <span className="block md:pt-1 truncate text-xl md:text-2xl logo-font font-bold text-primary">
+          tourtoise
+        </span>
+      </span>
+    </Link>
   );
 };

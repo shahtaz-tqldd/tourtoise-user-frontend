@@ -2,12 +2,12 @@ import { setAuthCookie } from "@/hooks/useCookie";
 import { clearTokens, getTokens, setSessionToken } from "@/hooks/useToken";
 import { createSlice } from "@reduxjs/toolkit";
 
-const { accessToken } = getTokens();
+const { accessToken, refreshToken } = getTokens();
 
 const initialState = {
   accessToken: accessToken || null,
   user: null,
-  isAuthenticated: !!accessToken,
+  isAuthenticated: !!(accessToken || refreshToken),
 };
 
 export const authSlice = createSlice({

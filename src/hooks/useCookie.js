@@ -6,6 +6,10 @@ export const setAuthCookie = (auth, name = "tourtoise", path = "/") => {
   try {
     const { exp } = decodeJWT(accessToken);
     const millisecondsUntilExpiration = exp ? exp * 1000 - Date.now() : 0;
+    const safeAccessToken = encodeURIComponent(accessToken);
+    const safeRefreshToken = refreshToken
+      ? encodeURIComponent(refreshToken)
+      : null;
 
     // Set secure defaults
     let cookieFlags = "; SameSite=Strict";
@@ -17,12 +21,12 @@ export const setAuthCookie = (auth, name = "tourtoise", path = "/") => {
 
     // Set access token with appropriate expiration
     const accessExpires = new Date(Date.now() + millisecondsUntilExpiration);
-    document.cookie = `${name}_access=${accessToken}; expires=${accessExpires.toUTCString()}; path=${path}${cookieFlags}`;
+    document.cookie = `${name}_access=${safeAccessToken}; expires=${accessExpires.toUTCString()}; path=${path}${cookieFlags}`;
 
     if (refreshToken) {
       // Set refresh token with longer expiration (15 days)
       const refreshExpires = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
-      document.cookie = `${name}_refresh=${refreshToken}; expires=${refreshExpires.toUTCString()}; path=${path}${cookieFlags}`;
+      document.cookie = `${name}_refresh=${safeRefreshToken}; expires=${refreshExpires.toUTCString()}; path=${path}${cookieFlags}`;
     }
 
     // Store token expiration time in localStorage for quick validation
@@ -38,7 +42,7 @@ export const getAuthCookie = (name = "tourtoise") => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${cookieName}=`);
     if (parts.length === 2) {
-      return parts.pop().split(";").shift();
+      return decodeURIComponent(parts.pop().split(";").shift());
     }
     return null;
   };
@@ -48,7 +52,9 @@ export const getAuthCookie = (name = "tourtoise") => {
   const tokenExp = localStorage.getItem(`${name}_exp`);
 
   // Quick expiration check without decoding token
-  const isExpired = tokenExp && parseInt(tokenExp) * 1000 < Date.now();
+  const tokenExpSeconds = Number(tokenExp);
+  const isExpired =
+    Number.isFinite(tokenExpSeconds) && tokenExpSeconds * 1000 < Date.now();
 
   return {
     accessToken: isExpired ? null : accessToken,

@@ -8,6 +8,7 @@ import {
   PlaneTakeoff,
   Settings,
 } from "lucide-react";
+import { Logo } from "../shared/utils";
 
 const LeftSideMenu = () => {
   const location = useLocation();
@@ -39,12 +40,6 @@ const LeftSideMenu = () => {
       icon: <Bookmark size={18} />,
     },
     {
-      id: 7,
-      label: "Alerts",
-      link: "/alerts",
-      icon: <Bell size={18} />,
-    },
-    {
       id: 8,
       label: "Settings",
       link: "/settings",
@@ -63,15 +58,7 @@ const LeftSideMenu = () => {
   return (
     <div className="hidden md:flex flex-col justify-between w-[300px] p-6 h-screen border-r border-primary/10 sticky top-0">
       <div className="space-y-6">
-        <Link to="/" className="flex items-center gap-3" aria-label="tourtoise">
-          <img src="/logo.png" className="h-8" alt="" />
-          <span className="hidden min-w-0 sm:block">
-            <span className="block pt-1 truncate text-2xl logo-font font-bold text-primary">
-              tourtoise
-            </span>
-          </span>
-        </Link>
-
+        <Logo />
         <nav className="space-y-2">
           {navItems.map((item) => {
             const isActive = isActiveRoute(item.link);

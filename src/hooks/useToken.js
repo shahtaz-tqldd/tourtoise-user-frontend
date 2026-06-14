@@ -7,7 +7,7 @@ export const getTokens = () => {
   const sessionAccessToken = sessionStorage.getItem("tourtoise_access");
   const sessionRefreshToken = sessionStorage.getItem("tourtoise_refresh");
 
-  if (cookieRefreshToken) {
+  if (cookieAccessToken || cookieRefreshToken) {
     return {
       accessToken: cookieAccessToken,
       refreshToken: cookieRefreshToken,
