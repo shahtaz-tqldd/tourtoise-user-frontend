@@ -32,6 +32,7 @@ function FloatingInput({
   onChange,
   onBlur,
   name,
+  rightElement,
   ...props
 }) {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -65,6 +66,7 @@ function FloatingInput({
             }
             dark:border-white/15 dark:bg-slate-950 dark:text-white dark:focus:ring-white/10
             ${isPassword ? "pr-12" : ""}
+            ${rightElement ? "pr-32" : ""}
             ${prefix ? "pl-8" : ""}`,
             inputClassName,
           )}
@@ -102,6 +104,11 @@ function FloatingInput({
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
+        )}
+        {rightElement && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            {rightElement}
+          </div>
         )}
       </div>
 

@@ -55,10 +55,20 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ["trip-list", "trip-detail"],
     }),
 
-    tripDetail: builder.query({
-      query: (trip_slug) => {
+    deleteTrip: builder.mutation({
+      query: ({ trip_id }) => {
         return {
-          url: `/trips/${trip_slug}/detail/`,
+          url: `/trips/${trip_id}/delete/`,
+          method: "DELETE",
+        };
+      },
+      invalidatesTags: ["trip-list", "trip-detail"],
+    }),
+
+    tripDetail: builder.query({
+      query: (trip_id) => {
+        return {
+          url: `/trips/${trip_id}/detail/`,
           method: "GET",
         };
       },
@@ -174,6 +184,7 @@ export const {
   useTripAgentConversationQuery,
   useCreateTripMutation,
   useUpdateTripMutation,
+  useDeleteTripMutation,
   useTripAgentActiveMutation,
   useTripAgentCreateMessageMutation,
   useTripAgentMessageListQuery,

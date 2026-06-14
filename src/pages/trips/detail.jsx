@@ -9,7 +9,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import StatusBadge from "@/components/ui/status";
+import TabMenu from "@/components/ui/tab";
 import { Textarea } from "@/components/ui/textarea";
+import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
 import {
   AlertTriangle,
   Backpack,
@@ -25,6 +27,7 @@ import {
   Eye,
   FileCheck2,
   FileText,
+  Loader2,
   MapPin,
   MessageSquareDot,
   Plane,
@@ -37,228 +40,8 @@ import {
   Upload,
   Users,
 } from "lucide-react";
-import React, { useState } from "react";
-
-const demoTrip = {
-  title: "Amalfi Coast trip plan",
-  status: "draft",
-  overview:
-    "A balanced three-day coastal trip with scenic transfers, compact town walks, ferry views, and flexible evening windows for restaurants and rest.",
-  start_date: "2026-05-27",
-  end_date: "2026-05-29",
-  nights: 2,
-  travelers_count: 1,
-  trip_pace: "balanced",
-  total_budget: 200,
-  budget_currency: "USD",
-  destinations: [
-    {
-      name: "Sorrento",
-      country: "Italy",
-      stay: "Arrival base",
-      image_url:
-        "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=900&q=80",
-      summary:
-        "Convenient starting point for the coast with easy rail, ferry, and road access.",
-    },
-    {
-      name: "Positano",
-      country: "Italy",
-      stay: "Day visit",
-      image_url:
-        "https://images.unsplash.com/photo-1534445867742-43195f401b6c?auto=format&fit=crop&w=900&q=80",
-      summary:
-        "Cliffside village for viewpoints, beach time, boutiques, and a slow lunch.",
-    },
-    {
-      name: "Amalfi",
-      country: "Italy",
-      stay: "Final coastal stop",
-      image_url:
-        "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=900&q=80",
-      summary:
-        "Historic town center, cathedral area, waterfront walks, and ferry return options.",
-    },
-  ],
-  packing_items: [
-    { label: "Passport and travel wallet", packed: true },
-    { label: "Comfortable walking shoes", packed: false },
-    { label: "Light rain jacket", packed: false },
-    { label: "Power bank and Type C charger", packed: true },
-    { label: "Sunscreen and sunglasses", packed: false },
-  ],
-  documents: [
-    { name: "Passport", status: "ready", note: "Valid through 2030" },
-    {
-      name: "Hotel confirmation",
-      status: "missing",
-      note: "Upload after booking",
-    },
-    { name: "Travel insurance", status: "review", note: "Check coverage area" },
-    {
-      name: "Ferry tickets",
-      status: "missing",
-      note: "Book once route is locked",
-    },
-  ],
-  uploaded_documents: [
-    {
-      name: "passport-scan.pdf",
-      type: "Identity",
-      uploaded_at: "May 20, 2026",
-      status: "verified",
-    },
-    {
-      name: "naples-arrival-ticket.pdf",
-      type: "Ticket",
-      uploaded_at: "May 22, 2026",
-      status: "needs review",
-    },
-  ],
-  days: [
-    {
-      day: 1,
-      date: "2026-05-27",
-      title: "Arrive in Naples and settle in Sorrento",
-      roam_route:
-        "Naples Airport -> Sorrento Hotel -> Marina Grande -> Piazza Tasso",
-      attractions: [
-        "Marina Grande",
-        "Piazza Tasso",
-        "Villa Comunale viewpoint",
-      ],
-      activities: [
-        "Airport pickup",
-        "Hotel check-in",
-        "Sunset waterfront walk",
-      ],
-      items: [
-        "Land in Naples and collect luggage",
-        "Private car transfer to Sorrento",
-        "Hotel check-in and waterfront walk",
-        "Dinner near Piazza Tasso",
-      ],
-    },
-    {
-      day: 2,
-      date: "2026-05-28",
-      title: "Positano viewpoints and beach time",
-      roam_route:
-        "Sorrento Port -> Positano Ferry Dock -> Spiaggia Grande -> Viewpoint walk",
-      attractions: [
-        "Spiaggia Grande",
-        "Via Cristoforo Colombo",
-        "Fornillo Beach",
-      ],
-      activities: ["Morning ferry", "Slow lunch", "Photo walk", "Beach break"],
-      items: [
-        "Morning ferry from Sorrento to Positano",
-        "Walk Via Cristoforo Colombo viewpoints",
-        "Lunch reservation near Spiaggia Grande",
-        "Return before late evening crowds",
-      ],
-    },
-    {
-      day: 3,
-      date: "2026-05-29",
-      title: "Amalfi town and return",
-      roam_route: "Positano -> Amalfi Cathedral -> Amalfi waterfront -> Naples",
-      attractions: ["Amalfi Cathedral", "Piazza Duomo", "Amalfi waterfront"],
-      activities: [
-        "Ferry transfer",
-        "Cathedral visit",
-        "Coffee stop",
-        "Return transfer",
-      ],
-      items: [
-        "Transfer to Amalfi by ferry",
-        "Visit Amalfi Cathedral area",
-        "Coffee and souvenir window",
-        "Return to Naples for onward travel",
-      ],
-    },
-  ],
-  route_segments: [
-    {
-      from: "Naples Airport",
-      to: "Sorrento Hotel",
-      mode: "car",
-      duration: "1h 25m",
-      note: "Private transfer after arrival",
-    },
-    {
-      from: "Sorrento Port",
-      to: "Positano",
-      mode: "ferry",
-      duration: "45m",
-      note: "Best views on the right side outbound",
-    },
-    {
-      from: "Positano",
-      to: "Amalfi",
-      mode: "ferry",
-      duration: "25m",
-      note: "Keep buffer for boarding queues",
-    },
-    {
-      from: "Amalfi",
-      to: "Naples",
-      mode: "bus",
-      duration: "2h 10m",
-      note: "Fallback if ferry timing does not match",
-    },
-  ],
-  notes: [
-    {
-      id: 1,
-      title: "Ferry buffer",
-      body: "Keep at least 30 minutes between ferry arrival and restaurant booking.",
-      created_at: "May 22, 2026",
-    },
-    {
-      id: 2,
-      title: "Luggage caution",
-      body: "Avoid carrying large luggage into Positano during the day visit.",
-      created_at: "May 23, 2026",
-    },
-    {
-      id: 3,
-      title: "Weather check",
-      body: "Confirm sea conditions the evening before ferry-heavy days.",
-      created_at: "May 24, 2026",
-    },
-  ],
-  alerts: [
-    {
-      id: 1,
-      title: "Ferry schedules change in rough weather",
-      severity: "medium",
-      body: "Check ferry status the night before Day 2 and Day 3.",
-    },
-    {
-      id: 2,
-      title: "Restaurant booking needed",
-      severity: "low",
-      body: "Reserve lunch near Spiaggia Grande before the route is locked.",
-    },
-  ],
-  chat: [
-    {
-      role: "agent",
-      content:
-        "I drafted this as a balanced pace plan with Sorrento as the base. The biggest open decision is whether to prioritize ferry views or road flexibility.",
-    },
-    {
-      role: "user",
-      content: "Keep ferry where possible, but avoid risky late returns.",
-    },
-    {
-      role: "agent",
-      content:
-        "Noted. I kept ferries for scenic daytime movement and added bus or car fallbacks for the return legs.",
-    },
-  ],
-};
+import React, { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 
 const modeIcons = {
   car: Car,
@@ -283,6 +66,167 @@ const formatMoney = (amount, currency) =>
     currency: currency || "USD",
     maximumFractionDigits: 0,
   }).format(Number(amount || 0));
+
+const unwrapTripDetail = (response) => response?.data || response;
+
+const normalizeTransportMode = (mode = "") => {
+  const normalizedMode = mode.toLowerCase();
+
+  if (normalizedMode.includes("bus")) return "bus";
+  if (normalizedMode.includes("train")) return "train";
+  if (normalizedMode.includes("ferry") || normalizedMode.includes("boat")) {
+    return "ferry";
+  }
+  if (normalizedMode.includes("car") || normalizedMode.includes("transfer")) {
+    return "car";
+  }
+
+  return normalizedMode || "route";
+};
+
+const formatTime = (value) => {
+  if (!value) return "";
+  if (!value.includes(":")) return value;
+
+  const [hour, minute] = value.split(":");
+  const date = new Date();
+  date.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
+
+  return new Intl.DateTimeFormat("en", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+};
+
+const buildChatMessages = (trip) => {
+  const context = trip?.agent_context || {};
+  const messages = [
+    context.preference_qna?.context && {
+      role: "agent",
+      content: context.preference_qna.context,
+    },
+    context.recommendations?.messages?.attractions && {
+      role: "agent",
+      content: context.recommendations.messages.attractions,
+    },
+    context.recommendations?.messages?.activities && {
+      role: "agent",
+      content: context.recommendations.messages.activities,
+    },
+    context.recommendations?.messages?.cuisines && {
+      role: "agent",
+      content: context.recommendations.messages.cuisines,
+    },
+    context.itinerary_design?.message && {
+      role: "agent",
+      content: context.itinerary_design.message,
+    },
+    context.trip_preparation?.message && {
+      role: "agent",
+      content: context.trip_preparation.message,
+    },
+  ].filter(Boolean);
+
+  return messages;
+};
+
+const normalizeTripDetail = (sourceTrip) => {
+  if (!sourceTrip) return null;
+
+  const itinerary = sourceTrip.agent_context?.itinerary_design || {};
+  const preparation = sourceTrip.agent_context?.trip_preparation || {};
+  const preferences = sourceTrip.preferences || {};
+  const routePlan = itinerary.route_plan || [];
+  const preparationDocuments = preparation.required_documents || [];
+  const packingItems = preparation.packing_items || [];
+  const headsUp = preparation.heads_up || [];
+  const days = sourceTrip.days?.length
+    ? sourceTrip.days
+    : itinerary.day_wise_plan || [];
+
+  return {
+    ...sourceTrip,
+    overview:
+      itinerary.summary ||
+      preparation.summary ||
+      sourceTrip.planning_summary ||
+      "No planning summary available yet.",
+    trip_pace: preferences.travel_pace || sourceTrip.traveler_type || "custom",
+    destinations: (sourceTrip.trip_destinations || []).map((destination) => ({
+      name:
+        destination.destination?.name ||
+        destination.name ||
+        destination.title ||
+        sourceTrip.title,
+      country: destination.destination?.country || destination.country || "",
+      stay: destination.stay || destination.role || "Trip destination",
+      image_url:
+        destination.destination?.cover_image ||
+        destination.cover_image ||
+        destination.image_url,
+      summary:
+        destination.destination?.overview ||
+        destination.summary ||
+        sourceTrip.planning_summary,
+    })),
+    packing_items: packingItems.map((item) => ({
+      label: item.item || item.label,
+      packed: item.packed || false,
+      note: item.reason,
+    })),
+    documents: preparationDocuments.map((document) => ({
+      name: document.document || document.name,
+      status: document.required_level || document.status || "required",
+      note: document.reason || document.note,
+    })),
+    uploaded_documents: sourceTrip.uploaded_documents || [],
+    route_segments: routePlan.map((segment) => ({
+      from: segment.from_point,
+      to: segment.to_point,
+      mode: normalizeTransportMode(segment.transport_mode),
+      duration: segment.estimated_duration,
+      note: segment.notes || segment.start_time,
+    })),
+    days: days.map((day) => {
+      const dayItems = day.items || [];
+      const attractions = dayItems
+        .filter((item) => item.item_type === "tour_spot")
+        .map((item) => item.title);
+      const activities = dayItems
+        .filter((item) =>
+          ["activity", "free_time", "transfer"].includes(item.item_type),
+        )
+        .map((item) => item.title);
+
+      return {
+        ...day,
+        roam_route: day.summary,
+        attractions,
+        activities,
+        items: dayItems.map((item) => {
+          const time = formatTime(item.time);
+          return [
+            time,
+            item.title,
+            item.estimated_cost
+              ? `(${formatMoney(item.estimated_cost, sourceTrip.budget_currency)})`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+        }),
+      };
+    }),
+    notes: [],
+    alerts: headsUp.map((alert, index) => ({
+      id: `${alert.category || "alert"}-${index}`,
+      title: alert.title,
+      severity: alert.severity || "medium",
+      body: alert.details,
+    })),
+    chat: buildChatMessages(sourceTrip),
+  };
+};
 
 const SectionHeader = ({ icon, title, description }) => (
   <div className="flex items-start justify-between gap-4">
@@ -324,12 +268,18 @@ const TripOverview = ({ trip }) => (
       <SummaryMetric
         icon={Clock3}
         label="Duration"
-        value={`${trip.nights} nights`}
+        value={
+          trip.nights
+            ? `${trip.nights} nights`
+            : `${trip.duration_days || "-"} days`
+        }
       />
       <SummaryMetric
         icon={Users}
         label="Travelers"
-        value={`${trip.travelers_count} traveler`}
+        value={`${trip.travelers_count || 1} traveler${
+          Number(trip.travelers_count || 1) === 1 ? "" : "s"
+        }`}
       />
       <SummaryMetric
         icon={DollarSign}
@@ -343,7 +293,7 @@ const TripOverview = ({ trip }) => (
   </section>
 );
 
-const DestinationSlider = ({ destinations }) => {
+const DestinationSlider = ({ destinations = [] }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const hasMultipleDestinations = destinations.length > 1;
@@ -422,11 +372,17 @@ const DestinationSlider = ({ destinations }) => {
       >
         <div className="grid gap-0 md:grid-cols-[320px_minmax(0,1fr)]">
           <div className="h-56 p-4">
-            <img
-              src={activeDestination.image_url}
-              alt={activeDestination.name}
-              className="h-full w-full object-cover rounded-lg"
-            />
+            {activeDestination.image_url ? (
+              <img
+                src={activeDestination.image_url}
+                alt={activeDestination.name}
+                className="h-full w-full rounded-lg object-cover"
+              />
+            ) : (
+              <div className="center h-full w-full rounded-lg bg-primary/10 text-primary">
+                <MapPin size={28} />
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col justify-between gap-5 bg-white p-4 pl-2">
@@ -497,7 +453,7 @@ const SummaryMetric = ({ icon, label, value }) => (
   </div>
 );
 
-const PackingSection = ({ items }) => (
+const PackingSection = ({ items = [] }) => (
   <section className="space-y-4 rounded-[28px] border border-slate-200 bg-white p-5">
     <SectionHeader
       icon={Backpack}
@@ -505,20 +461,33 @@ const PackingSection = ({ items }) => (
       description="Track essentials before the trip is locked."
     />
     <div className="grid gap-2">
-      {items.map((item) => (
-        <label
-          key={item.label}
-          className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-3 text-sm font-medium text-slate-700"
-        >
-          <Checkbox defaultChecked={item.packed} />
-          {item.label}
-        </label>
-      ))}
+      {items.length ? (
+        items.map((item) => (
+          <label
+            key={item.label}
+            className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-3 text-sm font-medium text-slate-700"
+          >
+            <Checkbox defaultChecked={item.packed} />
+            <span>
+              {item.label}
+              {item.note && (
+                <span className="mt-1 block text-xs font-normal leading-5 text-slate-500">
+                  {item.note}
+                </span>
+              )}
+            </span>
+          </label>
+        ))
+      ) : (
+        <p className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+          No packing items available yet.
+        </p>
+      )}
     </div>
   </section>
 );
 
-const DocumentsSection = ({ documents, uploadedDocuments }) => (
+const DocumentsSection = ({ documents = [], uploadedDocuments = [] }) => (
   <div className="space-y-5 rounded-[28px] border border-slate-200 bg-white p-5">
     <SectionHeader
       icon={FileCheck2}
@@ -527,22 +496,30 @@ const DocumentsSection = ({ documents, uploadedDocuments }) => (
     />
 
     <div className="grid gap-3 md:grid-cols-2">
-      {documents.map((document) => (
-        <article
-          key={document.name}
-          className="rounded-lg border border-slate-200 p-4"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h3 className="font-semibold text-slate-950">{document.name}</h3>
-              <p className="mt-1 text-sm text-slate-500">{document.note}</p>
+      {documents.length ? (
+        documents.map((document) => (
+          <article
+            key={document.name}
+            className="rounded-lg border border-slate-200 p-4"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="font-semibold text-slate-950">
+                  {document.name}
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">{document.note}</p>
+              </div>
+              <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize text-slate-600">
+                {document.status}
+              </span>
             </div>
-            <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize text-slate-600">
-              {document.status}
-            </span>
-          </div>
-        </article>
-      ))}
+          </article>
+        ))
+      ) : (
+        <p className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 md:col-span-2">
+          No required documents available yet.
+        </p>
+      )}
     </div>
 
     <div className="grid gap-3">
@@ -553,41 +530,53 @@ const DocumentsSection = ({ documents, uploadedDocuments }) => (
           Upload
         </Button>
       </div>
-      {uploadedDocuments.map((document) => (
-        <div
-          key={document.name}
-          className="flex flex-col gap-3 rounded-lg border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-              <FileText size={18} />
+      {uploadedDocuments.length ? (
+        uploadedDocuments.map((document) => (
+          <div
+            key={document.name}
+            className="flex flex-col gap-3 rounded-lg border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                <FileText size={18} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-950">
+                  {document.name}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {document.type} uploaded {document.uploaded_at}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-950">
-                {document.name}
-              </p>
-              <p className="mt-1 text-xs text-slate-500">
-                {document.type} uploaded {document.uploaded_at}
-              </p>
-            </div>
+            <span className="w-fit rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold capitalize text-emerald-700">
+              {document.status}
+            </span>
           </div>
-          <span className="w-fit rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold capitalize text-emerald-700">
-            {document.status}
-          </span>
-        </div>
-      ))}
+        ))
+      ) : (
+        <p className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+          No uploaded documents yet.
+        </p>
+      )}
     </div>
   </div>
 );
 
-const DayPlanSection = ({ days }) => (
+const DayPlanSection = ({ days = [] }) => (
   <div className="space-y-4 rounded-[28px] border border-slate-200 bg-white p-5">
     <SectionHeader
       icon={CalendarDays}
       title="Day wise plan"
       description="A readable daily structure that the agent can continue refining."
     />
-    <DayAccordion days={days} />
+    {days.length ? (
+      <DayAccordion days={days} />
+    ) : (
+      <p className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+        No day-wise plan available yet.
+      </p>
+    )}
   </div>
 );
 
@@ -662,24 +651,28 @@ const DayAccordion = ({ days }) => {
   );
 };
 
-const DetailList = ({ title, items }) => (
+const DetailList = ({ title, items = [] }) => (
   <div className="rounded-lg border border-slate-200 p-3">
     <p className="text-sm font-semibold text-slate-950">{title}</p>
     <div className="mt-3 grid gap-2">
-      {items.map((item) => (
-        <div
-          key={item}
-          className="flex items-start gap-2 text-sm text-slate-600"
-        >
-          <CheckCircle2 size={15} className="mt-0.5 text-primary" />
-          <span>{item}</span>
-        </div>
-      ))}
+      {items.length ? (
+        items.map((item) => (
+          <div
+            key={item}
+            className="flex items-start gap-2 text-sm text-slate-600"
+          >
+            <CheckCircle2 size={15} className="mt-0.5 text-primary" />
+            <span>{item}</span>
+          </div>
+        ))
+      ) : (
+        <p className="text-sm text-slate-500">No items listed.</p>
+      )}
     </div>
   </div>
 );
 
-const RouteSection = ({ segments }) => (
+const RouteSection = ({ segments = [] }) => (
   <div className="space-y-4 rounded-[28px] border border-slate-200 bg-white p-5">
     <SectionHeader
       icon={Route}
@@ -688,44 +681,50 @@ const RouteSection = ({ segments }) => (
     />
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
       <div className="relative space-y-4">
-        {segments.map((segment, index) => {
-          const Icon = modeIcons[segment.mode] || Route;
+        {segments.length ? (
+          segments.map((segment, index) => {
+            const Icon = modeIcons[segment.mode] || Route;
 
-          return (
-            <div
-              key={`${segment.from}-${segment.to}`}
-              className="relative flex gap-4"
-            >
-              {index < segments.length - 1 && (
-                <span className="absolute left-5 top-11 h-[calc(100%+1rem)] w-px bg-slate-300" />
-              )}
-              <div className="z-10 flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-primary ring-1 ring-slate-200">
-                <Icon size={18} />
-              </div>
-              <div className="min-w-0 flex-1 rounded-lg bg-white p-4 ring-1 ring-slate-200">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-950">
-                      {segment.from} to {segment.to}
-                    </p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {segment.note}
-                    </p>
+            return (
+              <div
+                key={`${segment.from}-${segment.to}`}
+                className="relative flex gap-4"
+              >
+                {index < segments.length - 1 && (
+                  <span className="absolute left-5 top-11 h-[calc(100%+1rem)] w-px bg-slate-300" />
+                )}
+                <div className="z-10 flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-primary ring-1 ring-slate-200">
+                  <Icon size={18} />
+                </div>
+                <div className="min-w-0 flex-1 rounded-lg bg-white p-4 ring-1 ring-slate-200">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">
+                        {segment.from} to {segment.to}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {segment.note}
+                      </p>
+                    </div>
+                    <span className="w-fit rounded-md bg-primary/10 px-2.5 py-1 text-xs font-semibold capitalize text-primary">
+                      {segment.mode} - {segment.duration}
+                    </span>
                   </div>
-                  <span className="w-fit rounded-md bg-primary/10 px-2.5 py-1 text-xs font-semibold capitalize text-primary">
-                    {segment.mode} - {segment.duration}
-                  </span>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        ) : (
+          <p className="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
+            No route plan available yet.
+          </p>
+        )}
       </div>
     </div>
   </div>
 );
 
-const NotesAlertsSection = ({ notes, alerts }) => {
+const NotesAlertsSection = ({ notes = [], alerts = [] }) => {
   const [activeNote, setActiveNote] = useState(null);
   const [isCreateNoteOpen, setIsCreateNoteOpen] = useState(false);
 
@@ -749,26 +748,32 @@ const NotesAlertsSection = ({ notes, alerts }) => {
           </Button>
         </div>
         <div className="grid gap-3">
-          {notes.map((note) => (
-            <div
-              key={note.id}
-              className="rounded-xl border border-slate-200 p-3 cursor-pointer hover:bg-slate-50"
-              onClick={() => setActiveNote(note)}
-              aria-label={`View ${note.title}`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-950">
-                    {note.title}
-                  </h3>
-                  <p className="mt-1 line-clamp-1 text-sm text-slate-500">
-                    {note.body}
-                  </p>
+          {notes.length ? (
+            notes.map((note) => (
+              <div
+                key={note.id}
+                className="rounded-xl border border-slate-200 p-3 cursor-pointer hover:bg-slate-50"
+                onClick={() => setActiveNote(note)}
+                aria-label={`View ${note.title}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-950">
+                      {note.title}
+                    </h3>
+                    <p className="mt-1 line-clamp-1 text-sm text-slate-500">
+                      {note.body}
+                    </p>
+                  </div>
                 </div>
+                <p className="mt-2 text-xs text-slate-400">{note.created_at}</p>
               </div>
-              <p className="mt-2 text-xs text-slate-400">{note.created_at}</p>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+              No notes saved yet.
+            </p>
+          )}
         </div>
       </div>
 
@@ -779,22 +784,28 @@ const NotesAlertsSection = ({ notes, alerts }) => {
           description="Important warnings and tasks that need attention."
         />
         <div className="grid gap-3">
-          {alerts.map((alert) => (
-            <article
-              key={alert.id}
-              className="rounded-xl border border-amber-200 bg-amber-50 p-3"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="text-sm font-semibold text-amber-950">
-                  {alert.title}
-                </h3>
-                <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold capitalize text-amber-700">
-                  {alert.severity}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-amber-800">{alert.body}</p>
-            </article>
-          ))}
+          {alerts.length ? (
+            alerts.map((alert) => (
+              <article
+                key={alert.id}
+                className="rounded-xl border border-amber-200 bg-amber-50 p-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-sm font-semibold text-amber-950">
+                    {alert.title}
+                  </h3>
+                  <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold capitalize text-amber-700">
+                    {alert.severity}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-amber-800">{alert.body}</p>
+              </article>
+            ))
+          ) : (
+            <p className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+              No alerts available yet.
+            </p>
+          )}
         </div>
       </div>
 
@@ -843,7 +854,7 @@ const NotesAlertsSection = ({ notes, alerts }) => {
   );
 };
 
-const AgentChat = ({ messages }) => (
+const AgentChat = ({ messages = [] }) => (
   <aside className="lg:sticky lg:top-24 lg:self-start">
     <div className="flex h-[calc(100vh-7rem)] min-h-[560px] flex-col rounded-[28px] border border-slate-200 bg-white">
       <div className="border-b border-slate-200 px-5 py-4">
@@ -863,18 +874,24 @@ const AgentChat = ({ messages }) => (
       </div>
 
       <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto p-4">
-        {messages.map((message, index) => (
-          <div
-            key={`${message.role}-${index}`}
-            className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 ${
-              message.role === "user"
-                ? "ml-auto rounded-tr-md bg-primary text-white"
-                : "rounded-tl-md bg-slate-100 text-slate-700"
-            }`}
-          >
-            {message.content}
-          </div>
-        ))}
+        {messages.length ? (
+          messages.map((message, index) => (
+            <div
+              key={`${message.role}-${index}`}
+              className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 ${
+                message.role === "user"
+                  ? "ml-auto rounded-tr-md bg-primary text-white"
+                  : "rounded-tl-md bg-slate-100 text-slate-700"
+              }`}
+            >
+              {message.content}
+            </div>
+          ))
+        ) : (
+          <p className="rounded-2xl bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-600">
+            No agent messages available yet.
+          </p>
+        )}
       </div>
 
       <form className="border-t border-slate-200 p-4">
@@ -909,22 +926,11 @@ const PlanningTabs = ({ trip }) => {
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200">
-        {planningTabs.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setActiveTab(tab.value)}
-            className={`border-b-2 px-4 py-3 text-sm font-semibold transition ${
-              activeTab === tab.value
-                ? "border-primary text-primary"
-                : "border-transparent text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <TabMenu
+        tabs={planningTabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
       {activeTab === "packing" && <PackingSection items={trip.packing_items} />}
       {activeTab === "documents" && (
@@ -940,7 +946,37 @@ const PlanningTabs = ({ trip }) => {
 };
 
 const TripDetailPage = () => {
-  const trip = demoTrip;
+  const { trip_id } = useParams();
+
+  const { data, isFetching, isError } = useTripDetailQuery(trip_id);
+  const trip = useMemo(
+    () => normalizeTripDetail(unwrapTripDetail(data)),
+    [data],
+  );
+
+  if (isFetching) {
+    return (
+      <div className="center min-h-[420px] text-primary">
+        <Loader2 className="mr-2 animate-spin" size={22} />
+        Loading trip details...
+      </div>
+    );
+  }
+
+  if (isError || !trip) {
+    return (
+      <section className="py-6">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center">
+          <h1 className="text-xl font-bold text-slate-950">
+            Trip details unavailable
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Could not load this trip from the API.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="grid gap-6 py-5 xl:grid-cols-[minmax(0,1fr)_420px]">

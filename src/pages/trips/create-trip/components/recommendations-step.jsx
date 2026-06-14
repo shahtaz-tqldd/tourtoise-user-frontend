@@ -1,14 +1,9 @@
+import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
+import TabMenu from "@/components/ui/tab";
 import { useTripAgentRecommendationsQuery } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
-import {
-  Clock3,
-  MapPin,
-  Sparkles,
-  Star,
-  Utensils,
-  Wallet,
-} from "lucide-react";
+import { Clock3, MapPin, Sparkles, Star, Utensils, Wallet } from "lucide-react";
 import React, { useMemo, useState } from "react";
 
 const categories = [
@@ -177,9 +172,9 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
               </span>
             )}
           </div>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
+          {/* <p className="mt-1 text-sm leading-6 text-slate-600">
             {item.description}
-          </p>
+          </p> */}
         </div>
 
         {item.address && (
@@ -218,16 +213,53 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
   );
 };
 
-const RecommendationsStep = ({ trip }) => {
+const RecommendationTabContent = ({ category, items, message }) => (
+  <div className="space-y-3">
+    {message && <NotificationCard message={message} />}
+
+    <h3 className="text-sm font-semibold text-slate-950">{category.title}</h3>
+
+    {items.length ? (
+      <div className="grid grid-cols-2 gap-3">
+        {items.map((item, index) => (
+          <RecommendationCard
+            key={item.id || item.slug || item.name}
+            item={item}
+            categoryKey={category.key}
+            index={index}
+          />
+        ))}
+      </div>
+    ) : (
+      <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+        {category.empty}
+      </div>
+    )}
+  </div>
+);
+
+const RecommendationsStep = ({ trip, onStepComplete, onStepSelect }) => {
   const tripId = getTripId(trip);
   const [activeCategory, setActiveCategory] = useState("attractions");
   const { data, isLoading, isFetching, isError } =
     useTripAgentRecommendationsQuery(tripId ? { trip_id: tripId } : skipToken);
   const recommendations = useMemo(() => unwrapRecommendations(data), [data]);
+  const currentStep = Number(trip?.current_step);
+  const isItineraryComplete = Number.isFinite(currentStep) && currentStep > 4;
+  const itineraryButtonLabel = isItineraryComplete
+    ? "Show itinerary"
+    : "Start itinerary planning";
+  const tabs = categories.map((category) => ({
+    ...category,
+    value: category.key,
+    count: recommendations?.[category.key]?.length || 0,
+  }));
   const activeCategoryConfig = categories.find(
     (category) => category.key === activeCategory,
   );
   const activeItems = recommendations?.[activeCategory] || [];
+  const activeMessage =
+    recommendations?.messages?.[activeCategoryConfig.messageKey];
 
   if (isLoading || isFetching) {
     return <RecommendationSkeleton />;
@@ -242,84 +274,44 @@ const RecommendationsStep = ({ trip }) => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
-        <div className="flex items-start gap-3">
-          <div className="center mt-0.5 size-8 shrink-0 rounded-full bg-white text-primary">
-            <Sparkles size={17} />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-slate-950">
-              Recommendations for your trip
-            </p>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              {recommendations?.selection_instruction ||
-                "Review the suggested places, activities, and foods for this trip."}
-            </p>
-          </div>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+        <AuthorMessage message="I have recommended you tour spots, activities and local cuisines based on your interests. Feel free to remove items and tell me what I can do more!" />
+
+        <div className="sticky -top-4 z-10 bg-white pt-1">
+          <TabMenu
+            tabs={tabs}
+            activeTab={activeCategory}
+            setActiveTab={setActiveCategory}
+          />
         </div>
-      </div>
 
-      <div className="mt-6 -mb-3 grid grid-cols-3 gap-2 sticky top-0 bg-white z-20 py-3 -translate-y-4">
-        {categories.map((category) => {
-          const count = recommendations?.[category.key]?.length || 0;
-          const isActive = activeCategory === category.key;
+        <RecommendationTabContent
+          category={activeCategoryConfig}
+          items={activeItems}
+          message={activeMessage}
+        />
 
-          return (
-            <button
-              key={category.key}
-              type="button"
-              onClick={() => setActiveCategory(category.key)}
-              className={`rounded-lg border px-3 py-1.5 text-left transition ${
-                isActive
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-primary/40"
-              }`}
-            >
-              <div className="flbx gap-2 text-sm font-semibold">
-                {category.label}
-                <span className="h-7 w-7 bg-white center text-xs rounded-full">{count}</span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {recommendations?.messages?.[activeCategoryConfig.messageKey] && (
-        <p className="rounded-xl bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">
-          {recommendations.messages[activeCategoryConfig.messageKey]}
-        </p>
-      )}
-
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-950">
-          {activeCategoryConfig.title}
-        </h3>
-
-        {activeItems.length ? (
-          <div className="grid grid-cols-2 gap-3">
-            {activeItems.map((item, index) => (
-              <RecommendationCard
-                key={item.id || item.slug || item.name}
-                item={item}
-                categoryKey={activeCategory}
-                index={index}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-            {activeCategoryConfig.empty}
+        {recommendations?.is_discovery_complete && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">
+            Discovery is complete. You can review these suggestions or continue
+            to itinerary planning.
           </div>
         )}
       </div>
-
-      {recommendations?.is_discovery_complete && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">
-          Discovery is complete. You can review these suggestions or continue to
-          itinerary planning.
-        </div>
-      )}
+      <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onStepSelect?.(1)}
+        >
+          View Preferences
+        </Button>
+        <Button type="button" onClick={() => onStepComplete?.()}>
+          <Sparkles size={17} />
+          {itineraryButtonLabel}
+        </Button>
+      </div>
     </div>
   );
 };
