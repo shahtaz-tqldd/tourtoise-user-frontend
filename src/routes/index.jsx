@@ -34,7 +34,7 @@ export const routes = createBrowserRouter([
         element: <TripsPage />,
       },
       {
-        path: "/trips/:trip_slug",
+        path: "/trips/:trip_id",
         element: <TripDetailPage />,
       },
     ],

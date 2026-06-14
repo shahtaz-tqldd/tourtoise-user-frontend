@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { FloatingInput } from "@/components/ui/input";
-import { LocateFixed, Loader2, MapPin } from "lucide-react";
+import { LocateFixed, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -41,7 +41,6 @@ const LocationInput = ({
   placeholder = "Enter pickup or starting address",
   className,
 }) => {
-  const [mode, setMode] = useState("manual");
   const [isLocating, setIsLocating] = useState(false);
 
   const address = value?.[addressField] || "";
@@ -59,7 +58,6 @@ const LocationInput = ({
       return;
     }
 
-    setMode("current");
     setIsLocating(true);
 
     navigator.geolocation.getCurrentPosition(
@@ -103,52 +101,37 @@ const LocationInput = ({
     );
   };
 
-  const useManualInput = () => {
-    setMode("manual");
-    updateLocation({
-      [latitudeField]: "",
-      [longitudeField]: "",
-      [accuracyField]: "",
-    });
-  };
-
   return (
     <div className={className}>
-      <div className="mb-3 flex gap-2">
-        <Button
-          type="button"
-          variant={mode === "current" ? "default" : "outline"}
-          size="sm"
-          onClick={useCurrentLocation}
-          disabled={isLocating}
-          className="flex-1"
-        >
-          {isLocating ? (
-            <Loader2 className="animate-spin" size={15} />
-          ) : (
-            <LocateFixed size={15} />
-          )}
-          Use current
-        </Button>
-        <Button
-          type="button"
-          variant={mode === "manual" ? "default" : "outline"}
-          size="sm"
-          onClick={useManualInput}
-          className="flex-1"
-        >
-          <MapPin size={15} />
-          Manual input
-        </Button>
-      </div>
-
       <FloatingInput
         name="start-location"
         label={label}
         placeholder={placeholder}
         value={address}
         onChange={(event) =>
-          updateLocation({ [addressField]: event.target.value })
+          updateLocation({
+            [addressField]: event.target.value,
+            [latitudeField]: "",
+            [longitudeField]: "",
+            [accuracyField]: "",
+          })
+        }
+        rightElement={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={useCurrentLocation}
+            disabled={isLocating}
+            className="h-8 rounded-lg px-2.5 text-xs"
+          >
+            {isLocating ? (
+              <Loader2 className="animate-spin" size={14} />
+            ) : (
+              <LocateFixed size={14} />
+            )}
+            Use current
+          </Button>
         }
       />
     </div>

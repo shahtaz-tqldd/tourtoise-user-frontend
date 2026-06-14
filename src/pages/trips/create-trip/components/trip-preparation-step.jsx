@@ -1,3 +1,6 @@
+import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
+import { Button } from "@/components/ui/button";
+import TabMenu from "@/components/ui/tab";
 import { useTripPreparationQuery } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import {
@@ -11,9 +14,9 @@ import {
 import React, { useMemo, useState } from "react";
 
 const tabs = [
-  { key: "packing", label: "Packing", icon: Backpack },
-  { key: "documents", label: "Documents", icon: FileText },
-  { key: "heads_up", label: "Heads up", icon: ShieldAlert },
+  { value: "packing", label: "Packing", icon: Backpack },
+  { value: "documents", label: "Documents", icon: FileText },
+  { value: "heads_up", label: "Heads up", icon: ShieldAlert },
 ];
 
 const priorityStyles = {
@@ -63,7 +66,8 @@ const getDocumentName = (document) =>
   document.document_name || document.document;
 
 const getRevisionInstruction = (preparation) =>
-  preparation.revision_instruction || preparation.metadata?.revision_instruction;
+  preparation.revision_instruction ||
+  preparation.metadata?.revision_instruction;
 
 const PrepSkeleton = () => (
   <div className="space-y-4">
@@ -230,7 +234,7 @@ const EmptyState = ({ children }) => (
   </div>
 );
 
-const TripPreparationStep = ({ trip }) => {
+const TripPreparationStep = ({ trip, onStepComplete, onStepSelect }) => {
   const tripId = getTripId(trip);
   const [activeTab, setActiveTab] = useState("packing");
   const { data, isLoading, isFetching, isError } = useTripPreparationQuery(
@@ -256,79 +260,67 @@ const TripPreparationStep = ({ trip }) => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
-        <div className="flex items-start gap-3">
-          <div className="center mt-0.5 size-8 shrink-0 rounded-full bg-white text-primary">
-            <Sparkles size={17} />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-slate-950">
-              {preparation.title || "Documents and packup"}
-            </p>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              {preparation.summary || preparation.message}
-            </p>
-          </div>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+        <AuthorMessage
+          title={preparation.title || "Documents and packup"}
+          message={preparation.summary || preparation.message}
+        />
+
+        <div className="sticky -top-4 z-10 bg-white pt-1">
+          <TabMenu
+            tabs={tabs}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
         </div>
+
+        {activeTab === "packing" &&
+          (packingItems.length ? (
+            <PackingList items={packingItems} />
+          ) : (
+            <EmptyState>No packing items available.</EmptyState>
+          ))}
+
+        {activeTab === "documents" &&
+          (documents.length ? (
+            <DocumentsList items={documents} />
+          ) : (
+            <EmptyState>No documents listed yet.</EmptyState>
+          ))}
+
+        {activeTab === "heads_up" &&
+          (headsUp.length ? (
+            <HeadsUpList items={headsUp} />
+          ) : (
+            <EmptyState>No heads-up notes available.</EmptyState>
+          ))}
+
+        {revisionInstruction && (
+          <NotificationCard message={revisionInstruction} />
+        )}
+
+        {(preparation.is_finalized || preparation.is_preparation_complete) && (
+          <NotificationCard
+            message="Preparation guide is complete. Review your packing list, documents,
+            and important travel notes before locking the plan."
+          />
+        )}
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.key;
-
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
-                isActive
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-primary/40"
-              }`}
-            >
-              <Icon size={15} />
-              {tab.label}
-            </button>
-          );
-        })}
+      <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onStepSelect?.(3)}
+        >
+          View Itenaries
+        </Button>
+        <Button type="button" onClick={() => onStepComplete?.()}>
+          <Sparkles size={17} />
+          See Overview
+        </Button>
       </div>
-
-      {activeTab === "packing" &&
-        (packingItems.length ? (
-          <PackingList items={packingItems} />
-        ) : (
-          <EmptyState>No packing items available.</EmptyState>
-        ))}
-
-      {activeTab === "documents" &&
-        (documents.length ? (
-          <DocumentsList items={documents} />
-        ) : (
-          <EmptyState>No documents listed yet.</EmptyState>
-        ))}
-
-      {activeTab === "heads_up" &&
-        (headsUp.length ? (
-          <HeadsUpList items={headsUp} />
-        ) : (
-          <EmptyState>No heads-up notes available.</EmptyState>
-        ))}
-
-      {revisionInstruction && (
-        <div className="rounded-xl bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">
-          {revisionInstruction}
-        </div>
-      )}
-
-      {(preparation.is_finalized || preparation.is_preparation_complete) && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">
-          Preparation guide is complete. Review your packing list, documents,
-          and important travel notes before locking the plan.
-        </div>
-      )}
     </div>
   );
 };

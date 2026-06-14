@@ -1,3 +1,6 @@
+import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
+import { Button } from "@/components/ui/button";
+import TabMenu from "@/components/ui/tab";
 import { useTripItinerariesQuery } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { CalendarDays, MapPinned, Route, Sparkles, Wallet } from "lucide-react";
@@ -189,7 +192,13 @@ const BudgetRow = ({ label, value, highlight }) => (
   </div>
 );
 
-const ItineraryStep = ({ trip }) => {
+const itineraryTabs = [
+  { value: "days", label: "Days", icon: CalendarDays },
+  { value: "routes", label: "Routes", icon: Route },
+  { value: "budget", label: "Budget", icon: Wallet },
+];
+
+const ItineraryStep = ({ trip, onStepComplete, onStepSelect }) => {
   const tripId = getTripId(trip);
   const [view, setView] = useState("days");
   const { data, isLoading, isFetching, isError } = useTripItinerariesQuery(
@@ -202,6 +211,11 @@ const ItineraryStep = ({ trip }) => {
   const activeDayPlan = days.find((day) => day.day === activeDay) || days[0];
   const activeDayItems = getDayItems(activeDayPlan || {});
   const budget = itinerary.rough_budget || {};
+  const currentStep = Number(trip?.current_step);
+  const isPreparationComplete = Number.isFinite(currentStep) && currentStep > 5;
+  const preparationButtonLabel = isPreparationComplete
+    ? "Show preparations"
+    : "Start preparations";
 
   if (isLoading || isFetching) {
     return <ItinerarySkeleton />;
@@ -224,144 +238,131 @@ const ItineraryStep = ({ trip }) => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
-        <div className="flex items-start gap-3">
-          <div className="center mt-0.5 size-8 shrink-0 rounded-full bg-white text-primary">
-            <Sparkles size={17} />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-slate-950">
-              {itinerary.title || "Day wise itinerary"}
-            </p>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              {itinerary.summary || itinerary.message}
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+        <AuthorMessage
+          title={itinerary.title || "Day wise itinerary"}
+          message={itinerary.summary || itinerary.message}
+        />
 
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { key: "days", label: "Days", icon: CalendarDays },
-          { key: "routes", label: "Routes", icon: Route },
-          { key: "budget", label: "Budget", icon: Wallet },
-        ].map((item) => {
-          const Icon = item.icon;
-          const isActive = view === item.key;
-
-          return (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => setView(item.key)}
-              className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
-                isActive
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-primary/40"
-              }`}
-            >
-              <Icon size={15} />
-              {item.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {view === "days" && activeDayPlan && (
-        <div className="space-y-4">
-          <DayTabs
-            days={days}
-            activeDay={activeDayPlan.day}
-            onChange={setActiveDay}
+        <div className="sticky -top-4 z-10 bg-white pt-1">
+          <TabMenu
+            tabs={itineraryTabs}
+            activeTab={view}
+            setActiveTab={setView}
           />
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <div className="mb-4">
-              <p className="text-xs font-medium uppercase text-slate-500">
-                Day {activeDayPlan.day} · {formatDate(activeDayPlan.date)}
-              </p>
-              <h3 className="mt-1 text-base font-semibold text-slate-950">
-                {activeDayPlan.title}
-              </h3>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                {activeDayPlan.summary}
-              </p>
+        </div>
+
+        {view === "days" && activeDayPlan && (
+          <div className="space-y-4">
+            <DayTabs
+              days={days}
+              activeDay={activeDayPlan.day}
+              onChange={setActiveDay}
+            />
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-4">
+                <p className="text-xs font-medium uppercase text-slate-500">
+                  Day {activeDayPlan.day} · {formatDate(activeDayPlan.date)}
+                </p>
+                <h3 className="mt-1 text-base font-semibold text-slate-950">
+                  {activeDayPlan.title}
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  {activeDayPlan.summary}
+                </p>
+              </div>
+              <div>
+                {activeDayItems.map((item, index) => (
+                  <TimelineItem
+                    key={`${item.time}-${item.title}-${index}`}
+                    item={item}
+                    isLast={index === activeDayItems.length - 1}
+                  />
+                ))}
+              </div>
             </div>
-            <div>
-              {activeDayItems.map((item, index) => (
-                <TimelineItem
-                  key={`${item.time}-${item.title}-${index}`}
-                  item={item}
-                  isLast={index === activeDayItems.length - 1}
+          </div>
+        )}
+
+        {view === "routes" && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
+              <MapPinned size={16} className="text-primary" />
+              Route plan
+            </div>
+            {routePlan.length ? (
+              routePlan.map((route, index) => (
+                <RouteCard
+                  key={`${route.date}-${route.start_time}-${index}`}
+                  route={route}
                 />
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+                No route plan available.
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {view === "routes" && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
-            <MapPinned size={16} className="text-primary" />
-            Route plan
-          </div>
-          {routePlan.length ? (
-            routePlan.map((route, index) => (
-              <RouteCard
-                key={`${route.date}-${route.start_time}-${index}`}
-                route={route}
+        {view === "budget" && (
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
+              <Wallet size={16} className="text-primary" />
+              Rough budget
+            </div>
+            <div className="grid gap-2">
+              <BudgetRow label="Transport" value={budget.transport} />
+              <BudgetRow label="Food" value={budget.food} />
+              <BudgetRow label="Activities" value={budget.activities} />
+              <BudgetRow
+                label="Tickets or entry"
+                value={budget.tickets_or_entry}
               />
-            ))
-          ) : (
-            <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-              No route plan available.
+              <BudgetRow label="Miscellaneous" value={budget.miscellaneous} />
+              <BudgetRow
+                label="Total estimated"
+                value={budget.total_estimated_budget}
+                highlight
+              />
             </div>
-          )}
-        </div>
-      )}
-
-      {view === "budget" && (
-        <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
-            <Wallet size={16} className="text-primary" />
-            Rough budget
+            {budget.budget_note && (
+              <p className="text-sm leading-6 text-slate-600">
+                {budget.budget_note}
+              </p>
+            )}
           </div>
-          <div className="grid gap-2">
-            <BudgetRow label="Transport" value={budget.transport} />
-            <BudgetRow label="Food" value={budget.food} />
-            <BudgetRow label="Activities" value={budget.activities} />
-            <BudgetRow
-              label="Tickets or entry"
-              value={budget.tickets_or_entry}
-            />
-            <BudgetRow label="Miscellaneous" value={budget.miscellaneous} />
-            <BudgetRow
-              label="Total estimated"
-              value={budget.total_estimated_budget}
-              highlight
-            />
+        )}
+
+        {itinerary.revision_instruction && (
+          <div className="rounded-xl bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">
+            {itinerary.revision_instruction}
           </div>
-          {budget.budget_note && (
-            <p className="text-sm leading-6 text-slate-600">
-              {budget.budget_note}
-            </p>
-          )}
-        </div>
-      )}
+        )}
 
-      {itinerary.revision_instruction && (
-        <div className="rounded-xl bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">
-          {itinerary.revision_instruction}
-        </div>
-      )}
+        {(itinerary.is_finalized || itinerary.is_itinerary_complete) && (
+          <NotificationCard
+            message="Itinerary planning is complete. Review the days, routes, and budget
+            before moving forward."
+          />
+        )}
+      </div>
 
-      {(itinerary.is_finalized || itinerary.is_itinerary_complete) && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-800">
-          Itinerary planning is complete. Review the days, routes, and budget
-          before moving forward.
-        </div>
-      )}
+      <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onStepSelect?.(2)}
+        >
+          View Recommendations
+        </Button>
+
+        <Button type="button" onClick={() => onStepComplete?.()}>
+          <Sparkles size={17} />
+          {preparationButtonLabel}
+        </Button>
+      </div>
     </div>
   );
 };

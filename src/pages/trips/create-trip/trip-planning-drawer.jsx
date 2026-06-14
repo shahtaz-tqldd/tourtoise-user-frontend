@@ -6,9 +6,25 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Pencil, Loader2, Sparkles, Plus } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Ellipsis,
+  List,
+  Pencil,
+  Loader2,
+  Sparkles,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import {
   useCreateTripMutation,
+  useDeleteTripMutation,
   useTripDetailQuery,
   useTripListQuery,
 } from "@/features/trips/tripApiSlice";
@@ -17,17 +33,16 @@ import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 // components
-import InitialInfoStep from "./components/initial-info-step";
 import TripPlanInitialInput from "./components/initial-input";
-import UserProfileStep from "./components/user-profile-step";
+import PreferencesStep from "./components/preferences-step";
 import RecommendationsStep from "./components/recommendations-step";
 import ItineraryStep from "./components/itinerary-step";
 import TripPreparationStep from "./components/trip-preparation-step";
-import OverviewLockStep from "./components/overview-lock-step";
+import OverviewStep from "./components/overview-step";
 
 const createInitialForm = () => ({
-  total_budget: "",
-  budget_currency: "USD",
+  budget_tier: "mid",
+  budget_currency: "",
   start_date: "",
   days: "",
   travelers_count: "1",
@@ -50,16 +65,16 @@ const titleTemplates = [
 
 const planningSteps = [
   {
-    key: "initial_info",
-    title: "Initial info",
+    key: "get_started",
+    title: "Get Started",
     description: "Initial info taking",
-    component: InitialInfoStep,
+    component: TripPlanInitialInput,
   },
   {
-    key: "user_profile",
-    title: "Profile",
+    key: "preferences",
+    title: "Preferences",
     description: "User profile and customization",
-    component: UserProfileStep,
+    component: PreferencesStep,
   },
   {
     key: "recommendations",
@@ -74,37 +89,26 @@ const planningSteps = [
     component: ItineraryStep,
   },
   {
-    key: "documents_packup",
+    key: "preparation",
     title: "Preparation",
     description: "Documents and packup",
     component: TripPreparationStep,
   },
   {
-    key: "overview_lock",
+    key: "overview",
     title: "Overview",
     description: "Overview and locking up",
-    component: OverviewLockStep,
+    component: OverviewStep,
   },
 ];
 
 const currentStepAliases = {
-  initial_info_taking: "initial_info",
-  initial_information: "initial_info",
-  user_profile_and_customization: "user_profile",
-  profile: "user_profile",
-  customization: "user_profile",
-  recommendations_for_spots_activities_and_foods: "recommendations",
-  spots_activities_foods: "recommendations",
-  activities_foods: "recommendations",
-  day_wise_itineraries_planning: "itinerary",
-  day_wise_itinerary: "itinerary",
-  itineraries: "itinerary",
-  documents_and_packup: "documents_packup",
-  documents_packup: "documents_packup",
-  packup: "documents_packup",
-  overview_and_locking_up: "overview_lock",
-  overview_locking: "overview_lock",
-  locking_up: "overview_lock",
+  get_started: "get_started",
+  preferences: "preferences",
+  recommendations: "recommendations",
+  itinerary: "itinerary",
+  preparation: "preparation",
+  overview: "overview",
 };
 
 const getDestinationSlug = (destination) =>
@@ -199,6 +203,7 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
   const [createdTrip, setCreatedTrip] = useState(null);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [isStartingNewPlan, setIsStartingNewPlan] = useState(false);
+  const [isViewingPlanList, setIsViewingPlanList] = useState(false);
   const [tripTitle, setTripTitle] = useState(null);
   const [activeStep, setActiveStep] = useState(null);
   const [furthestStep, setFurthestStep] = useState(0);
@@ -208,12 +213,17 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
   );
   const currentTripTitle = tripTitle ?? generatedTripTitle;
 
-  const { data: tripListData, isFetching: isCheckingTrips } = useTripListQuery(
+  const {
+    data: tripListData,
+    isFetching: isCheckingTrips,
+    refetch: refetchTripList,
+  } = useTripListQuery(
     open && destinationSlug
       ? { destination_slug: destinationSlug, page: 1, page_size: 20 }
       : skipToken,
   );
   const [createTrip, { isLoading: isCreatingTrip }] = useCreateTripMutation();
+  const [deleteTrip, { isLoading: isDeletingTrip }] = useDeleteTripMutation();
 
   const destinationTrips = useMemo(
     () => unwrapList(tripListData),
@@ -221,9 +231,12 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
   );
   const previousTrip = destinationTrips[0] || null;
   const shouldLoadSingleTrip =
-    destinationTrips.length === 1 && !isStartingNewPlan && !createdTrip;
+    destinationTrips.length === 1 &&
+    !isStartingNewPlan &&
+    !isViewingPlanList &&
+    !createdTrip;
   const detailSourceTrip =
-    !isCheckingTrips && !createdTrip && !isStartingNewPlan
+    !isCheckingTrips && !createdTrip && !isStartingNewPlan && !isViewingPlanList
       ? selectedTrip || (shouldLoadSingleTrip ? previousTrip : null)
       : null;
   const detailTripId = getTripDetailId(detailSourceTrip);
@@ -236,7 +249,10 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     () => unwrapDetail(tripDetailData),
     [tripDetailData],
   );
-  const activeTrip = createdTrip || detailedTrip || null;
+  const activeTrip =
+    isStartingNewPlan || isViewingPlanList
+      ? null
+      : createdTrip || detailedTrip || null;
   const tripCurrentStep = activeTrip ? getCurrentStepIndex(activeTrip) : 0;
   const displayedStep = activeStep ?? tripCurrentStep;
   const unlockedStep = Math.max(furthestStep, tripCurrentStep, displayedStep);
@@ -259,16 +275,15 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     if (
       !form.start_date ||
       !form.days ||
+      !form.budget_tier ||
       !form.travelers_count ||
       !form.traveler_type ||
-      !form.accommodation_preference ||
       !form.start_location_address
     ) {
       toast.error("Fill in the trip basics before starting the plan.");
       return;
     }
 
-    const totalBudget = Number(form.total_budget);
     const startLatitude = Number(form.start_location_latitude);
     const startLongitude = Number(form.start_location_longitude);
     const startAccuracy = Number(form.start_location_accuracy);
@@ -285,9 +300,15 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
         destination_slugs: [destinationSlug],
         start_date: form.start_date,
         days: Number(form.days),
+        budget_tier: form.budget_tier,
+        ...(form.budget_currency
+          ? { budget_currency: form.budget_currency }
+          : {}),
         traveler_type: form.traveler_type,
         travelers_count: Number(form.travelers_count),
-        accommodation_preference: form.accommodation_preference,
+        ...(form.accommodation_preference
+          ? { accommodation_preference: form.accommodation_preference }
+          : {}),
         start_location_address: form.start_location_address,
         ...(Number.isFinite(startLatitude) && Number.isFinite(startLongitude)
           ? {
@@ -296,12 +317,6 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
               ...(Number.isFinite(startAccuracy)
                 ? { start_location_accuracy: startAccuracy }
                 : {}),
-            }
-          : {}),
-        ...(form.total_budget
-          ? {
-              total_budget: totalBudget,
-              budget_currency: form.budget_currency,
             }
           : {}),
       }).unwrap();
@@ -325,6 +340,19 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     setCreatedTrip(null);
     setSelectedTrip(null);
     setIsStartingNewPlan(true);
+    setIsViewingPlanList(false);
+    setTripTitle(null);
+    setForm(createInitialForm());
+    setActiveStep(null);
+    setFurthestStep(0);
+  };
+
+  const handleViewPlanList = () => {
+    setCreatedTrip(null);
+    setSelectedTrip(null);
+    setIsStartingNewPlan(false);
+    setIsViewingPlanList(true);
+    setTripTitle(null);
     setActiveStep(null);
     setFurthestStep(0);
   };
@@ -335,8 +363,32 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     setCreatedTrip(null);
     setSelectedTrip(trip);
     setIsStartingNewPlan(false);
+    setIsViewingPlanList(false);
+    setTripTitle(getTripTitle(trip, destination));
     setActiveStep(currentStep);
     setFurthestStep(currentStep);
+  };
+
+  const handleDeleteActiveTrip = async () => {
+    if (!activeTripId) {
+      toast.error("No active trip selected.");
+      return;
+    }
+
+    try {
+      await deleteTrip({ trip_id: activeTripId }).unwrap();
+      toast.success("Trip plan deleted.");
+      setCreatedTrip(null);
+      setSelectedTrip(null);
+      setIsStartingNewPlan(false);
+      setIsViewingPlanList(true);
+      setTripTitle(null);
+      setActiveStep(null);
+      setFurthestStep(0);
+      refetchTripList?.();
+    } catch (error) {
+      toast.error(error?.data?.message || "Could not delete this trip plan.");
+    }
   };
 
   const handleStepSelect = (stepIndex) => {
@@ -380,22 +432,33 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
 
   const showTripList =
     !isCheckingTrips &&
-    !isStartingNewPlan &&
-    !selectedTrip &&
-    !createdTrip &&
-    destinationTrips.length > 1;
+    (isViewingPlanList ||
+      (!isStartingNewPlan &&
+        !selectedTrip &&
+        !createdTrip &&
+        destinationTrips.length > 1));
   const showSetupForm =
     !isCheckingTrips &&
     !isFetchingTripDetail &&
+    !isViewingPlanList &&
     (isStartingNewPlan || (!destinationTrips.length && !activeTrip));
-  const showAgent = !!activeTrip && !isFetchingTripDetail;
+  const showAgent =
+    !!activeTrip &&
+    !isStartingNewPlan &&
+    !isViewingPlanList &&
+    !isFetchingTripDetail;
   const showInitialLoader =
-    isCheckingTrips || (!!detailTripId && isFetchingTripDetail);
+    isCheckingTrips ||
+    (!isStartingNewPlan &&
+      !isViewingPlanList &&
+      !!detailTripId &&
+      isFetchingTripDetail);
   const handleOpenChange = (nextOpen) => {
     if (!nextOpen) {
       setCreatedTrip(null);
       setSelectedTrip(null);
       setIsStartingNewPlan(false);
+      setIsViewingPlanList(false);
       setForm(createInitialForm());
       setTripTitle(null);
       setActiveStep(null);
@@ -407,10 +470,10 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
-        side="right"
-        className="w-full max-w-full overflow-hidden bg-white p-0 sm:max-w-[480px]"
+        side="bottom"
+        className="h-dvh w-full max-w-full overflow-hidden p-0 md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:h-screen md:w-screen md:-translate-x-1/2 md:-translate-y-1/2 md:border md:border-slate-200"
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col max-w-xl w-full mx-auto bg-white">
           <SheetHeader className="border-b border-slate-200 pr-12 text-left">
             <SheetTitle className="flex items-center gap-2">
               <Pencil
@@ -425,34 +488,64 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
                 onChange={(event) => setTripTitle(event.target.value)}
                 className="min-w-0 flex-1 bg-transparent p-0 text-xl font-semibold text-slate-950 outline-none"
               />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Trip plan actions"
+                    className="center size-9 shrink-0 rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 translate-x-12"
+                  >
+                    <Ellipsis size={18} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 rounded-xl border-slate-200 p-1 shadow-lg"
+                >
+                  <DropdownMenuItem
+                    className="rounded-lg px-3 py-2"
+                    onSelect={handleStartNewPlan}
+                  >
+                    <Plus size={16} />
+                    Add new plan
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="rounded-lg px-3 py-2"
+                    onSelect={handleViewPlanList}
+                  >
+                    <List size={16} />
+                    See previous plans
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    disabled={!activeTripId || isDeletingTrip}
+                    className="rounded-lg px-3 py-2"
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      handleDeleteActiveTrip();
+                    }}
+                  >
+                    {isDeletingTrip ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                    Delete this plan
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </SheetTitle>
             <div className="flbx pl-6">
               <SheetDescription>
                 {destination?.region}, {destination?.country}
               </SheetDescription>
-              <button
-                className="text-sm flx gap-2"
-                onClick={handleStartNewPlan}
-              >
-                <Plus size={14} />
-                New Plan
-              </button>
             </div>
           </SheetHeader>
 
           {showAgent && (
-            <div className="border-b border-slate-200 px-4 py-3">
-              <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-300"
-                  style={{
-                    width: `${
-                      (displayedStep / (planningSteps.length - 1)) * 100
-                    }%`,
-                  }}
-                />
-              </div>
-              <div className="grid grid-cols-6 gap-1">
+            <div className="border-slate-200 px-4 py-3 border-b">
+              <div className="flex">
                 {planningSteps.map((step, index) => {
                   const isReached = index <= unlockedStep;
                   const isActive = index === displayedStep;
@@ -464,7 +557,7 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
                       type="button"
                       onClick={() => handleStepSelect(index)}
                       disabled={!isReached}
-                      className={`min-w-0 rounded-md px-1 py-1.5 text-center transition ${
+                      className={`min-w-0 flex-1 rounded-md px-1 py-1.5 text-center transition ${
                         isActive
                           ? "bg-primary/10 text-primary"
                           : isComplete
@@ -545,47 +638,69 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
               </Button>
 
               <div className="grid gap-3">
-                {destinationTrips.map((trip) => (
-                  <button
-                    key={
-                      getTripId(trip) ||
-                      trip?.slug ||
-                      getTripTitle(trip, destination)
-                    }
-                    type="button"
-                    onClick={() => handleSelectTrip(trip)}
-                    className="rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-primary/40 hover:bg-primary/5"
-                  >
-                    <p className="text-sm font-semibold text-slate-950">
-                      {getTripTitle(trip, destination)}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      {getTripDates(trip)}
-                    </p>
-                    {trip?.trip_pace && (
-                      <p className="mt-2 text-xs font-medium uppercase text-slate-400">
-                        {trip.trip_pace}
+                {destinationTrips.length ? (
+                  destinationTrips.map((trip) => (
+                    <button
+                      key={
+                        getTripId(trip) ||
+                        trip?.slug ||
+                        getTripTitle(trip, destination)
+                      }
+                      type="button"
+                      onClick={() => handleSelectTrip(trip)}
+                      className="rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-primary/40 hover:bg-primary/5"
+                    >
+                      <p className="text-sm font-semibold text-slate-950">
+                        {getTripTitle(trip, destination)}
                       </p>
-                    )}
-                  </button>
-                ))}
+                      <p className="mt-1 text-xs text-slate-500">
+                        {getTripDates(trip)}
+                      </p>
+                      {trip?.trip_pace && (
+                        <p className="mt-2 text-xs font-medium uppercase text-slate-400">
+                          {trip.trip_pace}
+                        </p>
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+                    No previous plans found for this destination.
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {showSetupForm && !tripDetailError && (
-            <TripPlanInitialInput
-              destination={destination}
-              form={form}
-              onFieldChange={updateField}
-              onSubmit={handleCreateTrip}
-              isSubmitting={isCreatingTrip}
-              getEndDate={getEndDate}
-            />
+            <div className="flex min-h-0 flex-1 flex-col">
+              <TripPlanInitialInput
+                destination={destination}
+                form={form}
+                onFieldChange={updateField}
+                onSubmit={handleCreateTrip}
+                isSubmitting={isCreatingTrip}
+                getEndDate={getEndDate}
+                onClose={() => handleOpenChange(false)}
+              />
+            </div>
           )}
 
           {showAgent && !tripDetailError && (
-            <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto p-4">
+            <div
+              className={
+                [
+                  "get_started",
+                  "preferences",
+                  "recommendations",
+                  "itinerary",
+                  "preparation",
+                  "overview",
+                ].includes(displayedStepConfig.key)
+                  ? "min-h-0 flex-1"
+                  : "custom-scrollbar flex-1 space-y-3 overflow-y-auto p-4"
+              }
+            >
               <ActiveStepComponent
                 key={`${activeTripId}-${displayedStepConfig.key}`}
                 trip={activeTrip}
@@ -593,6 +708,8 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
                 getEndDate={getEndDate}
                 onTripUpdated={handleTripUpdated}
                 onStepComplete={handleStepComplete}
+                onStepSelect={handleStepSelect}
+                onClose={() => handleOpenChange(false)}
               />
             </div>
           )}
