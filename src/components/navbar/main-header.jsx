@@ -110,15 +110,25 @@ const MainHeader = () => {
         </label>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigateToSearch("")}
+            className="inline-flex size-11 items-center justify-center rounded-full border border-primary/10 bg-[#f8faf8] text-primary transition hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 md:hidden"
+            aria-label="Search"
+          >
+            <Search className="size-5" />
+          </button>
           <AlertMenu />
-          <ProfileMenu
-            fullName={fullName}
-            profileImage={profileImage}
-            profilePath={profilePath}
-            email={email}
-            username={username}
-            onLogout={handleLogout}
-          />
+          <div className="hidden md:block">
+            <ProfileMenu
+              fullName={fullName}
+              profileImage={profileImage}
+              profilePath={profilePath}
+              email={email}
+              username={username}
+              onLogout={handleLogout}
+            />
+          </div>
         </div>
       </div>
     </header>
