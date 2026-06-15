@@ -11,6 +11,8 @@ import DestiantionPage from "@/pages/destinations";
 import DestinationDetailPage from "@/pages/destinations/destination-detail";
 import TripsPage from "@/pages/trips";
 import TripDetailPage from "@/pages/trips/detail";
+import AgentChatPage from "@/pages/chat";
+import SavedDestinationPage from "@/pages/destinations/save-destination";
 
 export const routes = createBrowserRouter([
   {
@@ -30,12 +32,20 @@ export const routes = createBrowserRouter([
         element: <DestinationDetailPage />,
       },
       {
+        path: "/destinations/saved-destination",
+        element: <SavedDestinationPage />,
+      },
+      {
         path: "/trips",
         element: <TripsPage />,
       },
       {
         path: "/trips/:trip_id",
         element: <TripDetailPage />,
+      },
+      {
+        path: "/agent-chat",
+        element: <AgentChatPage />,
       },
     ],
   },

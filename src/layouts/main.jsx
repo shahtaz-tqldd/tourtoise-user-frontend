@@ -9,7 +9,7 @@ const MainLayout = () => {
       <LeftSideMenu />
       <div className="mx-auto w-full max-w-7xl">
         <MainHeader />
-        <div className="px-4">
+        <div className="px-4 pb-24 md:pb-0">
           <Outlet />
         </div>
       </div>
