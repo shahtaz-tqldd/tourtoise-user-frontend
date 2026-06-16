@@ -78,12 +78,26 @@ export const Logo = ({ className = "flex" }) => {
   );
 };
 
-export const PageTitle = ({ title, text }) => {
+export const PageTitle = ({ title, text, variant = "dark" }) => {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 className="mt-1 text-3xl font-bold text-slate-800">{title}</h1>
-        <p className="mt-2 max-w-xl text-base text-slate-600 leading-7">{text}</p>
+        <h1
+          className={cn(
+            "mt-1 text-2xl md:text-3xl font-bold",
+            variant === "dark" ? "text-slate-800" : "text-white",
+          )}
+        >
+          {title}
+        </h1>
+        <p
+          className={cn(
+            "mt-2 max-w-xl text-sm md:text-base md:leading-7",
+            variant === "dark" ? "text-slate-600" : "text-slate-200",
+          )}
+        >
+          {text}
+        </p>
       </div>
     </div>
   );

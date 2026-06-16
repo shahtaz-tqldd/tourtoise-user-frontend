@@ -7,9 +7,9 @@ const MainLayout = () => {
   return (
     <main className="bg-primary/5 min-h-screen flex">
       <LeftSideMenu />
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="w-full">
         <MainHeader />
-        <div className="px-4 pb-24 md:pb-0">
+        <div className="mx-auto w-full max-w-7xl px-4 pb-24 md:pb-0">
           <Outlet />
         </div>
       </div>
