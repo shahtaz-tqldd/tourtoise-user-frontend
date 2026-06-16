@@ -34,7 +34,7 @@ import { Link, useParams } from "react-router-dom";
 import TripPlanningDrawer from "@/pages/trips/create-trip/trip-planning-drawer";
 import { formatLabel } from "@/lib/utils";
 import { ActivityCard, AttractionCard, CuisineCard } from "./item-cards";
-import { DetailPill } from "@/components/shared/utils";
+import { DetailPill, PageTitle } from "@/components/shared/utils";
 import { formatMonths } from "@/lib/date-time";
 import DestinationGallery from "./destination-gallery";
 import CardSlider from "@/components/shared/card-slider";
@@ -721,16 +721,11 @@ const DestinationCover = ({ destination }) => {
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white md:p-8">
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div className="max-w-3xl">
-              <h1 className="text-2xl font-bold leading-tight md:text-4xl">
-                {destination.name}
-              </h1>
-              <p className="mt-3 line-clamp-3 max-w-xl text-sm md:text-lg md:leading-7 leading-5 text-white/85">
-                {destination.tagline || destination.overview}
-              </p>
-            </div>
-          </div>
+          <PageTitle
+            title={destination.name}
+            text={destination.tagline}
+            variant="light"
+          />
         </div>
       </div>
       {!!tags.length && (

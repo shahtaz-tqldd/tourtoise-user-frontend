@@ -379,8 +379,8 @@ const TripCard = ({ trip, compact = false }) => {
 
   return (
     <>
-      <article className="group overflow-hidden md:rounded-[28px] md:border border-slate-200 md:bg-white relative">
-        <div className="grid gap-6 md:p-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <article className="group overflow-hidden rounded-2xl md:rounded-[28px] md:border border-slate-200 bg-white relative">
+        <div className="grid gap-6 p-4 md:p-6 lg:grid-cols-[minmax(0,1fr)_300px]">
           {/* Card body */}
           <div className="flex flex-col gap-6 justify-between">
             {/* Badges */}
@@ -451,7 +451,7 @@ const TripCard = ({ trip, compact = false }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 md:px-6 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 md:px-6 py-3">
           <p className="text-xs text-slate-400">
             {trip.updated_at
               ? `Updated ${formatUpdatedAt(trip.updated_at)}`
@@ -475,7 +475,7 @@ const TripCard = ({ trip, compact = false }) => {
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="rounded-full text-slate-500 bg-white/50 backdrop-blur-sm hover:bg-white/75 hover:text-slate-900 absolute top-6 right-6 tr"
+              className="rounded-full text-slate-500 bg-white/50 backdrop-blur-sm hover:bg-white/75 hover:text-slate-900 absolute top-4 md:top-6 right-4 md:right-6 tr"
               aria-label="Trip actions"
             >
               <MoreHorizontal size={18} />

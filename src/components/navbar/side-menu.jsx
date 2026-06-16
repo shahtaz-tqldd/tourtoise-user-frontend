@@ -188,7 +188,7 @@ const LeftSideMenu = () => {
           })}
           <Link
             to={profilePath}
-            className={`relative flex items-center justify-center rounded-2xl py-2 transition ${
+            className={`relative flex items-center justify-center rounded-2xl py-1 transition ${
               isActiveRoute(profilePath)
                 ? "bg-primary/10"
                 : "hover:bg-slate-50"
@@ -199,7 +199,7 @@ const LeftSideMenu = () => {
               <img
                 src={profileImage}
                 alt=""
-                className={`size-10 rounded-full object-cover ring-2 ${
+                className={`size-7 rounded-full object-cover ring-2 ${
                   isActiveRoute(profilePath)
                     ? "ring-primary/30"
                     : "ring-slate-100"
@@ -207,7 +207,7 @@ const LeftSideMenu = () => {
               />
             ) : (
               <span
-                className={`flex size-10 items-center justify-center rounded-full text-xs font-bold ${
+                className={`flex size-7 items-center justify-center rounded-full text-xs font-bold ${
                   isActiveRoute(profilePath)
                     ? "bg-primary text-white"
                     : "bg-primary/15 text-primary"
