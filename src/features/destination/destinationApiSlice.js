@@ -52,9 +52,43 @@ export const destinationApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
+      providesTags: (result, error, destination_slug) => [
+        { type: "destination-detail", id: destination_slug },
+      ],
+    }),
+
+    saveDestination: builder.mutation({
+      query: ({ destination_slug, save }) => {
+        return {
+          url: `/destinations/${destination_slug}/save/`,
+          method: "POST",
+          body: {
+            save: save,
+          },
+        };
+      },
+      invalidatesTags: (result, error, { destination_slug }) => [
+        "destination-list",
+        "saved-destination-list",
+        { type: "destination-detail", id: destination_slug },
+      ],
+    }),
+
+    saveDestinationList: builder.query({
+      query: ({ page = 1, pageSize = 12 } = {}) => {
+        return {
+          url: `/destinations/save/list/?page=${page}&page_size=${pageSize}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["saved-destination-list"],
     }),
   }),
 });
 
-export const { useDestinationListQuery, useDestinationDetailQuery } =
-  destinationApiSlice;
+export const {
+  useDestinationListQuery,
+  useDestinationDetailQuery,
+  useSaveDestinationListQuery,
+  useSaveDestinationMutation,
+} = destinationApiSlice;

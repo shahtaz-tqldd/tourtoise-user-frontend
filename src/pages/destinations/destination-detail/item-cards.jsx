@@ -1,5 +1,5 @@
 import React from "react";
-import { formatLabel } from "@/lib/utils";
+import { formatLabel, getCloudinaryPreviewUrl } from "@/lib/utils";
 import {
   Activity,
   MapPin,
@@ -17,40 +17,38 @@ export const AttractionCard = ({ item, onSelect }) => {
     <button
       type="button"
       onClick={() => onSelect(item)}
-      className="group h-full w-full overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
+      className="relative h-full w-full aspect-[1] group overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:shadow-md focus-visible:ring-2"
     >
-      <div className="relative aspect-[1] bg-slate-100">
-        {item.cover_image ? (
-          <img
-            src={item.cover_image}
-            alt={item.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
-            {fallbackIcon}
-          </div>
+      {item.cover_image ? (
+        <img
+          src={getCloudinaryPreviewUrl(item.cover_image, 360)}
+          alt={item.name}
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
+          {fallbackIcon}
+        </div>
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
+      <div className="absolute left-3 top-3">
+        {item.is_featured && (
+          <DetailPill>
+            <Star
+              size={12}
+              className="mr-1 -translate-y-[1px] inline-block fill-current"
+            />
+            Featured
+          </DetailPill>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
-        <div className="absolute left-3 top-3">
-          {item.is_featured && (
-            <DetailPill>
-              <Star
-                size={12}
-                className="mr-1 -translate-y-[1px] inline-block fill-current"
-              />
-              Featured
-            </DetailPill>
-          )}
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <span className="text-xs uppercase font-medium tracking-wider">
-            {item?.attraction_type}
-          </span>
-          <h3 className="font-semibold text-lg mt-0.5 mb-1 leading-tight truncate">
-            {item.name}
-          </h3>
-        </div>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+        <span className="text-xs uppercase font-medium tracking-wider">
+          {item?.attraction_type}
+        </span>
+        <h3 className="font-semibold text-lg mt-0.5 mb-1 leading-tight truncate">
+          {item.name}
+        </h3>
       </div>
     </button>
   );
@@ -88,7 +86,7 @@ export const ActivityCard = ({ item, onSelect }) => {
       <div className="relative aspect-[5/3] overflow-hidden bg-slate-100">
         {coverImage ? (
           <img
-            src={coverImage}
+            src={getCloudinaryPreviewUrl(coverImage, 360)}
             alt={item.name}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
@@ -146,7 +144,7 @@ export const CuisineCard = ({ item, metaItems, onSelect }) => {
       <div className="relative aspect-[7/6] overflow-hidden bg-slate-100 rounded-xl">
         {item.cover_image ? (
           <img
-            src={item.cover_image}
+            src={getCloudinaryPreviewUrl(item.cover_image, 360)}
             alt={item.name}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />

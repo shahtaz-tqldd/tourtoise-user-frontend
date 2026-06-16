@@ -33,7 +33,7 @@ const MainHeader = () => {
 
   return (
     <header className="w-full sticky top-0 z-40 border-b border-b-primary/10 bg-white/10 backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-2 md:py-3">
+      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-2.5 md:py-3">
         <Logo className="flex md:hidden" />
         <label className="relative hidden min-w-0 max-w-xl flex-1 md:block">
           <span className="sr-only">Search feed</span>
@@ -50,7 +50,7 @@ const MainHeader = () => {
           <button
             type="button"
             onClick={() => navigateToSearch("")}
-            className="size-9 md:size-11 center rounded-full border border-primary/10 bg-[#f8faf8] text-primary transition hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 md:hidden"
+            className="size-9 md:size-11 items-center justify-center rounded-full border border-primary/10 bg-[#f8faf8] text-primary transition hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 flex md:hidden"
             aria-label="Search"
           >
             <Search className="size-4 md:size-5" />

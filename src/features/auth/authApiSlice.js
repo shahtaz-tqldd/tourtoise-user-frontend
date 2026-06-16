@@ -103,17 +103,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
-
-    userAccountList: builder.query({
-      query: ({ page, page_size, search_str }) => {
-        return {
-          url: `/admin/accounts/list/?page=${page}&page_size=${page_size}&search_str=${
-            search_str || ""
-          }`,
-          method: "GET",
-        };
-      },
-    }),
   }),
 });
 
@@ -128,5 +117,4 @@ export const {
   useChangePasswordMutation,
   useRequestResetPasswordMutation,
   useResetPasswordMutation,
-  useUserAccountListQuery,
 } = authApiSlice;

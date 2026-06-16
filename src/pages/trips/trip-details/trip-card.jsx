@@ -22,6 +22,7 @@ import {
   useUpdateTripMutation,
 } from "@/features/trips/tripApiSlice";
 import { formatDate, formatUpdatedAt } from "@/lib/date-time";
+import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import {
   Ban,
   CalendarClock,
@@ -438,7 +439,7 @@ const TripCard = ({ trip, compact = false }) => {
           {/* Cover image — full-width hero strip */}
           {coverImage ? (
             <img
-              src={coverImage}
+              src={getCloudinaryPreviewUrl(coverImage, 360)}
               alt={`${getDestinationLabel(trip)} cover`}
               className="rounded-2xl h-48 w-full object-cover"
               loading="lazy"

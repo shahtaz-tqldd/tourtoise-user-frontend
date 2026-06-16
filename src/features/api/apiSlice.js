@@ -83,6 +83,8 @@ export const apiSlice = createApi({
     "auth",
     "my-profile",
     "destination-list",
+    "destination-detail",
+    "saved-destination-list",
     "trip-list",
     "trip-detail",
     "accommodation-type",
