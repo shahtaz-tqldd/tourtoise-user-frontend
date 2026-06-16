@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Card from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import TabMenu from "@/components/ui/tab";
@@ -7,21 +8,18 @@ import { cn, getCloudinaryPreviewUrl } from "@/lib/utils";
 import {
   Bell,
   Camera,
-  CheckCircle2,
   Compass,
   Eye,
   Globe2,
   KeyRound,
   LockKeyhole,
   MapPin,
-  Mountain,
-  Plane,
   ShieldCheck,
   Smartphone,
-  UserRound,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+import Overview from "./overview";
 
 const demoProfile = {
   name: "Maya Rahman",
@@ -36,22 +34,6 @@ const demoProfile = {
     { label: "Saved", value: "138" },
   ],
 };
-
-const tripPreferences = [
-  { label: "Nature trails", value: "Primary", icon: Mountain },
-  { label: "Local food", value: "High", icon: Compass },
-  { label: "Direct flights", value: "Preferred", icon: Plane },
-  { label: "Walkable stays", value: "Required", icon: MapPin },
-];
-
-const preferenceChips = [
-  "Boutique stays",
-  "Public transport",
-  "Early starts",
-  "Museums",
-  "Hidden cafes",
-  "Light packing",
-];
 
 const alertOptions = [
   {
@@ -86,7 +68,7 @@ const mergeProfile = (account) => ({
 
 const ProfilePage = () => {
   const { username } = useParams();
-  const [activeTab, setActiveTab] = useState("preferences");
+  const [activeTab, setActiveTab] = useState("overview");
 
   const { data, isLoading, isFetching } = usePublicAccountQuery(username);
   const account = data?.data;
@@ -110,20 +92,18 @@ const ProfilePage = () => {
       <div className="min-w-0 space-y-6">
         <TabMenu
           tabs={[
-            { label: "Preferences", value: "preferences", icon: Compass },
-            { label: "Security", value: "security", icon: ShieldCheck },
-            { label: "Alerts", value: "alerts", icon: Bell },
-            { label: "Location", value: "location", icon: Globe2 },
+            { label: "Overview", value: "overview", icon: Compass },
+            { label: "Bucket List", value: "bucket_list", icon: ShieldCheck },
+            { label: "Settings", value: "settings", icon: Bell },
           ]}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
 
         <div>
-          {activeTab === "preferences" && <PreferencesPanel />}
-          {activeTab === "security" && <SecurityPanel />}
-          {activeTab === "alerts" && <AlertsPanel />}
-          {activeTab === "location" && <LocationPanel />}
+          {activeTab === "overview" && <Overview />}
+          {activeTab === "bucket_list" && <SecurityPanel />}
+          {activeTab === "settings" && <AlertsPanel />}
         </div>
       </div>
     </section>
@@ -132,102 +112,54 @@ const ProfilePage = () => {
 
 const ProfileOverview = ({ profile }) => {
   return (
-    <aside className="rounded-2xl md:rounded-[28px] overflow-hidden bg-white p-5 lg:sticky lg:top-5">
-      <div className="bg-primary/10 h-28 -mx-5 -mt-5"></div>
-      <div className="-mt-16 flex flex-col items-center text-center">
-        <div className="relative size-28 shrink-0">
-          <img
-            src={getCloudinaryPreviewUrl(profile.avatar, 240)}
-            alt={profile.name}
-            className="h-full w-full object-cover rounded-3xl"
-          />
-          <button
-            type="button"
-            className="absolute -bottom-2 -right-2 center size-8 rounded-full bg-white text-slate-700 shadow-sm"
-            aria-label="Update profile picture"
-          >
-            <Camera size={16} />
-          </button>
-        </div>
-
-        <h1 className="mt-4 max-w-full truncate text-2xl font-bold text-slate-950">
-          {profile.name}
-        </h1>
-        <span className="truncate text-sm text-primary">
-          @{profile.username}
-        </span>
-        <div className="mt-4 flex max-w-full flex-col items-center gap-1.5 text-sm text-slate-500">
-          <span className="inline-flex max-w-full items-center gap-1.5">
-            <MapPin size={15} />{" "}
-            <span className="truncate">{profile.location}</span>
-          </span>
-        </div>
-        <p className="mt-4 text-sm leading-6 text-slate-600">{profile.bio}</p>
-      </div>
-
-      <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-2">
-        {profile.stats.map((stat) => (
-          <div key={stat.label} className="min-w-0 px-2 py-2 text-center">
-            <p className="text-lg font-bold text-slate-950">{stat.value}</p>
-            <p className="truncate text-xs font-medium text-slate-500">
-              {stat.label}
-            </p>
+    <aside className="lg:sticky lg:top-5">
+      <Card>
+        <div className="bg-primary/10 h-28 -mx-6 -mt-6"></div>
+        <div className="-mt-16 flex flex-col items-center text-center">
+          <div className="relative size-28 shrink-0">
+            <img
+              src={getCloudinaryPreviewUrl(profile.avatar, 240)}
+              alt={profile.name}
+              className="h-full w-full object-cover rounded-3xl"
+            />
+            <button
+              type="button"
+              className="absolute -bottom-2 -right-2 center size-8 rounded-full bg-white text-slate-700 shadow-sm"
+              aria-label="Update profile picture"
+            >
+              <Camera size={16} />
+            </button>
           </div>
-        ))}
-      </div>
+
+          <h1 className="mt-4 max-w-full truncate text-2xl font-bold text-slate-950">
+            {profile.name}
+          </h1>
+          <span className="truncate text-sm text-primary">
+            @{profile.username}
+          </span>
+          <div className="mt-4 flex max-w-full flex-col items-center gap-1.5 text-sm text-slate-500">
+            <span className="inline-flex max-w-full items-center gap-1.5">
+              <MapPin size={15} />{" "}
+              <span className="truncate">{profile.location}</span>
+            </span>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-slate-600">{profile.bio}</p>
+        </div>
+
+        <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-2">
+          {profile.stats.map((stat) => (
+            <div key={stat.label} className="min-w-0 px-2 py-2 text-center">
+              <p className="text-lg font-bold text-slate-950">{stat.value}</p>
+              <p className="truncate text-xs font-medium text-slate-500">
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Card>
     </aside>
   );
 };
-
-const PreferencesPanel = () => (
-  <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
-    <Panel title="Trip Preferences" icon={Compass}>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {tripPreferences.map((preference) => {
-          const Icon = preference.icon;
-
-          return (
-            <div
-              key={preference.label}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="center size-10 rounded-full bg-white text-primary">
-                  <Icon size={18} />
-                </div>
-                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">
-                  {preference.value}
-                </span>
-              </div>
-              <h3 className="mt-4 text-sm font-semibold text-slate-950">
-                {preference.label}
-              </h3>
-            </div>
-          );
-        })}
-      </div>
-    </Panel>
-
-    <Panel title="Travel Style" icon={CheckCircle2}>
-      <div className="flex flex-wrap gap-2">
-        {preferenceChips.map((chip) => (
-          <span
-            key={chip}
-            className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
-          >
-            {chip}
-          </span>
-        ))}
-      </div>
-      <div className="mt-5 rounded-2xl bg-primary/10 p-4">
-        <p className="text-sm font-semibold text-slate-950">Budget range</p>
-        <p className="mt-1 text-sm text-slate-600">
-          Mid-range stays, flexible transport, and local experiences first.
-        </p>
-      </div>
-    </Panel>
-  </div>
-);
 
 const SecurityPanel = () => (
   <div className="grid gap-5 lg:grid-cols-[1fr_360px]">

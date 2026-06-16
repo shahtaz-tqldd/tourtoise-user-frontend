@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
+import React from "react";
 import { Link } from "react-router-dom";
 
 export const DetailPill = ({ children, className }) => {
@@ -102,3 +103,19 @@ export const PageTitle = ({ title, text, variant = "dark" }) => {
     </div>
   );
 };
+
+export const SectionHeader = ({ icon, title, description }) => (
+  <div className="flex items-start justify-between gap-4">
+    <div className="flex gap-3">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        {React.createElement(icon, { size: 18 })}
+      </div>
+      <div>
+        <h2 className="text-lg font-bold text-slate-950">{title}</h2>
+        {description && (
+          <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
+        )}
+      </div>
+    </div>
+  </div>
+);

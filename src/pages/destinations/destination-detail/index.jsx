@@ -44,6 +44,7 @@ import { formatMonths } from "@/lib/date-time";
 import DestinationGallery from "./destination-gallery";
 import CardSlider from "@/components/shared/card-slider";
 import { toast } from "sonner";
+import Card from "@/components/ui/card";
 
 const getFeatureType = (item) =>
   formatLabel(
@@ -78,16 +79,16 @@ function useMediaQuery(query) {
 
 function InfoSection({ title, children }) {
   return (
-    <section className="rounded-[28px] bg-white p-5">
+    <Card>
       <h2 className="text-lg font-bold text-slate-950">{title}</h2>
       <div className="mt-2 text-slate-600">{children}</div>
-    </section>
+    </Card>
   );
 }
 
 function TripBasicsCard({ destination, bestTime, languages, setPlanningOpen }) {
   return (
-    <div className="rounded-[24px] bg-white p-4 md:rounded-[28px] md:p-6">
+    <Card>
       <div className="flbx">
         <h2 className="text-lg font-bold text-slate-950">Trip Basics</h2>
         <Button
@@ -138,7 +139,7 @@ function TripBasicsCard({ destination, bestTime, languages, setPlanningOpen }) {
           </p>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
 

@@ -1,4 +1,6 @@
+import { SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
+import Card from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -228,24 +230,8 @@ const normalizeTripDetail = (sourceTrip) => {
   };
 };
 
-const SectionHeader = ({ icon, title, description }) => (
-  <div className="flex items-start justify-between gap-4">
-    <div className="flex gap-3">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-        {React.createElement(icon, { size: 18 })}
-      </div>
-      <div>
-        <h2 className="text-lg font-bold text-slate-950">{title}</h2>
-        {description && (
-          <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
-        )}
-      </div>
-    </div>
-  </div>
-);
-
 const TripOverview = ({ trip }) => (
-  <section className="rounded-[28px] border border-slate-200 bg-white p-6">
+  <Card>
     <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
       <div className="max-w-3xl">
         <div className="flex flex-wrap items-center gap-2">
@@ -290,7 +276,7 @@ const TripOverview = ({ trip }) => (
     <hr className="my-6" />
 
     <DestinationSlider destinations={trip.destinations} />
-  </section>
+  </Card>
 );
 
 const DestinationSlider = ({ destinations = [] }) => {
@@ -454,7 +440,7 @@ const SummaryMetric = ({ icon, label, value }) => (
 );
 
 const PackingSection = ({ items = [] }) => (
-  <section className="space-y-4 rounded-[28px] border border-slate-200 bg-white p-5">
+  <Card className="space-y-5">
     <SectionHeader
       icon={Backpack}
       title="Packing"
@@ -484,11 +470,11 @@ const PackingSection = ({ items = [] }) => (
         </p>
       )}
     </div>
-  </section>
+  </Card>
 );
 
 const DocumentsSection = ({ documents = [], uploadedDocuments = [] }) => (
-  <div className="space-y-5 rounded-[28px] border border-slate-200 bg-white p-5">
+  <Card className="space-y-5">
     <SectionHeader
       icon={FileCheck2}
       title="Documents"
@@ -560,11 +546,11 @@ const DocumentsSection = ({ documents = [], uploadedDocuments = [] }) => (
         </p>
       )}
     </div>
-  </div>
+  </Card>
 );
 
 const DayPlanSection = ({ days = [] }) => (
-  <div className="space-y-4 rounded-[28px] border border-slate-200 bg-white p-5">
+  <Card className="space-y-5">
     <SectionHeader
       icon={CalendarDays}
       title="Day wise plan"
@@ -577,7 +563,7 @@ const DayPlanSection = ({ days = [] }) => (
         No day-wise plan available yet.
       </p>
     )}
-  </div>
+  </Card>
 );
 
 const DayAccordion = ({ days }) => {
@@ -673,7 +659,7 @@ const DetailList = ({ title, items = [] }) => (
 );
 
 const RouteSection = ({ segments = [] }) => (
-  <div className="space-y-4 rounded-[28px] border border-slate-200 bg-white p-5">
+  <Card className="space-y-5">
     <SectionHeader
       icon={Route}
       title="Route"
@@ -721,7 +707,7 @@ const RouteSection = ({ segments = [] }) => (
         )}
       </div>
     </div>
-  </div>
+  </Card>
 );
 
 const NotesAlertsSection = ({ notes = [], alerts = [] }) => {
@@ -730,7 +716,7 @@ const NotesAlertsSection = ({ notes = [], alerts = [] }) => {
 
   return (
     <section className="grid gap-4 md:grid-cols-2">
-      <div className="space-y-4 rounded-[28px] border border-slate-200 bg-white p-5">
+      <Card className="space-y-5">
         <SectionHeader
           icon={ShieldCheck}
           title="Notes"
@@ -775,9 +761,9 @@ const NotesAlertsSection = ({ notes = [], alerts = [] }) => {
             </p>
           )}
         </div>
-      </div>
+      </Card>
 
-      <div className="space-y-4 rounded-[28px] border border-slate-200 bg-white p-5">
+      <Card className="space-y-5">
         <SectionHeader
           icon={AlertTriangle}
           title="Alerts"
@@ -807,7 +793,7 @@ const NotesAlertsSection = ({ notes = [], alerts = [] }) => {
             </p>
           )}
         </div>
-      </div>
+      </Card>
 
       <Dialog
         open={!!activeNote}
@@ -856,8 +842,8 @@ const NotesAlertsSection = ({ notes = [], alerts = [] }) => {
 
 const AgentChat = ({ messages = [] }) => (
   <aside className="lg:sticky lg:top-24 lg:self-start">
-    <div className="flex h-[calc(100vh-7rem)] min-h-[560px] flex-col rounded-[28px] border border-slate-200 bg-white">
-      <div className="border-b border-slate-200 px-5 py-4">
+    <Card className="h-[calc(100vh-7rem)] min-h-[560px] flex flex-col">
+      <div className="border-b border-slate-200 pb-4">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <MessageSquareDot size={18} />
@@ -873,7 +859,7 @@ const AgentChat = ({ messages = [] }) => (
         </div>
       </div>
 
-      <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto p-4">
+      <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto py-4">
         {messages.length ? (
           messages.map((message, index) => (
             <div
@@ -894,7 +880,7 @@ const AgentChat = ({ messages = [] }) => (
         )}
       </div>
 
-      <form className="border-t border-slate-200 p-4">
+      <form className="border-t border-slate-200 pt-4">
         <Textarea
           placeholder="Ask to adjust dates, route, documents, or packing..."
           className="min-h-24 resize-none rounded-xl border-slate-200 bg-slate-50 text-sm"
@@ -910,7 +896,7 @@ const AgentChat = ({ messages = [] }) => (
           </Button>
         </div>
       </form>
-    </div>
+    </Card>
   </aside>
 );
 
@@ -965,16 +951,14 @@ const TripDetailPage = () => {
 
   if (isError || !trip) {
     return (
-      <section className="py-6">
-        <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-slate-950">
-            Trip details unavailable
-          </h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Could not load this trip from the API.
-          </p>
-        </div>
-      </section>
+      <Card className="text-center min-h-60">
+        <h1 className="text-xl font-bold text-slate-950">
+          Trip details unavailable
+        </h1>
+        <p className="mt-2 text-sm text-slate-500">
+          Could not load this trip from the API.
+        </p>
+      </Card>
     );
   }
 
