@@ -4,22 +4,9 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
-
-const getCloudinaryPreviewUrl = (url, width = 300) => {
-  if (!url?.includes("res.cloudinary.com") || !url.includes("/image/upload/")) {
-    return url;
-  }
-
-  const uploadPath = "/image/upload/";
-  const [baseUrl, imagePath] = url.split(uploadPath);
-
-  if (!baseUrl || !imagePath) return url;
-  if (imagePath.startsWith("c_scale,")) return url;
-
-  return `${baseUrl}${uploadPath}c_scale,w_${width}/${imagePath}`;
-};
 
 const DestinationGallery = ({ destination }) => {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -72,7 +59,7 @@ const DestinationGallery = ({ destination }) => {
               className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 text-left outline-none ring-primary/30 focus-visible:ring-2"
             >
               <img
-                src={image.previewUrl}
+                src={getCloudinaryPreviewUrl(image.previewUrl, 96)}
                 alt={
                   image.caption || `${destination.name} gallery ${index + 1}`
                 }

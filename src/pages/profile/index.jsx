@@ -3,6 +3,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import TabMenu from "@/components/ui/tab";
 import { usePublicAccountQuery } from "@/features/auth/authApiSlice";
+import { cn, getCloudinaryPreviewUrl } from "@/lib/utils";
 import {
   Bell,
   Camera,
@@ -136,7 +137,7 @@ const ProfileOverview = ({ profile }) => {
       <div className="-mt-16 flex flex-col items-center text-center">
         <div className="relative size-28 shrink-0">
           <img
-            src={profile.avatar}
+            src={getCloudinaryPreviewUrl(profile.avatar, 240)}
             alt={profile.name}
             className="h-full w-full object-cover rounded-3xl"
           />
@@ -152,7 +153,9 @@ const ProfileOverview = ({ profile }) => {
         <h1 className="mt-4 max-w-full truncate text-2xl font-bold text-slate-950">
           {profile.name}
         </h1>
-        <span className="truncate text-sm text-primary">@{profile.username}</span>
+        <span className="truncate text-sm text-primary">
+          @{profile.username}
+        </span>
         <div className="mt-4 flex max-w-full flex-col items-center gap-1.5 text-sm text-slate-500">
           <span className="inline-flex max-w-full items-center gap-1.5">
             <MapPin size={15} />{" "}
@@ -251,7 +254,7 @@ const SecurityPanel = () => (
       </Button>
     </Panel>
 
-    <Panel title="Two-Factor Auth" icon={ShieldCheck}>
+    <Panel className="space-y-4" title="Two-Factor Auth" icon={ShieldCheck}>
       <SettingRow
         icon={Smartphone}
         title="Authenticator app"
@@ -309,11 +312,16 @@ const LocationPanel = () => (
   </div>
 );
 
-const Panel = ({ title, icon, children }) => {
+const Panel = ({ title, icon, children, className }) => {
   const Icon = icon;
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div
+      className={cn(
+        "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm",
+        className,
+      )}
+    >
       <div className="mb-5 flex items-center gap-3">
         <div className="center size-10 rounded-full bg-primary/10 text-primary">
           <Icon size={18} />
@@ -329,7 +337,7 @@ const SettingRow = ({ icon, title, description, checked = false }) => {
   const Icon = icon;
 
   return (
-    <label className="flex h-full cursor-pointer gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <label className="flex cursor-pointer gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
       <div className="center size-10 shrink-0 rounded-full bg-white text-primary">
         <Icon size={18} />
       </div>

@@ -10,7 +10,7 @@ import {
   NoteIcon,
   SaveIcon,
 } from "@/assets/icons/svg-icons";
-import { getInitials } from "@/lib/utils";
+import { getCloudinaryPreviewUrl, getInitials } from "@/lib/utils";
 
 const PRIMARY_COLOR = "#009966";
 const DEFAULT_ICON_COLOR = "#1C274C";
@@ -78,7 +78,11 @@ const LeftSideMenu = () => {
 
   const isActiveRoute = (link) => {
     if (link === "/") {
-      return pathname === "/";
+      return (
+        pathname === "/" ||
+        (pathname.startsWith("/destinations/") &&
+          !pathname.startsWith("/destinations/saved-destination"))
+      );
     }
 
     return pathname === link || pathname.startsWith(`${link}/`);
@@ -92,69 +96,69 @@ const LeftSideMenu = () => {
             <Logo />
           </div>
 
-        <div className="mt-7 space-y-2">
-          <p className="px-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-            Menu
-          </p>
-          <nav className="space-y-1.5">
-            {navItems.map((item) => {
-              const isActive = isActiveRoute(item.link);
-              const Icon = item.icon;
+          <div className="mt-7 space-y-2">
+            <p className="px-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+              Menu
+            </p>
+            <nav className="space-y-1.5">
+              {navItems.map((item) => {
+                const isActive = isActiveRoute(item.link);
+                const Icon = item.icon;
 
-              return (
-                <Link
-                  key={item.id}
-                  to={item.link}
-                  className={`group relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-all ${
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-                  }`}
-                >
-                  {isActive && (
-                    <span className="absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
-                  )}
-                  <span
-                    className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition ${
+                return (
+                  <Link
+                    key={item.id}
+                    to={item.link}
+                    className={`group relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-all ${
                       isActive
-                        ? "bg-white shadow-sm ring-1 ring-primary/10"
-                        : "bg-slate-50 group-hover:bg-white"
+                        ? "bg-primary/10 text-primary"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
                     }`}
                   >
-                    <Icon isActive={isActive} />
-                  </span>
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
+                    )}
+                    <span
+                      className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition ${
+                        isActive
+                          ? "bg-white shadow-sm ring-1 ring-primary/10"
+                          : "bg-slate-50 group-hover:bg-white"
+                      }`}
+                    >
+                      <Icon isActive={isActive} />
+                    </span>
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
-        <Link
-          to={profilePath}
-          className="mt-auto flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 transition hover:border-primary/25 hover:bg-primary/5"
-        >
-          {profileImage ? (
-            <img
-              src={profileImage}
-              alt=""
-              className="size-11 rounded-full object-cover ring-2 ring-white"
-            />
-          ) : (
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary ring-2 ring-white">
-              {getInitials(fullName)}
+          <Link
+            to={profilePath}
+            className="mt-auto flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 transition hover:border-primary/25 hover:bg-primary/5"
+          >
+            {profileImage ? (
+              <img
+                src={getCloudinaryPreviewUrl(profileImage, 50)}
+                alt=""
+                className="size-11 rounded-full object-cover ring-2 ring-white"
+              />
+            ) : (
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary ring-2 ring-white">
+                {getInitials(fullName)}
+              </span>
+            )}
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold text-slate-950">
+                {fullName}
+              </span>
+              <span className="block truncate text-xs text-slate-500">
+                {username ? `@${username}` : email}
+              </span>
             </span>
-          )}
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold text-slate-950">
-              {fullName}
-            </span>
-            <span className="block truncate text-xs text-slate-500">
-              {username ? `@${username}` : email}
-            </span>
-          </span>
-          <ChevronRight className="size-4 shrink-0 text-slate-400" />
-        </Link>
+            <ChevronRight className="size-4 shrink-0 text-slate-400" />
+          </Link>
         </div>
       </aside>
 
@@ -189,15 +193,13 @@ const LeftSideMenu = () => {
           <Link
             to={profilePath}
             className={`relative flex items-center justify-center rounded-2xl py-1 transition ${
-              isActiveRoute(profilePath)
-                ? "bg-primary/10"
-                : "hover:bg-slate-50"
+              isActiveRoute(profilePath) ? "bg-primary/10" : "hover:bg-slate-50"
             }`}
             aria-label="Profile"
           >
             {profileImage ? (
               <img
-                src={profileImage}
+                src={getCloudinaryPreviewUrl(profileImage, 36)}
                 alt=""
                 className={`size-7 rounded-full object-cover ring-2 ${
                   isActiveRoute(profilePath)

@@ -11,12 +11,16 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useDestinationDetailQuery } from "@/features/destination/destinationApiSlice";
+import {
+  useDestinationDetailQuery,
+  useSaveDestinationMutation,
+} from "@/features/destination/destinationApiSlice";
 import { demoDestinations } from "@/pages/destinations/demo-data";
 import { skipToken } from "@reduxjs/toolkit/query";
 import {
   Activity,
   ArrowLeft,
+  Bookmark,
   CalendarDays,
   Clock,
   Languages,
@@ -33,11 +37,13 @@ import { Link, useParams } from "react-router-dom";
 
 import TripPlanningDrawer from "@/pages/trips/create-trip/trip-planning-drawer";
 import { formatLabel } from "@/lib/utils";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { ActivityCard, AttractionCard, CuisineCard } from "./item-cards";
 import { DetailPill, PageTitle } from "@/components/shared/utils";
 import { formatMonths } from "@/lib/date-time";
 import DestinationGallery from "./destination-gallery";
 import CardSlider from "@/components/shared/card-slider";
+import { toast } from "sonner";
 
 const getFeatureType = (item) =>
   formatLabel(
@@ -386,7 +392,10 @@ const DestinationDetailPage = () => {
   const { data, isFetching } = useDestinationDetailQuery(
     demoDestination ? skipToken : destination_id,
   );
+  const [saveDestination, { isLoading: isSavingDestination }] =
+    useSaveDestinationMutation();
   const destination = demoDestination || data?.data || data;
+  const isSaved = destination?.is_saved;
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -434,6 +443,31 @@ const DestinationDetailPage = () => {
     }
 
     setPlanningOpen(false);
+  };
+
+  const handleSaveDestination = async () => {
+    if (!destination?.slug) {
+      toast.error("Destination slug is missing.");
+      return;
+    }
+
+    const nextSavedState = !isSaved;
+
+    try {
+      await saveDestination({
+        destination_slug: destination.slug,
+        save: nextSavedState,
+      }).unwrap();
+    } catch (error) {
+      toast.error(
+        getApiErrorMessage(
+          error,
+          nextSavedState
+            ? "Could not save this destination."
+            : "Could not unsave this destination.",
+        ),
+      );
+    }
   };
 
   if (isFetching) {
@@ -669,13 +703,31 @@ const DestinationDetailPage = () => {
                 <p>No cultural tips available.</p>
               )}
             </InfoSection>
-            <Button
-              className="hidden h-12 w-full rounded-full xl:flex"
-              onClick={() => handlePlanningOpenChange(true)}
-            >
-              <Sparkles size={18} />
-              Start Planning your Trip
-            </Button>
+            <div className="space-y-3">
+              <Button
+                className="hidden h-12 w-full rounded-full xl:flex"
+                onClick={() => handlePlanningOpenChange(true)}
+              >
+                <Sparkles size={18} />
+                Start Planning your Trip
+              </Button>
+              <Button
+                variant="outline"
+                className="hidden h-12 w-full rounded-full xl:flex"
+                disabled={isSavingDestination}
+                onClick={handleSaveDestination}
+              >
+                <Bookmark
+                  size={18}
+                  className={isSaved ? "fill-primary text-primary" : ""}
+                />
+                {isSavingDestination
+                  ? "Saving..."
+                  : isSaved
+                    ? "Saved Destination"
+                    : "Save Destination"}
+              </Button>
+            </div>
           </aside>
         </div>
       </section>

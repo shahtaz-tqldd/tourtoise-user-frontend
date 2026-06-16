@@ -2,6 +2,7 @@ import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import TabMenu from "@/components/ui/tab";
 import { useTripAgentRecommendationsQuery } from "@/features/trips/tripApiSlice";
+import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Clock3, MapPin, Sparkles, Star, Utensils, Wallet } from "lucide-react";
 import React, { useMemo, useState } from "react";
@@ -142,7 +143,7 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
       <div className="relative h-36 bg-slate-100">
         {image ? (
           <img
-            src={image}
+            src={getCloudinaryPreviewUrl(image, 360)}
             alt={item.name}
             className="h-full w-full object-cover"
             loading="lazy"
