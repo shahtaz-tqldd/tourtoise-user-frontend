@@ -1,25 +1,13 @@
-import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import TabMenu from "@/components/ui/tab";
 import { usePublicAccountQuery } from "@/features/auth/authApiSlice";
-import { cn, getCloudinaryPreviewUrl } from "@/lib/utils";
-import {
-  Bell,
-  Camera,
-  Compass,
-  Eye,
-  Globe2,
-  KeyRound,
-  LockKeyhole,
-  MapPin,
-  ShieldCheck,
-  Smartphone,
-} from "lucide-react";
+import { getCloudinaryPreviewUrl } from "@/lib/utils";
+import { Camera, Compass, MapPin, NotebookTabs, Settings } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import Overview from "./overview";
+import ProfileSettings from "./settings";
+import TripProfile from "./trip-profile";
 
 const demoProfile = {
   name: "Maya Rahman",
@@ -34,27 +22,6 @@ const demoProfile = {
     { label: "Saved", value: "138" },
   ],
 };
-
-const alertOptions = [
-  {
-    label: "Trip reminders",
-    description: "Packing, check-in, and visa tasks.",
-  },
-  { label: "Price alerts", description: "Flight and hotel price movement." },
-  { label: "Safety alerts", description: "Weather and route advisories." },
-];
-
-const locationOptions = [
-  {
-    label: "Share live location during trips",
-    description:
-      "Trusted companions can view your route while a trip is active.",
-  },
-  {
-    label: "Use location for nearby suggestions",
-    description: "Show restaurants, stations, and attractions around you.",
-  },
-];
 
 const mergeProfile = (account) => ({
   ...demoProfile,
@@ -93,17 +60,21 @@ const ProfilePage = () => {
         <TabMenu
           tabs={[
             { label: "Overview", value: "overview", icon: Compass },
-            { label: "Bucket List", value: "bucket_list", icon: ShieldCheck },
-            { label: "Settings", value: "settings", icon: Bell },
+            {
+              label: "Trip Diaries",
+              value: "trip_profile",
+              icon: NotebookTabs,
+            },
+            { label: "Settings", value: "settings", icon: Settings },
           ]}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
 
         <div>
-          {activeTab === "overview" && <Overview />}
-          {activeTab === "bucket_list" && <SecurityPanel />}
-          {activeTab === "settings" && <AlertsPanel />}
+          {activeTab === "overview" && <Overview profile={profile} />}
+          {activeTab === "trip_profile" && <TripProfile />}
+          {activeTab === "settings" && <ProfileSettings />}
         </div>
       </div>
     </section>
@@ -160,136 +131,6 @@ const ProfileOverview = ({ profile }) => {
     </aside>
   );
 };
-
-const SecurityPanel = () => (
-  <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
-    <Panel title="Update Password" icon={KeyRound}>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Input
-          type="password"
-          placeholder="Current password"
-          className="h-12 rounded-xl bg-slate-50"
-        />
-        <Input
-          type="password"
-          placeholder="New password"
-          className="h-12 rounded-xl bg-slate-50"
-        />
-        <Input
-          type="password"
-          placeholder="Confirm password"
-          className="h-12 rounded-xl bg-slate-50"
-        />
-      </div>
-      <Button className="mt-5">
-        <LockKeyhole size={16} /> Save Password
-      </Button>
-    </Panel>
-
-    <Panel className="space-y-4" title="Two-Factor Auth" icon={ShieldCheck}>
-      <SettingRow
-        icon={Smartphone}
-        title="Authenticator app"
-        description="Require a six digit code when signing in."
-        checked
-      />
-      <SettingRow
-        icon={Eye}
-        title="Remember trusted devices"
-        description="Skip verification for devices you use often."
-      />
-    </Panel>
-  </div>
-);
-
-const AlertsPanel = () => (
-  <Panel title="Alert Settings" icon={Bell}>
-    <div className="grid gap-3 md:grid-cols-3">
-      {alertOptions.map((option, index) => (
-        <SettingRow
-          key={option.label}
-          icon={Bell}
-          title={option.label}
-          description={option.description}
-          checked={index !== 1}
-        />
-      ))}
-    </div>
-  </Panel>
-);
-
-const LocationPanel = () => (
-  <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
-    <Panel title="Location Sharing" icon={MapPin}>
-      <div className="grid gap-3 md:grid-cols-2">
-        {locationOptions.map((option, index) => (
-          <SettingRow
-            key={option.label}
-            icon={Globe2}
-            title={option.label}
-            description={option.description}
-            checked={index === 1}
-          />
-        ))}
-      </div>
-    </Panel>
-
-    <Panel title="Visibility" icon={Eye}>
-      <div className="space-y-3">
-        <PrivacyOption label="Public profile" checked />
-        <PrivacyOption label="Show visited countries" checked />
-        <PrivacyOption label="Show upcoming trip dates" />
-      </div>
-    </Panel>
-  </div>
-);
-
-const Panel = ({ title, icon, children, className }) => {
-  const Icon = icon;
-
-  return (
-    <div
-      className={cn(
-        "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm",
-        className,
-      )}
-    >
-      <div className="mb-5 flex items-center gap-3">
-        <div className="center size-10 rounded-full bg-primary/10 text-primary">
-          <Icon size={18} />
-        </div>
-        <h2 className="text-base font-bold text-slate-950">{title}</h2>
-      </div>
-      {children}
-    </div>
-  );
-};
-
-const SettingRow = ({ icon, title, description, checked = false }) => {
-  const Icon = icon;
-
-  return (
-    <label className="flex cursor-pointer gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <div className="center size-10 shrink-0 rounded-full bg-white text-primary">
-        <Icon size={18} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-sm font-semibold text-slate-950">{title}</p>
-          <Checkbox defaultChecked={checked} />
-        </div>
-        <p className="mt-1 text-sm leading-6 text-slate-600">{description}</p>
-      </div>
-    </label>
-  );
-};
-
-const PrivacyOption = ({ label, checked = false }) => (
-  <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-    <span className="text-sm font-semibold text-slate-700">{label}</span>
-    <Checkbox defaultChecked={checked} />
-  </label>
-);
 
 const ProfileSkeleton = () => (
   <section className="space-y-6 py-5">
