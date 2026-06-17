@@ -464,9 +464,9 @@ const TripCard = ({ trip, compact = false }) => {
             <Button asChild variant="outline">
               <Link to={getTripUrl(trip)}>Share Trip</Link>
             </Button>
-            <Button>
-              <Link to={getTripUrl(trip)}>View details</Link>
-            </Button>
+            <Link to={getTripUrl(trip)}>
+              <Button>View details</Button>
+            </Link>
           </div>
         </div>
 

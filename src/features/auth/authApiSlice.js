@@ -84,6 +84,16 @@ export const authApiSlice = apiSlice.injectEndpoints({
       },
     }),
 
+    deleteAccount: builder.mutation({
+      query: () => {
+        return {
+          url: `/accounts/delete/`,
+          method: "DELETE",
+        };
+      },
+      invalidatesTags: ["my-profile"],
+    }),
+
     requestResetPassword: builder.mutation({
       query: (payload) => {
         return {
@@ -115,6 +125,7 @@ export const {
   useSelfDetailsQuery,
   useUpdateAccountMutation,
   useChangePasswordMutation,
+  useDeleteAccountMutation,
   useRequestResetPasswordMutation,
   useResetPasswordMutation,
 } = authApiSlice;
