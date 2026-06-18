@@ -104,12 +104,19 @@ export const PageTitle = ({ title, text, variant = "dark" }) => {
   );
 };
 
-export const SectionHeader = ({ icon, title, description }) => (
-  <div className="flex items-start justify-between gap-4">
+export const SectionHeader = ({
+  title,
+  description,
+  icon = null,
+  className = "",
+}) => (
+  <div className={cn("flex items-start justify-between gap-4", className)}>
     <div className="flex gap-3">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-        {React.createElement(icon, { size: 18 })}
-      </div>
+      {icon && (
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          {React.createElement(icon, { size: 18 })}
+        </div>
+      )}
       <div>
         <h2 className="text-lg font-bold text-slate-950">{title}</h2>
         {description && (
