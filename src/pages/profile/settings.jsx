@@ -220,13 +220,18 @@ const ProfileSettings = () => {
 
   return (
     <>
-      <Card className="space-y-12 md:space-y-10 p-6 md:p-8">
+      <Card className="space-y-10 p-6 md:p-8">
         <SectionHeader
           title="Profile Settings"
           description="Manage account preferences, password, and account access."
         />
+        <div className="bg-primary/5 rounded-xl p-4 grid md:grid-cols-2 gap-6">
+          {activity.map((item) => (
+            <ActivityRow {...item} />
+          ))}
+        </div>
 
-        <div className="space-y-8 md:space-y-6">
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-x-6 gap-y-10">
           <SwitchRow
             icon={MapPin}
             title="Location sharing"
@@ -243,14 +248,6 @@ const ProfileSettings = () => {
             disabled={isUpdatingAccount}
             onCheckedChange={handleNotificationToggle}
           />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-6">
-          {activity.map((item) => (
-            <ActivityRow key={item.label} {...item} />
-          ))}
-        </div>
-        <hr className="-mx-10" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-6">
           <ActionRow
             icon={KeyRound}
             title="Update password"
