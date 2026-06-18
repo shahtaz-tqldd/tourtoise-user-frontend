@@ -6,6 +6,7 @@ import { ChevronRight } from "lucide-react";
 import { Logo } from "../shared/utils";
 import {
   ChatIcon,
+  JournalIcon,
   MapIcon,
   NoteIcon,
   SaveIcon,
@@ -37,6 +38,7 @@ const LeftSideMenu = () => {
           color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
         />
       ),
+      isMobile: true,
     },
     {
       id: 2,
@@ -49,6 +51,7 @@ const LeftSideMenu = () => {
           color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
         />
       ),
+      isMobile: true,
     },
     {
       id: 3,
@@ -61,6 +64,20 @@ const LeftSideMenu = () => {
           color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
         />
       ),
+      isMobile: true,
+    },
+    {
+      id: 4,
+      label: "Tour Journal",
+      shortLabel: "Journal",
+      link: "/tour-journal",
+      icon: ({ isActive }) => (
+        <JournalIcon
+          size={5}
+          color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
+        />
+      ),
+      isMobile: true,
     },
     {
       id: 5,
@@ -73,6 +90,7 @@ const LeftSideMenu = () => {
           color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
         />
       ),
+      isMobile: false,
     },
   ];
 
@@ -90,7 +108,7 @@ const LeftSideMenu = () => {
 
   return (
     <>
-      <aside className="sticky top-0 hidden h-screen w-[300px] border-r border-slate-200 bg-white md:flex">
+      <aside className="sticky top-0 hidden h-screen w-[360px] border-r border-slate-200 bg-white md:flex">
         <div className="flex min-h-0 w-full flex-col px-4 py-5">
           <div className="px-2">
             <Logo />
@@ -164,32 +182,34 @@ const LeftSideMenu = () => {
 
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur md:hidden">
         <div className="mx-auto grid max-w-md grid-cols-5 items-center gap-1">
-          {navItems.map((item) => {
-            const isActive = isActiveRoute(item.link);
-            const Icon = item.icon;
+          {navItems
+            .filter((item) => item.isMobile)
+            .map((item) => {
+              const isActive = isActiveRoute(item.link);
+              const Icon = item.icon;
 
-            return (
-              <Link
-                key={item.id}
-                to={item.link}
-                className={`relative flex min-w-0 items-center justify-center rounded-2xl transition ${
-                  isActive
-                    ? ""
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-                aria-label={item.label}
-              >
-                <span
-                  className={`flex size-10 items-center justify-center rounded-xl transition ${
-                    isActive ? "bg-white shadow-sm" : "bg-transparent"
+              return (
+                <Link
+                  key={item.id}
+                  to={item.link}
+                  className={`relative flex min-w-0 items-center justify-center rounded-2xl transition ${
+                    isActive
+                      ? ""
+                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                   }`}
+                  aria-label={item.label}
                 >
-                  <Icon isActive={isActive} />
-                </span>
-                <span className="sr-only">{item.shortLabel}</span>
-              </Link>
-            );
-          })}
+                  <span
+                    className={`flex size-10 items-center justify-center rounded-xl transition ${
+                      isActive ? "bg-white shadow-sm" : "bg-transparent"
+                    }`}
+                  >
+                    <Icon isActive={isActive} />
+                  </span>
+                  <span className="sr-only">{item.shortLabel}</span>
+                </Link>
+              );
+            })}
           <Link
             to={profilePath}
             className={`relative flex items-center justify-center rounded-2xl py-1 transition ${

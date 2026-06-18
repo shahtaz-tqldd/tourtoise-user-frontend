@@ -13,7 +13,7 @@ import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import Overview from "./overview";
 import ProfileSettings from "./settings";
-import TripProfile from "./travel_days";
+import TripProfile from "./travel_journal";
 
 const demoProfile = {
   name: "Maya Rahman",

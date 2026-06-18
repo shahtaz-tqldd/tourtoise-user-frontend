@@ -14,6 +14,7 @@ import TripDetailPage from "@/pages/trips/detail";
 import AgentChatPage from "@/pages/chat";
 import SavedDestinationPage from "@/pages/destinations/save-destination";
 import ProfilePage from "@/pages/profile";
+import TravelJournalPage from "@/pages/journal";
 
 export const routes = createBrowserRouter([
   {
@@ -47,6 +48,10 @@ export const routes = createBrowserRouter([
       {
         path: "/agent-chat",
         element: <AgentChatPage />,
+      },
+      {
+        path: "/tour-journal",
+        element: <TravelJournalPage />,
       },
       {
         path: "/profile/:username",

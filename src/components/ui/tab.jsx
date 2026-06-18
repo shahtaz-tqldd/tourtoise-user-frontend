@@ -29,11 +29,11 @@ const TabButton = ({ tab, active, onClick }) => {
     <button
       type="button"
       onClick={onClick}
-      className={`border-b-2 py-3 text-sm font-semibold transition flx gap-2 ${
+      className={`border-b-2 py-3 text-xs md:text-sm font-semibold transition flx gap-2 ${
         active
           ? "border-primary text-primary"
           : "border-transparent text-slate-500 hover:text-slate-900"
-      } ${hasCount ? "pl-3.5 pr-2.5" : "px-3.5"}`}
+      } ${hasCount ? "pl-3.5 pr-2.5" : "px-2 md:px-3.5"}`}
     >
       {Icon && <Icon size={15} />}
       {tab.label}
