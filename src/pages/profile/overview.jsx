@@ -1,12 +1,11 @@
 import Card from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
   BadgeCheck,
   Cake,
   CircleUserRound,
-  Globe2,
   HeartPulse,
   Languages,
-  MapPin,
   Phone,
   Rabbit,
   ShieldCheck,
@@ -50,11 +49,6 @@ const Overview = ({ profile = {} }) => {
 
   const personalDetails = [
     {
-      label: "Username",
-      value: profile.username ? `@${profile.username}` : EMPTY_VALUE,
-      icon: CircleUserRound,
-    },
-    {
       label: "Date of birth",
       value: formatDate(profile.date_of_birth),
       icon: Cake,
@@ -63,14 +57,6 @@ const Overview = ({ profile = {} }) => {
       label: "Gender",
       value: titleize(profile.gender),
       icon: BadgeCheck,
-    },
-    {
-      label: "Location",
-      value:
-        [profile.city, profile.country_of_residence]
-          .filter(Boolean)
-          .join(", ") || EMPTY_VALUE,
-      icon: MapPin,
     },
   ];
 
@@ -90,19 +76,14 @@ const Overview = ({ profile = {} }) => {
       value: titleize(profile.travel_pace),
       icon: Rabbit,
     },
-    {
-      label: "Profile visibility",
-      value: profile.is_public_profile ? "Public profile" : "Private profile",
-      icon: Globe2,
-    },
   ];
 
   const hasEmergencyContact =
     profile.emergency_contact_name || profile.emergency_contact_phone;
 
   return (
-    <Card className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="space-y-8">
+    <Card className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] p-6 md:p-8">
+      <div className="space-y-10 md:space-y-12">
         <ProfileInfoCard
           title="Personal Details"
           description="Basic information connected to this travel profile."
@@ -175,7 +156,7 @@ const Overview = ({ profile = {} }) => {
 const ProfileInfoCard = ({ title, description, items }) => (
   <div>
     <SectionTitle title={title} description={description} />
-    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+    <div className="mt-5 space-y-4">
       {items.map((item) => (
         <InfoRow key={item.label} {...item} />
       ))}
@@ -225,7 +206,7 @@ const ChipGroup = ({ icon, title, values, emptyText, className = "" }) => {
       </div>
 
       {values.length ? (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           {values.map((value) => (
             <span
               key={value}
@@ -236,14 +217,19 @@ const ChipGroup = ({ icon, title, values, emptyText, className = "" }) => {
           ))}
         </div>
       ) : (
-        <EmptyState message={emptyText} />
+        <EmptyState message={emptyText} className="ml-9" />
       )}
     </div>
   );
 };
 
-const EmptyState = ({ message }) => (
-  <p className="mt-4 rounded-xl border border-dashed border-slate-200 bg-white px-3 py-3 text-sm text-slate-500">
+const EmptyState = ({ message, className }) => (
+  <p
+    className={cn(
+      "mt-2 rounded-xl border border-dashed border-slate-200 bg-white px-3 py-3 text-sm text-slate-500",
+      className,
+    )}
+  >
     {message}
   </p>
 );

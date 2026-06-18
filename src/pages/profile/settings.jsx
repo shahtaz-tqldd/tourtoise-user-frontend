@@ -10,7 +10,6 @@ import {
   Laptop,
   LogOut,
   MapPin,
-  Settings2,
   ShieldAlert,
   Trash2,
 } from "lucide-react";
@@ -220,15 +219,14 @@ const ProfileSettings = () => {
   };
 
   return (
-    <div className="space-y-5">
-      <Card className="space-y-4">
+    <>
+      <Card className="space-y-12 md:space-y-10 p-6 md:p-8">
         <SectionHeader
-          icon={Settings2}
           title="Profile Settings"
           description="Manage account preferences, password, and account access."
         />
 
-        <div className="space-y-8 md:space-y-0 mt-10 md:mt-6">
+        <div className="space-y-8 md:space-y-6">
           <SwitchRow
             icon={MapPin}
             title="Location sharing"
@@ -246,13 +244,13 @@ const ProfileSettings = () => {
             onCheckedChange={handleNotificationToggle}
           />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-6">
           {activity.map((item) => (
             <ActivityRow key={item.label} {...item} />
           ))}
         </div>
-        <hr className="-mx-6"/>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-4">
+        <hr className="-mx-10" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-6">
           <ActionRow
             icon={KeyRound}
             title="Update password"
@@ -397,7 +395,7 @@ const ProfileSettings = () => {
         isLoading={isUpdatingAccount || isDeletingAccount}
         onConfirm={confirmState?.onConfirm}
       />
-    </div>
+    </>
   );
 };
 
@@ -412,7 +410,7 @@ const SwitchRow = ({
   const Icon = icon;
 
   return (
-    <div className="gap-4 md:p-4 flbx">
+    <div className="gap-4 flbx">
       <div className="flex min-w-0 gap-3">
         <div
           className={cn(
@@ -463,8 +461,7 @@ const ActionRow = ({
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 md:p-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl",
-        destructive ? "bg-red-500/5 border border-red-200 p-4" : "",
+        "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl",
       )}
     >
       <div className="flex min-w-0 gap-3">
@@ -479,7 +476,14 @@ const ActionRow = ({
           <Icon size={18} />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-slate-950">{title}</p>
+          <h3
+            className={cn(
+              "text-sm font-semibold text-slate-950",
+              destructive ? "text-red-600" : "",
+            )}
+          >
+            {title}
+          </h3>
           <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
         </div>
       </div>
@@ -498,7 +502,7 @@ const ActionRow = ({
 const ActivityRow = ({ icon, label, value }) => {
   const Icon = icon;
   return (
-    <div className="flex gap-3 md:p-4">
+    <div className="flex gap-3">
       <div
         className={cn(
           "center size-10 shrink-0 rounded-full bg-primary/10 text-primary",

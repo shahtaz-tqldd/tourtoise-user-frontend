@@ -2,12 +2,18 @@ import Card from "@/components/ui/card";
 import TabMenu from "@/components/ui/tab";
 import { usePublicAccountQuery } from "@/features/auth/authApiSlice";
 import { getCloudinaryPreviewUrl } from "@/lib/utils";
-import { Camera, Compass, MapPin, NotebookTabs, Settings } from "lucide-react";
+import {
+  Camera,
+  GalleryVerticalEnd,
+  MapPin,
+  Settings,
+  Sparkles,
+} from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import Overview from "./overview";
 import ProfileSettings from "./settings";
-import TripProfile from "./trip-profile";
+import TripProfile from "./travel_days";
 
 const demoProfile = {
   name: "Maya Rahman",
@@ -59,11 +65,11 @@ const ProfilePage = () => {
       <div className="min-w-0 space-y-6">
         <TabMenu
           tabs={[
-            { label: "Overview", value: "overview", icon: Compass },
+            { label: "Overview", value: "overview", icon: GalleryVerticalEnd },
             {
-              label: "Trip Diaries",
-              value: "trip_profile",
-              icon: NotebookTabs,
+              label: "Travel Journal",
+              value: "travel_days",
+              icon: Sparkles,
             },
             { label: "Settings", value: "settings", icon: Settings },
           ]}
@@ -73,7 +79,7 @@ const ProfilePage = () => {
 
         <div>
           {activeTab === "overview" && <Overview profile={profile} />}
-          {activeTab === "trip_profile" && <TripProfile />}
+          {activeTab === "travel_days" && <TripProfile />}
           {activeTab === "settings" && <ProfileSettings />}
         </div>
       </div>
