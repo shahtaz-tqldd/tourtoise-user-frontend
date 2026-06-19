@@ -200,6 +200,7 @@ const TripsPage = () => {
       <PageTitle
         title="Trip Plans"
         text="Resume current plans and drafts from one focused list."
+        className="block md:hidden"
       />
 
       <TabMenu
@@ -224,6 +225,11 @@ const TripsPage = () => {
             mobileTab === "active" ? "block" : "hidden"
           } lg:block`}
         >
+          <PageTitle
+            title="Trip Plans"
+            text="Resume current plans and drafts from one focused list."
+            className="hidden md:block"
+          />
           <div className="flex w-full gap-3">
             <SearchField
               value={activeSearch}

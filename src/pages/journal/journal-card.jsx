@@ -18,7 +18,7 @@ const JournalCard = ({ journal }) => {
       : [];
 
   return (
-    <article className="rounded-[20px] border border-slate-200 bg-white p-4 sm:p-5 md:p-6">
+    <article className="md:rounded-[20px] md:border md:border-slate-200 md:bg-white md:p-6">
       <div className="flex flex-col gap-5 sm:flex-row md:gap-8">
         {galleryImages[0] && (
           <img

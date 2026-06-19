@@ -18,7 +18,7 @@ const ReadJournalDialog = ({ journal, images }) => (
         <span className="truncate">Read Full</span>
       </button>
     </DialogTrigger>
-    <DialogContent className="max-h-[92vh] overflow-y-auto p-4 sm:max-w-2xl sm:p-6">
+    <DialogContent className="max-h-[92vh] overflow-y-auto p-4 sm:max-w-2xl sm:p-6 rounded-3xl">
       <DialogHeader>
         <DialogTitle className="pr-7 text-xl leading-7">
           {journal.title}

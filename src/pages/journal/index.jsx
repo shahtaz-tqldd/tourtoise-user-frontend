@@ -117,7 +117,7 @@ const TravelJournalPage = () => {
         </div>
 
         {filteredJournals.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-12 md:space-y-4">
             {filteredJournals.map((journal) => (
               <JournalCard key={journal.title} journal={journal} />
             ))}

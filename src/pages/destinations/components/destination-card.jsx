@@ -64,9 +64,9 @@ const DestinationCard = ({ destination, onSavedClick, savedActionLabel }) => {
           variant="outline"
           className="absolute bottom-4 right-4 z-10 h-10 rounded-full border-white/60 bg-white/95 px-4 text-primary shadow-sm backdrop-blur hover:bg-white"
           onClick={onSavedClick}
+          aria-label={savedActionLabel || "Save destination"}
         >
           <Bookmark size={16} className="fill-primary text-primary" />
-          {savedActionLabel || "Saved"}
         </Button>
       )}
     </article>

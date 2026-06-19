@@ -68,9 +68,9 @@ const LeftSideMenu = () => {
     },
     {
       id: 4,
-      label: "Tour Journal",
+      label: "Travel Journal",
       shortLabel: "Journal",
-      link: "/tour-journal",
+      link: "/travel-journal",
       icon: ({ isActive }) => (
         <JournalIcon
           size={5}
@@ -79,28 +79,11 @@ const LeftSideMenu = () => {
       ),
       isMobile: true,
     },
-    {
-      id: 5,
-      label: "Saved Destinations",
-      shortLabel: "Saved",
-      link: "/destinations/saved-destination",
-      icon: ({ isActive }) => (
-        <SaveIcon
-          size={5}
-          color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
-        />
-      ),
-      isMobile: false,
-    },
   ];
 
   const isActiveRoute = (link) => {
     if (link === "/") {
-      return (
-        pathname === "/" ||
-        (pathname.startsWith("/destinations/") &&
-          !pathname.startsWith("/destinations/saved-destination"))
-      );
+      return pathname === "/" || pathname.startsWith("/destinations/");
     }
 
     return pathname === link || pathname.startsWith(`${link}/`);
