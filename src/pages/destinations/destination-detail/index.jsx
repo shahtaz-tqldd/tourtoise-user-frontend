@@ -725,8 +725,8 @@ const DestinationDetailPage = () => {
                 {isSavingDestination
                   ? "Saving..."
                   : isSaved
-                    ? "Saved Destination"
-                    : "Save Destination"}
+                    ? "Add to Bucket List"
+                    : "Added to Bucket List"}
               </Button>
             </div>
           </aside>

@@ -12,7 +12,6 @@ import DestinationDetailPage from "@/pages/destinations/destination-detail";
 import TripsPage from "@/pages/trips";
 import TripDetailPage from "@/pages/trips/detail";
 import AgentChatPage from "@/pages/chat";
-import SavedDestinationPage from "@/pages/destinations/save-destination";
 import ProfilePage from "@/pages/profile";
 import TravelJournalPage from "@/pages/journal";
 
@@ -34,10 +33,6 @@ export const routes = createBrowserRouter([
         element: <DestinationDetailPage />,
       },
       {
-        path: "/destinations/saved-destination",
-        element: <SavedDestinationPage />,
-      },
-      {
         path: "/trips",
         element: <TripsPage />,
       },
@@ -50,7 +45,7 @@ export const routes = createBrowserRouter([
         element: <AgentChatPage />,
       },
       {
-        path: "/tour-journal",
+        path: "/travel-journal",
         element: <TravelJournalPage />,
       },
       {
