@@ -7,10 +7,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Bookmark, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import ReadJournalDialog from "./journal-dialog";
 
-const JournalCard = ({ journal }) => {
+const JournalCard = ({ journal, isSaved = false, onSaveToggle }) => {
   const galleryImages = journal.images?.length
     ? journal.images
     : journal.cover_image
@@ -40,7 +40,27 @@ const JournalCard = ({ journal }) => {
               </h3>
             </div>
 
-            <JournalActions />
+            <div className="flex shrink-0 items-center gap-1">
+              {onSaveToggle && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="rounded-full text-primary"
+                  onClick={() => onSaveToggle(journal)}
+                  aria-label={
+                    isSaved ? "Remove saved journal" : "Save journal"
+                  }
+                  aria-pressed={isSaved}
+                >
+                  <Bookmark
+                    size={16}
+                    className={isSaved ? "fill-current" : ""}
+                  />
+                </Button>
+              )}
+              <JournalActions />
+            </div>
           </div>
 
           <div className="flx mt-2 gap-2">

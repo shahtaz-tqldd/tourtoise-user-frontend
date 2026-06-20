@@ -1,19 +1,32 @@
-import { PageTitle } from "@/components/shared/utils";
+import ListingHeader from "@/components/shared/listing-header";
+import SearchField from "@/components/shared/search";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import { useTripListQuery } from "@/features/trips/tripApiSlice";
-import { ChevronLeft, ChevronRight, Luggage, Search, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  History,
+  Luggage,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import React, { useMemo, useState } from "react";
 import TripCard from "./trip-details/trip-card";
-import TabMenu from "@/components/ui/tab";
 
 const pageSize = 24;
 const historyPageSize = 12;
@@ -60,37 +73,6 @@ const filterCurrentTrips = (trips, status) =>
     (trip) => !isPastTrip(trip) && statusMatches(trip.status, status),
   );
 
-const SearchField = ({
-  value,
-  onChange,
-  onClear,
-  placeholder,
-  className = "",
-}) => (
-  <div className={`relative w-full min-w-0 ${className}`}>
-    <Search
-      size={17}
-      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-    />
-    <Input
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
-      className="h-12 w-full rounded-full border-slate-200 bg-slate-50 pl-11 pr-11 text-sm shadow-none focus-visible:ring-primary/15"
-    />
-    {value && (
-      <button
-        type="button"
-        onClick={onClear}
-        className="absolute right-3 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-slate-700"
-        aria-label="Clear search"
-      >
-        <X size={15} />
-      </button>
-    )}
-  </div>
-);
-
 const TripListLoader = ({ compact = false }) => (
   <div className="grid gap-3">
     {Array.from({ length: compact ? 4 : 3 }).map((_, index) => (
@@ -128,12 +110,105 @@ const EmptyState = ({ title, description, onClear, compact = false }) => (
   </div>
 );
 
+const TripStatusFilter = ({ value, onApply }) => {
+  const [open, setOpen] = useState(false);
+  const [draftStatus, setDraftStatus] = useState(value);
+
+  const handleOpenChange = (nextOpen) => {
+    if (nextOpen) setDraftStatus(value);
+    setOpen(nextOpen);
+  };
+
+  const applyFilter = () => {
+    onApply(draftStatus);
+    setOpen(false);
+  };
+
+  const cancelFilter = () => {
+    setDraftStatus(value);
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-12 w-12 rounded-full border-slate-200"
+            aria-label="Open trip filters"
+          >
+            <SlidersHorizontal size={16} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-[min(calc(100vw-2rem),320px)] rounded-2xl border-slate-200 bg-white p-0 shadow-xl"
+          onCloseAutoFocus={(event) => event.preventDefault()}
+        >
+          <div className="border-b border-slate-100 p-4">
+            <h2 className="text-base font-bold text-slate-950">
+              Filter trip plans
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Choose which trip status to show.
+            </p>
+          </div>
+
+          <div className="space-y-2 p-4">
+            <p className="text-xs font-semibold uppercase text-slate-500">
+              Status
+            </p>
+            {[
+              { value: "all", label: "All" },
+              { value: "active", label: "Active" },
+              { value: "draft", label: "Draft" },
+            ].map((option) => (
+              <label
+                key={option.value}
+                className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3 text-sm font-semibold transition ${
+                  draftStatus === option.value
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-primary/40 hover:bg-primary/5"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="trip-status-filter"
+                  value={option.value}
+                  checked={draftStatus === option.value}
+                  onChange={(event) => setDraftStatus(event.target.value)}
+                  className="size-4 accent-primary"
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-2 border-t border-slate-100 p-4">
+            <Button type="button" variant="outline" onClick={cancelFilter}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={applyFilter}>
+              Apply
+            </Button>
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {value !== "all" && (
+        <span className="absolute -right-1 -top-1 size-3 rounded-full bg-primary" />
+      )}
+    </div>
+  );
+};
+
 const TripsPage = () => {
   const [page, setPage] = useState(1);
   const [activeSearch, setActiveSearch] = useState("");
   const [activeStatus, setActiveStatus] = useState("all");
   const [historySearch, setHistorySearch] = useState("");
-  const [mobileTab, setMobileTab] = useState("active");
 
   const queryArgs = useMemo(
     () => ({
@@ -178,6 +253,7 @@ const TripsPage = () => {
     [historyTrips],
   );
   const hasActiveFilters = activeSearch || activeStatus !== "all";
+  const totalTrips = meta.count ?? meta.total ?? trips.length;
 
   const updateActiveSearch = (value) => {
     setActiveSearch(value);
@@ -196,59 +272,35 @@ const TripsPage = () => {
   };
 
   return (
-    <section className="space-y-6 py-5 relative">
-      <PageTitle
-        title="Trip Plans"
-        text="Resume current plans and drafts from one focused list."
-        className="block md:hidden"
-      />
-
-      <TabMenu
-        tabs={[
-          {
-            label: "Active Plan",
-            value: "active",
-          },
-          {
-            label: "Trip History",
-            value: "history",
-          },
-        ]}
-        activeTab={mobileTab}
-        setActiveTab={setMobileTab}
-        className="flex md:hidden"
-      />
-
+    <section className="relative space-y-6 py-5">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <div
-          className={`space-y-6 ${
-            mobileTab === "active" ? "block" : "hidden"
-          } lg:block`}
-        >
-          <PageTitle
+        <div className="space-y-6">
+          <ListingHeader
             title="Trip Plans"
-            text="Resume current plans and drafts from one focused list."
-            className="hidden md:block"
+            description={`Showing ${activeTrips.length} of ${totalTrips} trips`}
+            filters={
+              <div className="flex w-full gap-3 md:justify-end">
+                <SearchField
+                  value={activeSearch}
+                  onChange={updateActiveSearch}
+                  onClear={() => updateActiveSearch("")}
+                  placeholder="Search active trips..."
+                  className="max-w-sm flex-1"
+                />
+                <TripStatusFilter
+                  value={activeStatus}
+                  onApply={updateActiveStatus}
+                />
+                <TripHistoryDrawer
+                  trips={pastTrips}
+                  search={historySearch}
+                  onSearchChange={setHistorySearch}
+                  isFetching={isHistoryFetching}
+                  isError={isHistoryError}
+                />
+              </div>
+            }
           />
-          <div className="flex w-full gap-3">
-            <SearchField
-              value={activeSearch}
-              onChange={updateActiveSearch}
-              onClear={() => updateActiveSearch("")}
-              placeholder="Search active trips..."
-              className="flex-1"
-            />
-            <Select value={activeStatus} onValueChange={updateActiveStatus}>
-              <SelectTrigger className="!h-12 rounded-full border-slate-200 bg-slate-50 px-4 shadow-none">
-                <SelectValue placeholder="Trip status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
           {isFetching && <TripListLoader />}
 
@@ -313,7 +365,7 @@ const TripsPage = () => {
         </div>
 
         <TripHistory
-          className={`${mobileTab === "history" ? "block" : "hidden"} lg:block`}
+          className="hidden lg:block"
           trips={pastTrips}
           search={historySearch}
           onSearchChange={setHistorySearch}
@@ -324,6 +376,57 @@ const TripsPage = () => {
     </section>
   );
 };
+
+const TripHistoryDrawer = ({
+  trips,
+  search,
+  onSearchChange,
+  isFetching,
+  isError,
+}) => (
+  <Sheet>
+    <SheetTrigger asChild>
+      <Button
+        type="button"
+        variant="outline"
+        className="h-12 w-12 rounded-full border-slate-200 lg:hidden"
+        aria-label="Open trip history"
+      >
+        <History size={16} />
+      </Button>
+    </SheetTrigger>
+    <SheetContent
+      side="right"
+      className="w-[min(92vw,420px)] gap-0 overflow-y-auto p-0"
+      showCloseButton={false}
+    >
+      <SheetHeader className="border-b border-slate-100 pr-12 text-left">
+        <SheetTitle>Trip History</SheetTitle>
+        <SheetDescription>Your past completed trips.</SheetDescription>
+      </SheetHeader>
+      <SheetClose asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="absolute right-3 top-3 rounded-full"
+          aria-label="Close trip history"
+        >
+          <X size={16} />
+        </Button>
+      </SheetClose>
+      <div className="p-4">
+        <TripHistory
+          trips={trips}
+          search={search}
+          onSearchChange={onSearchChange}
+          isFetching={isFetching}
+          isError={isError}
+        />
+      </div>
+    </SheetContent>
+  </Sheet>
+);
 
 const TripHistory = ({
   className = "",

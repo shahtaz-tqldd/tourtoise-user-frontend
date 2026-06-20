@@ -18,9 +18,15 @@ export const DetailPill = ({ children, className }) => {
   );
 };
 
-export const AuthorMessage = ({ message, title = null, author = "turtle" }) => {
+export const AuthorMessage = ({
+  message,
+  title = null,
+  component = null,
+  className = "",
+  author = "turtle",
+}) => {
   return (
-    <div className="flex gap-3 w-fit md:max-w-[88%]">
+    <div className={cn("flex gap-3 w-fit md:max-w-[88%]", className)}>
       <div className="mt-1 flex h-8 w-8 shrink-0">
         <img src="/logo.png" className="h-full object-contain" />
       </div>
@@ -32,6 +38,7 @@ export const AuthorMessage = ({ message, title = null, author = "turtle" }) => {
           <h3 className="text-sm font-semibold text-slate-950 mb-1">{title}</h3>
         )}
         <p className="text-sm md:leading-6 text-slate-700">{message}</p>
+        {component && component}
       </div>
     </div>
   );

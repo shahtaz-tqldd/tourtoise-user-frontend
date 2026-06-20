@@ -9,6 +9,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AuthorMessage } from "@/components/shared/utils";
 
 const suggestedPrompts = [
   "Recommend a 5 day beach trip under $900",
@@ -68,15 +70,49 @@ const initialSessions = [
   },
 ];
 
+const localAssistantReply =
+  "Got it. I would compare destinations by travel time, seasonal weather, daily budget, crowd level, and the kind of experiences you want. Add your travel month, starting city, group size, and budget range so I can make a sharper recommendation.";
+
+const createForwardedSession = (message) => ({
+  id: "forwarded-session",
+  title: message.slice(0, 42),
+  preview: message,
+  updatedAt: "Just now",
+  messages: [
+    {
+      id: 4,
+      role: "user",
+      message,
+      meta: "You",
+    },
+    {
+      id: 5,
+      role: "assistant",
+      message: localAssistantReply,
+      meta: "turtle",
+    },
+  ],
+});
+
 const AgentChatPage = () => {
-  const [sessions, setSessions] = useState(initialSessions);
-  const [activeSessionId, setActiveSessionId] = useState(
-    initialSessions[0]?.id,
+  const location = useLocation();
+  const navigate = useNavigate();
+  const initialMessage =
+    typeof location.state?.initialMessage === "string"
+      ? location.state.initialMessage.trim()
+      : "";
+  const [sessions, setSessions] = useState(() =>
+    initialMessage
+      ? [createForwardedSession(initialMessage), ...initialSessions]
+      : initialSessions,
+  );
+  const [activeSessionId, setActiveSessionId] = useState(() =>
+    initialMessage ? "forwarded-session" : initialSessions[0]?.id,
   );
   const [sessionSearch, setSessionSearch] = useState("");
   const [message, setMessage] = useState("");
   const nextSessionIdRef = useRef(3);
-  const nextMessageIdRef = useRef(4);
+  const nextMessageIdRef = useRef(initialMessage ? 6 : 4);
   const messagesEndRef = useRef(null);
 
   const activeSession = sessions.find(
@@ -130,9 +166,7 @@ const AgentChatPage = () => {
     const sessionLines = [
       activeSession.title,
       "",
-      ...activeSession.messages.map(
-        (item) => `${item.meta}: ${item.message}`,
-      ),
+      ...activeSession.messages.map((item) => `${item.meta}: ${item.message}`),
     ];
     const file = new Blob([sessionLines.join("\n\n")], {
       type: "text/plain;charset=utf-8",
@@ -140,10 +174,12 @@ const AgentChatPage = () => {
     const url = URL.createObjectURL(file);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${activeSession.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "") || "travel-chat-session"}.txt`;
+    link.download = `${
+      activeSession.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "") || "travel-chat-session"
+    }.txt`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -163,8 +199,7 @@ const AgentChatPage = () => {
     const assistantMessage = {
       id: nextMessageIdRef.current,
       role: "assistant",
-      message:
-        "Got it. I would compare destinations by travel time, seasonal weather, daily budget, crowd level, and the kind of experiences you want. Add your travel month, starting city, group size, and budget range so I can make a sharper recommendation.",
+      message: localAssistantReply,
       meta: "turtle",
     };
     nextMessageIdRef.current += 1;
@@ -221,12 +256,22 @@ const AgentChatPage = () => {
   };
 
   const handleComposerKeyDown = (event) => {
-    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing)
+    if (
+      event.key !== "Enter" ||
+      event.shiftKey ||
+      event.nativeEvent.isComposing
+    )
       return;
 
     event.preventDefault();
     submitMessage(message);
   };
+
+  useEffect(() => {
+    if (!initialMessage) return;
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [initialMessage, location.pathname, navigate]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ block: "end" });
@@ -397,30 +442,20 @@ const AgentChatPage = () => {
                     isUser && "justify-end",
                   )}
                 >
-                  {!isUser && (
-                    <div className="mt-1 flex size-9 shrink-0">
-                      <img src="/logo.png" alt="" className="h-7" />
-                    </div>
-                  )}
-
-                  <div
-                    className={cn(
-                      "max-w-[86%] rounded-3xl px-4 py-3 md:max-w-[72%]",
-                      isUser
-                        ? "rounded-tr-md bg-primary text-white"
-                        : "rounded-tl-md border border-slate-200 bg-white text-slate-700",
-                    )}
-                  >
+                  {!isUser ? (
+                    <AuthorMessage message={item.message} />
+                  ) : (
                     <div
                       className={cn(
-                        "mb-1 text-xs font-semibold uppercase tracking-wider",
-                        isUser ? "text-white/75" : "text-primary",
+                        "max-w-[86%] rounded-xl px-4 py-3 md:max-w-[72%]",
+                        isUser
+                          ? "rounded-tr-md bg-primary text-white"
+                          : "rounded-tl-md border border-slate-200 bg-white text-slate-700",
                       )}
                     >
-                      {item.meta}
+                      <p className="text-sm leading-6">{item.message}</p>
                     </div>
-                    <p className="text-sm leading-6">{item.message}</p>
-                  </div>
+                  )}
                 </div>
               );
             })
