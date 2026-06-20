@@ -190,6 +190,7 @@ const DestinationFilter = ({
   difficulties,
   setDifficulties,
   actions,
+  className = "",
 }) => {
   const [open, setOpen] = useState(false);
   const [draftCountries, setDraftCountries] = useState(selectedCountries);
@@ -255,7 +256,12 @@ const DestinationFilter = ({
   };
 
   return (
-    <div className="flex gap-2 md:gap-3 items-center md:justify-end">
+    <div
+      className={cn(
+        "flex gap-2 md:gap-3 items-center md:justify-end",
+        className,
+      )}
+    >
       <div className="relative min-w-0 flex-1 max-w-sm">
         <Search
           size={17}
