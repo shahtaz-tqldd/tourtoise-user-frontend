@@ -765,21 +765,24 @@ const DestinationCover = ({ destination }) => {
         >
           <ArrowLeft size={16} />
         </Link>
-        <div className="aspect-[16/9]">
+        <div className="aspect-[4/3] md:aspect-[16/9]">
           <img
             src={destination.cover_image}
             alt={destination.name}
             className="h-full w-full object-cover"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white md:p-8">
+        <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent" />
+        <div className="hidden md:block absolute bottom-0 left-0 right-0 p-4 text-white md:p-8">
           <PageTitle
             title={destination.name}
             text={destination.tagline}
             variant="light"
           />
         </div>
+      </div>
+      <div className="block md:hidden mt-3">
+        <PageTitle title={destination.name} text={destination.tagline} />
       </div>
       {!!tags.length && (
         <div className="flex flex-wrap gap-2">
