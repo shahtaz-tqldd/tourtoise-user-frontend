@@ -160,3 +160,20 @@ button {
 .card-slider .swiper-scrollbar-drag {
   background: var(--primary);
 }
+
+.journal-image-slider .swiper-pagination {
+  bottom: 12px;
+}
+
+.journal-image-slider .swiper-pagination-bullet {
+  width: 7px;
+  height: 7px;
+  background: rgb(255 255 255 / 75%);
+  opacity: 1;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 35%);
+}
+
+.journal-image-slider .swiper-pagination-bullet-active {
+  background: white;
+  transform: scale(1.2);
+}

@@ -1,7 +1,16 @@
 import React, { useMemo, useState } from "react";
-import { Bookmark, BookmarkX, Search, SlidersHorizontal, X } from "lucide-react";
+import {
+  Bookmark,
+  BookmarkX,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
 
 import AgentMessageComposer from "@/components/shared/agent-message-composer";
+import InfiniteScroll from "@/components/shared/infinite-scroll";
 import ListingHeader from "@/components/shared/listing-header";
 import SearchField from "@/components/shared/search";
 import { Button } from "@/components/ui/button";
@@ -20,84 +29,15 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import {
+  useJournalInfiniteListInfiniteQuery,
+  useSavedJournalInfiniteListInfiniteQuery,
+  useSaveJournalMutation,
+} from "@/features/journal/journalApiSlice";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import JournalCard from "./journal-card";
-
-const journals = [
-  {
-    title: "A quiet morning by the lake",
-    date: "Apr 18, 2026",
-    body: "Woke up before the cafes opened and watched the boats move through fog. I want to remember how slow this day felt before the hike started.",
-    readCount: 1840,
-    tags: ["Nature", "Slow Travel", "Photography"],
-    author: {
-      name: "Shahtaz Rahman",
-      avatar_url:
-        "https://img.magnific.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80",
-    },
-    images: [
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=80",
-    ],
-  },
-  {
-    date: "Mar 02, 2026",
-    title: "Street food notes after landing",
-    body: "First travel rule confirmed again: eat near the ferry crowd. Simit, tea, grilled fish, and one tiny dessert shop worth saving for the next visit.",
-    readCount: 2310,
-    tags: ["Food", "City Guide", "Budget"],
-    cover_image:
-      "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=500&q=80",
-    author: {
-      name: "Shahtaz Rahman",
-      avatar_url:
-        "https://img.magnific.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80",
-    },
-    images: [
-      "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=700&q=80",
-    ],
-  },
-  {
-    date: "Feb 14, 2026",
-    title: "Three days through old temples",
-    body: "The best part was not the famous courtyard. It was the narrow lane behind the guesthouse where incense, breakfast stalls, and morning bells all mixed together.",
-    readCount: 1576,
-    tags: ["Culture", "History", "Slow Travel"],
-    cover_image:
-      "https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=700&q=80",
-    author: {
-      name: "Maya Rahman",
-      avatar_url:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=320&q=80",
-    },
-    images: [
-      "https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1513326738677-b964603b136d?auto=format&fit=crop&w=700&q=80",
-    ],
-  },
-  {
-    date: "Jan 26, 2026",
-    title: "Rainy train ride to the hills",
-    body: "Packed too lightly, bought a wool scarf at the station, and spent the whole ride watching tea gardens disappear into low clouds.",
-    readCount: 1228,
-    tags: ["Nature", "Transport", "Mountains"],
-    cover_image:
-      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=700&q=80",
-    author: {
-      name: "Nadia Islam",
-      avatar_url:
-        "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=320&q=80",
-    },
-    images: [
-      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=700&q=80",
-    ],
-  },
-];
+import { normalizeJournals } from "./journal-utils";
+import { JournalFormDialog } from "../profile/travel_journal";
 
 const JournalTagFilter = ({ tags, value, onApply }) => {
   const [open, setOpen] = useState(false);
@@ -193,7 +133,24 @@ const JournalTagFilter = ({ tags, value, onApply }) => {
 const getJournalCover = (journal) =>
   journal.images?.[0] || journal.cover_image || null;
 
-const SavedJournalList = ({ journals: savedJournals, onSaveToggle }) => {
+const SavedJournalList = ({
+  journals: savedJournals,
+  onSaveToggle,
+  isLoading,
+}) => {
+  if (isLoading && !savedJournals.length) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-24 animate-pulse rounded-2xl bg-slate-100"
+          />
+        ))}
+      </div>
+    );
+  }
+
   if (!savedJournals.length) {
     return (
       <div className="flex flex-col items-center gap-4 py-10 text-center">
@@ -214,7 +171,7 @@ const SavedJournalList = ({ journals: savedJournals, onSaveToggle }) => {
 
         return (
           <article
-            key={journal.title}
+            key={journal.id}
             className="flex min-w-0 items-center gap-3 rounded-2xl bg-white p-2"
           >
             <div className="size-20 shrink-0 overflow-hidden rounded-xl bg-slate-100">
@@ -227,10 +184,10 @@ const SavedJournalList = ({ journals: savedJournals, onSaveToggle }) => {
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="line-clamp-2 text-sm font-bold text-slate-950">
-                {journal.title}
-              </h3>
-              <p className="mt-1 truncate text-xs text-slate-500">
+              <p className="line-clamp-2 text-sm leading-5 text-slate-700">
+                {journal.body}
+              </p>
+              <p className="mt-1.5 truncate text-xs font-semibold text-slate-500">
                 {journal.author.name}
               </p>
               <p className="mt-1 text-xs font-medium text-slate-400">
@@ -243,7 +200,7 @@ const SavedJournalList = ({ journals: savedJournals, onSaveToggle }) => {
               size="icon-sm"
               className="rounded-full text-primary"
               onClick={() => onSaveToggle(journal)}
-              aria-label={`Remove ${journal.title} from saved journals`}
+              aria-label="Remove journal from saved journals"
             >
               <Bookmark size={16} className="fill-current" />
             </Button>
@@ -254,8 +211,14 @@ const SavedJournalList = ({ journals: savedJournals, onSaveToggle }) => {
   );
 };
 
-const SavedJournalsPanel = ({ journals: savedJournals, onSaveToggle }) => (
-  <aside className="hidden space-y-10 lg:sticky lg:top-24 lg:block lg:self-start">
+const SavedJournalsPanel = ({
+  journals: savedJournals,
+  onSaveToggle,
+  hasMore,
+  isLoading,
+  onLoadMore,
+}) => (
+  <aside className="custom-scrollbar hidden max-h-[calc(100vh-7rem)] space-y-10 overflow-y-auto pr-2 lg:sticky lg:top-24 lg:block lg:self-start">
     <AgentMessageComposer
       message="Found a travel story you like? I can help turn its ideas into your own trip plan."
       placeholder="Ask about a journal or travel idea"
@@ -268,12 +231,25 @@ const SavedJournalsPanel = ({ journals: savedJournals, onSaveToggle }) => (
       <SavedJournalList
         journals={savedJournals}
         onSaveToggle={onSaveToggle}
+        isLoading={isLoading}
+      />
+      <InfiniteScroll
+        hasMore={hasMore}
+        isLoading={isLoading}
+        onLoadMore={onLoadMore}
+        loadingLabel="Loading saved journals..."
       />
     </div>
   </aside>
 );
 
-const SavedJournalsDrawer = ({ journals: savedJournals, onSaveToggle }) => (
+const SavedJournalsDrawer = ({
+  journals: savedJournals,
+  onSaveToggle,
+  hasMore,
+  isLoading,
+  onLoadMore,
+}) => (
   <Sheet>
     <SheetTrigger asChild>
       <Button
@@ -313,6 +289,13 @@ const SavedJournalsDrawer = ({ journals: savedJournals, onSaveToggle }) => (
         <SavedJournalList
           journals={savedJournals}
           onSaveToggle={onSaveToggle}
+          isLoading={isLoading}
+        />
+        <InfiniteScroll
+          hasMore={hasMore}
+          isLoading={isLoading}
+          onLoadMore={onLoadMore}
+          loadingLabel="Loading saved journals..."
         />
       </div>
     </SheetContent>
@@ -322,45 +305,63 @@ const SavedJournalsDrawer = ({ journals: savedJournals, onSaveToggle }) => (
 const TravelJournalPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTag, setActiveTag] = useState("All");
-  const [savedJournalTitles, setSavedJournalTitles] = useState(() => new Set());
+  const [formOpen, setFormOpen] = useState(false);
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useJournalInfiniteListInfiniteQuery({
+    page_size: 10,
+    search: searchQuery.trim(),
+    tags: activeTag === "All" ? undefined : activeTag,
+  });
+  const {
+    data: savedData,
+    fetchNextPage: fetchNextSavedPage,
+    hasNextPage: hasNextSavedPage,
+    isLoading: isLoadingSaved,
+    isFetchingNextPage: isFetchingNextSavedPage,
+  } = useSavedJournalInfiniteListInfiniteQuery({ page_size: 10 });
+  const [saveJournal, { isLoading: isSaving }] = useSaveJournalMutation();
 
-  const tags = useMemo(
-    () => ["All", ...new Set(journals.flatMap((journal) => journal.tags))],
-    [],
+  const journals = useMemo(
+    () => normalizeJournals(data?.pages.flatMap((page) => page.data)),
+    [data],
   );
-
-  const filteredJournals = useMemo(() => {
-    const normalizedSearch = searchQuery.trim().toLowerCase();
-
-    return journals.filter((journal) => {
-      const matchesTag =
-        activeTag === "All" || journal.tags.includes(activeTag);
-      const matchesSearch =
-        !normalizedSearch ||
-        [journal.title, journal.body, journal.author.name, ...journal.tags]
-          .join(" ")
-          .toLowerCase()
-          .includes(normalizedSearch);
-
-      return matchesTag && matchesSearch;
-    });
-  }, [activeTag, searchQuery]);
-
   const savedJournals = useMemo(
     () =>
-      journals.filter((journal) => savedJournalTitles.has(journal.title)),
-    [savedJournalTitles],
+      normalizeJournals(savedData?.pages.flatMap((page) => page.data)),
+    [savedData],
+  );
+  const totalJournals = data?.pages[0]?.meta?.count || 0;
+
+  const tags = useMemo(
+    () => [
+      "All",
+      ...new Set([
+        ...(activeTag === "All" ? [] : [activeTag]),
+        ...journals.flatMap((journal) => journal.tags || []),
+        ...savedJournals.flatMap((journal) => journal.tags || []),
+      ]),
+    ],
+    [activeTag, journals, savedJournals],
   );
 
-  const toggleSavedJournal = (journal) => {
-    setSavedJournalTitles((currentTitles) => {
-      const nextTitles = new Set(currentTitles);
-
-      if (nextTitles.has(journal.title)) nextTitles.delete(journal.title);
-      else nextTitles.add(journal.title);
-
-      return nextTitles;
-    });
+  const toggleSavedJournal = async (journal) => {
+    if (isSaving) return;
+    try {
+      const response = await saveJournal({
+        journal_id: journal.id,
+        saved: journal.is_saved,
+      }).unwrap();
+      toast.success(response.message);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not update this journal."));
+    }
   };
 
   const clearFilters = () => {
@@ -375,7 +376,7 @@ const TravelJournalPage = () => {
       <div className="min-w-0 space-y-5">
         <ListingHeader
           title="Travel Journal"
-          description={`Showing ${filteredJournals.length} of ${journals.length} journals`}
+          description={`Showing ${journals.length} of ${totalJournals} journals`}
           filters={
             <div className="flex w-full gap-3 md:justify-end">
               <SearchField
@@ -390,24 +391,52 @@ const TravelJournalPage = () => {
                 value={activeTag}
                 onApply={setActiveTag}
               />
+              <Button
+                type="button"
+                className="h-12 shrink-0 rounded-full px-4"
+                onClick={() => setFormOpen(true)}
+              >
+                <Plus size={16} />
+                <span className="hidden sm:inline">Write Journal</span>
+              </Button>
               <SavedJournalsDrawer
                 journals={savedJournals}
                 onSaveToggle={toggleSavedJournal}
+                hasMore={hasNextSavedPage}
+                isLoading={isLoadingSaved || isFetchingNextSavedPage}
+                onLoadMore={fetchNextSavedPage}
               />
             </div>
           }
         />
 
-        {filteredJournals.length > 0 ? (
+        {isLoading ? (
+          <JournalListSkeleton />
+        ) : isError ? (
+          <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
+            <p className="text-sm font-semibold text-red-700">
+              Could not load travel journals.
+            </p>
+            <Button className="mt-4" variant="outline" onClick={refetch}>
+              Try again
+            </Button>
+          </div>
+        ) : journals.length > 0 ? (
           <div className="space-y-12 md:space-y-4">
-            {filteredJournals.map((journal) => (
+            {journals.map((journal) => (
               <JournalCard
-                key={journal.title}
+                key={journal.id}
                 journal={journal}
-                isSaved={savedJournalTitles.has(journal.title)}
+                isSaved={journal.is_saved}
                 onSaveToggle={toggleSavedJournal}
               />
             ))}
+            <InfiniteScroll
+              hasMore={hasNextPage}
+              isLoading={isFetchingNextPage}
+              onLoadMore={fetchNextPage}
+              loadingLabel="Loading more journals..."
+            />
           </div>
         ) : (
           <div className="flex min-h-80 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
@@ -432,9 +461,30 @@ const TravelJournalPage = () => {
       <SavedJournalsPanel
         journals={savedJournals}
         onSaveToggle={toggleSavedJournal}
+        hasMore={hasNextSavedPage}
+        isLoading={isLoadingSaved || isFetchingNextSavedPage}
+        onLoadMore={fetchNextSavedPage}
       />
+      {formOpen && (
+        <JournalFormDialog
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          journal={null}
+        />
+      )}
     </section>
   );
 };
+
+const JournalListSkeleton = () => (
+  <div className="space-y-4">
+    {Array.from({ length: 3 }).map((_, index) => (
+      <div
+        key={index}
+        className="h-64 animate-pulse rounded-3xl bg-slate-100"
+      />
+    ))}
+  </div>
+);
 
 export default TravelJournalPage;

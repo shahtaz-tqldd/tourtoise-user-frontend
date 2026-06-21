@@ -10,6 +10,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import Overview from "./overview";
 import ProfileSettings from "./settings";
@@ -42,6 +43,7 @@ const mergeProfile = (account) => ({
 const ProfilePage = () => {
   const { username } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
+  const currentUser = useSelector((state) => state.auth.user);
 
   const { data, isLoading, isFetching } = usePublicAccountQuery(username);
   const account = data?.data;
@@ -49,6 +51,9 @@ const ProfilePage = () => {
     () => mergeProfile(account, username),
     [account, username],
   );
+  const isOwner =
+    currentUser?.id === account?.id ||
+    currentUser?.username === account?.username;
 
   if (isLoading || isFetching) {
     return <ProfileSkeleton />;
@@ -79,7 +84,9 @@ const ProfilePage = () => {
 
         <div>
           {activeTab === "overview" && <Overview profile={profile} />}
-          {activeTab === "travel_days" && <TripProfile />}
+          {activeTab === "travel_days" && (
+            <TripProfile userId={account?.id} isOwner={isOwner} />
+          )}
           {activeTab === "settings" && <ProfileSettings />}
         </div>
       </div>

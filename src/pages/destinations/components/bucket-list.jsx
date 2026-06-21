@@ -17,7 +17,7 @@ import { Link } from "react-router-dom";
 const DestinationMiniList = ({ destinations }) => {
   if (!destinations.length) {
     return (
-      <div className="flex flex-col items-center gap-4 py-8">
+      <div className="flex flex-col items-center gap-4 py-8 border border-dashed rounded-3xl border-slate-200">
         <div className="center h-12 w-12 rounded-full bg-slate-200/80">
           <BookmarkX className="text-gray-500" />
         </div>
