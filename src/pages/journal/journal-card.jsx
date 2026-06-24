@@ -8,9 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  ArrowUpRight,
   Bookmark,
-  ChevronUp,
   MessageCircle,
   MoreVertical,
   Pencil,
@@ -22,6 +20,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import ReadJournalDialog from "./journal-dialog";
 import JournalComments from "./journal-comments";
+import { cn } from "@/lib/utils";
 
 const JournalCard = ({
   journal,
@@ -41,7 +40,7 @@ const JournalCard = ({
       : [];
 
   return (
-    <article className="md:rounded-[20px] md:border md:border-slate-200 md:bg-white md:p-6">
+    <article className="border-b border-slate-200 md:rounded-[20px] md:border md:border-slate-200 md:bg-white -mx-4 md:mx-0 px-4 md:px-4 py-3 md:py-4">
       <div className="md:hidden">
         {galleryImages.length > 0 && (
           <Swiper
@@ -65,7 +64,7 @@ const JournalCard = ({
           </Swiper>
         )}
 
-        <div className="pt-4">
+        <div className={cn(galleryImages.length > 0 ? "pt-4" : "")}>
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <AuthorAvatar src={authorAvatar} name={authorName} size="md" />
@@ -269,29 +268,36 @@ const MobileStory = ({ content, expanded, onExpandedChange }) => {
 
   return (
     <>
-      <p
-        ref={storyRef}
-        className={`mt-3 whitespace-pre-line leading-7 text-slate-600 ${
-          expanded ? "" : "line-clamp-2"
-        }`}
-      >
-        {content}
-      </p>
-      {(isOverflowing || expanded) && (
-        <button
-          type="button"
-          className="flx mt-3 gap-2 text-sm font-semibold text-primary"
-          onClick={() => onExpandedChange(!expanded)}
-          aria-expanded={expanded}
+      <div className="relative mt-3">
+        <p
+          ref={storyRef}
+          className={`whitespace-pre-line leading-7 text-slate-600 ${
+            expanded ? "" : "line-clamp-2"
+          }`}
         >
-          {expanded ? (
-            <ChevronUp size={14} className="shrink-0" />
-          ) : (
-            <ArrowUpRight size={14} className="shrink-0" />
+          {content}
+          {expanded && (
+            <button
+              type="button"
+              className="ml-1 inline text-sm font-semibold text-primary"
+              onClick={() => onExpandedChange(false)}
+              aria-expanded={expanded}
+            >
+              ... Show less
+            </button>
           )}
-          <span>{expanded ? "Show Less" : "Read Full Story"}</span>
-        </button>
-      )}
+        </p>
+        {isOverflowing && !expanded && (
+          <button
+            type="button"
+            className="absolute bottom-1 right-0 translate-x-5 text-sm font-semibold text-primary"
+            onClick={() => onExpandedChange(true)}
+            aria-expanded={expanded}
+          >
+            Read more
+          </button>
+        )}
+      </div>
     </>
   );
 };

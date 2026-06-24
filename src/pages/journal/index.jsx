@@ -563,7 +563,7 @@ const TravelJournalPage = () => {
             </Button>
           </div>
         ) : journals.length > 0 ? (
-          <div className="space-y-12 md:space-y-4">
+          <div className=" md:space-y-4">
             {journals.map((journal) => (
               <JournalCard
                 key={journal.id}

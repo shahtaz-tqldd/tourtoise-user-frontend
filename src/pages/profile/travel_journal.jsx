@@ -190,7 +190,7 @@ export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="custom-scrollbar max-h-screen overflow-x-hidden p-4 max-w-screen sm:max-w-xl sm:p-6 rounded-none md:rounded-3xl">
+      <DialogContent className="custom-scrollbar max-h-screen h-screen md:h-fit overflow-x-hidden p-4 max-w-screen sm:max-w-xl sm:p-6 rounded-none md:rounded-3xl">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Update travel journal" : "Create travel journal"}
