@@ -1,19 +1,26 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "@/layouts/main";
 import PrivateRoute from "./private-route";
 
-import LoginPage from "@/pages/auth/login";
-import RegisterPage from "@/pages/auth/register";
-import ForgotPasswordPage from "@/pages/auth/forgot-password";
-import ResetPasswordPage from "@/pages/auth/reset-password";
+const LoginPage = lazy(() => import("@/pages/auth/login"));
+const RegisterPage = lazy(() => import("@/pages/auth/register"));
+const ForgotPasswordPage = lazy(() => import("@/pages/auth/forgot-password"));
+const ResetPasswordPage = lazy(() => import("@/pages/auth/reset-password"));
 
-import DestiantionPage from "@/pages/destinations";
-import DestinationDetailPage from "@/pages/destinations/destination-detail";
-import TripsPage from "@/pages/trips";
-import TripDetailPage from "@/pages/trips/detail";
-import AgentChatPage from "@/pages/chat";
-import ProfilePage from "@/pages/profile";
-import TravelJournalPage from "@/pages/journal";
+const DestiantionPage = lazy(() => import("@/pages/destinations"));
+const DestinationDetailPage = lazy(
+  () => import("@/pages/destinations/destination-detail")
+);
+const TripsPage = lazy(() => import("@/pages/trips"));
+const TripDetailPage = lazy(() => import("@/pages/trips/detail"));
+const AgentChatPage = lazy(() => import("@/pages/chat"));
+const ProfilePage = lazy(() => import("@/pages/profile"));
+const TravelJournalPage = lazy(() => import("@/pages/journal"));
+
+const withSuspense = (element) => (
+  <Suspense fallback={null}>{element}</Suspense>
+);
 
 export const routes = createBrowserRouter([
   {
@@ -26,48 +33,48 @@ export const routes = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <DestiantionPage />,
+        element: withSuspense(<DestiantionPage />),
       },
       {
         path: "/destinations/:destination_id",
-        element: <DestinationDetailPage />,
+        element: withSuspense(<DestinationDetailPage />),
       },
       {
         path: "/trips",
-        element: <TripsPage />,
+        element: withSuspense(<TripsPage />),
       },
       {
         path: "/trips/:trip_id",
-        element: <TripDetailPage />,
+        element: withSuspense(<TripDetailPage />),
       },
       {
         path: "/agent-chat",
-        element: <AgentChatPage />,
+        element: withSuspense(<AgentChatPage />),
       },
       {
         path: "/travel-journal",
-        element: <TravelJournalPage />,
+        element: withSuspense(<TravelJournalPage />),
       },
       {
         path: "/profile/:username",
-        element: <ProfilePage />,
+        element: withSuspense(<ProfilePage />),
       },
     ],
   },
   {
     path: "/login",
-    element: <LoginPage />,
+    element: withSuspense(<LoginPage />),
   },
   {
     path: "/register",
-    element: <RegisterPage />,
+    element: withSuspense(<RegisterPage />),
   },
   {
     path: "/forgot-password",
-    element: <ForgotPasswordPage />,
+    element: withSuspense(<ForgotPasswordPage />),
   },
   {
     path: "/reset-password",
-    element: <ResetPasswordPage />,
+    element: withSuspense(<ResetPasswordPage />),
   },
 ]);
