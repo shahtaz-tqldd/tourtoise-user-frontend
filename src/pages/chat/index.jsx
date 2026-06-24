@@ -1,6 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Download,
+  Loader2,
   MessageCircle,
   MoreVertical,
   Plus,
@@ -10,6 +17,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,6 +29,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AuthorMessage } from "@/components/shared/utils";
+import useDebounce from "@/hooks/useDebounce";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
+import {
+  useAskChatQuestionMutation,
+  useChatMessageListQuery,
+  useChatSessionListQuery,
+  useCreateChatSessionMutation,
+  useDeleteChatSessionMutation,
+} from "@/features/chat/chatApiSlice";
 
 const suggestedPrompts = [
   "Recommend a 5 day beach trip under $900",
@@ -29,69 +46,41 @@ const suggestedPrompts = [
   "What should I know before visiting Kyoto?",
 ];
 
-const starterMessages = [
-  {
-    id: 1,
-    role: "assistant",
-    message:
-      "Hi, I am your Tour Agent. Tell me where you are starting from, your dates, budget, pace, and what kind of places you like. I can recommend destinations, compare routes, and turn the plan into a practical itinerary.",
-    meta: "turtle",
-  },
-  {
-    id: 2,
-    role: "user",
-    message:
-      "I want a peaceful destination with nature, good local food, and not too much crowd.",
-    meta: "You",
-  },
-  {
-    id: 3,
-    role: "assistant",
-    message:
-      "For that style, I would shortlist Luang Prabang, Pokhara, and Ninh Binh. They all work well for slower days, scenic viewpoints, local markets, and flexible budgets. Share your travel month and departure city and I can narrow it down.",
-    meta: "turtle",
-  },
-];
+const formatRelativeTime = (dateValue) => {
+  if (!dateValue) return "New";
 
-const initialSessions = [
-  {
-    id: "session-1",
-    title: "Peaceful nature escape",
-    preview: "Shortlist Luang Prabang, Pokhara, and Ninh Binh.",
-    updatedAt: "Just now",
-    messages: starterMessages,
-  },
-  {
-    id: "session-2",
-    title: "Japan spring route",
-    preview: "Kyoto, Kanazawa, and Takayama with slower travel days.",
-    updatedAt: "Yesterday",
-    messages: [],
-  },
-];
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return "New";
 
-const localAssistantReply =
-  "Got it. I would compare destinations by travel time, seasonal weather, daily budget, crowd level, and the kind of experiences you want. Add your travel month, starting city, group size, and budget range so I can make a sharper recommendation.";
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
 
-const createForwardedSession = (message) => ({
-  id: "forwarded-session",
-  title: message.slice(0, 42),
-  preview: message,
-  updatedAt: "Just now",
-  messages: [
-    {
-      id: 4,
-      role: "user",
-      message,
-      meta: "You",
-    },
-    {
-      id: 5,
-      role: "assistant",
-      message: localAssistantReply,
-      meta: "turtle",
-    },
-  ],
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
+  });
+};
+
+const sessionPreview = (session) =>
+  session?.last_message?.content || "No messages yet";
+
+const toDisplayMessage = (message) => ({
+  id: message.id,
+  role: message.sender === "user" ? "user" : "assistant",
+  message: message.content,
+  meta: message.sender === "user" ? "You" : "turtle",
+  created_at: message.created_at,
 });
 
 const AgentChatPage = () => {
@@ -101,63 +90,104 @@ const AgentChatPage = () => {
     typeof location.state?.initialMessage === "string"
       ? location.state.initialMessage.trim()
       : "";
-  const [sessions, setSessions] = useState(() =>
-    initialMessage
-      ? [createForwardedSession(initialMessage), ...initialSessions]
-      : initialSessions,
-  );
-  const [activeSessionId, setActiveSessionId] = useState(() =>
-    initialMessage ? "forwarded-session" : initialSessions[0]?.id,
-  );
+  const forwardedMessageSentRef = useRef(false);
+  const messagesEndRef = useRef(null);
+  const pendingMessageIdRef = useRef(1);
+
+  const [activeSessionId, setActiveSessionId] = useState(null);
   const [sessionSearch, setSessionSearch] = useState("");
   const [message, setMessage] = useState("");
-  const nextSessionIdRef = useRef(3);
-  const nextMessageIdRef = useRef(initialMessage ? 6 : 4);
-  const messagesEndRef = useRef(null);
+  const [pendingMessage, setPendingMessage] = useState(null);
+  const debouncedSessionSearch = useDebounce(sessionSearch.trim(), 350);
 
+  const {
+    data: sessionListResponse,
+    isFetching: isFetchingSessions,
+    isError: isSessionListError,
+    refetch: refetchSessions,
+  } = useChatSessionListQuery({
+    page: 1,
+    page_size: 20,
+    search: debouncedSessionSearch,
+  });
+
+  const sessions = useMemo(
+    () => sessionListResponse?.data || [],
+    [sessionListResponse?.data],
+  );
+  const selectedSessionId = useMemo(() => {
+    if (sessions.some((session) => session.id === activeSessionId)) {
+      return activeSessionId;
+    }
+
+    return sessions[0]?.id || null;
+  }, [activeSessionId, sessions]);
   const activeSession = sessions.find(
-    (session) => session.id === activeSessionId,
-  );
-  const messages = activeSession?.messages || [];
-  const canSend = message.trim().length > 0;
-
-  const filteredSessions = useMemo(
-    () =>
-      sessions.filter((session) =>
-        `${session.title} ${session.preview}`
-          .toLowerCase()
-          .includes(sessionSearch.trim().toLowerCase()),
-      ),
-    [sessionSearch, sessions],
+    (session) => session.id === selectedSessionId,
   );
 
-  const createNewSession = () => {
-    const newSession = {
-      id: `session-${nextSessionIdRef.current}`,
-      title: "New travel chat",
-      preview: "No messages yet",
-      updatedAt: "New",
-      messages: [],
-    };
+  const {
+    data: messageListResponse,
+    isFetching: isFetchingMessages,
+    isError: isMessageListError,
+    refetch: refetchMessages,
+  } = useChatMessageListQuery(
+    {
+      session_id: selectedSessionId,
+      page: 1,
+      page_size: 100,
+    },
+    { skip: !selectedSessionId },
+  );
 
-    nextSessionIdRef.current += 1;
-    setSessions((currentSessions) => [newSession, ...currentSessions]);
-    setActiveSessionId(newSession.id);
-    setMessage("");
+  const [createChatSession, { isLoading: isCreatingSession }] =
+    useCreateChatSessionMutation();
+  const [deleteChatSession, { isLoading: isDeletingSession }] =
+    useDeleteChatSessionMutation();
+  const [askChatQuestion, { isLoading: isSendingMessage }] =
+    useAskChatQuestionMutation();
+
+  const messages = useMemo(() => {
+    const serverMessages = (messageListResponse?.data || [])
+      .slice()
+      .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+      .map(toDisplayMessage);
+
+    if (!pendingMessage) return serverMessages;
+    return [...serverMessages, pendingMessage];
+  }, [messageListResponse?.data, pendingMessage]);
+
+  const canSend = message.trim().length > 0 && !isSendingMessage;
+
+  const createNewSession = async () => {
+    try {
+      const response = await createChatSession({
+        title: "New travel chat",
+      }).unwrap();
+      const session = response?.data;
+
+      if (session?.id) setActiveSessionId(session.id);
+      setMessage("");
+      toast.success(response?.message || "Chat session created.");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not create chat session."));
+    }
   };
 
-  const deleteActiveSession = () => {
-    if (!activeSessionId) return;
+  const deleteActiveSession = async () => {
+    if (!selectedSessionId) return;
 
-    setSessions((currentSessions) => {
-      const nextSessions = currentSessions.filter(
-        (session) => session.id !== activeSessionId,
-      );
+    try {
+      const deletingId = selectedSessionId;
+      const response = await deleteChatSession(deletingId).unwrap();
+      const nextSession = sessions.find((session) => session.id !== deletingId);
 
-      setActiveSessionId(nextSessions[0]?.id);
-      return nextSessions;
-    });
-    setMessage("");
+      setActiveSessionId(nextSession?.id || null);
+      setMessage("");
+      toast.success(response?.message || "Chat session deleted.");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not delete this session."));
+    }
   };
 
   const downloadActiveSession = () => {
@@ -166,7 +196,7 @@ const AgentChatPage = () => {
     const sessionLines = [
       activeSession.title,
       "",
-      ...activeSession.messages.map((item) => `${item.meta}: ${item.message}`),
+      ...messages.map((item) => `${item.meta}: ${item.message}`),
     ];
     const file = new Blob([sessionLines.join("\n\n")], {
       type: "text/plain;charset=utf-8",
@@ -184,67 +214,34 @@ const AgentChatPage = () => {
     URL.revokeObjectURL(url);
   };
 
-  const submitMessage = (nextMessage) => {
+  const submitMessage = useCallback(async (nextMessage) => {
     const trimmedMessage = nextMessage.trim();
-    if (!trimmedMessage) return;
+    if (!trimmedMessage || isSendingMessage) return;
 
-    const userMessage = {
-      id: nextMessageIdRef.current,
+    setMessage("");
+    setPendingMessage({
+      id: `pending-${pendingMessageIdRef.current}`,
       role: "user",
       message: trimmedMessage,
       meta: "You",
-    };
-    nextMessageIdRef.current += 1;
-
-    const assistantMessage = {
-      id: nextMessageIdRef.current,
-      role: "assistant",
-      message: localAssistantReply,
-      meta: "turtle",
-    };
-    nextMessageIdRef.current += 1;
-
-    if (!activeSessionId) {
-      const firstSession = {
-        id: `session-${nextSessionIdRef.current}`,
-        title: trimmedMessage.slice(0, 42),
-        preview: trimmedMessage,
-        updatedAt: "Just now",
-        messages: [userMessage, assistantMessage],
-      };
-
-      nextSessionIdRef.current += 1;
-      setSessions([firstSession]);
-      setActiveSessionId(firstSession.id);
-      setMessage("");
-      return;
-    }
-
-    setSessions((currentSessions) => {
-      return currentSessions.map((session) => {
-        if (session.id !== activeSessionId) return session;
-
-        const nextMessages = [
-          ...session.messages,
-          userMessage,
-          assistantMessage,
-        ];
-
-        return {
-          ...session,
-          title:
-            session.messages.length === 0
-              ? trimmedMessage.slice(0, 42)
-              : session.title,
-          preview: trimmedMessage,
-          updatedAt: "Just now",
-          messages: nextMessages,
-        };
-      });
     });
+    pendingMessageIdRef.current += 1;
 
-    setMessage("");
-  };
+    try {
+      const payload = selectedSessionId
+        ? { session_id: selectedSessionId, message: trimmedMessage }
+        : { message: trimmedMessage };
+      const response = await askChatQuestion(payload).unwrap();
+      const sessionId = response?.data?.session_id;
+
+      if (sessionId) setActiveSessionId(sessionId);
+    } catch (error) {
+      setMessage(trimmedMessage);
+      toast.error(getApiErrorMessage(error, "Could not send message."));
+    } finally {
+      setPendingMessage(null);
+    }
+  }, [askChatQuestion, isSendingMessage, selectedSessionId]);
 
   const sendMessage = (event) => {
     event.preventDefault();
@@ -268,14 +265,16 @@ const AgentChatPage = () => {
   };
 
   useEffect(() => {
-    if (!initialMessage) return;
+    if (!initialMessage || forwardedMessageSentRef.current) return;
 
+    forwardedMessageSentRef.current = true;
+    submitMessage(initialMessage);
     navigate(location.pathname, { replace: true, state: null });
-  }, [initialMessage, location.pathname, navigate]);
+  }, [initialMessage, location.pathname, navigate, submitMessage]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ block: "end" });
-  }, [messages.length, activeSessionId]);
+  }, [messages.length, selectedSessionId]);
 
   return (
     <section className="mt-4 grid gap-5 lg:h-[calc(100vh-100px)] lg:min-h-[560px] lg:grid-cols-[420px_minmax(0,1fr)]">
@@ -292,10 +291,15 @@ const AgentChatPage = () => {
               type="button"
               size="icon"
               onClick={createNewSession}
+              disabled={isCreatingSession}
               aria-label="Create new session"
               className="rounded-xl"
             >
-              <Plus size={18} />
+              {isCreatingSession ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Plus size={18} />
+              )}
             </Button>
           </div>
 
@@ -311,9 +315,13 @@ const AgentChatPage = () => {
         </div>
 
         <div className="custom-scrollbar min-h-0 flex-1 space-y-2 py-3 pr-1">
-          {filteredSessions.length > 0 ? (
-            filteredSessions.map((session) => {
-              const isActive = session.id === activeSessionId;
+          {isFetchingSessions && !sessions.length ? (
+            <SessionListSkeleton />
+          ) : isSessionListError ? (
+            <SessionErrorState onRetry={refetchSessions} />
+          ) : sessions.length > 0 ? (
+            sessions.map((session) => {
+              const isActive = session.id === selectedSessionId;
 
               return (
                 <button
@@ -341,13 +349,13 @@ const AgentChatPage = () => {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-bold text-slate-950">
-                        {session.title}
+                        {session.title || "Untitled chat"}
                       </span>
-                      <span className="mt-1 truncate block text-xs leading-5 text-slate-500">
-                        {session.preview}
+                      <span className="mt-1 block truncate text-xs leading-5 text-slate-500">
+                        {sessionPreview(session)}
                       </span>
                       <span className="mt-2 block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                        {session.updatedAt}
+                        {formatRelativeTime(session.updated_at)}
                       </span>
                     </span>
                   </div>
@@ -369,6 +377,7 @@ const AgentChatPage = () => {
                 type="button"
                 size="sm"
                 onClick={createNewSession}
+                disabled={isCreatingSession}
                 className="mt-4"
               >
                 <Plus size={16} />
@@ -410,7 +419,7 @@ const AgentChatPage = () => {
             <DropdownMenuContent align="end" className="w-48 rounded-xl">
               <DropdownMenuItem
                 onClick={downloadActiveSession}
-                disabled={!activeSession}
+                disabled={!activeSession || !messages.length}
                 className="cursor-pointer rounded-lg"
               >
                 <Download size={16} />
@@ -419,7 +428,7 @@ const AgentChatPage = () => {
               <DropdownMenuItem
                 variant="destructive"
                 onClick={deleteActiveSession}
-                disabled={!activeSession}
+                disabled={!activeSession || isDeletingSession}
                 className="cursor-pointer rounded-lg"
               >
                 <Trash2 size={16} />
@@ -430,7 +439,11 @@ const AgentChatPage = () => {
         </div>
 
         <div className="custom-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto rounded-2xl bg-slate-50/70 px-4 py-5">
-          {messages.length > 0 ? (
+          {isFetchingMessages && selectedSessionId && !messages.length ? (
+            <MessageListSkeleton />
+          ) : isMessageListError ? (
+            <MessageErrorState onRetry={refetchMessages} />
+          ) : messages.length > 0 ? (
             messages.map((item) => {
               const isUser = item.role === "user";
 
@@ -445,14 +458,7 @@ const AgentChatPage = () => {
                   {!isUser ? (
                     <AuthorMessage message={item.message} />
                   ) : (
-                    <div
-                      className={cn(
-                        "max-w-[86%] rounded-xl px-4 py-3 md:max-w-[72%]",
-                        isUser
-                          ? "rounded-tr-md bg-primary text-white"
-                          : "rounded-tl-md border border-slate-200 bg-white text-slate-700",
-                      )}
-                    >
+                    <div className="max-w-[86%] rounded-xl rounded-tr-md bg-primary px-4 py-3 text-white md:max-w-[72%]">
                       <p className="text-sm leading-6">{item.message}</p>
                     </div>
                   )}
@@ -477,12 +483,19 @@ const AgentChatPage = () => {
                     key={prompt}
                     type="button"
                     onClick={() => sendPrompt(prompt)}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                    disabled={isSendingMessage}
+                    className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-primary/30 hover:bg-primary/5 hover:text-primary disabled:pointer-events-none disabled:opacity-50"
                   >
                     {prompt}
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+          {isSendingMessage && (
+            <div className="flex items-center gap-2 pl-11 text-xs font-semibold text-slate-400">
+              <Loader2 size={14} className="animate-spin" />
+              turtle is typing
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -500,7 +513,8 @@ const AgentChatPage = () => {
               onKeyDown={handleComposerKeyDown}
               placeholder="Ask about destinations, weather, culture, budget, safety, food, or a custom route..."
               rows={2}
-              className="max-h-36 min-h-12 flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
+              disabled={isSendingMessage}
+              className="max-h-36 min-h-12 flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-70"
             />
             <Button
               type="submit"
@@ -509,7 +523,11 @@ const AgentChatPage = () => {
               aria-label="Send message"
               className="mb-1 rounded-2xl"
             >
-              <Send size={18} />
+              {isSendingMessage ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Send size={18} />
+              )}
             </Button>
           </form>
         </div>
@@ -517,5 +535,64 @@ const AgentChatPage = () => {
     </section>
   );
 };
+
+const SessionListSkeleton = () => (
+  <div className="space-y-2">
+    {[1, 2, 3].map((item) => (
+      <div key={item} className="flex gap-3 rounded-xl p-3">
+        <div className="size-9 animate-pulse rounded-lg bg-slate-100" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-2/3 animate-pulse rounded bg-slate-100" />
+          <div className="h-3 w-full animate-pulse rounded bg-slate-100" />
+          <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const MessageListSkeleton = () => (
+  <div className="space-y-5">
+    <div className="h-20 w-3/4 animate-pulse rounded-xl bg-slate-100" />
+    <div className="ml-auto h-16 w-2/3 animate-pulse rounded-xl bg-slate-200" />
+    <div className="h-24 w-4/5 animate-pulse rounded-xl bg-slate-100" />
+  </div>
+);
+
+const SessionErrorState = ({ onRetry }) => (
+  <div className="flex h-full min-h-56 flex-col items-center justify-center rounded-xl border border-dashed border-red-200 bg-red-50 p-6 text-center">
+    <h3 className="text-sm font-bold text-red-950">Could not load sessions</h3>
+    <p className="mt-1 text-sm leading-6 text-red-700">
+      Check your connection and try again.
+    </p>
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      onClick={onRetry}
+      className="mt-4"
+    >
+      Retry
+    </Button>
+  </div>
+);
+
+const MessageErrorState = ({ onRetry }) => (
+  <div className="flex h-full min-h-80 flex-col items-center justify-center rounded-2xl border border-dashed border-red-200 bg-white p-8 text-center">
+    <h3 className="text-lg font-bold text-red-950">Could not load messages</h3>
+    <p className="mt-2 max-w-md text-sm leading-6 text-red-700">
+      The selected chat failed to load.
+    </p>
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      onClick={onRetry}
+      className="mt-4"
+    >
+      Retry
+    </Button>
+  </div>
+);
 
 export default AgentChatPage;

@@ -96,6 +96,9 @@ export const apiSlice = createApi({
     "journal-detail",
     "journal-comments",
     "journal-replies",
+    "chat-session-list",
+    "chat-session",
+    "chat-message-list",
   ],
   keepUnusedDataFor: 300, // Don't keep any unused data
   refetchOnMountOrArgChange: false, // Always refetch when component mounts
