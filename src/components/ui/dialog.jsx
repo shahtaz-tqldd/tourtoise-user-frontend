@@ -3,11 +3,34 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useCloseOnBack } from "@/hooks/useCloseOnBack"
 
 function Dialog({
+  open,
+  defaultOpen = false,
+  onOpenChange,
   ...props
 }) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />;
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
+  const actualOpen = open ?? internalOpen;
+  const handleOpenChange = React.useCallback(
+    (nextOpen) => {
+      if (open === undefined) setInternalOpen(nextOpen);
+      onOpenChange?.(nextOpen);
+    },
+    [open, onOpenChange]
+  );
+
+  useCloseOnBack(actualOpen, () => handleOpenChange(false));
+
+  return (
+    <DialogPrimitive.Root
+      data-slot="dialog"
+      open={actualOpen}
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
+  );
 }
 
 function DialogTrigger({

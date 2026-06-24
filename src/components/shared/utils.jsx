@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
@@ -134,5 +135,34 @@ export const SectionHeader = ({
         )}
       </div>
     </div>
+  </div>
+);
+
+export const EmptyState = ({
+  title,
+  description,
+  onClear,
+  compact = false,
+}) => (
+  <div
+    className={`border border-dashed border-slate-300 bg-white text-center ${
+      compact ? "rounded-2xl px-6 py-12" : "rounded-[28px] px-10 py-24"
+    }`}
+  >
+    <h2
+      className={`font-semibold text-slate-950 ${
+        compact ? "text-base" : "text-lg"
+      }`}
+    >
+      {title}
+    </h2>
+    <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
+      {description}
+    </p>
+    {onClear && (
+      <Button className="mt-4" variant="outline" onClick={onClear}>
+        Clear filters
+      </Button>
+    )}
   </div>
 );

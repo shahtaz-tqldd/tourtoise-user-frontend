@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import TripCard from "./trip-details/trip-card";
+import { EmptyState, SectionHeader } from "@/components/shared/utils";
 
 const pageSize = 24;
 const historyPageSize = 12;
@@ -83,30 +84,6 @@ const TripListLoader = ({ compact = false }) => (
         }`}
       />
     ))}
-  </div>
-);
-
-const EmptyState = ({ title, description, onClear, compact = false }) => (
-  <div
-    className={`border border-dashed border-slate-300 bg-white text-center ${
-      compact ? "rounded-2xl px-6 py-12" : "rounded-[28px] px-10 py-24"
-    }`}
-  >
-    <h2
-      className={`font-semibold text-slate-950 ${
-        compact ? "text-base" : "text-lg"
-      }`}
-    >
-      {title}
-    </h2>
-    <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
-      {description}
-    </p>
-    {onClear && (
-      <Button className="mt-4" variant="outline" onClick={onClear}>
-        Clear filters
-      </Button>
-    )}
   </div>
 );
 
@@ -440,19 +417,11 @@ const TripHistory = ({
     <aside
       className={`${className} space-y-5 lg:sticky lg:top-24 lg:self-start`}
     >
-      <div className="hidden md:flex items-start justify-between gap-3">
-        <div className="flex gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Luggage size={18} />
-          </div>
-          <div>
-            <h2 className="text-base font-bold text-slate-950">Trip History</h2>
-            <p className="text-sm leading-5 text-slate-500">
-              Your past completed trips
-            </p>
-          </div>
-        </div>
-      </div>
+      <SectionHeader
+        icon={Luggage}
+        title="Trip History"
+        description="Your past completed trips"
+      />
 
       <SearchField
         value={search}
