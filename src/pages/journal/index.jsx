@@ -1,15 +1,17 @@
 import React, { useMemo, useState } from "react";
 import {
   Bookmark,
+  BookMarked,
   BookmarkX,
   Plus,
   Search,
   SlidersHorizontal,
   X,
 } from "lucide-react";
+import { useSelector } from "react-redux";
 import { toast } from "sonner";
 
-import AgentMessageComposer from "@/components/shared/agent-message-composer";
+import ConfirmDialog from "@/components/shared/confirm-dialog";
 import InfiniteScroll from "@/components/shared/infinite-scroll";
 import ListingHeader from "@/components/shared/listing-header";
 import SearchField from "@/components/shared/search";
@@ -30,14 +32,18 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import {
+  useDeleteJournalMutation,
   useJournalInfiniteListInfiniteQuery,
   useSavedJournalInfiniteListInfiniteQuery,
   useSaveJournalMutation,
 } from "@/features/journal/journalApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
+import useDebounce from "@/hooks/useDebounce";
 import JournalCard from "./journal-card";
 import { normalizeJournals } from "./journal-utils";
 import { JournalFormDialog } from "../profile/travel_journal";
+import { SectionHeader } from "@/components/shared/utils";
+import { UserAvatar } from "@/components/shared/user-profile";
 
 const JournalTagFilter = ({ tags, value, onApply }) => {
   const [open, setOpen] = useState(false);
@@ -133,10 +139,30 @@ const JournalTagFilter = ({ tags, value, onApply }) => {
 const getJournalCover = (journal) =>
   journal.images?.[0] || journal.cover_image || null;
 
+const matchesSavedJournalSearch = (journal, searchQuery) => {
+  if (!searchQuery) return true;
+
+  const searchableText = [
+    journal.body,
+    journal.author?.name,
+    journal.date,
+    ...(journal.tags || []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return searchableText.includes(searchQuery.toLowerCase());
+};
+
 const SavedJournalList = ({
   journals: savedJournals,
   onSaveToggle,
   isLoading,
+  isError,
+  onRetry,
+  searchQuery,
+  onClearSearch,
 }) => {
   if (isLoading && !savedJournals.length) {
     return (
@@ -151,15 +177,41 @@ const SavedJournalList = ({
     );
   }
 
+  if (isError) {
+    return (
+      <div className="rounded-2xl border border-dashed border-red-200 bg-red-50 px-6 py-10 text-center">
+        <h3 className="text-base font-semibold text-red-700">
+          Could not load saved journals
+        </h3>
+        <p className="mx-auto mt-1 max-w-[260px] text-sm leading-6 text-red-600/80">
+          There was a problem loading your bookmarked travel stories.
+        </p>
+        <Button className="mt-4" variant="outline" onClick={onRetry}>
+          Try again
+        </Button>
+      </div>
+    );
+  }
+
   if (!savedJournals.length) {
     return (
-      <div className="flex flex-col items-center gap-4 py-10 text-center">
-        <div className="center size-12 rounded-full bg-slate-200/80">
-          <BookmarkX className="text-slate-500" />
+      <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
+        <div className="center size-12 rounded-xl bg-primary/10 text-primary">
+          <BookmarkX size={20} />
         </div>
-        <p className="max-w-[240px] text-sm leading-5 text-slate-500">
-          You have no saved journals yet.
+        <h3 className="mt-4 text-base font-semibold text-slate-950">
+          {searchQuery ? "No saved journals found" : "No saved journals yet"}
+        </h3>
+        <p className="mt-1 max-w-[260px] text-sm leading-6 text-slate-500">
+          {searchQuery
+            ? "Try another search term to find a bookmarked travel story."
+            : "Save journals you want to revisit and they will show up here."}
         </p>
+        {searchQuery && (
+          <Button className="mt-4" variant="outline" onClick={onClearSearch}>
+            Clear search
+          </Button>
+        )}
       </div>
     );
   }
@@ -175,24 +227,30 @@ const SavedJournalList = ({
             className="flex min-w-0 items-center gap-3 rounded-2xl bg-white p-2"
           >
             <div className="size-20 shrink-0 overflow-hidden rounded-xl bg-slate-100">
-              {coverImage && (
+              {coverImage ? (
                 <img
                   src={coverImage}
                   alt=""
                   className="h-full w-full object-cover"
                 />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
+                  <BookMarked size={22} />
+                </div>
               )}
             </div>
             <div className="min-w-0 flex-1">
               <p className="line-clamp-2 text-sm leading-5 text-slate-700">
-                {journal.body}
+                {journal.body || "Untitled travel journal"}
               </p>
               <p className="mt-1.5 truncate text-xs font-semibold text-slate-500">
-                {journal.author.name}
+                {journal.author?.name || "Unknown traveler"}
               </p>
-              <p className="mt-1 text-xs font-medium text-slate-400">
-                {journal.date}
-              </p>
+              {journal.date && (
+                <p className="mt-1 text-xs font-medium text-slate-400">
+                  {journal.date}
+                </p>
+              )}
             </div>
             <Button
               type="button"
@@ -216,26 +274,39 @@ const SavedJournalsPanel = ({
   onSaveToggle,
   hasMore,
   isLoading,
+  isFetchingMore,
+  isError,
+  onRetry,
   onLoadMore,
+  searchQuery,
+  onSearchChange,
 }) => (
   <aside className="custom-scrollbar hidden max-h-[calc(100vh-7rem)] space-y-10 overflow-y-auto pr-2 lg:sticky lg:top-24 lg:block lg:self-start">
-    <AgentMessageComposer
-      message="Found a travel story you like? I can help turn its ideas into your own trip plan."
-      placeholder="Ask about a journal or travel idea"
-    />
     <div className="space-y-5">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
-        <Bookmark size={14} />
-        Saved journals
-      </div>
+      <SectionHeader
+        icon={BookMarked}
+        title="Saved Journals"
+        description="Bookmarked travel stories"
+      />
+
+      <SearchField
+        value={searchQuery}
+        onChange={onSearchChange}
+        onClear={() => onSearchChange("")}
+        placeholder="Search saved journals..."
+      />
       <SavedJournalList
         journals={savedJournals}
         onSaveToggle={onSaveToggle}
         isLoading={isLoading}
+        isError={isError}
+        onRetry={onRetry}
+        searchQuery={searchQuery}
+        onClearSearch={() => onSearchChange("")}
       />
       <InfiniteScroll
         hasMore={hasMore}
-        isLoading={isLoading}
+        isLoading={isFetchingMore}
         onLoadMore={onLoadMore}
         loadingLabel="Loading saved journals..."
       />
@@ -248,7 +319,12 @@ const SavedJournalsDrawer = ({
   onSaveToggle,
   hasMore,
   isLoading,
+  isFetchingMore,
+  isError,
+  onRetry,
   onLoadMore,
+  searchQuery,
+  onSearchChange,
 }) => (
   <Sheet>
     <SheetTrigger asChild>
@@ -282,18 +358,24 @@ const SavedJournalsDrawer = ({
         </Button>
       </SheetClose>
       <div className="space-y-8 p-4">
-        <AgentMessageComposer
-          message="Found a travel story you like? I can help turn its ideas into your own trip plan."
-          placeholder="Ask about a journal or travel idea"
+        <SearchField
+          value={searchQuery}
+          onChange={onSearchChange}
+          onClear={() => onSearchChange("")}
+          placeholder="Search saved journals..."
         />
         <SavedJournalList
           journals={savedJournals}
           onSaveToggle={onSaveToggle}
           isLoading={isLoading}
+          isError={isError}
+          onRetry={onRetry}
+          searchQuery={searchQuery}
+          onClearSearch={() => onSearchChange("")}
         />
         <InfiniteScroll
           hasMore={hasMore}
-          isLoading={isLoading}
+          isLoading={isFetchingMore}
           onLoadMore={onLoadMore}
           loadingLabel="Loading saved journals..."
         />
@@ -304,8 +386,14 @@ const SavedJournalsDrawer = ({
 
 const TravelJournalPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [savedSearchQuery, setSavedSearchQuery] = useState("");
   const [activeTag, setActiveTag] = useState("All");
   const [formOpen, setFormOpen] = useState(false);
+  const [editingJournal, setEditingJournal] = useState(null);
+  const [deletingJournal, setDeletingJournal] = useState(null);
+  const currentUser = useSelector((state) => state.auth.user);
+  const debouncedSearchQuery = useDebounce(searchQuery.trim(), 400);
+  const debouncedSavedSearchQuery = useDebounce(savedSearchQuery.trim(), 400);
   const {
     data,
     isLoading,
@@ -316,7 +404,7 @@ const TravelJournalPage = () => {
     isFetchingNextPage,
   } = useJournalInfiniteListInfiniteQuery({
     page_size: 10,
-    search: searchQuery.trim(),
+    search: debouncedSearchQuery,
     tags: activeTag === "All" ? undefined : activeTag,
   });
   const {
@@ -324,18 +412,30 @@ const TravelJournalPage = () => {
     fetchNextPage: fetchNextSavedPage,
     hasNextPage: hasNextSavedPage,
     isLoading: isLoadingSaved,
+    isError: isSavedError,
     isFetchingNextPage: isFetchingNextSavedPage,
-  } = useSavedJournalInfiniteListInfiniteQuery({ page_size: 10 });
+    refetch: refetchSavedJournals,
+  } = useSavedJournalInfiniteListInfiniteQuery({
+    page_size: debouncedSavedSearchQuery ? 100 : 10,
+    search: debouncedSavedSearchQuery,
+  });
   const [saveJournal, { isLoading: isSaving }] = useSaveJournalMutation();
+  const [deleteJournal, { isLoading: isDeleting }] = useDeleteJournalMutation();
 
   const journals = useMemo(
     () => normalizeJournals(data?.pages.flatMap((page) => page.data)),
     [data],
   );
   const savedJournals = useMemo(
-    () =>
-      normalizeJournals(savedData?.pages.flatMap((page) => page.data)),
+    () => normalizeJournals(savedData?.pages.flatMap((page) => page.data)),
     [savedData],
+  );
+  const filteredSavedJournals = useMemo(
+    () =>
+      savedJournals.filter((journal) =>
+        matchesSavedJournalSearch(journal, debouncedSavedSearchQuery),
+      ),
+    [debouncedSavedSearchQuery, savedJournals],
   );
   const totalJournals = data?.pages[0]?.meta?.count || 0;
 
@@ -364,12 +464,44 @@ const TravelJournalPage = () => {
     }
   };
 
+  const openCreate = () => {
+    setEditingJournal(null);
+    setFormOpen(true);
+  };
+
+  const openEdit = (journal) => {
+    setEditingJournal(journal);
+    setFormOpen(true);
+  };
+
+  const handleDeleteJournal = async () => {
+    if (!deletingJournal) return;
+
+    try {
+      const response = await deleteJournal(deletingJournal.id).unwrap();
+      toast.success(response.message);
+      setDeletingJournal(null);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not delete this journal."));
+    }
+  };
+
+  const isOwnJournal = (journal) => {
+    if (journal.is_mine || journal.is_owner) return true;
+    if (!currentUser?.id || !journal.author?.id) return false;
+
+    return String(currentUser.id) === String(journal.author.id);
+  };
+
   const clearFilters = () => {
     setSearchQuery("");
     setActiveTag("All");
   };
 
   const hasFilters = searchQuery || activeTag !== "All";
+  const isSavedSearchSettling =
+    savedSearchQuery.trim() !== debouncedSavedSearchQuery;
+  const isJournalSearchSettling = searchQuery.trim() !== debouncedSearchQuery;
 
   return (
     <section className="grid gap-6 py-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
@@ -391,26 +523,35 @@ const TravelJournalPage = () => {
                 value={activeTag}
                 onApply={setActiveTag}
               />
-              <Button
-                type="button"
-                className="h-12 shrink-0 rounded-full px-4"
-                onClick={() => setFormOpen(true)}
-              >
-                <Plus size={16} />
-                <span className="hidden sm:inline">Write Journal</span>
-              </Button>
               <SavedJournalsDrawer
-                journals={savedJournals}
+                journals={filteredSavedJournals}
                 onSaveToggle={toggleSavedJournal}
-                hasMore={hasNextSavedPage}
-                isLoading={isLoadingSaved || isFetchingNextSavedPage}
+                hasMore={hasNextSavedPage && !debouncedSavedSearchQuery}
+                isLoading={isLoadingSaved || isSavedSearchSettling}
+                isFetchingMore={isFetchingNextSavedPage}
+                isError={isSavedError}
+                onRetry={refetchSavedJournals}
                 onLoadMore={fetchNextSavedPage}
+                searchQuery={savedSearchQuery}
+                onSearchChange={setSavedSearchQuery}
               />
             </div>
           }
         />
 
-        {isLoading ? (
+        <div
+          type="button"
+          className="flx w-full gap-2 cursor-pointer"
+          onClick={openCreate}
+        >
+          <UserAvatar className="size-9" />
+          <div className="flex-1 border rounded-full w-full flex items-center bg-white text-slate-400 py-2.5 px-4 gap-2">
+            <Plus size={14} />
+            <span className="text-sm">Write Journal</span>
+          </div>
+        </div>
+
+        {isLoading || isJournalSearchSettling ? (
           <JournalListSkeleton />
         ) : isError ? (
           <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
@@ -429,6 +570,10 @@ const TravelJournalPage = () => {
                 journal={journal}
                 isSaved={journal.is_saved}
                 onSaveToggle={toggleSavedJournal}
+                onEdit={isOwnJournal(journal) ? openEdit : undefined}
+                onDelete={
+                  isOwnJournal(journal) ? setDeletingJournal : undefined
+                }
               />
             ))}
             <InfiniteScroll
@@ -459,19 +604,35 @@ const TravelJournalPage = () => {
       </div>
 
       <SavedJournalsPanel
-        journals={savedJournals}
+        journals={filteredSavedJournals}
         onSaveToggle={toggleSavedJournal}
-        hasMore={hasNextSavedPage}
-        isLoading={isLoadingSaved || isFetchingNextSavedPage}
+        hasMore={hasNextSavedPage && !debouncedSavedSearchQuery}
+        isLoading={isLoadingSaved || isSavedSearchSettling}
+        isFetchingMore={isFetchingNextSavedPage}
+        isError={isSavedError}
+        onRetry={refetchSavedJournals}
         onLoadMore={fetchNextSavedPage}
+        searchQuery={savedSearchQuery}
+        onSearchChange={setSavedSearchQuery}
       />
       {formOpen && (
         <JournalFormDialog
+          key={editingJournal?.id || "new-journal"}
           open={formOpen}
           onOpenChange={setFormOpen}
-          journal={null}
+          journal={editingJournal}
         />
       )}
+      <ConfirmDialog
+        open={Boolean(deletingJournal)}
+        onOpenChange={(open) => !open && setDeletingJournal(null)}
+        title="Delete journal?"
+        description="This permanently deletes this journal and all its comments."
+        confirmLabel="Delete"
+        variant="destructive"
+        isLoading={isDeleting}
+        onConfirm={handleDeleteJournal}
+      />
     </section>
   );
 };

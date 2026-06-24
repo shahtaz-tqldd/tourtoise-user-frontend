@@ -35,10 +35,7 @@ const TravelJournal = ({ userId, isOwner = false }) => {
   const [formOpen, setFormOpen] = useState(false);
   const [editingJournal, setEditingJournal] = useState(null);
   const [deletingJournal, setDeletingJournal] = useState(null);
-  const myQuery = useMyJournalListQuery(
-    { page_size: 100 },
-    { skip: !isOwner },
-  );
+  const myQuery = useMyJournalListQuery({ page_size: 100 }, { skip: !isOwner });
   const userQuery = useUserJournalListQuery(
     { user_id: userId, page_size: 100 },
     { skip: isOwner || !userId },
@@ -48,8 +45,7 @@ const TravelJournal = ({ userId, isOwner = false }) => {
     () => normalizeJournals(query.data?.data),
     [query.data],
   );
-  const [deleteJournal, { isLoading: isDeleting }] =
-    useDeleteJournalMutation();
+  const [deleteJournal, { isLoading: isDeleting }] = useDeleteJournalMutation();
 
   const openCreate = () => {
     setEditingJournal(null);
@@ -138,16 +134,12 @@ const TravelJournal = ({ userId, isOwner = false }) => {
 
 export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
   const [content, setContent] = useState(journal?.body || "");
-  const [visibility, setVisibility] = useState(
-    journal?.visibility || "public",
-  );
+  const [visibility, setVisibility] = useState(journal?.visibility || "public");
   const [tags, setTags] = useState((journal?.tags || []).join(", "));
   const [images, setImages] = useState([]);
   const [removedImageIds, setRemovedImageIds] = useState([]);
-  const [createJournal, { isLoading: isCreating }] =
-    useCreateJournalMutation();
-  const [updateJournal, { isLoading: isUpdating }] =
-    useUpdateJournalMutation();
+  const [createJournal, { isLoading: isCreating }] = useCreateJournalMutation();
+  const [updateJournal, { isLoading: isUpdating }] = useUpdateJournalMutation();
   const isEditing = Boolean(journal);
   const isSubmitting = isCreating || isUpdating;
   const imagePreviews = useMemo(
@@ -198,7 +190,7 @@ export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="custom-scrollbar max-h-[92vh] overflow-y-auto p-4 sm:max-w-xl sm:p-6">
+      <DialogContent className="custom-scrollbar max-h-screen overflow-x-hidden p-4 max-w-screen sm:max-w-xl sm:p-6 rounded-none md:rounded-3xl">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Update travel journal" : "Create travel journal"}
@@ -209,6 +201,39 @@ export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
         </DialogHeader>
 
         <form className="space-y-5 pt-2" onSubmit={handleSubmit}>
+          <fieldset className="space-y-2">
+            <div className="flex gap-6">
+              {[
+                {
+                  value: "public",
+                  label: "Public",
+                  description: "Anyone can read it",
+                },
+                {
+                  value: "private",
+                  label: "Private",
+                  description: "Only you can read it",
+                },
+              ].map((option) => (
+                <label
+                  key={option.value}
+                  className="cursor-pointer transition select-none"
+                >
+                  <span className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    <input
+                      type="radio"
+                      name="journal-visibility"
+                      value={option.value}
+                      checked={visibility === option.value}
+                      onChange={(event) => setVisibility(event.target.value)}
+                      className="size-4 accent-primary"
+                    />
+                    {option.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <FloatingTextarea
             name="journal-body"
             label="Story"
@@ -225,50 +250,6 @@ export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
             onChange={(event) => setTags(event.target.value)}
             placeholder="Beach, Food, Solo Travel"
           />
-
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-semibold text-slate-700">
-              Who can see this journal?
-            </legend>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                {
-                  value: "public",
-                  label: "Public",
-                  description: "Anyone can read it",
-                },
-                {
-                  value: "private",
-                  label: "Private",
-                  description: "Only you can read it",
-                },
-              ].map((option) => (
-                <label
-                  key={option.value}
-                  className={`cursor-pointer rounded-xl border p-3 transition ${
-                    visibility === option.value
-                      ? "border-primary bg-primary/5 ring-2 ring-primary/10"
-                      : "border-slate-200 hover:border-primary/40"
-                  }`}
-                >
-                  <span className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <input
-                      type="radio"
-                      name="journal-visibility"
-                      value={option.value}
-                      checked={visibility === option.value}
-                      onChange={(event) => setVisibility(event.target.value)}
-                      className="size-4 accent-primary"
-                    />
-                    {option.label}
-                  </span>
-                  <span className="mt-1 block pl-6 text-xs text-slate-500">
-                    {option.description}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
@@ -349,7 +330,11 @@ export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
 
 const ImageTile = ({ src, onRemove }) => (
   <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
-    <img src={src} alt="Journal preview" className="h-full w-full object-cover" />
+    <img
+      src={src}
+      alt="Journal preview"
+      className="h-full w-full object-cover"
+    />
     <button
       type="button"
       onClick={onRemove}

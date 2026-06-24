@@ -4,9 +4,29 @@ import { cva } from "class-variance-authority";
 import { XIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useCloseOnBack } from "@/hooks/useCloseOnBack";
 
-function Sheet({ ...props }) {
-  return <SheetPrimitive.Root data-slot="sheet" {...props} />;
+function Sheet({ open, defaultOpen = false, onOpenChange, ...props }) {
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
+  const actualOpen = open ?? internalOpen;
+  const handleOpenChange = React.useCallback(
+    (nextOpen) => {
+      if (open === undefined) setInternalOpen(nextOpen);
+      onOpenChange?.(nextOpen);
+    },
+    [open, onOpenChange],
+  );
+
+  useCloseOnBack(actualOpen, () => handleOpenChange(false));
+
+  return (
+    <SheetPrimitive.Root
+      data-slot="sheet"
+      open={actualOpen}
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
+  );
 }
 
 function SheetTrigger({ ...props }) {

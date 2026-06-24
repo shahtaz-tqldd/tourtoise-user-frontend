@@ -21,7 +21,7 @@ const ReadJournalDialog = ({ journal, images }) => {
   return (
   <Dialog open={open} onOpenChange={setOpen}>
     <DialogTrigger asChild>
-      <button className="flx mt-4 gap-2 text-sm font-semibold text-primary">
+      <button className="flx gap-2 text-sm font-semibold text-primary">
         <ArrowUpRight size={14} className="shrink-0" />
         <span className="truncate">Read Full</span>
       </button>
