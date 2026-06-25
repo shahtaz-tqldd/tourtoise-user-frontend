@@ -582,7 +582,7 @@ const DestinationDetailPage = () => {
 
   return (
     <>
-      <section className="space-y-5 pb-6 pt-3 md:space-y-6 md:py-5">
+      <section className="space-y-5 md:space-y-6 pt-5 pb-16 md:pb-5">
         <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="min-w-0 space-y-5 md:space-y-6">
             <DestinationCover destination={destination} />
@@ -765,7 +765,7 @@ const DestinationCover = ({ destination }) => {
         >
           <ArrowLeft size={16} />
         </Link>
-        <div className="aspect-[4/3] md:aspect-[16/9]">
+        <div className="aspect-[16/9]">
           <img
             src={destination.cover_image}
             alt={destination.name}
