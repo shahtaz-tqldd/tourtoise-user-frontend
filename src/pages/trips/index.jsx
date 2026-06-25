@@ -249,7 +249,7 @@ const TripsPage = () => {
   };
 
   return (
-    <section className="relative space-y-6 py-5">
+    <section className="relative space-y-6 pt-5 pb-20 md:pb-5">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="space-y-6">
           <ListingHeader
@@ -306,38 +306,6 @@ const TripsPage = () => {
               }
               onClear={hasActiveFilters ? clearActiveFilters : undefined}
             />
-          )}
-
-          {!isFetching && !isError && trips.length > 0 && (
-            <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-              <p className="text-sm text-slate-500">
-                Showing page {meta.page || page}
-                {meta.count ? ` of ${meta.count} trips` : ""}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  disabled={page <= 1 || isFetching}
-                >
-                  <ChevronLeft size={16} />
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((current) => current + 1)}
-                  disabled={
-                    (!meta.next && page >= (meta.num_pages || page)) ||
-                    isFetching
-                  }
-                >
-                  Next
-                  <ChevronRight size={16} />
-                </Button>
-              </div>
-            </div>
           )}
         </div>
 

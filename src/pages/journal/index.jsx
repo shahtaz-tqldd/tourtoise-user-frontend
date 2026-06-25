@@ -504,7 +504,7 @@ const TravelJournalPage = () => {
   const isJournalSearchSettling = searchQuery.trim() !== debouncedSearchQuery;
 
   return (
-    <section className="grid gap-6 py-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
+    <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start pt-5 pb-20 md:pb-5">
       <div className="min-w-0 space-y-5">
         <ListingHeader
           title="Travel Journal"

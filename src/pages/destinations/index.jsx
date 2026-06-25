@@ -85,7 +85,7 @@ const DestinationPage = () => {
   };
 
   return (
-    <section className="grid gap-10 py-5 lg:grid-cols-[minmax(0,1fr)_372px]">
+    <section className="grid gap-10 pt-5 pb-20 md:pb-5 lg:grid-cols-[minmax(0,1fr)_372px]">
       <div className="space-y-8">
         <ListingHeader
           title="Where's Next?"
