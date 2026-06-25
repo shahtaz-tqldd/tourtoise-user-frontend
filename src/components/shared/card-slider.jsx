@@ -1,9 +1,8 @@
 import { cn } from "@/lib/utils";
-import { FreeMode, Scrollbar } from "swiper/modules";
+import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
-import "swiper/css/free-mode";
-import "swiper/css/scrollbar";
+import "swiper/css/pagination";
 
 const CardSlider = ({
   items = [],
@@ -18,20 +17,16 @@ const CardSlider = ({
     <>
       <div className="w-full min-w-0 overflow-hidden pb-1 lg:hidden">
         <Swiper
-          modules={[FreeMode, Scrollbar]}
-          slidesPerView="auto"
-          spaceBetween={14}
-          freeMode
-          scrollbar={{ draggable: true, hide: false }}
-          className="card-slider !overflow-hidden !pb-5"
+          modules={[Pagination]}
+          slidesPerView={1}
+          spaceBetween={12}
+          pagination={{ clickable: true }}
+          className="card-slider !overflow-hidden !pb-8 [&_.swiper-pagination-bullet-active]:!bg-primary [&_.swiper-pagination-bullet]:!h-1.5 [&_.swiper-pagination-bullet]:!w-1.5 [&_.swiper-pagination-bullet]:!bg-slate-300 [&_.swiper-pagination-bullet]:!opacity-100"
         >
           {items.map((item, index) => (
             <SwiperSlide
               key={getKey(item, index)}
-              className={cn(
-                "!h-auto !w-[min(78vw,320px)] shrink-0",
-                slideClassName,
-              )}
+              className={cn("!h-auto", slideClassName)}
             >
               <div className="h-full">{renderItem(item, index)}</div>
             </SwiperSlide>

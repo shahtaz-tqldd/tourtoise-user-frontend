@@ -58,7 +58,7 @@ const DestinationHighlights = ({ destination, setActiveFeature }) => {
         />
         <Link
           to={`/destinations/${destination.slug}/attractions`}
-          className="font-semibold text-sm text-slate-500"
+          className="font-semibold text-sm text-slate-500 whitespace-nowrap"
         >
           View More
         </Link>
