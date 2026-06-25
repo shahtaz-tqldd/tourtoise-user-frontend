@@ -9,8 +9,8 @@ const ForgotPasswordPage = lazy(() => import("@/pages/auth/forgot-password"));
 const ResetPasswordPage = lazy(() => import("@/pages/auth/reset-password"));
 
 const DestiantionPage = lazy(() => import("@/pages/destinations"));
-const DestinationDetailPage = lazy(
-  () => import("@/pages/destinations/destination-detail")
+const DestinationDetailsPage = lazy(
+  () => import("@/pages/destinations/destination-details")
 );
 const TripsPage = lazy(() => import("@/pages/trips"));
 const TripDetailPage = lazy(() => import("@/pages/trips/detail"));
@@ -37,7 +37,7 @@ export const routes = createBrowserRouter([
       },
       {
         path: "/destinations/:destination_id",
-        element: withSuspense(<DestinationDetailPage />),
+        element: withSuspense(<DestinationDetailsPage />),
       },
       {
         path: "/trips",

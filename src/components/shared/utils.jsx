@@ -125,14 +125,14 @@ export const SectionHeader = ({
   <div className={cn("flex items-start justify-between gap-4", className)}>
     <div className="flex gap-3">
       {icon && (
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          {React.createElement(icon, { size: 18 })}
+        <div className="hidden md:flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          {React.createElement(icon, { size: 20 })}
         </div>
       )}
       <div>
         <h2 className="text-lg font-bold text-slate-950">{title}</h2>
         {description && (
-          <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
+          <p className="mt-1 text-sm text-slate-500 line-clamp-1">{description}</p>
         )}
       </div>
     </div>
