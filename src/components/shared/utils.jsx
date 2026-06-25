@@ -126,7 +126,7 @@ export const SectionHeader = ({
     <div className="flex gap-3">
       {icon && (
         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          {React.createElement(icon, { size: 18 })}
+          {React.createElement(icon, { size: 20 })}
         </div>
       )}
       <div>

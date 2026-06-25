@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,9 +7,9 @@ import {
 } from "@/components/ui/dialog";
 import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import Card from "@/components/ui/card";
 
-const DestinationGallery = ({ destination }) => {
+const Gallery = ({ destination }) => {
   const [activeIndex, setActiveIndex] = useState(null);
   const images = useMemo(() => {
     const galleryImages =
@@ -49,14 +50,23 @@ const DestinationGallery = ({ destination }) => {
 
   return (
     <>
-      <section className="border rounded-[28px] p-4">
-        <div className="grid gap-3 grid-cols-3">
+      <Card className="md:p-4">
+        <div className="flbx">
+          <h2 className="font-bold">Gallery Highlights</h2>
+          <button
+            onClick={() => setActiveIndex(0)}
+            className="text-xs text-slate-500 font-bold"
+          >
+            View All
+          </button>
+        </div>
+        <div className="grid grid-cols-3 gap-2 mt-4">
           {visibleImages.map((image, index) => (
             <button
               type="button"
               key={`${image.url}-${index}`}
               onClick={() => setActiveIndex(index)}
-              className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 text-left outline-none ring-primary/30 focus-visible:ring-2"
+              className="group relative aspect-[1] overflow-hidden rounded-xl bg-slate-100 text-left outline-none ring-primary/30 focus-visible:ring-2"
             >
               <img
                 src={getCloudinaryPreviewUrl(image.previewUrl, 96)}
@@ -68,7 +78,7 @@ const DestinationGallery = ({ destination }) => {
             </button>
           ))}
         </div>
-      </section>
+      </Card>
 
       <Dialog
         open={activeIndex !== null}
@@ -143,4 +153,4 @@ const DestinationGallery = ({ destination }) => {
   );
 };
 
-export default DestinationGallery;
+export default Gallery;

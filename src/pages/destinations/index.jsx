@@ -1,16 +1,18 @@
-import { Button } from "@/components/ui/button";
-import ListingHeader from "@/components/shared/listing-header";
 import React, { useMemo, useState } from "react";
+
+import ListingHeader from "@/components/shared/listing-header";
 import DestinationCard from "./components/destination-card";
-import DestinationFilter from "./filters";
+import DestinationFilter from "./components/destination-filter";
 import {
   useDestinationListQuery,
   useSaveDestinationListQuery,
 } from "@/features/destination/destinationApiSlice";
+import { BucketListDrawer, BucketListPanel } from "./components/bucket-list";
 import {
-  BucketListDrawer,
-  BucketListPanel,
-} from "./components/bucket-list";
+  DestinationFetchError,
+  EmptyDestinationList,
+  LoadingDestinationList,
+} from "./components/fallback";
 
 const getDestinationRows = (response) => {
   const payload = response?.data || response;
@@ -120,41 +122,12 @@ const DestinationPage = () => {
           ))}
         </div>
 
-        {isFetching && (
-          <div className="rounded-lg border border-slate-200 bg-white p-10 text-center">
-            <h2 className="text-lg font-semibold text-slate-950">
-              Loading destinations
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Fetching published destinations from the API.
-            </p>
-          </div>
-        )}
+        {isFetching && <LoadingDestinationList />}
 
-        {isError && !isFetching && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-10 text-center">
-            <h2 className="text-lg font-semibold text-red-900">
-              Could not load destinations
-            </h2>
-            <p className="mt-1 text-sm text-red-700">
-              Check the API base URL, endpoint path, and whether published
-              destinations exist.
-            </p>
-          </div>
-        )}
+        {isError && !isFetching && <DestinationFetchError />}
 
         {!isFetching && !isError && !destinations.length && (
-          <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
-            <h2 className="text-lg font-semibold text-slate-950">
-              No destinations found
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Adjust the search, country, or destination type filters.
-            </p>
-            <Button className="mt-4" variant="outline" onClick={clearFilters}>
-              Clear filters
-            </Button>
-          </div>
+          <EmptyDestinationList />
         )}
       </div>
 
