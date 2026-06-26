@@ -64,7 +64,6 @@ const DestinationPage = () => {
           description={`Showing ${destinations.length} of ${totalDestinations} destinations`}
           filters={
             <DestinationFilter
-              totalDestinations={totalDestinations}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               countries={countries}
@@ -97,7 +96,7 @@ const DestinationPage = () => {
         {isError && !isFetching && <DestinationFetchError />}
 
         {!isFetching && !isError && !destinations.length && (
-          <EmptyDestinationList />
+          <EmptyDestinationList clearFilters={clearFilters} />
         )}
       </div>
 
