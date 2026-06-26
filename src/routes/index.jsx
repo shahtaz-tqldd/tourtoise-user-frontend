@@ -12,6 +12,9 @@ const DestiantionPage = lazy(() => import("@/pages/destinations"));
 const DestinationDetailsPage = lazy(
   () => import("@/pages/destinations/destination-details")
 );
+const DestinationFeatureListPage = lazy(
+  () => import("@/pages/destinations/destination-features")
+);
 const TripsPage = lazy(() => import("@/pages/trips"));
 const TripDetailPage = lazy(() => import("@/pages/trips/detail"));
 const AgentChatPage = lazy(() => import("@/pages/chat"));
@@ -38,6 +41,10 @@ export const routes = createBrowserRouter([
       {
         path: "/destinations/:destination_id",
         element: withSuspense(<DestinationDetailsPage />),
+      },
+      {
+        path: "/destinations/:destination_id/:feature_type",
+        element: withSuspense(<DestinationFeatureListPage />),
       },
       {
         path: "/trips",

@@ -1,13 +1,19 @@
 import { useMemo, useState } from "react";
+
+// components
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getCloudinaryPreviewUrl } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import Card from "@/components/ui/card";
+
+// icons
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+
+// lib
+import { getCloudinaryPreviewUrl } from "@/lib/utils";
 
 const Gallery = ({ destination }) => {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -85,7 +91,7 @@ const Gallery = ({ destination }) => {
         onOpenChange={(open) => setActiveIndex(open ? activeIndex : null)}
       >
         <DialogContent
-          className="h-[90vh] rounded-3xl overflow-hidden border-0 bg-slate-950 p-0 text-white sm:max-w-5xl"
+          className="h-[100dvh] w-screen max-w-none overflow-hidden rounded-none border-0 bg-black p-0 text-white sm:h-auto sm:w-fit sm:max-w-[calc(100vw-4rem)] sm:rounded-2xl"
           showCloseButton={false}
         >
           <DialogTitle className="sr-only">
@@ -96,14 +102,14 @@ const Gallery = ({ destination }) => {
           </DialogDescription>
 
           {activeImage && (
-            <div className="relative h-[90vh] w-full">
+            <div className="relative flex h-full w-full items-center justify-center sm:h-auto sm:w-fit">
               <img
                 src={activeImage.url}
                 alt={
                   activeImage.caption ||
                   `${destination.name} gallery ${activeIndex + 1}`
                 }
-                className="h-full w-full object-cover"
+                className="block h-auto w-auto max-h-[100dvh] max-w-full object-contain sm:max-h-[calc(100dvh-4rem)] sm:max-w-[calc(100vw-4rem)]"
               />
 
               <div className="absolute left-0 right-0 top-0 flex items-center justify-between gap-3 bg-gradient-to-b from-slate-950/80 to-transparent p-4">
@@ -113,9 +119,11 @@ const Gallery = ({ destination }) => {
                 <button
                   type="button"
                   onClick={() => setActiveIndex(null)}
-                  className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+                  className="grid size-10 place-items-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  aria-label="Close image preview"
+                  title="Close image preview"
                 >
-                  Close
+                  <X size={20} />
                 </button>
               </div>
 
