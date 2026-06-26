@@ -7,7 +7,7 @@ import { useDestinationDetailQuery } from "@/features/destination/destinationApi
 // comonents
 import Gallery from "./components/gallery";
 import DestinationCover from "./components/cover";
-import TripPlanningDrawer from "@/pages/trips/create-trip/trip-planning-drawer";
+import TripPlanningDrawer from "@/pages/trips/trip-create";
 import TripSnapshot from "./components/snapshot";
 import DestinationHighlights from "./components/highlights";
 import DestinationFeatures from "./components/activities";

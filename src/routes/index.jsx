@@ -16,7 +16,7 @@ const DestinationFeatureListPage = lazy(
   () => import("@/pages/destinations/destination-features")
 );
 const TripsPage = lazy(() => import("@/pages/trips"));
-const TripDetailPage = lazy(() => import("@/pages/trips/detail"));
+const TripDetailPage = lazy(() => import("@/pages/trips/trip-details"));
 const AgentChatPage = lazy(() => import("@/pages/chat"));
 const ProfilePage = lazy(() => import("@/pages/profile"));
 const TravelJournalPage = lazy(() => import("@/pages/journal"));
