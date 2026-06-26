@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-export const EmptyDestinationList = () => {
+export const EmptyDestinationList = ({ clearFilters }) => {
   return (
     <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
       <h2 className="text-lg font-semibold text-slate-950">
