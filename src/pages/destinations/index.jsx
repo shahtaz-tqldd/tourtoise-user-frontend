@@ -14,39 +14,13 @@ import {
   LoadingDestinationList,
 } from "./components/fallback";
 
-const getDestinationRows = (response) => {
-  const payload = response?.data || response;
-
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.results)) return payload.results;
-  if (Array.isArray(payload?.rows)) return payload.rows;
-  if (Array.isArray(payload?.data)) return payload.data;
-
-  return [];
-};
-
-const getDestinationCount = (response, rows) => {
-  const payload = response?.data || response;
-
-  return (
-    response?.meta?.count ||
-    response?.meta?.total ||
-    payload?.count ||
-    payload?.total ||
-    rows.length
-  );
-};
-
-const getDestinationFromSavedRow = (row) =>
-  row?.destination || row?.destination_detail || row?.destination_data || row;
-
 const DestinationPage = () => {
+  // filter
   const [searchQuery, setSearchQuery] = useState("");
   const [countries, setCountries] = useState([]);
   const [destinationTypes, setDestinationTypes] = useState([]);
   const [budgetTiers, setBudgetTiers] = useState([]);
   const [difficulties, setDifficulties] = useState([]);
-
   const destinationQuery = useMemo(
     () => ({
       page: 1,
@@ -59,25 +33,6 @@ const DestinationPage = () => {
     }),
     [budgetTiers, countries, destinationTypes, difficulties, searchQuery],
   );
-
-  const { data, isFetching, isError } =
-    useDestinationListQuery(destinationQuery);
-  const { data: savedData, isFetching: isSavedFetching } =
-    useSaveDestinationListQuery({
-      page: 1,
-      pageSize: 6,
-    });
-  const destinations = useMemo(() => getDestinationRows(data), [data]);
-  const totalDestinations = getDestinationCount(data, destinations);
-  const savedDestinations = useMemo(
-    () =>
-      getDestinationRows(savedData)
-        .map(getDestinationFromSavedRow)
-        .filter((destination) => destination?.slug)
-        .slice(0, 4),
-    [savedData],
-  );
-
   const clearFilters = () => {
     setSearchQuery("");
     setCountries([]);
@@ -85,6 +40,21 @@ const DestinationPage = () => {
     setBudgetTiers([]);
     setDifficulties([]);
   };
+
+  // destination
+  const { data, isFetching, isError } =
+    useDestinationListQuery(destinationQuery);
+  const destinations = useMemo(() => data?.data || [], [data]);
+  const totalDestinations = data?.meta?.count || 0;
+
+  // saved destination
+  const { data: savedData, isFetching: isSavedFetching } =
+    useSaveDestinationListQuery({
+      page: 1,
+      pageSize: 6,
+    });
+  const savedDestinations = useMemo(() => savedData?.data || [], [savedData]);
+  const totalSavedDestinations = savedData?.meta?.count || 0;
 
   return (
     <section className="grid gap-10 pt-5 pb-20 md:pb-5 lg:grid-cols-[minmax(0,1fr)_372px]">

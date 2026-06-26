@@ -1,10 +1,16 @@
-import { Button } from "@/components/ui/button";
-import Card from "@/components/ui/card";
-import { useSaveDestinationMutation } from "@/features/destination/destinationApiSlice";
-import { getApiErrorMessage } from "@/lib/get-api-error-message";
-import { Bookmark, Sparkles } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
+
+// components
+import Card from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+// icons
+import { Bookmark, Sparkles } from "lucide-react";
+
+// lib
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
+import { useSaveDestinationMutation } from "@/features/destination/destinationApiSlice";
 
 const TripPlan = ({ destination, handlePlanningOpenChange }) => {
   const [saveDestination, { isLoading: isSavingDestination }] =
@@ -65,8 +71,8 @@ const TripPlan = ({ destination, handlePlanningOpenChange }) => {
           {isSavingDestination
             ? "Saving..."
             : isSaved
-              ? "Add to Bucket List"
-              : "Added to Bucket List"}
+              ? "Added into Bucket List"
+              : "Add to Bucket List"}
         </Button>
       </div>
     </Card>

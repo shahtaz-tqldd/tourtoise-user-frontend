@@ -84,7 +84,7 @@ const FeatureDetails = ({ feature, open, onOpenChange }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[88vh] overflow-hidden p-0 sm:max-w-2xl">
+      <DialogContent className="max-h-[88vh] overflow-hidden p-0 sm:max-w-xl border-none rounded-3xl">
         <DialogTitle className="sr-only">{feature?.item?.name}</DialogTitle>
         <DialogDescription className="sr-only">
           {feature?.item?.description || "Destination feature details"}
@@ -162,7 +162,7 @@ function FeatureDetailContent({ feature }) {
 
   return (
     <div className="overflow-hidden bg-white">
-      <div className="relative aspect-[16/10] max-h-[340px] bg-slate-100">
+      <div className="relative aspect-[16/10] max-h-[340px] w-full bg-slate-100">
         {item.cover_image ? (
           <img
             src={item.cover_image}
