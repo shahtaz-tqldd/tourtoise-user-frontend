@@ -25,7 +25,7 @@ import {
   useUserJournalListQuery,
 } from "@/features/journal/journalApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
-import JournalCard from "../journal/journal-card";
+import JournalCard from "../journal/components/journal-card";
 import {
   createJournalFormData,
   normalizeJournals,
@@ -135,7 +135,6 @@ const TravelJournal = ({ userId, isOwner = false }) => {
 export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
   const [content, setContent] = useState(journal?.body || "");
   const [visibility, setVisibility] = useState(journal?.visibility || "public");
-  const [tags, setTags] = useState((journal?.tags || []).join(", "));
   const [images, setImages] = useState([]);
   const [removedImageIds, setRemovedImageIds] = useState([]);
   const [createJournal, { isLoading: isCreating }] = useCreateJournalMutation();
@@ -160,19 +159,11 @@ export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const parsedTags = [
-      ...new Set(
-        tags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter(Boolean),
-      ),
-    ];
+
     const body = createJournalFormData({
       title: content.trim().split("\n")[0].slice(0, 200) || "Travel journal",
       content,
       visibility,
-      tags: parsedTags,
       images,
       removeImageIds: removedImageIds,
     });
@@ -240,17 +231,9 @@ export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
             value={content}
             onChange={(event) => setContent(event.target.value)}
             rows={7}
-            textareaClassName="min-h-44"
+            textareaClassName="min-h-44 leading-7"
             required
           />
-          <FloatingInput
-            name="journal-tags"
-            label="Tags"
-            value={tags}
-            onChange={(event) => setTags(event.target.value)}
-            placeholder="Beach, Food, Solo Travel"
-          />
-
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-semibold text-slate-700">Images</p>

@@ -1,33 +1,8 @@
-import ListingHeader from "@/components/shared/listing-header";
-import SearchField from "@/components/shared/search";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-
 import { useTripListQuery } from "@/features/trips/tripApiSlice";
-import {
-  ChevronLeft,
-  ChevronRight,
-  History,
-  Luggage,
-  SlidersHorizontal,
-  X,
-} from "lucide-react";
 import React, { useMemo, useState } from "react";
-import TripCard from "./trip-details/trip-card";
-import { EmptyState, SectionHeader } from "@/components/shared/utils";
+import { TripHistory } from "./components/trip-history";
+import TripsFeed from "./components/trips-feed";
+import TripsPageHeader from "./components/trips-page-header";
 
 const pageSize = 24;
 const historyPageSize = 12;
@@ -73,113 +48,6 @@ const filterCurrentTrips = (trips, status) =>
   trips.filter(
     (trip) => !isPastTrip(trip) && statusMatches(trip.status, status),
   );
-
-const TripListLoader = ({ compact = false }) => (
-  <div className="grid gap-3">
-    {Array.from({ length: compact ? 4 : 3 }).map((_, index) => (
-      <div
-        key={index}
-        className={`animate-pulse rounded-lg border border-slate-200 bg-slate-100 ${
-          compact ? "h-32" : "h-44"
-        }`}
-      />
-    ))}
-  </div>
-);
-
-const TripStatusFilter = ({ value, onApply }) => {
-  const [open, setOpen] = useState(false);
-  const [draftStatus, setDraftStatus] = useState(value);
-
-  const handleOpenChange = (nextOpen) => {
-    if (nextOpen) setDraftStatus(value);
-    setOpen(nextOpen);
-  };
-
-  const applyFilter = () => {
-    onApply(draftStatus);
-    setOpen(false);
-  };
-
-  const cancelFilter = () => {
-    setDraftStatus(value);
-    setOpen(false);
-  };
-
-  return (
-    <div className="relative">
-      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-12 w-12 rounded-full border-slate-200"
-            aria-label="Open trip filters"
-          >
-            <SlidersHorizontal size={16} />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-[min(calc(100vw-2rem),320px)] rounded-2xl border-slate-200 bg-white p-0 shadow-xl"
-          onCloseAutoFocus={(event) => event.preventDefault()}
-        >
-          <div className="border-b border-slate-100 p-4">
-            <h2 className="text-base font-bold text-slate-950">
-              Filter trip plans
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Choose which trip status to show.
-            </p>
-          </div>
-
-          <div className="space-y-2 p-4">
-            <p className="text-xs font-semibold uppercase text-slate-500">
-              Status
-            </p>
-            {[
-              { value: "all", label: "All" },
-              { value: "active", label: "Active" },
-              { value: "draft", label: "Draft" },
-            ].map((option) => (
-              <label
-                key={option.value}
-                className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3 text-sm font-semibold transition ${
-                  draftStatus === option.value
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-primary/40 hover:bg-primary/5"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="trip-status-filter"
-                  value={option.value}
-                  checked={draftStatus === option.value}
-                  onChange={(event) => setDraftStatus(event.target.value)}
-                  className="size-4 accent-primary"
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
-
-          <div className="flex justify-end gap-2 border-t border-slate-100 p-4">
-            <Button type="button" variant="outline" onClick={cancelFilter}>
-              Cancel
-            </Button>
-            <Button type="button" onClick={applyFilter}>
-              Apply
-            </Button>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {value !== "all" && (
-        <span className="absolute -right-1 -top-1 size-3 rounded-full bg-primary" />
-      )}
-    </div>
-  );
-};
 
 const TripsPage = () => {
   const [page, setPage] = useState(1);
@@ -252,61 +120,27 @@ const TripsPage = () => {
     <section className="relative space-y-6 pt-5 pb-20 md:pb-5">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="space-y-6">
-          <ListingHeader
-            title="Trip Plans"
-            description={`Showing ${activeTrips.length} of ${totalTrips} trips`}
-            filters={
-              <div className="flex w-full gap-3 md:justify-end">
-                <SearchField
-                  value={activeSearch}
-                  onChange={updateActiveSearch}
-                  onClear={() => updateActiveSearch("")}
-                  placeholder="Search active trips..."
-                  className="max-w-sm flex-1"
-                />
-                <TripStatusFilter
-                  value={activeStatus}
-                  onApply={updateActiveStatus}
-                />
-                <TripHistoryDrawer
-                  trips={pastTrips}
-                  search={historySearch}
-                  onSearchChange={setHistorySearch}
-                  isFetching={isHistoryFetching}
-                  isError={isHistoryError}
-                />
-              </div>
-            }
+          <TripsPageHeader
+            tripsCount={activeTrips.length}
+            totalTrips={totalTrips}
+            activeSearch={activeSearch}
+            onActiveSearchChange={updateActiveSearch}
+            activeStatus={activeStatus}
+            onActiveStatusChange={updateActiveStatus}
+            historyTrips={pastTrips}
+            historySearch={historySearch}
+            onHistorySearchChange={setHistorySearch}
+            isHistoryFetching={isHistoryFetching}
+            isHistoryError={isHistoryError}
           />
 
-          {isFetching && <TripListLoader />}
-
-          {isError && !isFetching && (
-            <EmptyState
-              title="Could not load active trips"
-              description="Check the trips endpoint and try again."
-            />
-          )}
-
-          {!isFetching && !isError && activeTrips.length > 0 && (
-            <div className="space-y-4">
-              {activeTrips.map((trip) => (
-                <TripCard key={trip.id || trip.slug} trip={trip} />
-              ))}
-            </div>
-          )}
-
-          {!isFetching && !isError && !activeTrips.length && (
-            <EmptyState
-              title="No active trips"
-              description={
-                hasActiveFilters
-                  ? "No current trips match the search and status filter."
-                  : "Start planning from a destination page and active trips or drafts will appear here."
-              }
-              onClear={hasActiveFilters ? clearActiveFilters : undefined}
-            />
-          )}
+          <TripsFeed
+            trips={activeTrips}
+            isFetching={isFetching}
+            isError={isError}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearActiveFilters}
+          />
         </div>
 
         <TripHistory
@@ -319,116 +153,6 @@ const TripsPage = () => {
         />
       </div>
     </section>
-  );
-};
-
-const TripHistoryDrawer = ({
-  trips,
-  search,
-  onSearchChange,
-  isFetching,
-  isError,
-}) => (
-  <Sheet>
-    <SheetTrigger asChild>
-      <Button
-        type="button"
-        variant="outline"
-        className="h-12 w-12 rounded-full border-slate-200 lg:hidden"
-        aria-label="Open trip history"
-      >
-        <History size={16} />
-      </Button>
-    </SheetTrigger>
-    <SheetContent
-      side="right"
-      className="w-[min(92vw,420px)] gap-0 overflow-y-auto p-0"
-      showCloseButton={false}
-    >
-      <SheetHeader className="border-b border-slate-100 pr-12 text-left">
-        <SheetTitle>Trip History</SheetTitle>
-        <SheetDescription>Your past completed trips.</SheetDescription>
-      </SheetHeader>
-      <SheetClose asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="absolute right-3 top-3 rounded-full"
-          aria-label="Close trip history"
-        >
-          <X size={16} />
-        </Button>
-      </SheetClose>
-      <div className="p-4">
-        <TripHistory
-          trips={trips}
-          search={search}
-          onSearchChange={onSearchChange}
-          isFetching={isFetching}
-          isError={isError}
-        />
-      </div>
-    </SheetContent>
-  </Sheet>
-);
-
-const TripHistory = ({
-  className = "",
-  trips,
-  search,
-  onSearchChange,
-  isFetching,
-  isError,
-}) => {
-  return (
-    <aside
-      className={`${className} space-y-5 lg:sticky lg:top-24 lg:self-start`}
-    >
-      <SectionHeader
-        icon={Luggage}
-        title="Trip History"
-        description="Your past completed trips"
-      />
-
-      <SearchField
-        value={search}
-        onChange={onSearchChange}
-        onClear={() => onSearchChange("")}
-        placeholder="Search past trips..."
-      />
-
-      {isFetching && <TripListLoader compact />}
-
-      {isError && !isFetching && (
-        <EmptyState
-          title="Could not load history"
-          description="Check the trips endpoint and try again."
-          compact
-        />
-      )}
-
-      {!isFetching && !isError && trips.length > 0 && (
-        <div className="space-y-3">
-          {trips.map((trip) => (
-            <TripCard key={trip.id || trip.slug} trip={trip} compact />
-          ))}
-        </div>
-      )}
-
-      {!isFetching && !isError && !trips.length && (
-        <EmptyState
-          title="No past trips"
-          description={
-            search
-              ? "No past trips match the current search."
-              : "Completed, archived, cancelled, or ended trips will collect here."
-          }
-          onClear={search ? () => onSearchChange("") : undefined}
-          compact
-        />
-      )}
-    </aside>
   );
 };
 
