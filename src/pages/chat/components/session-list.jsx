@@ -53,7 +53,7 @@ const ChatSessionList = ({
 }) => (
   <Card
     className={cn(
-      "h-full min-h-0 rounded-none border-x-0 border-y-0 p-4 md:rounded-2xl md:border lg:flex lg:flex-col",
+      "h-full min-h-0",
       isMobileChatOpen ? "hidden lg:flex" : "flex flex-col",
     )}
   >

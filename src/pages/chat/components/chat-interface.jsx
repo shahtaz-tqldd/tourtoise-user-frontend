@@ -106,7 +106,7 @@ const ChatInterface = ({
   return (
     <Card
       className={cn(
-        "h-full min-h-0 rounded-none border-x-0 border-y-0 p-4 md:rounded-2xl md:border lg:flex lg:flex-col",
+        "h-full min-h-0 lg:flex lg:flex-col",
         isMobileChatOpen ? "flex flex-col" : "hidden lg:flex",
       )}
     >

@@ -37,19 +37,20 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
             credentials: "include",
           },
           api,
-          extraOptions
+          extraOptions,
         );
 
         if (refreshResult.data?.success) {
           const refreshData = refreshResult?.data?.data || {};
           api.dispatch(
             userLoggedIn({
-              accessToken:
-                refreshData.access_token || refreshData.accessToken,
+              accessToken: refreshData.access_token || refreshData.accessToken,
               refreshToken:
-                refreshData.refresh_token || refreshData.refreshToken || refreshToken,
+                refreshData.refresh_token ||
+                refreshData.refreshToken ||
+                refreshToken,
               rememberMe,
-            })
+            }),
           );
 
           // Retry the original request with new token
@@ -84,6 +85,7 @@ export const apiSlice = createApi({
     "my-profile",
     "destination-list",
     "destination-detail",
+    "destination-short-detail",
     "destination-feature-list",
     "saved-destination-list",
     "trip-list",

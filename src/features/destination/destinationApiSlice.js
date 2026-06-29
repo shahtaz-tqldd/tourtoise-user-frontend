@@ -1,5 +1,8 @@
 import { apiSlice } from "../api/apiSlice";
 
+const nextDestinationFeaturePage = (lastPage, allPages, lastPageParam) =>
+  lastPage?.meta?.next ? lastPageParam + 1 : undefined;
+
 export const destinationApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     destinationList: builder.query({
@@ -57,8 +60,26 @@ export const destinationApiSlice = apiSlice.injectEndpoints({
       ],
     }),
 
+    destinationShortDetail: builder.query({
+      query: (destination_slug) => {
+        return {
+          url: `/destinations/${destination_slug}/short-detail/`,
+          method: "GET",
+        };
+      },
+      providesTags: (result, error, destination_slug) => [
+        { type: "destination-short-detail", id: destination_slug },
+      ],
+    }),
+
     destinationFeatureList: builder.query({
-      query: ({ destination_slug, feature_type, page = 1, page_size = 12, search }) => {
+      query: ({
+        destination_slug,
+        feature_type,
+        page = 1,
+        page_size = 12,
+        search,
+      }) => {
         const queryParams = new URLSearchParams({
           page: String(page),
           page_size: String(page_size),
@@ -73,7 +94,44 @@ export const destinationApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: (result, error, { destination_slug, feature_type }) => [
         { type: "destination-detail", id: destination_slug },
-        { type: "destination-feature-list", id: `${destination_slug}-${feature_type}` },
+        {
+          type: "destination-feature-list",
+          id: `${destination_slug}-${feature_type}`,
+        },
+      ],
+    }),
+
+    destinationFeatureInfiniteList: builder.infiniteQuery({
+      query: ({ queryArg = {}, pageParam }) => {
+        const {
+          destination_slug,
+          feature_type,
+          page_size = 12,
+          search,
+        } = queryArg;
+
+        const queryParams = new URLSearchParams({
+          page: String(pageParam),
+          page_size: String(page_size),
+        });
+
+        if (search) queryParams.set("search", search);
+
+        return {
+          url: `/destinations/${destination_slug}/${feature_type}/?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
+      infiniteQueryOptions: {
+        initialPageParam: 1,
+        getNextPageParam: nextDestinationFeaturePage,
+      },
+      providesTags: (result, error, { destination_slug, feature_type }) => [
+        { type: "destination-detail", id: destination_slug },
+        {
+          type: "destination-feature-list",
+          id: `${destination_slug}-${feature_type}`,
+        },
       ],
     }),
 
@@ -109,7 +167,9 @@ export const destinationApiSlice = apiSlice.injectEndpoints({
 export const {
   useDestinationListQuery,
   useDestinationDetailQuery,
+  useDestinationShortDetailQuery,
   useDestinationFeatureListQuery,
+  useDestinationFeatureInfiniteListInfiniteQuery,
   useSaveDestinationListQuery,
   useSaveDestinationMutation,
 } = destinationApiSlice;

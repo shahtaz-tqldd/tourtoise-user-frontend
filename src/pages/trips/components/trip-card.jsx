@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Card from "@/components/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -305,7 +306,7 @@ const TripCard = ({ trip, compact = false }) => {
   if (compact) {
     return (
       <Link to={getTripUrl(trip)}>
-        <article className="relative rounded-2xl border border-slate-200 bg-white p-4">
+        <Card className="relative">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-3">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -363,7 +364,7 @@ const TripCard = ({ trip, compact = false }) => {
               </span>
             </span>
           </div>
-        </article>
+        </Card>
 
         <ConfirmDialog
           open={deleteOpen}
@@ -380,8 +381,8 @@ const TripCard = ({ trip, compact = false }) => {
 
   return (
     <>
-      <article className="group overflow-hidden rounded-2xl md:rounded-[28px] md:border border-slate-200 bg-white relative">
-        <div className="grid gap-6 p-4 md:p-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <Card className="group relative">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
           {/* Card body */}
           <div className="flex flex-col gap-6 justify-between">
             {/* Badges */}
@@ -450,9 +451,9 @@ const TripCard = ({ trip, compact = false }) => {
             </div>
           )}
         </div>
-
+        <div className="border-t border-slate-100 my-4 -mx-6"></div>
         {/* Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 md:px-6 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-slate-400">
             {trip.updated_at
               ? `Updated ${formatUpdatedAt(trip.updated_at)}`
@@ -505,7 +506,7 @@ const TripCard = ({ trip, compact = false }) => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </article>
+      </Card>
       <RescheduleDialog
         trip={trip}
         open={rescheduleOpen}
