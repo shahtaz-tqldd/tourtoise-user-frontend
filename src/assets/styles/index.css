@@ -141,6 +141,20 @@ button {
   border-radius: 8px;
 }
 
+.hidden-scrollbar {
+  overflow-y: auto;
+}
+.hidden-scrollbar::-webkit-scrollbar {
+  width: 0px;
+}
+.hidden-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.hidden-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #004f3baf, #004f3baf);
+  border-radius: 0px;
+}
+
 .card-slider {
   width: 100%;
   min-width: 0;

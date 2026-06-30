@@ -3,7 +3,7 @@ import { Bookmark, BookMarked, BookmarkX, X } from "lucide-react";
 
 import InfiniteScroll from "@/components/shared/infinite-scroll";
 import SearchField from "@/components/shared/search";
-import { SectionHeader } from "@/components/shared/utils";
+import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -26,7 +26,6 @@ const SavedJournalList = ({
   isError,
   onRetry,
   searchQuery,
-  onClearSearch,
 }) => {
   if (isLoading && !journals.length) {
     return (
@@ -59,24 +58,16 @@ const SavedJournalList = ({
 
   if (!journals.length) {
     return (
-      <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
-        <div className="center size-12 rounded-xl bg-primary/10 text-primary">
-          <BookmarkX size={20} />
-        </div>
-        <h3 className="mt-4 text-base font-semibold text-slate-950">
-          {searchQuery ? "No saved journals found" : "No saved journals yet"}
-        </h3>
-        <p className="mt-1 max-w-[260px] text-sm leading-6 text-slate-500">
-          {searchQuery
+      <EmptyState
+        title={
+          searchQuery ? "No saved journals found" : "No saved journals yet"
+        }
+        description={
+          searchQuery
             ? "Try another search term to find a bookmarked travel story."
-            : "Save journals you want to revisit and they will show up here."}
-        </p>
-        {searchQuery && (
-          <Button className="mt-4" variant="outline" onClick={onClearSearch}>
-            Clear search
-          </Button>
-        )}
-      </div>
+            : "Save journals you want to revisit and they will show up here."
+        }
+      />
     );
   }
 
@@ -174,7 +165,6 @@ export const SavedJournalsPanel = ({
         isError={isError}
         onRetry={onRetry}
         searchQuery={searchQuery}
-        onClearSearch={() => onSearchChange("")}
       />
       <InfiniteScroll
         hasMore={hasMore}
@@ -243,7 +233,6 @@ export const SavedJournalsDrawer = ({
           isError={isError}
           onRetry={onRetry}
           searchQuery={searchQuery}
-          onClearSearch={() => onSearchChange("")}
         />
         <InfiniteScroll
           hasMore={hasMore}

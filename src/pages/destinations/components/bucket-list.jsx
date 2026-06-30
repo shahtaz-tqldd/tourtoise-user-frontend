@@ -1,5 +1,5 @@
 import AgentMessageComposer from "@/components/shared/agent-message-composer";
-import { DetailPill } from "@/components/shared/utils";
+import { DetailPill, EmptyState } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -17,14 +17,10 @@ import { Link } from "react-router-dom";
 const DestinationMiniList = ({ destinations }) => {
   if (!destinations.length) {
     return (
-      <div className="flex flex-col items-center gap-4 py-8 border border-dashed rounded-3xl border-slate-200">
-        <div className="center h-12 w-12 rounded-full bg-slate-200/80">
-          <BookmarkX className="text-gray-500" />
-        </div>
-        <p className="mx-auto max-w-[240px] text-center text-sm leading-5 text-slate-500">
-          You have no destination added to your bucket list
-        </p>
-      </div>
+      <EmptyState
+        title="Empty Bucket List"
+        description="You have no destination added to your bucket list"
+      />
     );
   }
 
@@ -74,9 +70,7 @@ export const BucketListPanel = ({
 }) => (
   <aside className={`min-w-0 lg:sticky lg:top-24 lg:self-start ${className}`}>
     <div className="space-y-12">
-      <AgentMessageComposer
-        message="Hey, nice that you're here, right now it's really great time to go to Sundarban, Nebula and so on!"
-      />
+      <AgentMessageComposer message="Hey, nice that you're here, right now it's really great time to go to Sundarban, Nebula and so on!" />
 
       <section className="space-y-4">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
