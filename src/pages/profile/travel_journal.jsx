@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { ImagePlus, Plus, X } from "lucide-react";
 
 import ConfirmDialog from "@/components/shared/confirm-dialog";
-import { SectionHeader } from "@/components/shared/utils";
+import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import {
@@ -98,15 +98,19 @@ const TravelJournal = ({ userId, isOwner = false }) => {
                 journal={journal}
                 onEdit={isOwner ? openEdit : undefined}
                 onDelete={isOwner ? setDeletingJournal : undefined}
+                className="border"
               />
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">
-            {isOwner
-              ? "You have not written a travel journal yet."
-              : "No public journals are available."}
-          </div>
+          <EmptyState
+            title="No Journal added yet"
+            description={
+              isOwner
+                ? "You have not kept any travel journal yet!"
+                : "No public journals are available"
+            }
+          />
         )}
       </div>
 

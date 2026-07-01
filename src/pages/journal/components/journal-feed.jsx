@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/shared/user-profile";
 import { Button } from "@/components/ui/button";
 
 import JournalCard from "./journal-card";
+import { EmptyState } from "@/components/shared/utils";
 
 const JournalListSkeleton = () => (
   <div className="space-y-4">
@@ -19,7 +20,11 @@ const JournalListSkeleton = () => (
 );
 
 const CreateJournalTrigger = ({ onCreate }) => (
-  <button type="button" className="flex w-full cursor-pointer gap-2" onClick={onCreate}>
+  <button
+    type="button"
+    className="flex w-full cursor-pointer gap-2"
+    onClick={onCreate}
+  >
     <UserAvatar className="size-9" />
     <div className="flex w-full flex-1 items-center gap-2 rounded-full border bg-white px-4 py-2.5 text-slate-400">
       <Plus size={14} />
@@ -34,8 +39,6 @@ const JournalFeed = ({
   isSearchSettling,
   isError,
   onRetry,
-  hasFilters,
-  onClearFilters,
   hasMore,
   isFetchingMore,
   onLoadMore,
@@ -79,22 +82,10 @@ const JournalFeed = ({
         />
       </div>
     ) : (
-      <div className="flex min-h-80 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <Search size={24} />
-        </div>
-        <h2 className="mt-5 text-lg font-bold text-slate-950">
-          No journals found
-        </h2>
-        <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-          Adjust the search or tag filter to browse more travel stories.
-        </p>
-        {hasFilters && (
-          <Button className="mt-4" variant="outline" onClick={onClearFilters}>
-            Clear filters
-          </Button>
-        )}
-      </div>
+      <EmptyState
+        title="No journals found"
+        description="Adjust the search or tag filter to browse more travel stories."
+      />
     )}
   </>
 );

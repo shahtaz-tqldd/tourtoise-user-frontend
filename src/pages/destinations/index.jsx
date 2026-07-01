@@ -10,9 +10,9 @@ import {
 import { BucketListDrawer, BucketListPanel } from "./components/bucket-list";
 import {
   DestinationFetchError,
-  EmptyDestinationList,
   LoadingDestinationList,
 } from "./components/fallback";
+import { EmptyState } from "@/components/shared/utils";
 
 const DestinationPage = () => {
   // filter
@@ -96,7 +96,10 @@ const DestinationPage = () => {
         {isError && !isFetching && <DestinationFetchError />}
 
         {!isFetching && !isError && !destinations.length && (
-          <EmptyDestinationList clearFilters={clearFilters} />
+          <EmptyState
+            title="No destinations found"
+            description="Adjust the search, country, or destination type filters."
+          />
         )}
       </div>
 

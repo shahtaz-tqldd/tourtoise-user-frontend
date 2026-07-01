@@ -20,6 +20,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import JournalComments from "./comments";
 import Card from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const JournalCard = ({
   journal,
@@ -27,6 +28,7 @@ const JournalCard = ({
   onSaveToggle,
   onEdit,
   onDelete,
+  className = "",
 }) => {
   const [isStoryExpanded, setIsStoryExpanded] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -39,7 +41,12 @@ const JournalCard = ({
       : [];
 
   return (
-    <Card className="p-0 bg-transparent md:bg-white md:p-6 rounded-none md:rounded-3xl">
+    <Card
+      className={cn(
+        "p-0 bg-transparent md:bg-white md:p-6 rounded-none md:rounded-3xl",
+        className,
+      )}
+    >
       <div>
         <div>
           <div className="flex items-start justify-between gap-3">
