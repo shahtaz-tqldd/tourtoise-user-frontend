@@ -160,7 +160,7 @@ const ChatInterface = ({
         </div>
       )}
 
-      <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto py-4 pr-1 lg:space-y-5 lg:pr-2">
+      <div className="hidden-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto py-4 pr-1 lg:space-y-5 lg:pr-2">
         {isFetchingMessages && selectedSessionId && !messages.length ? (
           <MessageListSkeleton />
         ) : isMessageListError ? (

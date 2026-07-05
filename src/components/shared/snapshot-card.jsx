@@ -11,7 +11,7 @@ const SnapshotCard = ({ icon: Icon, label, value, className = "" }) => {
         })}
       </div>
       <h4 className="truncate text-xs text-slate-500 mt-3">{label}</h4>
-      <p className="mt-1 break-words text-sm font-semibold text-slate-950 text-center">
+      <p className="mt-1 break-words text-sm font-semibold text-slate-950 text-center capitalize">
         {value}
       </p>
     </div>

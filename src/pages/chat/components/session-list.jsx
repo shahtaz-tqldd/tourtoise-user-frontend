@@ -53,7 +53,7 @@ const ChatSessionList = ({
 }) => (
   <Card
     className={cn(
-      "h-full min-h-0",
+      "h-full min-h-0 flex flex-col",
       isMobileChatOpen ? "hidden lg:flex" : "flex flex-col",
     )}
   >
@@ -92,7 +92,7 @@ const ChatSessionList = ({
       </div>
     </div>
 
-    <div className="custom-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto py-3 pr-1">
+    <div className="hidden-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto py-3 pr-1">
       {isFetchingSessions && !sessions.length ? (
         <SessionListSkeleton />
       ) : isSessionListError ? (

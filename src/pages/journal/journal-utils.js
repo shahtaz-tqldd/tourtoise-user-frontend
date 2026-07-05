@@ -23,7 +23,7 @@ export const createJournalFormData = ({
   title,
   content,
   visibility,
-  tags,
+  tags = [],
   images = [],
   removeImageIds = [],
 }) => {
