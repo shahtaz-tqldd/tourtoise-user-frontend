@@ -5,6 +5,7 @@ import SearchField from "@/components/shared/search";
 
 import { TripHistoryDrawer } from "./trip-history";
 import TripStatusFilter from "./trip-status-filter";
+import SearchBar from "@/components/shared/search-bar";
 
 const TripsPageHeader = ({
   tripsCount,
@@ -24,13 +25,12 @@ const TripsPageHeader = ({
     description={`Showing ${tripsCount} of ${totalTrips} trips`}
     filters={
       <div className="flex w-full gap-3 md:justify-end">
-        <SearchField
-          value={activeSearch}
-          onChange={onActiveSearchChange}
-          onClear={() => onActiveSearchChange("")}
-          placeholder="Search active trips..."
-          className="max-w-sm flex-1"
+        <SearchBar
+          searchQuery={activeSearch}
+          setSearchQuery={onActiveSearchChange}
+          placeholder="Search your trips"
         />
+
         <TripStatusFilter value={activeStatus} onApply={onActiveStatusChange} />
         <TripHistoryDrawer
           trips={historyTrips}
