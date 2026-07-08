@@ -212,7 +212,6 @@ const TripDetailPage = () => {
       <div className="space-y-5">
         <TripOverview trip={trip} />
         <TripPlanningTabs trip={trip} />
-        <TripNotesAlerts notes={trip.notes} alerts={trip.alerts} />
       </div>
 
       <TripAgentChat messages={trip.chat} />
