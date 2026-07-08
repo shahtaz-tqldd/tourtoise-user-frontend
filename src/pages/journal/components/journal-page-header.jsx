@@ -1,8 +1,7 @@
 import React from "react";
 
 import ListingHeader from "@/components/shared/listing-header";
-import SearchField from "@/components/shared/search";
-
+import SearchBar from "@/components/shared/search-bar";
 import { SavedJournalsDrawer } from "./saved-journals";
 
 const JournalPageHeader = ({
@@ -23,12 +22,10 @@ const JournalPageHeader = ({
     title="Travel Journal"
     filters={
       <div className="flex w-full gap-3 md:justify-end">
-        <SearchField
-          value={searchQuery}
-          onChange={onSearchChange}
-          onClear={() => onSearchChange("")}
-          placeholder="Search journals..."
-          className="max-w-sm flex-1"
+        <SearchBar
+          searchQuery={searchQuery}
+          setSearchQuery={onSearchChange}
+          placeholder="Search Journals"
         />
         <SavedJournalsDrawer
           journals={savedJournals}

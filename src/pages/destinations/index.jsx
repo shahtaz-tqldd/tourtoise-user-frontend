@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
+import InfiniteScroll from "@/components/shared/infinite-scroll";
 import ListingHeader from "@/components/shared/listing-header";
 import DestinationCard from "./components/destination-card";
 import DestinationFilter from "./components/destination-filter";
 import {
-  useDestinationListQuery,
-  useSaveDestinationListQuery,
+  useDestinationInfiniteListInfiniteQuery,
+  useSaveDestinationInfiniteListInfiniteQuery,
 } from "@/features/destination/destinationApiSlice";
 import { BucketListDrawer, BucketListPanel } from "./components/bucket-list";
 import {
@@ -42,26 +43,55 @@ const DestinationPage = () => {
   };
 
   // destination
-  const { data, isFetching, isError } =
-    useDestinationListQuery(destinationQuery);
-  const destinations = useMemo(() => data?.data || [], [data]);
-  const totalDestinations = data?.meta?.count || 0;
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useDestinationInfiniteListInfiniteQuery(destinationQuery);
+  const destinations = useMemo(
+    () => data?.pages?.flatMap((page) => page?.data || []) || [],
+    [data],
+  );
+  const isInitialDestinationLoading =
+    isLoading || (isFetching && !data?.pages?.length);
 
   // saved destination
-  const { data: savedData, isFetching: isSavedFetching } =
-    useSaveDestinationListQuery({
-      page: 1,
+  const {
+    data: savedData,
+    isLoading: isSavedLoading,
+    isFetching: isSavedFetching,
+    fetchNextPage: fetchNextSavedPage,
+    hasNextPage: hasNextSavedPage,
+    isFetchingNextPage: isFetchingSavedNextPage,
+  } = useSaveDestinationInfiniteListInfiniteQuery({
       pageSize: 6,
     });
-  const savedDestinations = useMemo(() => savedData?.data || [], [savedData]);
-  const totalSavedDestinations = savedData?.meta?.count || 0;
+  const savedDestinations = useMemo(
+    () => savedData?.pages?.flatMap((page) => page?.data || []) || [],
+    [savedData],
+  );
+  const isInitialSavedLoading =
+    isSavedLoading || (isSavedFetching && !savedData?.pages?.length);
+
+  const handleLoadMoreDestinations = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    fetchNextPage();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  const handleLoadMoreSavedDestinations = useCallback(() => {
+    if (!hasNextSavedPage || isFetchingSavedNextPage) return;
+    fetchNextSavedPage();
+  }, [fetchNextSavedPage, hasNextSavedPage, isFetchingSavedNextPage]);
 
   return (
     <section className="grid gap-10 pt-5 pb-20 md:pb-5 lg:grid-cols-[minmax(0,1fr)_372px]">
       <div className="space-y-8">
         <ListingHeader
           title="Where's Next?"
-          description={`Showing ${destinations.length} of ${totalDestinations} destinations`}
           filters={
             <DestinationFilter
               searchQuery={searchQuery}
@@ -78,7 +108,10 @@ const DestinationPage = () => {
               actions={
                 <BucketListDrawer
                   savedDestinations={savedDestinations}
-                  isFetching={isSavedFetching}
+                  isFetching={isInitialSavedLoading}
+                  hasMore={hasNextSavedPage}
+                  isFetchingNextPage={isFetchingSavedNextPage}
+                  onLoadMore={handleLoadMoreSavedDestinations}
                 />
               }
             />
@@ -91,11 +124,20 @@ const DestinationPage = () => {
           ))}
         </div>
 
-        {isFetching && <LoadingDestinationList />}
+        {isInitialDestinationLoading && <LoadingDestinationList />}
 
-        {isError && !isFetching && <DestinationFetchError />}
+        {!isInitialDestinationLoading && !isError && (
+          <InfiniteScroll
+            hasMore={hasNextPage}
+            isLoading={isFetchingNextPage}
+            onLoadMore={handleLoadMoreDestinations}
+            loadingLabel="Loading more destinations..."
+          />
+        )}
 
-        {!isFetching && !isError && !destinations.length && (
+        {isError && !isInitialDestinationLoading && <DestinationFetchError />}
+
+        {!isInitialDestinationLoading && !isError && !destinations.length && (
           <EmptyState
             title="No destinations found"
             description="Adjust the search, country, or destination type filters."
@@ -105,7 +147,10 @@ const DestinationPage = () => {
 
       <BucketListPanel
         savedDestinations={savedDestinations}
-        isFetching={isSavedFetching}
+        isFetching={isInitialSavedLoading}
+        hasMore={hasNextSavedPage}
+        isFetchingNextPage={isFetchingSavedNextPage}
+        onLoadMore={handleLoadMoreSavedDestinations}
         className="hidden lg:block"
       />
     </section>

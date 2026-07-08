@@ -4,20 +4,22 @@ import {
   ChevronLeft,
   Clock3,
   MapPin,
-  Search,
   Ticket,
   Utensils,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 import InfiniteScroll from "@/components/shared/infinite-scroll";
+import SearchBar from "@/components/shared/search-bar";
 import { Button } from "@/components/ui/button";
 import useDebounce from "@/hooks/useDebounce";
+import FeatureDetails from "@/pages/destinations/destination-details/components/feature-details";
 import {
   useDestinationFeatureInfiniteListInfiniteQuery,
   useDestinationShortDetailQuery,
 } from "@/features/destination/destinationApiSlice";
 import { formatLabel, getCloudinaryPreviewUrl } from "@/lib/utils";
+import { EmptyState } from "@/components/shared/utils";
 
 const PAGE_SIZE = 12;
 
@@ -77,7 +79,7 @@ const getFeatureTotal = (response, fallback) =>
 const getDestinationName = (response) =>
   response?.data?.name || response?.name || "Destination";
 
-const FeatureCard = ({ item, config }) => {
+const FeatureCard = ({ item, config, onSelect }) => {
   const coverImage = item.cover_image || item.images?.[0]?.image_url;
   const FallbackIcon = config.fallbackIcon;
   const metaItems = config
@@ -85,7 +87,11 @@ const FeatureCard = ({ item, config }) => {
     .filter((value) => value && value !== "N/A");
 
   return (
-    <article className="group overflow-hidden rounded-3xl bg-white shadow-xs transition hover:-translate-y-0.5 hover:shadow-md">
+    <button
+      type="button"
+      onClick={() => onSelect(item)}
+      className="group h-full w-full overflow-hidden rounded-3xl bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
+    >
       <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
         {coverImage ? (
           <img
@@ -126,7 +132,7 @@ const FeatureCard = ({ item, config }) => {
           </div>
         ) : null}
       </div>
-    </article>
+    </button>
   );
 };
 
@@ -135,6 +141,7 @@ const DestinationFeatureListPage = () => {
     useParams();
   const config = featureConfigs[featureType];
   const [search, setSearch] = useState("");
+  const [activeFeature, setActiveFeature] = useState(null);
   const debouncedSearch = useDebounce(search.trim(), 350);
 
   const query = useMemo(
@@ -178,6 +185,17 @@ const DestinationFeatureListPage = () => {
     fetchNextPage();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  const handleSelectFeature = useCallback(
+    (item) => {
+      setActiveFeature({
+        title: formatLabel(config.singular),
+        icon: config.icon,
+        item,
+      });
+    },
+    [config],
+  );
+
   if (!config) {
     return (
       <section className="py-8 md:py-12">
@@ -195,104 +213,99 @@ const DestinationFeatureListPage = () => {
   }
 
   return (
-    <section className="space-y-7 py-5 pb-20 md:py-8 md:pb-8">
-      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div className="flx gap-2">
-          <Link
-            to={`/destinations/${destinationSlug}`}
-            className="h-10 w-10 center bg-slate-100 rounded-full hover:bg-primary/10 tr"
-          >
-            <ChevronLeft size={14} />
-          </Link>
-          <h1 className="text-xl font-bold text-slate-900 md:text-2xl">
-            {config.title} in {destinationName}
-          </h1>
-        </div>
-
-        <div className="relative w-full md:max-w-sm">
-          <Search
-            size={17}
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-          <input
-            value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
-            }}
-            placeholder={`Search ${config.title.toLowerCase()}`}
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-3 focus:ring-primary/10"
-          />
-        </div>
-      </div>
-
-      {!isInitialLoading && !isSearchSettling && !isError && (
-        <p className="text-sm font-medium text-slate-500">
-          {total} {total === 1 ? config.singular : config.title.toLowerCase()}{" "}
-          found
-        </p>
-      )}
-
-      {isError ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
-          <h2 className="font-semibold text-red-900">
-            Could not load {config.title.toLowerCase()}
-          </h2>
-          <p className="mt-1 text-sm text-red-700">Please try again shortly.</p>
-        </div>
-      ) : isInitialLoading || isSearchSettling ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: PAGE_SIZE }, (_, index) => (
-            <div
-              key={index}
-              className="overflow-hidden rounded-lg border border-slate-200 bg-white"
+    <>
+      <section className="space-y-7 py-5 pb-20 md:pb-8">
+        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div className="flx gap-2">
+            <Link
+              to={`/destinations/${destinationSlug}`}
+              className="h-10 w-10 center bg-slate-100 rounded-full hover:bg-primary/10 tr"
             >
-              <div className="aspect-[4/3] animate-pulse bg-slate-200" />
-              <div className="space-y-3 p-4">
-                <div className="h-3 w-1/3 animate-pulse rounded bg-slate-200" />
-                <div className="h-5 animate-pulse rounded bg-slate-200" />
-              </div>
-            </div>
-          ))}
+              <ChevronLeft size={14} />
+            </Link>
+            <h1 className="text-xl font-bold text-slate-900 md:text-2xl">
+              {config.title} in {destinationName}
+            </h1>
+          </div>
+
+          <SearchBar
+            searchQuery={search}
+            setSearchQuery={setSearch}
+            placeholder={`Search ${config.title.toLowerCase()}`}
+            className="w-full md:max-w-sm"
+          />
         </div>
-      ) : items.length ? (
-        <>
+
+        {!isInitialLoading && !isSearchSettling && !isError && (
+          <p className="text-sm font-medium text-slate-500">
+            {total} {total === 1 ? config.singular : config.title.toLowerCase()}{" "}
+            found
+          </p>
+        )}
+
+        {isError ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
+            <h2 className="font-semibold text-red-900">
+              Could not load {config.title.toLowerCase()}
+            </h2>
+            <p className="mt-1 text-sm text-red-700">
+              Please try again shortly.
+            </p>
+          </div>
+        ) : isInitialLoading || isSearchSettling ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {items.map((item) => (
-              <FeatureCard
-                key={item.id || item.slug || item.name}
-                item={item}
-                config={config}
-              />
+            {Array.from({ length: PAGE_SIZE }, (_, index) => (
+              <div
+                key={index}
+                className="overflow-hidden rounded-lg border border-slate-200 bg-white"
+              >
+                <div className="aspect-[4/3] animate-pulse bg-slate-200" />
+                <div className="space-y-3 p-4">
+                  <div className="h-3 w-1/3 animate-pulse rounded bg-slate-200" />
+                  <div className="h-5 animate-pulse rounded bg-slate-200" />
+                </div>
+              </div>
             ))}
           </div>
-          <InfiniteScroll
-            hasMore={hasNextPage}
-            isLoading={isFetchingNextPage}
-            onLoadMore={handleLoadMore}
-            loadingLabel={`Loading more ${config.title.toLowerCase()}...`}
+        ) : items.length ? (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {items.map((item) => (
+                <FeatureCard
+                  key={item.id || item.slug || item.name}
+                  item={item}
+                  config={config}
+                  onSelect={handleSelectFeature}
+                />
+              ))}
+            </div>
+            <InfiniteScroll
+              hasMore={hasNextPage}
+              isLoading={isFetchingNextPage}
+              onLoadMore={handleLoadMore}
+              loadingLabel={`Loading more ${config.title.toLowerCase()}...`}
+            />
+          </>
+        ) : (
+          <EmptyState
+            title={`No ${config.title.toLowerCase()} found`}
+            description={
+              search
+                ? `No ${config.title.toLowerCase()} match your search for "${search}". Try another search term.`
+                : `Sorry currently there are no ${config.title.toLowerCase()} available for this destination.`
+            }
+            onClear={search ? () => setSearch("") : null}
           />
-        </>
-      ) : (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
-          <h2 className="font-semibold text-slate-900">
-            No {config.title.toLowerCase()} found
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Try another search term.
-          </p>
-          {search ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="mt-4"
-              onClick={() => setSearch("")}
-            >
-              Clear search
-            </Button>
-          ) : null}
-        </div>
-      )}
-    </section>
+        )}
+      </section>
+      <FeatureDetails
+        feature={activeFeature}
+        open={Boolean(activeFeature)}
+        onOpenChange={(open) => {
+          if (!open) setActiveFeature(null);
+        }}
+      />
+    </>
   );
 };
 

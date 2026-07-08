@@ -245,7 +245,7 @@ export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
                 {visibleExistingImages.length + images.length}/4
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid gap-3 grid-cols-4">
               {visibleExistingImages.map((image) => (
                 <ImageTile
                   key={image.id}
@@ -272,7 +272,7 @@ export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
                   className="center aspect-square cursor-pointer flex-col gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-2 text-center text-xs font-semibold text-slate-600 transition hover:border-primary hover:text-primary"
                 >
                   <ImagePlus size={20} />
-                  Add image
+                  <span className="hidden md:block">Upload image</span>
                 </label>
               )}
             </div>

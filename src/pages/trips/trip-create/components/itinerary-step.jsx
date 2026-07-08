@@ -355,7 +355,7 @@ const ItineraryStep = ({ trip, onStepComplete, onStepSelect }) => {
           variant="outline"
           onClick={() => onStepSelect?.(2)}
         >
-          View Recommendations
+          Recommendations
         </Button>
 
         <Button type="button" onClick={() => onStepComplete?.()}>

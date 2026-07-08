@@ -191,7 +191,6 @@ const FeatureDetails = ({ feature, open, onOpenChange }) => {
 };
 
 function FeatureDetailContent({ feature }) {
-  console.log("feature", feature);
   if (!feature) return null;
 
   const { item } = feature;

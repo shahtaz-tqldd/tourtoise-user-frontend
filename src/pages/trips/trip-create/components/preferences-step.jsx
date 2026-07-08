@@ -227,7 +227,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
     useTripAgentCreateMessageMutation();
   const isRecommendationComplete = Number(currentStep) >= 4;
   const recommendationButtonLabel = isRecommendationComplete
-    ? "See recommendations"
+    ? "Recommendations"
     : "Start recommendation";
 
   useEffect(() => {

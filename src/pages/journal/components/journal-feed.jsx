@@ -25,10 +25,10 @@ const CreateJournalTrigger = ({ onCreate }) => (
     className="flex w-full cursor-pointer gap-2"
     onClick={onCreate}
   >
-    <UserAvatar className="size-9" />
-    <div className="flex w-full flex-1 items-center gap-2 rounded-full border bg-white px-4 py-2.5 text-slate-400">
-      <Plus size={14} />
-      <span className="text-sm">Write Journal</span>
+    <UserAvatar className="size-10" />
+    <div className="flex w-full flex-1 items-center gap-2 rounded-full border bg-white px-4 py-3 text-slate-400">
+      <Plus size={15} />
+      <span className="text-sm">Write Your Travel Journal</span>
     </div>
   </button>
 );

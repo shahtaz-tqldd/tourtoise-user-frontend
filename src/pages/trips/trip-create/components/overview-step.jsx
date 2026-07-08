@@ -10,12 +10,10 @@ import {
   ArrowUpRight,
   CalendarDays,
   CheckCircle2,
-  CircleDashed,
   Loader2,
   MapPin,
   Plus,
   Route,
-  Trash2,
   UserRound,
   Wallet,
 } from "lucide-react";
@@ -71,9 +69,9 @@ const StatCard = ({ icon, label, value }) => (
 );
 
 const CountCard = ({ label, value }) => (
-  <div className="rounded-lg bg-slate-50 px-3 py-2">
-    <p className="text-xs font-medium uppercase text-slate-400">{label}</p>
-    <p className="mt-1 text-lg font-semibold text-slate-950">{value || 0}</p>
+  <div className="rounded-lg bg-slate-50 p-4 flex flex-col items-center justify-center text-center">
+    <p className="text-xs font-medium text-slate-400">{label}</p>
+    <p className="mt-1 text-lg font-bold text-slate-950">{value || 0}</p>
   </div>
 );
 
@@ -200,7 +198,7 @@ const OverviewStep = ({ trip }) => {
         </SectionCard>
 
         <SectionCard title="Plan coverage">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             <CountCard
               label="Spots"
               value={recommendations.attractions_count}
