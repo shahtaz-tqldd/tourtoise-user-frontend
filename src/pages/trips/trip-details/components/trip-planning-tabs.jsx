@@ -471,6 +471,7 @@ const TripPlanningTabs = ({ trip }) => {
         tabs={planningTabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        className="pt-2 sticky top-16 bg-white/50 backdrop-blur-xl z-20"
       />
 
       {activeTab === "packing" && <PackingSection items={trip.packing_items} />}
