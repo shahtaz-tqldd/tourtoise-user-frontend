@@ -108,7 +108,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       providesTags: ["trip-detail"],
     }),
 
-    // # agent endpoints
+    // --- AGENT ENDPOINTS ---
     tripAgentActive: builder.mutation({
       query: (payload) => {
         return {
@@ -198,6 +198,72 @@ export const tripApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+
+    // --- NOTES ENDPOINT ---
+    tripNoteList: builder.query({
+      query: (params = {}) => {
+        const { trip_id, page = 1, page_size = 10, search } = params;
+
+        const queryParams = new URLSearchParams({
+          page: String(page),
+          page_size: String(page_size),
+        });
+
+        const appendParam = (key, value) => {
+          if (!value || (Array.isArray(value) && !value.length)) return;
+          queryParams.set(key, Array.isArray(value) ? value.join(",") : value);
+        };
+
+        appendParam("search", search);
+
+        return {
+          url: `/trips/${trip_id}/notes/list?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["trip-note-list"],
+    }),
+
+    createTripNote: builder.mutation({
+      query: ({ trip_id, payload }) => {
+        return {
+          url: `/trips/${trip_id}/notes/create/`,
+          method: "POST",
+          body: payload,
+        };
+      },
+      invalidatesTags: ["trip-note-list"],
+    }),
+
+    updateTripNote: builder.mutation({
+      query: ({ trip_id, note_id, payload }) => {
+        return {
+          url: `/trips/${trip_id}/notes/${note_id}/update/`,
+          method: "PATCH",
+          body: payload,
+        };
+      },
+      invalidatesTags: ["trip-note-list"],
+    }),
+
+    deleteTripNote: builder.mutation({
+      query: ({ trip_id, note_id }) => {
+        return {
+          url: `/trips/${trip_id}/notes/${note_id}/delete/`,
+          method: "DELETE",
+        };
+      },
+      invalidatesTags: ["trip-note-list"],
+    }),
+
+    tripNoteDetails: builder.query({
+      query: ({ trip_id, note_id }) => {
+        return {
+          url: `/trips/${trip_id}/notes/${note_id}/details/`,
+          method: "GET",
+        };
+      },
+    }),
   }),
 });
 
@@ -219,4 +285,11 @@ export const {
   useTripOverviewQuery,
   useTripActivateQuery,
   useLazyTripActivateQuery,
+  
+  // notes
+  useTripNoteListQuery,
+  useCreateTripNoteMutation,
+  useUpdateTripNoteMutation,
+  useDeleteTripNoteMutation,
+  useTripNoteDetailsQuery,
 } = tripApiSlice;

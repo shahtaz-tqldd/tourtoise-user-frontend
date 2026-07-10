@@ -10,28 +10,17 @@ import {
   FileCheck2,
   FileText,
   Plane,
-  Plus,
   Route,
-  ShieldCheck,
   Train,
   Upload,
 } from "lucide-react";
 
-import { SectionHeader } from "@/components/shared/utils";
-import { Button } from "@/components/ui/button";
+import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import Card from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import TabMenu from "@/components/ui/tab";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+import TripNotes from "./trip-notes";
 
 const modeIcons = {
   car: Car,
@@ -85,15 +74,16 @@ const PackingSection = ({ items = [] }) => (
           </label>
         ))
       ) : (
-        <p className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">
-          No packing items available yet.
-        </p>
+        <EmptyState
+          title="Empty Packing items"
+          description="You have no packing items added in this trip yet!"
+        />
       )}
     </div>
   </Card>
 );
 
-const DocumentsSection = ({ documents = [], uploadedDocuments = [] }) => (
+const DocumentsSection = ({ documents = [] }) => (
   <Card className="space-y-5">
     <SectionHeader
       icon={FileCheck2}
@@ -106,7 +96,7 @@ const DocumentsSection = ({ documents = [], uploadedDocuments = [] }) => (
         documents.map((document) => (
           <article
             key={document.name}
-            className="rounded-lg border border-slate-200 p-4"
+            className="rounded-xl border border-slate-200 p-4"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -119,51 +109,20 @@ const DocumentsSection = ({ documents = [], uploadedDocuments = [] }) => (
                 {document.status}
               </span>
             </div>
+            <div className="mt-4">
+              <button className="flx gap-1.5 bg-primary/10 hover:bg-primary/15 tr py-1.5 pl-2.5 pr-3 rounded-md text-primary">
+                <Upload size={12} />
+                <span className="text-xs font-semibold">Upload</span>
+              </button>
+            </div>
           </article>
         ))
       ) : (
-        <p className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 md:col-span-2">
-          No required documents available yet.
-        </p>
-      )}
-    </div>
-
-    <div className="grid gap-3">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-slate-950">Uploaded files</h3>
-        <Button variant="outline" size="sm">
-          <Upload size={15} />
-          Upload
-        </Button>
-      </div>
-      {uploadedDocuments.length ? (
-        uploadedDocuments.map((document) => (
-          <div
-            key={document.name}
-            className="flex flex-col gap-3 rounded-lg border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                <FileText size={18} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-950">
-                  {document.name}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {document.type} uploaded {document.uploaded_at}
-                </p>
-              </div>
-            </div>
-            <span className="w-fit rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold capitalize text-emerald-700">
-              {document.status}
-            </span>
-          </div>
-        ))
-      ) : (
-        <p className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">
-          No uploaded documents yet.
-        </p>
+        <EmptyState
+          title="Empty Document list"
+          description="You have no document list added in this trip yet!"
+          className="md:col-span-2"
+        />
       )}
     </div>
   </Card>
@@ -271,9 +230,10 @@ const DayPlanSection = ({ days = [] }) => (
     {days.length ? (
       <DayAccordion days={days} />
     ) : (
-      <p className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500">
-        No day-wise plan available yet.
-      </p>
+      <EmptyState
+        title="No day-wise Plans"
+        description="You have no day-wise plan has added in this trip yet!"
+      />
     )}
   </Card>
 );
@@ -321,9 +281,10 @@ const RouteSection = ({ segments = [] }) => (
             );
           })
         ) : (
-          <p className="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
-            No route plan available yet.
-          </p>
+          <EmptyState
+            title="No Route plans"
+            description="You have no route-plan added in this trip yet!"
+          />
         )}
       </div>
     </div>
@@ -357,110 +318,14 @@ const HeadsupSection = ({ alerts = [] }) => (
           </article>
         ))
       ) : (
-        <p className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-500">
-          No alerts available yet.
-        </p>
+        <EmptyState
+          title="No Alerts or Notifications"
+          description="You have no heads-up info added in this trip yet!"
+        />
       )}
     </div>
   </Card>
 );
-
-const NotesSection = ({ notes = [] }) => {
-  const [activeNote, setActiveNote] = useState(null);
-  const [isCreateNoteOpen, setIsCreateNoteOpen] = useState(false);
-  return (
-    <>
-      <Card className="space-y-5">
-        <SectionHeader
-          icon={ShieldCheck}
-          title="Notes"
-          description="Additional information for this trip."
-        />
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-slate-500">{notes.length} saved notes</p>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setIsCreateNoteOpen(true)}
-          >
-            <Plus size={15} />
-            New note
-          </Button>
-        </div>
-
-        <div className="space-y-4">
-          {notes.length ? (
-            notes.map((note) => (
-              <div
-                key={note.id}
-                className="cursor-pointer rounded-xl border border-slate-200 p-3 hover:bg-slate-50"
-                onClick={() => setActiveNote(note)}
-                aria-label={`View ${note.title}`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-950">
-                      {note.title}
-                    </h3>
-                    <p className="mt-1 line-clamp-1 text-sm text-slate-500">
-                      {note.body}
-                    </p>
-                  </div>
-                </div>
-                <p className="mt-2 text-xs text-slate-400">{note.created_at}</p>
-              </div>
-            ))
-          ) : (
-            <p className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-500">
-              No notes saved yet.
-            </p>
-          )}
-        </div>
-      </Card>
-      <Dialog
-        open={Boolean(activeNote)}
-        onOpenChange={(open) => !open && setActiveNote(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{activeNote?.title}</DialogTitle>
-            <DialogDescription>{activeNote?.created_at}</DialogDescription>
-          </DialogHeader>
-          <p className="text-sm leading-6 text-slate-600">{activeNote?.body}</p>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isCreateNoteOpen} onOpenChange={setIsCreateNoteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create note</DialogTitle>
-            <DialogDescription>
-              Add a planning note for documents, route, timing, or personal
-              reminders.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-3">
-            <Textarea
-              placeholder="Write a note..."
-              className="min-h-36 resize-none rounded-xl border-slate-200"
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsCreateNoteOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={() => setIsCreateNoteOpen(false)}>
-              Create note
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-};
 
 const TripPlanningTabs = ({ trip }) => {
   const [activeTab, setActiveTab] = useState("packing");
@@ -505,7 +370,7 @@ const TripPlanningTabs = ({ trip }) => {
         )}
         {activeTab === "days" && <DayPlanSection days={trip.days} />}
         {activeTab === "heads-up" && <HeadsupSection alerts={trip.alerts} />}
-        {activeTab === "notes" && <NotesSection notes={trip.notes} />}
+        {activeTab === "notes" && <TripNotes tripId={trip.id} />}
       </div>
     </section>
   );

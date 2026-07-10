@@ -69,13 +69,11 @@ const SavedJournalList = ({
   if (!journals.length) {
     return (
       <EmptyState
-        title={
-          searchQuery ? "No saved journals found" : "No saved journals yet"
-        }
+        title={searchQuery ? "No saved journals found" : "Empty saved journals"}
         description={
           searchQuery
             ? "Try another search term to find a bookmarked travel story."
-            : "Save journals you want to revisit and they will show up here."
+            : "You have not saved any journal yet"
         }
       />
     );
@@ -241,13 +239,14 @@ export const SavedJournalsPanel = ({
         title="Saved Journals"
         description="Bookmarked travel stories"
       />
-
-      <SearchField
-        value={searchQuery}
-        onChange={onSearchChange}
-        onClear={() => onSearchChange("")}
-        placeholder="Search saved journals..."
-      />
+      {journals?.length > 3 ? (
+        <SearchField
+          value={searchQuery}
+          onChange={onSearchChange}
+          onClear={() => onSearchChange("")}
+          placeholder="Search saved journals..."
+        />
+      ) : null}
       <SavedJournalList
         journals={journals}
         onSaveToggle={onSaveToggle}

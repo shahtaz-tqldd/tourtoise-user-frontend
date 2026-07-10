@@ -46,7 +46,7 @@ const TripPlan = ({ destination, handlePlanningOpenChange }) => {
       <h2 className="text-lg font-bold text-primary text-center pt-2">
         Ready to make your {destination?.name} Trip?
       </h2>
-      <p className="text-center text-sm text-slate-500 mt-3 mb-6">
+      <p className="text-center text-sm text-slate-500 leading-[26px] mt-3 mb-6">
         Build your day by day itinerary with attractions, activities, food and
         travel tips
       </p>

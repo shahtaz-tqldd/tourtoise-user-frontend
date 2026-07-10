@@ -238,7 +238,7 @@ const TripCard = ({ trip, compact = false }) => {
             <img
               src={getCloudinaryPreviewUrl(coverImage, 360)}
               alt={`${getDestinationLabel(displayedTrip)} cover`}
-              className="rounded-2xl h-60 w-80 object-cover"
+              className="rounded-2xl h-60 w-full md:w-80 object-cover"
               loading="lazy"
             />
           ) : (

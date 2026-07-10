@@ -32,7 +32,7 @@ const ConfirmDialog = ({
           type="button"
           variant="outline"
           disabled={isLoading}
-          onclick={() => onOpenChange(false)}
+          onClick={() => onOpenChange(false)}
         >
           {cancelLabel}
         </Button>
@@ -54,7 +54,7 @@ const DeleteDialog = ({
   onOpenChange,
   title = "Confirm action",
   description,
-  confirmLabel = "Confirm",
+  confirmLabel = "Delete",
   cancelLabel = "Cancel",
   variant = "default",
   isLoading = false,
@@ -79,7 +79,7 @@ const DeleteDialog = ({
           type="button"
           variant="outline"
           disabled={isLoading}
-          onclick={() => onOpenChange(false)}
+          onClick={() => onOpenChange(false)}
           className="w-full md:w-auto"
         >
           {cancelLabel}

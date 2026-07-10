@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
-import { GhostIcon } from "@/assets/icons/svg-icons";
+import { BoxIcon, ImageIcon } from "@/assets/icons/svg-icons";
 
 export const DetailPill = ({ children, className }) => {
   if (!children) return null;
@@ -144,11 +144,11 @@ export const SectionHeader = ({
 export const EmptyState = ({ title, description, onClear, className = "" }) => (
   <div
     className={cn(
-      "border border-dashed border-slate-300 bg-white text-center flex flex-col items-center rounded-3xl px-10 py-24",
+      "bg-white text-center flex flex-col items-center rounded-3xl px-10 py-24",
       className,
     )}
   >
-    <GhostIcon size={12} />
+    <BoxIcon size={12} />
     <h2 className="mt-4 font-semibold text-slate-950 text-base">{title}</h2>
     <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
       {description}
