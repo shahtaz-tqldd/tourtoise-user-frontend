@@ -7,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 const statusOptions = [
   { value: "all", label: "All" },
@@ -64,26 +65,29 @@ const TripStatusFilter = ({ value, onApply }) => {
             <p className="text-xs font-semibold uppercase text-slate-500">
               Status
             </p>
-            {statusOptions.map((option) => (
-              <label
-                key={option.value}
-                className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3 text-sm font-semibold transition ${
-                  draftStatus === option.value
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-primary/40 hover:bg-primary/5"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="trip-status-filter"
-                  value={option.value}
-                  checked={draftStatus === option.value}
-                  onChange={(event) => setDraftStatus(event.target.value)}
-                  className="size-4 accent-primary"
-                />
-                {option.label}
-              </label>
-            ))}
+            <div className="flex flex-wrap gap-2">
+              {statusOptions.map((option) => (
+                <label
+                  key={option.value}
+                  className={cn(
+                    "w-fit flx gap-2 rounded-full py-2 px-4 text-sm font-semibold transition cursor-pointer",
+                    draftStatus === option.value
+                      ? "bg-primary text-white"
+                      : "bg-slate-100 text-slate-700 hover:bg-primary/10",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="trip-status-filter"
+                    value={option.value}
+                    checked={draftStatus === option.value}
+                    onChange={(event) => setDraftStatus(event.target.value)}
+                    className="size-4 accent-primary hidden"
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 border-t border-slate-100 p-4">

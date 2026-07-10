@@ -8,7 +8,7 @@ const ListingHeader = ({
 }) => (
   <div
     className={cn(
-      "flex w-full flex-col gap-4 md:flex-row md:items-start",
+      "flex w-full flex-col gap-4 md:flex-row md:items-center",
       className,
     )}
   >

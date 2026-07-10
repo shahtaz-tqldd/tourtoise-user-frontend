@@ -132,7 +132,9 @@ export const SectionHeader = ({
       <div>
         <h2 className="text-lg font-bold text-slate-950">{title}</h2>
         {description && (
-          <p className="mt-1 text-sm text-slate-500 line-clamp-1">{description}</p>
+          <p className="mt-1 text-sm text-slate-500 line-clamp-1">
+            {description}
+          </p>
         )}
       </div>
     </div>
@@ -142,7 +144,7 @@ export const SectionHeader = ({
 export const EmptyState = ({ title, description, onClear, className = "" }) => (
   <div
     className={cn(
-      "border border-dashed border-slate-300 bg-white text-center flex flex-col items-center rounded-[28px] px-10 py-24",
+      "border border-dashed border-slate-300 bg-white text-center flex flex-col items-center rounded-3xl px-10 py-24",
       className,
     )}
   >

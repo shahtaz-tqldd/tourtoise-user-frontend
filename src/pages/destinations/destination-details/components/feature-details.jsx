@@ -1,218 +1,302 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 
-// ui components
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { CalendarDays, MapPin, Star } from "lucide-react";
+  Activity,
+  Check,
+  Clock,
+  Currency,
+  Flame,
+  MapPin,
+  Sun,
+  TreePalm,
+  Utensils,
+} from "lucide-react";
 
 import { formatLabel } from "@/lib/utils";
 
 // comonents
 import { DetailPill } from "@/components/shared/utils";
+import ImagePreview from "@/components/shared/image-slider";
+import SnapshotCard from "@/components/shared/snapshot-card";
+import PreviewContent from "@/components/shared/preview-content";
 
 const getFeatureType = (item) =>
   formatLabel(
     item?.attraction_type || item?.activity_type || item?.cuisine_type,
   );
 
-function useMediaQuery(query) {
-  const [matches, setMatches] = useState(false);
+const formatHours = (value) => {
+  if (!value) return null;
 
-  useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-
-    const mediaQuery = window.matchMedia(query);
-    const handleChange = () => setMatches(mediaQuery.matches);
-
-    handleChange();
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [query]);
-
-  return matches;
-}
-
-const FeatureDetails = ({ feature, open, onOpenChange }) => {
-  const isMobile = useMediaQuery("(max-width: 767px)");
-  const touchStartY = useRef(null);
-
-  const handleTouchStart = (event) => {
-    touchStartY.current = event.touches[0].clientY;
-  };
-
-  const handleTouchEnd = (event) => {
-    if (touchStartY.current === null) return;
-
-    const distance = event.changedTouches[0].clientY - touchStartY.current;
-    touchStartY.current = null;
-
-    if (distance > 80) onOpenChange(false);
-  };
-
-  if (isMobile) {
-    return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
-          side="bottom"
-          className="h-[100dvh] gap-0 overflow-hidden rounded-none border-0 p-0"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-slate-300" />
-          <SheetTitle className="sr-only">{feature?.item?.name}</SheetTitle>
-          <SheetDescription className="sr-only">
-            {feature?.item?.description || "Destination feature details"}
-          </SheetDescription>
-          <div className="custom-scrollbar mt-3 flex-1 overflow-y-auto">
-            <FeatureDetailContent feature={feature} />
-          </div>
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[88vh] overflow-hidden p-0 sm:max-w-xl border-none rounded-3xl">
-        <DialogTitle className="sr-only">{feature?.item?.name}</DialogTitle>
-        <DialogDescription className="sr-only">
-          {feature?.item?.description || "Destination feature details"}
-        </DialogDescription>
-        <div className="custom-scrollbar overflow-y-auto">
-          <FeatureDetailContent feature={feature} />
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+  return `${value} hour${Number(value) === 1 ? "" : "s"}`;
 };
 
-function FeatureBadges({ item, value }) {
+const formatCost = (value) => {
+  if (!value) return null;
+
+  const cost = value.toString();
+  const numericCost = cost.replaceAll(",", "");
+
+  if (/[a-z]/i.test(cost)) return cost;
+  if (!/^\d+(\.\d+)?$/.test(numericCost)) return cost;
+
+  return `${Number(numericCost).toLocaleString()} IDR`;
+};
+
+const formatSeason = (value) => {
+  if (!value) return null;
+
+  const months = value
+    .toString()
+    .split(";")
+    .filter(Boolean)
+    .map(Number);
+
+  if (months.length === 12) return "All year";
+
+  return value;
+};
+
+const getFeatureCategory = (item) => {
+  if (item?.attraction_type) return "attraction";
+  if (item?.activity_type) return "activity";
+  if (item?.cuisine_type) return "cuisine";
+
+  return "feature";
+};
+
+const getSnapshotFeatures = (item) => {
+  const category = getFeatureCategory(item);
+
+  if (category === "activity") {
+    return [
+      {
+        label: "Activity Type",
+        value: formatLabel(item.activity_type),
+        icon: Activity,
+      },
+      {
+        label: "Difficulty",
+        value: formatLabel(item.difficulty_level),
+        icon: TreePalm,
+      },
+      {
+        label: "Duration",
+        value: formatHours(item.duration_hours),
+        icon: Clock,
+      },
+      {
+        label: "Cost",
+        value: formatCost(item.approx_cost) || formatLabel(item.budget_tier),
+        icon: Currency,
+      },
+    ];
+  }
+
+  if (category === "cuisine") {
+    return [
+      {
+        label: "Cuisine Type",
+        value: formatLabel(item.cuisine_type),
+        icon: Utensils,
+      },
+      {
+        label: "Meal",
+        value: formatLabel(item.meal_type),
+        icon: Clock,
+      },
+      {
+        label: "Spice",
+        value: formatLabel(item.spice_level),
+        icon: Flame,
+      },
+      {
+        label: "Cost",
+        value: formatCost(item.approx_cost) || item.approx_price_range,
+        icon: Currency,
+      },
+    ];
+  }
+
+  return [
+    {
+      label: "Attraction Type",
+      value: formatLabel(item?.attraction_type),
+      icon: TreePalm,
+    },
+    {
+      label: "Budget",
+      value: formatLabel(item?.budget_tier),
+      icon: Currency,
+    },
+    {
+      label: "Average Duration",
+      value: formatHours(item?.avg_duration_hours),
+      icon: Clock,
+    },
+    {
+      label: "Best Time of Day",
+      value: formatLabel(item?.best_time_of_day),
+      icon: Sun,
+    },
+  ];
+};
+
+const getExtraSections = (item) => {
+  const category = getFeatureCategory(item);
+
+  if (category === "activity") {
+    return [
+      {
+        title: "Booking",
+        body: item.booking_required ? "Booking required" : "Booking optional",
+      },
+      {
+        title: "Best Season",
+        body: formatSeason(item.best_season),
+      },
+    ].filter((section) => section.body);
+  }
+
+  if (category === "cuisine") {
+    return [
+      {
+        title: "Vegetarian Friendly",
+        body: item.is_vegetarian_friendly ? "Yes" : "No",
+      },
+    ];
+  }
+
+  return [
+    {
+      title: "How to Reach",
+      body: item.how_to_reach,
+    },
+    {
+      title: "Approximate Entrance Fee",
+      body:
+        item.entrance_fee_required === false
+          ? "Free"
+          : item.approx_entrance_fee,
+    },
+  ].filter((section) => section.body);
+};
+
+const FeatureDetails = ({ feature, open, onOpenChange }) => {
   return (
-    <div className="flex flex-wrap gap-2">
-      <DetailPill>{value}</DetailPill>
-      {item.is_featured && (
-        <DetailPill>
-          <Star size={12} className="mr-1 inline-block fill-current" />
-          Featured
-        </DetailPill>
-      )}
-      {item.is_must_try && (
-        <DetailPill>
-          <Star size={12} className="mr-1 inline-block fill-current" />
-          Must try
-        </DetailPill>
-      )}
-    </div>
+    <PreviewContent open={open} onOpenChange={onOpenChange}>
+      <FeatureDetailContent feature={feature} />
+    </PreviewContent>
   );
-}
-
-function FeatureMetaList({ metaItems = [], compact = false }) {
-  const visibleMetaItems = metaItems.filter((meta) => meta.value);
-
-  if (!visibleMetaItems.length) return null;
-
-  return (
-    <div className={compact ? "flex flex-wrap gap-2" : "grid gap-2 text-sm"}>
-      {visibleMetaItems.map((meta) => (
-        <div
-          key={meta.label}
-          className={
-            compact
-              ? "inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize text-slate-700"
-              : "flex items-start gap-2 text-slate-700"
-          }
-        >
-          {React.createElement(meta.icon, {
-            size: compact ? 13 : 16,
-            className: compact
-              ? "shrink-0 text-primary"
-              : "mt-0.5 shrink-0 text-primary",
-          })}
-          <span>
-            {!compact && (
-              <span className="font-semibold text-slate-900">
-                {meta.label}:{" "}
-              </span>
-            )}
-            {meta.value}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
+};
 
 function FeatureDetailContent({ feature }) {
   if (!feature) return null;
 
-  const { item, icon: Icon, metaItems, title } = feature;
-  const fallbackIcon = React.createElement(Icon, { size: 38 });
+  const { item } = feature;
   const type = getFeatureType(item);
+  const category = getFeatureCategory(item);
+
+  const images = [
+    item.cover_image,
+    ...(item.images || []).map((image) => image?.image_url),
+  ].filter(Boolean);
+  const features = getSnapshotFeatures(item).filter((feature) => feature.value);
+  const extraSections = getExtraSections(item);
+  const tags = item.tags || [];
+  const leadLine = item.address || item.how_to_reach || type;
 
   return (
     <div className="overflow-hidden bg-white">
-      <div className="relative aspect-[16/10] max-h-[340px] w-full bg-slate-100">
-        {item.cover_image ? (
-          <img
-            src={item.cover_image}
-            alt={item.name}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
-            {fallbackIcon}
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
-        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-          <FeatureBadges item={item} value={type} />
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <p className="text-xs font-semibold uppercase text-white/70">
-            {title}
+      <ImagePreview images={images} />
+      <div className="md:p-6 p-4">
+        <div className="">
+          <h4 className="text-xs font-semibold uppercase text-primary">
+            {feature.title || type}
+          </h4>
+          <h2 className="mt-1 text-xl font-bold leading-tight">{item.name}</h2>
+          {leadLine && (
+            <p className="mt-2 flex items-start gap-2 text-sm text-slate-500">
+              {category === "cuisine" ? (
+                <Utensils size={14} className="mt-0.5 shrink-0 text-primary" />
+              ) : (
+                <MapPin size={14} className="mt-0.5 shrink-0 text-primary" />
+              )}
+              <span>{leadLine}</span>
+            </p>
+          )}
+          <p className="mt-4 leading-7 text-slate-600 text-sm">
+            {item.description}
           </p>
-          <h3 className="mt-1 text-xl font-bold leading-tight">{item.name}</h3>
+          {tags.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <DetailPill key={tag.slug || tag.name}>
+                  {tag.name || formatLabel(tag.slug)}
+                </DetailPill>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
 
-      <div className="space-y-5 p-5">
-        {item.description && (
-          <p className="text-sm leading-6 text-slate-600">{item.description}</p>
-        )}
-
-        <FeatureMetaList metaItems={metaItems} />
-
-        {(item.address || item.best_time_to_visit || item.tips) && (
-          <div className="grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">
-            {item.address && (
-              <p className="flex items-start gap-2">
-                <MapPin size={16} className="mt-0.5 shrink-0 text-primary" />
-                <span>{item.address}</span>
-              </p>
-            )}
-            {item.best_time_to_visit && (
-              <p className="flex items-start gap-2">
-                <CalendarDays
-                  size={16}
-                  className="mt-0.5 shrink-0 text-primary"
-                />
-                <span>{item.best_time_to_visit}</span>
-              </p>
-            )}
-            {item.tips && <p className="leading-6">{item.tips}</p>}
+        <h2 className="text-sm font-semibold mb-2 mt-4">Quick Snapshot</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {features.map((item, index) => (
+            <SnapshotCard
+              className="border border-slate-200 rounded-xl p-4"
+              key={index}
+              {...item}
+            />
+          ))}
+        </div>
+        <div className="grid md:grid-cols-2 gap-4 mt-4">
+          <div className="border border-slate-200 rounded-xl p-4">
+            <h3 className="font-bold text-slate-900">
+              Reasons to add {item.name} to your list
+            </h3>
+            <div className="mt-4 text-slate-600">
+              {item.picking_reasons?.length ? (
+                <ul className="list-disc space-y-2">
+                  {item.picking_reasons.map((tip) => (
+                    <li key={tip} className="flex gap-2 text-sm">
+                      <Check size={14} className="text-primary mt-[3px]" />
+                      <span className="flex-1">{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No reasons available.</p>
+              )}
+            </div>
           </div>
-        )}
+          <div className="border border-slate-200 rounded-xl p-4 overflow-hidden">
+            <h3 className="font-bold text-slate-900">
+              Consider this before choosing {item.name}
+            </h3>
+            <div className="mt-4 text-slate-600">
+              {item.notes?.length ? (
+                <ul className="list-disc space-y-2">
+                  {item.notes.map((tip) => (
+                    <li key={tip} className="flex gap-2 text-sm">
+                      <Check size={14} className="text-primary mt-[3px]" />
+                      <span className="flex-1">{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No notes available.</p>
+              )}
+            </div>
+          </div>
+        </div>
+        {extraSections.map((section) => (
+          <div key={section.title} className="p-4 bg-slate-100 rounded-xl mt-4">
+            <h3 className="text-sm font-bold">{section.title}</h3>
+            <p className="mt-2 leading-7 text-slate-500 text-sm">
+              {section.body}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );

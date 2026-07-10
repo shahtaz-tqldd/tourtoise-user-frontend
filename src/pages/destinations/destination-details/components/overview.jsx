@@ -3,7 +3,7 @@ import Card from "@/components/ui/card";
 import { Check } from "lucide-react";
 
 const DestinationOverview = ({ destination }) => {
-  const tips = destination.cultural_tips || [];
+  const picking_reasons = destination.picking_reasons || [];
   return (
     <div className="grid md:grid-cols-2 gap-4">
       <Card>
@@ -11,9 +11,9 @@ const DestinationOverview = ({ destination }) => {
           Why {destination.name} is a great choice
         </h3>
         <div className="mt-4 text-slate-600">
-          {tips?.length ? (
+          {picking_reasons?.length ? (
             <ul className="list-disc space-y-2">
-              {tips.map((tip) => (
+              {picking_reasons.map((tip) => (
                 <li key={tip} className="flx gap-2">
                   <Check size={16} className="text-primary" />
                   {tip}
@@ -21,7 +21,9 @@ const DestinationOverview = ({ destination }) => {
               ))}
             </ul>
           ) : (
-            <p>No cultural tips available.</p>
+            <p className="opacity-75">
+              Currently no distinguishing reasons were provided!
+            </p>
           )}
         </div>
       </Card>
@@ -30,7 +32,11 @@ const DestinationOverview = ({ destination }) => {
           What {destination.name} feels like
         </h3>
         <p className="mt-4 leading-7 text-slate-600">
-          {destination.overview || "No overview available yet."}
+          {destination.description || (
+            <span className="opacity-75">
+              No description available for this destination.
+            </span>
+          )}
         </p>
       </Card>
     </div>

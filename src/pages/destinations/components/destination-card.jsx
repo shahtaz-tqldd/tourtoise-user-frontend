@@ -1,37 +1,43 @@
 import React from "react";
-import { Bookmark, MapPin } from "lucide-react";
+import { Bookmark, Clock, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { DESTINATION_TYPE_OPTIONS } from "../constants";
 
 const formatLabel = (value) => value?.replaceAll("_", " ") || "Destination";
 
 const DestinationCard = ({ destination, onSavedClick, savedActionLabel }) => {
   const destinationUrl = `/destinations/${destination.slug}`;
+  const typeGroup = DESTINATION_TYPE_OPTIONS.find(
+    (option) => option.value === destination.destination_type,
+  );
+
+  console.log(typeGroup);
 
   return (
-    <article className="overflow-hidden rounded-[28px] bg-white relative">
+    <article className="overflow-hidden rounded-[28px] bg-white relative group">
       <Link to={destinationUrl} className="block">
         <div className="relative aspect-[1/1] overflow-hidden bg-slate-100">
           <img
             src={getCloudinaryPreviewUrl(destination.cover_image)}
             alt={destination.name}
-            className="h-full w-full object-cover transition duration-500 hover:scale-105"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-transparent" />
 
-          <div className="absolute left-4 right-4 top-4 flex items-start justify-between gap-3">
-            <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold capitalize text-slate-900 shadow-sm backdrop-blur">
+          <div className="absolute left-4 right-4 top-4 flx gap-2">
+            <span className="flx gap-1 rounded-full bg-white/90 px-2.5 py-1.5 text-xs font-semibold capitalize text-slate-900 shadow-sm backdrop-blur">
+              {typeGroup?.icon && <typeGroup.icon size={12} />}
               {formatLabel(destination.destination_type)}
             </span>
-          </div>
-          {destination?.is_now_best_time && (
-            <div className="absolute right-4 top-4 flex items-start justify-between gap-3">
-              <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold capitalize text-slate-900 shadow-sm backdrop-blur">
+            {destination?.is_now_best_time && (
+              <span className="flx gap-1 rounded-full bg-primary text-white px-2.5 py-1.5 text-xs font-semibold capitalize text-slate-900 shadow-sm backdrop-blur">
+                <Clock size={12} />
                 best time
               </span>
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
             <h2 className="text-2xl font-bold leading-tight truncate">

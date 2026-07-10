@@ -6,7 +6,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { FloatingSelect, SelectItem } from "@/components/ui/select";
 import { COUNTRY_LIST } from "@/lib/countries";
 import { cn } from "@/lib/utils";
@@ -18,14 +17,13 @@ import {
   Landmark,
   Mountain,
   Palmtree,
-  RotateCcw,
-  Search,
   SlidersHorizontal,
   Sparkles,
   Sprout,
   Umbrella,
-  X,
 } from "lucide-react";
+import SearchBar from "@/components/shared/search-bar";
+import { DESTINATION_TYPE_OPTIONS } from "../constants";
 
 const COUNTRY_CODE_BY_NAME = {
   "United States": "USA",
@@ -73,16 +71,6 @@ const COUNTRY_CODE_BY_NAME = {
   Croatia: "HRV",
   "Czech Republic": "CZE",
 };
-
-const DESTINATION_TYPE_OPTIONS = [
-  { value: "city", label: "City", icon: Building2 },
-  { value: "beach", label: "Beach", icon: Umbrella },
-  { value: "mountain", label: "Mountain", icon: Mountain },
-  { value: "cultural", label: "Cultural", icon: Landmark },
-  { value: "nature", label: "Nature", icon: Sprout },
-  { value: "island", label: "Island", icon: Palmtree },
-  { value: "village", label: "Village", icon: Footprints },
-];
 
 const BUDGET_TIER_OPTIONS = [
   { value: "budget", label: "Budget" },
@@ -147,7 +135,7 @@ const OptionGroup = ({ title, icon, options, selectedValues, onToggle }) => {
 const CountrySelect = ({ countries, selectedValue, onValueChange }) => (
   <FloatingSelect
     label="Country"
-    placeholder="Any country"
+    placeholder="Select Country"
     value={selectedValue || undefined}
     onValueChange={onValueChange}
     contentClassName="max-h-64 rounded-xl border-slate-200 bg-white"
@@ -245,28 +233,12 @@ const DestinationFilter = ({
         className,
       )}
     >
-      <div className="relative min-w-0 flex-1 max-w-sm">
-        <Search
-          size={17}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-        />
-        <Input
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder="Search Bali, Kyoto, mountains..."
-          className="h-12 rounded-full border-slate-200 bg-white pl-11 pr-11 text-sm shadow-none focus-visible:ring-primary/15"
-        />
-        {searchQuery && (
-          <button
-            type="button"
-            onClick={() => setSearchQuery("")}
-            className="absolute right-3 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-slate-700"
-            aria-label="Clear search"
-          >
-            <X size={15} />
-          </button>
-        )}
-      </div>
+      <SearchBar
+        placeholder="Search with destination name, country, or type"
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        className=""
+      />
 
       <div className="relative">
         <DropdownMenu open={open} onOpenChange={handleOpenChange}>

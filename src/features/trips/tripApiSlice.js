@@ -57,6 +57,27 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ["trip-list", "trip-detail"],
     }),
 
+    createTripShareToken: builder.mutation({
+      query: ({ trip_id }) => {
+        return {
+          url: `/trips/${trip_id}/share-token/`,
+          method: "POST",
+        };
+      },
+      invalidatesTags: ["trip-detail"],
+    }),
+
+    updateTripVisibility: builder.mutation({
+      query: ({ trip_id, visibility }) => {
+        return {
+          url: `/trips/${trip_id}/visibility/`,
+          method: "PATCH",
+          body: { visibility },
+        };
+      },
+      invalidatesTags: ["trip-detail"],
+    }),
+
     deleteTrip: builder.mutation({
       query: ({ trip_id }) => {
         return {
@@ -186,6 +207,8 @@ export const {
   useTripAgentConversationQuery,
   useCreateTripMutation,
   useUpdateTripMutation,
+  useCreateTripShareTokenMutation,
+  useUpdateTripVisibilityMutation,
   useDeleteTripMutation,
   useTripAgentActiveMutation,
   useTripAgentCreateMessageMutation,

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import ChatHeader from "./chat-header";
 import { MessageErrorState, MessageListSkeleton } from "./fallback";
+import ChatInputForm from "./chat-input-form";
 
 const suggestedPrompts = [
   "Recommend a 5 day beach trip under $900",
@@ -80,33 +81,14 @@ const ChatInterface = ({
   onRefetchMessages,
   onSubmitMessage,
 }) => {
-  const canSend = message.trim().length > 0 && !isSendingMessage;
-
-  const handleSendMessage = (event) => {
-    event.preventDefault();
-    onSubmitMessage(message);
-  };
-
   const handlePromptClick = (prompt) => {
     onSubmitMessage(prompt);
-  };
-
-  const handleComposerKeyDown = (event) => {
-    if (
-      event.key !== "Enter" ||
-      event.shiftKey ||
-      event.nativeEvent.isComposing
-    )
-      return;
-
-    event.preventDefault();
-    onSubmitMessage(message);
   };
 
   return (
     <Card
       className={cn(
-        "h-full min-h-0 rounded-none border-x-0 border-y-0 p-4 md:rounded-2xl md:border lg:flex lg:flex-col",
+        "h-full min-h-0 lg:flex lg:flex-col",
         isMobileChatOpen ? "flex flex-col" : "hidden lg:flex",
       )}
     >
@@ -160,7 +142,7 @@ const ChatInterface = ({
         </div>
       )}
 
-      <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto py-4 pr-1 lg:space-y-5 lg:pr-2">
+      <div className="hidden-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto py-4 pr-1 lg:space-y-5 lg:pr-2">
         {isFetchingMessages && selectedSessionId && !messages.length ? (
           <MessageListSkeleton />
         ) : isMessageListError ? (
@@ -176,7 +158,10 @@ const ChatInterface = ({
             return (
               <div
                 key={item.id}
-                className={cn("flex items-start gap-2", isUser && "justify-end")}
+                className={cn(
+                  "flex items-start gap-2",
+                  isUser && "justify-end",
+                )}
               >
                 {!isUser ? (
                   <AuthorMessage message={messageContent} />
@@ -232,36 +217,13 @@ const ChatInterface = ({
       </div>
 
       <div className="border-t border-slate-200 bg-white pt-3 lg:pt-4">
-        <form onSubmit={handleSendMessage} className="flex items-end gap-2 sm:gap-3">
-          <label htmlFor="agent-message" className="sr-only">
-            Message Tour Agent
-          </label>
-          <textarea
-            ref={composerRef}
-            id="agent-message"
-            value={message}
-            onChange={(event) => onMessageChange(event.target.value)}
-            onKeyDown={handleComposerKeyDown}
-            placeholder="Message turtle..."
-            rows={1}
-            readOnly={isSendingMessage}
-            aria-disabled={isSendingMessage}
-            className="max-h-36 min-h-11 flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 aria-disabled:cursor-not-allowed aria-disabled:opacity-70 sm:min-h-12 sm:py-3"
-          />
-          <Button
-            type="submit"
-            size="icon-lg"
-            disabled={!canSend}
-            aria-label="Send message"
-            className="mb-1 rounded-full"
-          >
-            {isSendingMessage ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <Send size={18} />
-            )}
-          </Button>
-        </form>
+        <ChatInputForm
+          composerRef={composerRef}
+          message={message}
+          onSubmitMessage={onSubmitMessage}
+          onMessageChange={onMessageChange}
+          isSendingMessage={isSendingMessage}
+        />
       </div>
     </Card>
   );

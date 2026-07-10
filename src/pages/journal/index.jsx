@@ -39,7 +39,6 @@ const matchesSavedJournalSearch = (journal, searchQuery) => {
 const TravelJournalPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [savedSearchQuery, setSavedSearchQuery] = useState("");
-  const [activeTag, setActiveTag] = useState("All");
   const [formOpen, setFormOpen] = useState(false);
   const [editingJournal, setEditingJournal] = useState(null);
   const [deletingJournal, setDeletingJournal] = useState(null);
@@ -57,7 +56,6 @@ const TravelJournalPage = () => {
   } = useJournalInfiniteListInfiniteQuery({
     page_size: 10,
     search: debouncedSearchQuery,
-    tags: activeTag === "All" ? undefined : activeTag,
   });
   const {
     data: savedData,
@@ -132,12 +130,6 @@ const TravelJournalPage = () => {
     return String(currentUser.id) === String(journal.author.id);
   };
 
-  const clearFilters = () => {
-    setSearchQuery("");
-    setActiveTag("All");
-  };
-
-  const hasFilters = searchQuery || activeTag !== "All";
   const isSavedSearchSettling =
     savedSearchQuery.trim() !== debouncedSavedSearchQuery;
   const isJournalSearchSettling = searchQuery.trim() !== debouncedSearchQuery;
@@ -166,8 +158,6 @@ const TravelJournalPage = () => {
           isSearchSettling={isJournalSearchSettling}
           isError={isError}
           onRetry={refetch}
-          hasFilters={hasFilters}
-          onClearFilters={clearFilters}
           hasMore={hasNextPage}
           isFetchingMore={isFetchingNextPage}
           onLoadMore={fetchNextPage}

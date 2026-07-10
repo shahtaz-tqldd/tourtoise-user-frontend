@@ -21,6 +21,10 @@ import {
   Sparkles,
   Plus,
   Trash2,
+  CheckCircle,
+  CircleCheck,
+  Check,
+  CheckCheck,
 } from "lucide-react";
 import {
   useCreateTripMutation,
@@ -29,7 +33,7 @@ import {
   useTripListQuery,
 } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 // components
@@ -196,9 +200,13 @@ const getEndDate = (startDate, days) => {
   return date.toISOString().slice(0, 10);
 };
 
-const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
-  const destinationSlug = getDestinationSlug(destination);
-  const destinationName = destination?.name || "";
+const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
+  const resolvedDestination =
+    destination || trip?.primary_destination || trip?.destination || null;
+  const destinationSlug = getDestinationSlug(resolvedDestination);
+  const destinationName = resolvedDestination?.name || "";
+  const directTripId = getTripDetailId(trip);
+  const shouldSkipTripList = Boolean(trip);
   const [form, setForm] = useState(createInitialForm);
   const [createdTrip, setCreatedTrip] = useState(null);
   const [selectedTrip, setSelectedTrip] = useState(null);
@@ -211,14 +219,13 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     () => getGeneratedTripTitle(destinationName),
     [destinationName],
   );
-  const currentTripTitle = tripTitle ?? generatedTripTitle;
 
   const {
     data: tripListData,
     isFetching: isCheckingTrips,
     refetch: refetchTripList,
   } = useTripListQuery(
-    open && destinationSlug
+    open && destinationSlug && !shouldSkipTripList
       ? { destination_slug: destinationSlug, page: 1, page_size: 20 }
       : skipToken,
   );
@@ -237,9 +244,9 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     !createdTrip;
   const detailSourceTrip =
     !isCheckingTrips && !createdTrip && !isStartingNewPlan && !isViewingPlanList
-      ? selectedTrip || (shouldLoadSingleTrip ? previousTrip : null)
+      ? trip || selectedTrip || (shouldLoadSingleTrip ? previousTrip : null)
       : null;
-  const detailTripId = getTripDetailId(detailSourceTrip);
+  const detailTripId = directTripId || getTripDetailId(detailSourceTrip);
   const {
     data: tripDetailData,
     isFetching: isFetchingTripDetail,
@@ -252,13 +259,36 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
   const activeTrip =
     isStartingNewPlan || isViewingPlanList
       ? null
-      : createdTrip || detailedTrip || null;
+      : createdTrip || detailedTrip || trip || null;
+  const currentTripTitle =
+    tripTitle ??
+    getTripTitle(activeTrip || trip, resolvedDestination) ??
+    generatedTripTitle;
   const tripCurrentStep = activeTrip ? getCurrentStepIndex(activeTrip) : 0;
   const displayedStep = activeStep ?? tripCurrentStep;
   const unlockedStep = Math.max(furthestStep, tripCurrentStep, displayedStep);
   const displayedStepConfig = planningSteps[displayedStep];
   const ActiveStepComponent = displayedStepConfig.component;
   const activeTripId = getTripId(activeTrip);
+  const stepRailRef = useRef(null);
+  const stepButtonRefs = useRef({});
+
+  useEffect(() => {
+    const stepRail = stepRailRef.current;
+    const activeButton = stepButtonRefs.current[displayedStep];
+
+    if (!stepRail || !activeButton) return;
+
+    const targetLeft =
+      activeButton.offsetLeft -
+      stepRail.clientWidth / 2 +
+      activeButton.clientWidth / 2;
+
+    stepRail.scrollTo({
+      left: targetLeft,
+      behavior: "smooth",
+    });
+  }, [displayedStep]);
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -364,7 +394,7 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     setSelectedTrip(trip);
     setIsStartingNewPlan(false);
     setIsViewingPlanList(false);
-    setTripTitle(getTripTitle(trip, destination));
+    setTripTitle(getTripTitle(trip, resolvedDestination));
     setActiveStep(currentStep);
     setFurthestStep(currentStep);
   };
@@ -378,6 +408,12 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
     try {
       await deleteTrip({ trip_id: activeTripId }).unwrap();
       toast.success("Trip plan deleted.");
+
+      if (shouldSkipTripList) {
+        handleOpenChange(false);
+        return;
+      }
+
       setCreatedTrip(null);
       setSelectedTrip(null);
       setIsStartingNewPlan(false);
@@ -431,6 +467,7 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
   };
 
   const showTripList =
+    !shouldSkipTripList &&
     !isCheckingTrips &&
     (isViewingPlanList ||
       (!isStartingNewPlan &&
@@ -488,64 +525,72 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
                 onChange={(event) => setTripTitle(event.target.value)}
                 className="min-w-0 flex-1 bg-transparent p-0 text-xl font-semibold text-slate-950 outline-none"
               />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label="Trip plan actions"
-                    className="center size-9 shrink-0 rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 translate-x-12"
+              {!shouldSkipTripList && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Trip plan actions"
+                      className="center size-9 shrink-0 rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 translate-x-12"
+                    >
+                      <Ellipsis size={18} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 rounded-xl border-slate-200 p-1 shadow-lg"
                   >
-                    <Ellipsis size={18} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-56 rounded-xl border-slate-200 p-1 shadow-lg"
-                >
-                  <DropdownMenuItem
-                    className="rounded-lg px-3 py-2"
-                    onSelect={handleStartNewPlan}
-                  >
-                    <Plus size={16} />
-                    Add new plan
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="rounded-lg px-3 py-2"
-                    onSelect={handleViewPlanList}
-                  >
-                    <List size={16} />
-                    See previous plans
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    disabled={!activeTripId || isDeletingTrip}
-                    className="rounded-lg px-3 py-2"
-                    onSelect={(event) => {
-                      event.preventDefault();
-                      handleDeleteActiveTrip();
-                    }}
-                  >
-                    {isDeletingTrip ? (
-                      <Loader2 className="animate-spin" size={16} />
-                    ) : (
-                      <Trash2 size={16} />
-                    )}
-                    Delete this plan
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuItem
+                      className="rounded-lg px-3 py-2"
+                      onSelect={handleStartNewPlan}
+                    >
+                      <Plus size={16} />
+                      Add new plan
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      className="rounded-lg px-3 py-2"
+                      onSelect={handleViewPlanList}
+                    >
+                      <List size={16} />
+                      See previous plans
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      disabled={!activeTripId || isDeletingTrip}
+                      className="rounded-lg px-3 py-2"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        handleDeleteActiveTrip();
+                      }}
+                    >
+                      {isDeletingTrip ? (
+                        <Loader2 className="animate-spin" size={16} />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                      Delete this plan
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </SheetTitle>
             <div className="flbx pl-6">
               <SheetDescription>
-                {destination?.region}, {destination?.country}
+                {[resolvedDestination?.region, resolvedDestination?.country]
+                  .filter(Boolean)
+                  .join(", ")}
               </SheetDescription>
             </div>
           </SheetHeader>
 
           {showAgent && (
-            <div className="border-slate-200 px-4 py-3 border-b">
-              <div className="flex">
+            <div className="border-slate-200 py-3 px-4 border-b">
+              <div
+                ref={stepRailRef}
+                className="flex overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
                 {planningSteps.map((step, index) => {
                   const isReached = index <= unlockedStep;
                   const isActive = index === displayedStep;
@@ -553,19 +598,23 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
 
                   return (
                     <button
+                      ref={(node) => {
+                        stepButtonRefs.current[index] = node;
+                      }}
                       key={step.title}
                       type="button"
                       onClick={() => handleStepSelect(index)}
                       disabled={!isReached}
-                      className={`min-w-0 flex-1 rounded-md px-1 py-1.5 text-center transition ${
+                      className={`shrink-0 whitespace-nowrap rounded-md pr-3 pl-2.5 py-1.5 flx gap-1 text-center transition ${
                         isActive
                           ? "bg-primary/10 text-primary"
                           : isComplete
                             ? "text-slate-700 hover:bg-slate-100"
                             : "text-slate-400"
-                      } ${!isReached ? "cursor-not-allowed opacity-60" : ""}`}
+                        } ${!isReached ? "cursor-not-allowed opacity-60" : ""}`}
                     >
-                      <span className="block truncate text-[11px] font-medium leading-4">
+                      <CheckCheck className="shrink-0" size={14} />
+                      <span className="text-[11px] font-medium leading-4">
                         {step.title}
                       </span>
                     </button>
@@ -621,8 +670,8 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
                       Choose a plan to continue
                     </h3>
                     <p className="mt-1 text-sm leading-6 text-slate-600">
-                      I found existing plans for {destination?.name}. Continue
-                      one of them or start a separate plan.
+                      I found existing plans for {resolvedDestination?.name}.
+                      Continue one of them or start a separate plan.
                     </p>
                   </div>
                 </div>
@@ -644,14 +693,14 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
                       key={
                         getTripId(trip) ||
                         trip?.slug ||
-                        getTripTitle(trip, destination)
+                        getTripTitle(trip, resolvedDestination)
                       }
                       type="button"
                       onClick={() => handleSelectTrip(trip)}
                       className="rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-primary/40 hover:bg-primary/5"
                     >
                       <p className="text-sm font-semibold text-slate-950">
-                        {getTripTitle(trip, destination)}
+                        {getTripTitle(trip, resolvedDestination)}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
                         {getTripDates(trip)}
@@ -675,7 +724,7 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
           {showSetupForm && !tripDetailError && (
             <div className="flex min-h-0 flex-1 flex-col">
               <TripPlanInitialInput
-                destination={destination}
+                destination={resolvedDestination}
                 form={form}
                 onFieldChange={updateField}
                 onSubmit={handleCreateTrip}
@@ -704,7 +753,7 @@ const TripPlanningDrawer = ({ destination, open, onOpenChange }) => {
               <ActiveStepComponent
                 key={`${activeTripId}-${displayedStepConfig.key}`}
                 trip={activeTrip}
-                destination={destination}
+                destination={resolvedDestination}
                 getEndDate={getEndDate}
                 onTripUpdated={handleTripUpdated}
                 onStepComplete={handleStepComplete}

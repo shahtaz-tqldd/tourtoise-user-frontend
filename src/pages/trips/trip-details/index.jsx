@@ -1,12 +1,26 @@
-import Card from "@/components/ui/card";
-import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
-import { Loader2 } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+import { cn } from "@/lib/utils";
+
+// components
+import Card from "@/components/ui/card";
+import TabMenu from "@/components/ui/tab";
 import TripAgentChat from "./components/trip-agent-chat";
-import TripNotesAlerts from "./components/trip-notes-alerts";
 import TripOverview from "./components/trip-overview";
 import TripPlanningTabs from "./components/trip-planning-tabs";
+
+//icons
+import { Bell, Loader2, MessageSquareDot, Sparkles } from "lucide-react";
+
+// lib
+import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
+import useTitle from "@/hooks/useTitle";
+
+const mobileTabs = [
+  { value: "overview", label: "Overview", icon: Sparkles },
+  { value: "assistant", label: "Trip Assistant", icon: MessageSquareDot },
+  { value: "notifications", label: "Notification", icon: Bell },
+];
 
 const formatMoney = (amount, currency) =>
   new Intl.NumberFormat("en", {
@@ -78,6 +92,12 @@ const buildChatMessages = (trip) => {
   return messages;
 };
 
+const buildNotifications = (trip) =>
+  (trip?.alerts || []).map((alert) => ({
+    title: alert.title,
+    content: alert.body,
+  }));
+
 const normalizeTripDetail = (sourceTrip) => {
   if (!sourceTrip) return null;
 
@@ -101,20 +121,43 @@ const normalizeTripDetail = (sourceTrip) => {
       "No planning summary available yet.",
     trip_pace: preferences.travel_pace || sourceTrip.traveler_type || "custom",
     destinations: (sourceTrip.trip_destinations || []).map((destination) => ({
+      id:
+        destination.id ||
+        destination.destination?.slug ||
+        destination.destination?.name,
+      slug:
+        destination.destination?.slug ||
+        destination.slug ||
+        destination.destination_slug ||
+        "",
       name:
         destination.destination?.name ||
         destination.name ||
         destination.title ||
         sourceTrip.title,
       country: destination.destination?.country || destination.country || "",
-      stay: destination.stay || destination.role || "Trip destination",
+      region: destination.destination?.region || destination.region || "",
+      tagline: destination.destination?.tagline || destination.tagline || "",
+      destination_type:
+        destination.destination?.destination_type ||
+        destination.destination_type ||
+        "",
+      tags: destination.destination?.tags || destination.tags || [],
+      arrival_date: destination.arrival_date || "",
+      departure_date: destination.departure_date || "",
+      stay:
+        destination.stay ||
+        destination.role ||
+        (destination.is_primary ? "Primary destination" : "Trip destination"),
       image_url:
         destination.destination?.cover_image ||
         destination.cover_image ||
         destination.image_url,
       summary:
+        destination.destination?.description ||
         destination.destination?.overview ||
         destination.summary ||
+        destination.destination?.tagline ||
         sourceTrip.planning_summary,
     })),
     packing_items: packingItems.map((item) => ({
@@ -177,13 +220,16 @@ const normalizeTripDetail = (sourceTrip) => {
 };
 
 const TripDetailPage = () => {
+  useTitle("Trip Details");
   const { trip_id } = useParams();
+  const [activeMobileTab, setActiveMobileTab] = useState("overview");
 
   const { data, isFetching, isError } = useTripDetailQuery(trip_id);
   const trip = useMemo(
     () => normalizeTripDetail(unwrapTripDetail(data)),
     [data],
   );
+  const notifications = useMemo(() => buildNotifications(trip), [trip]);
 
   if (isFetching) {
     return (
@@ -208,15 +254,73 @@ const TripDetailPage = () => {
   }
 
   return (
-    <section className="grid gap-6 py-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-      <div className="space-y-5">
-        <TripOverview trip={trip} />
-        <TripPlanningTabs trip={trip} />
-        <TripNotesAlerts notes={trip.notes} alerts={trip.alerts} />
-      </div>
+    <>
+      <section className="hidden gap-6 py-5 xl:grid xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="space-y-5">
+          <TripOverview trip={trip} />
+          <TripPlanningTabs trip={trip} />
+        </div>
 
-      <TripAgentChat messages={trip.chat} />
-    </section>
+        <TripAgentChat
+          messages={trip.chat}
+          notifications={notifications}
+          className="sticky top-[92px]"
+        />
+      </section>
+
+      <section
+        className={cn(
+          "xl:hidden",
+          activeMobileTab === "overview"
+            ? "pt-0 pb-18 md:pt-5 md:pb-5"
+            : "flex h-[calc(100dvh-3rem)] min-h-0 flex-col overflow-hidden pb-[calc(env(safe-area-inset-bottom)+4.5rem)]",
+        )}
+      >
+        <TabMenu
+          tabs={mobileTabs}
+          activeTab={activeMobileTab}
+          setActiveTab={setActiveMobileTab}
+          className={cn(
+            "z-20 -mx-4 bg-white px-4 pt-1.5",
+            activeMobileTab === "overview" ? "sticky top-14" : "shrink-0",
+          )}
+        />
+
+        <div
+          className={cn(
+            "mt-0",
+            activeMobileTab !== "overview" && "min-h-0 flex-1 overflow-hidden",
+          )}
+        >
+          {activeMobileTab === "overview" && (
+            <div className="space-y-5">
+              <TripOverview trip={trip} />
+              <TripPlanningTabs trip={trip} />
+            </div>
+          )}
+
+          {activeMobileTab === "assistant" && (
+            <TripAgentChat
+              messages={trip.chat}
+              notifications={notifications}
+              showTabs={false}
+              activeSection="chat"
+              className="h-full min-h-0 rounded-none md:rounded-3xl"
+            />
+          )}
+
+          {activeMobileTab === "notifications" && (
+            <TripAgentChat
+              messages={trip.chat}
+              notifications={notifications}
+              showTabs={false}
+              activeSection="notifications"
+              className="h-full min-h-0 rounded-none md:rounded-3xl"
+            />
+          )}
+        </div>
+      </section>
+    </>
   );
 };
 

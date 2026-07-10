@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Bookmark, BookMarked, BookmarkX, X } from "lucide-react";
 
 import InfiniteScroll from "@/components/shared/infinite-scroll";
+import PreviewContent from "@/components/shared/preview-content";
 import SearchField from "@/components/shared/search";
-import { SectionHeader } from "@/components/shared/utils";
+import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -19,6 +20,13 @@ import { cn } from "@/lib/utils";
 const getJournalCover = (journal) =>
   journal.images?.[0] || journal.cover_image || null;
 
+const getJournalImages = (journal) =>
+  journal.images?.length
+    ? journal.images
+    : journal.cover_image
+      ? [journal.cover_image]
+      : [];
+
 const SavedJournalList = ({
   journals,
   onSaveToggle,
@@ -26,8 +34,9 @@ const SavedJournalList = ({
   isError,
   onRetry,
   searchQuery,
-  onClearSearch,
 }) => {
+  const [previewJournal, setPreviewJournal] = useState(null);
+
   if (isLoading && !journals.length) {
     return (
       <div className="space-y-3">
@@ -59,85 +68,157 @@ const SavedJournalList = ({
 
   if (!journals.length) {
     return (
-      <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
-        <div className="center size-12 rounded-xl bg-primary/10 text-primary">
-          <BookmarkX size={20} />
-        </div>
-        <h3 className="mt-4 text-base font-semibold text-slate-950">
-          {searchQuery ? "No saved journals found" : "No saved journals yet"}
-        </h3>
-        <p className="mt-1 max-w-[260px] text-sm leading-6 text-slate-500">
-          {searchQuery
+      <EmptyState
+        title={
+          searchQuery ? "No saved journals found" : "No saved journals yet"
+        }
+        description={
+          searchQuery
             ? "Try another search term to find a bookmarked travel story."
-            : "Save journals you want to revisit and they will show up here."}
-        </p>
-        {searchQuery && (
-          <Button className="mt-4" variant="outline" onClick={onClearSearch}>
-            Clear search
-          </Button>
-        )}
-      </div>
+            : "Save journals you want to revisit and they will show up here."
+        }
+      />
     );
   }
 
   return (
-    <div className="space-y-3">
-      {journals.map((journal) => {
-        const coverImage = getJournalCover(journal);
+    <>
+      <div className="space-y-3">
+        {journals.map((journal) => {
+          const coverImage = getJournalCover(journal);
 
-        return (
-          <article
-            key={journal.id}
-            className={cn(
-              "flex min-w-0 items-center gap-3 rounded-2xl bg-white",
-              coverImage ? "p-3" : "p-4",
-            )}
-          >
-            {coverImage ? (
-              <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-slate-100">
-                <img
-                  src={coverImage}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ) : null}
-            <div className="min-w-0 flex-1">
-              <p className="line-clamp-2 text-sm leading-6 text-slate-600">
-                {journal.body || "Untitled travel journal"}
-              </p>
-              <div className="mt-3 flx gap-2">
-                <img
-                  src={journal.author?.avatar_url}
-                  className="size-8 rounded-full object-cover"
-                  alt={journal.author.name}
-                />
-                <div>
-                  <p className="truncate text-xs font-semibold text-slate-800">
-                    {journal.author?.name || "Unknown traveler"}
-                  </p>
-                  {journal.date && (
-                    <p className="mt-1 text-xs font-medium text-slate-400">
-                      {journal.date}
-                    </p>
+          return (
+            <article
+              key={journal.id}
+              className={cn(
+                "flex min-w-0 cursor-pointer items-center gap-3 rounded-2xl bg-white transition hover:bg-slate-50",
+                coverImage ? "p-3" : "p-4",
+              )}
+              role="button"
+              tabIndex={0}
+              onClick={() => setPreviewJournal(journal)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setPreviewJournal(journal);
+                }
+              }}
+            >
+              {coverImage ? (
+                <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                  <img
+                    src={coverImage}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : null}
+              <div className="min-w-0 flex-1">
+                <p className="line-clamp-2 text-sm leading-6 text-slate-600">
+                  {journal.body || "Untitled travel journal"}
+                </p>
+                <div className="mt-3 flx gap-2">
+                  {journal.author?.avatar_url ? (
+                    <img
+                      src={journal.author.avatar_url}
+                      className="size-8 rounded-full object-cover"
+                      alt={journal.author?.name || "Unknown traveler"}
+                    />
+                  ) : (
+                    <div className="center size-8 rounded-full bg-primary/10 text-xs font-bold text-primary">
+                      {journal.author?.name?.charAt(0).toUpperCase() || "T"}
+                    </div>
                   )}
+                  <div>
+                    <p className="truncate text-xs font-semibold text-slate-800">
+                      {journal.author?.name || "Unknown traveler"}
+                    </p>
+                    {journal.date && (
+                      <p className="mt-1 text-xs font-medium text-slate-400">
+                        {journal.date}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="rounded-full text-primary"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onSaveToggle(journal);
+                }}
+                aria-label="Remove journal from saved journals"
+              >
+                <Bookmark size={16} className="fill-current" />
+              </Button>
+            </article>
+          );
+        })}
+      </div>
+
+      <PreviewContent
+        open={Boolean(previewJournal)}
+        onOpenChange={(open) => !open && setPreviewJournal(null)}
+      >
+        <SavedJournalPreview journal={previewJournal} />
+      </PreviewContent>
+    </>
+  );
+};
+
+const SavedJournalPreview = ({ journal }) => {
+  if (!journal) return null;
+
+  const authorName = journal.author?.name || "Unknown traveler";
+  const images = getJournalImages(journal);
+
+  return (
+    <article className="bg-white">
+      {images.length > 0 && (
+        <div className="grid max-h-[48vh] grid-cols-1 gap-1 overflow-hidden bg-slate-100 sm:grid-cols-2">
+          {images.slice(0, 4).map((image, index) => (
+            <img
+              key={`${image}-${index}`}
+              src={image}
+              alt={`Journal photo ${index + 1}`}
+              className={cn(
+                "h-full min-h-48 w-full object-cover",
+                images.length === 1 && "sm:col-span-2",
+              )}
+            />
+          ))}
+        </div>
+      )}
+      <div className="space-y-5 p-4 sm:p-6">
+        <div className="flex min-w-0 items-center gap-3">
+          {journal.author?.avatar_url ? (
+            <img
+              src={journal.author.avatar_url}
+              className="size-10 rounded-full object-cover"
+              alt={authorName}
+            />
+          ) : (
+            <div className="center size-10 rounded-full bg-primary/10 text-sm font-bold text-primary">
+              {authorName.charAt(0).toUpperCase()}
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className="rounded-full text-primary"
-              onClick={() => onSaveToggle(journal)}
-              aria-label="Remove journal from saved journals"
-            >
-              <Bookmark size={16} className="fill-current" />
-            </Button>
-          </article>
-        );
-      })}
-    </div>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-slate-950">
+              {authorName}
+            </p>
+            {journal.date && (
+              <p className="mt-0.5 text-xs text-slate-500">{journal.date}</p>
+            )}
+          </div>
+        </div>
+        <p className="whitespace-pre-line text-sm leading-7 text-slate-700 sm:text-base">
+          {journal.body || "Untitled travel journal"}
+        </p>
+      </div>
+    </article>
   );
 };
 
@@ -174,7 +255,6 @@ export const SavedJournalsPanel = ({
         isError={isError}
         onRetry={onRetry}
         searchQuery={searchQuery}
-        onClearSearch={() => onSearchChange("")}
       />
       <InfiniteScroll
         hasMore={hasMore}
@@ -243,7 +323,6 @@ export const SavedJournalsDrawer = ({
           isError={isError}
           onRetry={onRetry}
           searchQuery={searchQuery}
-          onClearSearch={() => onSearchChange("")}
         />
         <InfiniteScroll
           hasMore={hasMore}
