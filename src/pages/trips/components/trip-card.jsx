@@ -16,6 +16,7 @@ import { formatDate, formatUpdatedAt } from "@/lib/date-time";
 import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import TripPlanningDrawer from "../trip-create";
 import {
+  ArrowUpRight,
   Ban,
   CalendarClock,
   CalendarDays,
@@ -25,6 +26,7 @@ import {
   MapPin,
   MoreHorizontal,
   Pencil,
+  Route,
   Share2,
   Trash2,
   User,
@@ -229,10 +231,23 @@ const TripCard = ({ trip, compact = false }) => {
 
   return (
     <>
-      <Card className="group relative">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <Card className="group relative md:p-5">
+        <div className="grid gap-6 lg:flex">
+          {/* Cover image — full-width hero strip */}
+          {coverImage ? (
+            <img
+              src={getCloudinaryPreviewUrl(coverImage, 360)}
+              alt={`${getDestinationLabel(displayedTrip)} cover`}
+              className="rounded-2xl h-60 w-80 object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="rounded-2xl h-60 w-80 center bg-slate-100 text-slate-400">
+              <MapPin size={28} />
+            </div>
+          )}
           {/* Card body */}
-          <div className="flex flex-col gap-6 justify-between">
+          <div className="flex flex-col gap-6 justify-between flex-1 w-full">
             {/* Badges */}
             <div className="space-y-4">
               <div className="flex items-start justify-between gap-3">
@@ -287,49 +302,27 @@ const TripCard = ({ trip, compact = false }) => {
                   {formatTravelers(displayedTrip)}
                 </span>
               </span>
+              <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
+                <MapPin size={14} className="shrink-0 text-slate-400" />
+                <span className="truncate capitalize">
+                  {displayedTrip.updated_at
+                    ? `Updated ${formatUpdatedAt(displayedTrip.updated_at)}`
+                    : `${displayedTrip.destinations_count || 1} destination${
+                        Number(displayedTrip.destinations_count || 1) === 1
+                          ? ""
+                          : "s"
+                      }`}
+                </span>
+              </span>
             </div>
-          </div>
-
-          {/* Cover image — full-width hero strip */}
-          {coverImage ? (
-            <img
-              src={getCloudinaryPreviewUrl(coverImage, 360)}
-              alt={`${getDestinationLabel(displayedTrip)} cover`}
-              className="rounded-2xl h-48 w-full object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <div className="rounded-2xl h-48 w-full center bg-slate-100 text-slate-400">
-              <MapPin size={28} />
+            <div className="flex justify-end">
+              <Link className="w-full md:w-fit" to={getTripUrl(displayedTrip)}>
+                <Button className="w-full md:w-fit md:!pl-6 md:!pr-5">
+                  View Trip details
+                  <ArrowUpRight />
+                </Button>
+              </Link>
             </div>
-          )}
-        </div>
-        <div className="border-t border-slate-100 my-4 -mx-6"></div>
-        {/* Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs text-slate-400 hidden md:block">
-            {displayedTrip.updated_at
-              ? `Updated ${formatUpdatedAt(displayedTrip.updated_at)}`
-              : `${displayedTrip.destinations_count || 1} destination${
-                  Number(displayedTrip.destinations_count || 1) === 1 ? "" : "s"
-                }`}
-          </p>
-          <div className="flex w-full md:w-fit gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShareOpen(true)}
-              className="flex-1 md:flex-none"
-            >
-              <Share2 size={14} />
-              Share Trip
-            </Button>
-            <Link
-              className="flex-1 md:flex-none"
-              to={getTripUrl(displayedTrip)}
-            >
-              <Button className="w-full ">View details</Button>
-            </Link>
           </div>
         </div>
 
@@ -339,26 +332,32 @@ const TripCard = ({ trip, compact = false }) => {
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="rounded-full text-slate-500 bg-white/50 backdrop-blur-sm hover:bg-white/75 hover:text-slate-900 absolute top-4 md:top-6 right-4 md:right-6 tr"
+              className="rounded-full text-slate-500 bg-slate-50 hover:bg-slate-100 hover:text-slate-900 absolute top-4 md:top-5 right-4 md:right-5 tr"
               aria-label="Trip actions"
             >
               <MoreHorizontal size={18} />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-36">
+          <DropdownMenuContent
+            align="end"
+            className="w-40 border border-slate-200 rounded-2xl"
+          >
             <DropdownMenuItem onSelect={() => setRescheduleOpen(true)}>
               <CalendarClock size={15} />
               Reschedule
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setShareOpen(true)}>
+              <Share2 size={15} />
+              Share Trip
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setCancelOpen(true)}>
               <Ban size={15} />
               Cancel trip
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setPlanningOpen(true)}>
-              <Pencil size={15} />
+              <Route size={15} />
               View Planning
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"
               onSelect={() => setDeleteOpen(true)}

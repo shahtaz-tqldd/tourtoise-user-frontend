@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   ArrowRight,
-  ArrowUpRight,
   Calendar,
   CalendarDays,
   ChevronLeft,
@@ -169,7 +168,7 @@ const DestinationSlider = ({
             )}
           </div>
 
-          <div className="flex flex-col justify-between gap-5 bg-white p-4 pl-2">
+          <div className="flex flex-col justify-between gap-5 bg-white p-4 md:pl-2">
             <div>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -281,7 +280,7 @@ const TripOverview = ({ trip }) => {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-6 grid gap-3 grid-cols-2 md:grid-cols-4">
         <SummaryMetric
           icon={CalendarDays}
           label="Start date"

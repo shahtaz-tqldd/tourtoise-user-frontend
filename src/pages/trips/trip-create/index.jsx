@@ -21,6 +21,10 @@ import {
   Sparkles,
   Plus,
   Trash2,
+  CheckCircle,
+  CircleCheck,
+  Check,
+  CheckCheck,
 } from "lucide-react";
 import {
   useCreateTripMutation,
@@ -29,7 +33,7 @@ import {
   useTripListQuery,
 } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 // components
@@ -266,6 +270,25 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
   const displayedStepConfig = planningSteps[displayedStep];
   const ActiveStepComponent = displayedStepConfig.component;
   const activeTripId = getTripId(activeTrip);
+  const stepRailRef = useRef(null);
+  const stepButtonRefs = useRef({});
+
+  useEffect(() => {
+    const stepRail = stepRailRef.current;
+    const activeButton = stepButtonRefs.current[displayedStep];
+
+    if (!stepRail || !activeButton) return;
+
+    const targetLeft =
+      activeButton.offsetLeft -
+      stepRail.clientWidth / 2 +
+      activeButton.clientWidth / 2;
+
+    stepRail.scrollTo({
+      left: targetLeft,
+      behavior: "smooth",
+    });
+  }, [displayedStep]);
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -563,8 +586,11 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
           </SheetHeader>
 
           {showAgent && (
-            <div className="border-slate-200 px-4 py-3 border-b">
-              <div className="flex">
+            <div className="border-slate-200 py-3 px-4 border-b">
+              <div
+                ref={stepRailRef}
+                className="flex overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
                 {planningSteps.map((step, index) => {
                   const isReached = index <= unlockedStep;
                   const isActive = index === displayedStep;
@@ -572,19 +598,23 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
 
                   return (
                     <button
+                      ref={(node) => {
+                        stepButtonRefs.current[index] = node;
+                      }}
                       key={step.title}
                       type="button"
                       onClick={() => handleStepSelect(index)}
                       disabled={!isReached}
-                      className={`min-w-0 flex-1 rounded-md px-1 py-1.5 text-center transition ${
+                      className={`shrink-0 whitespace-nowrap rounded-md pr-3 pl-2.5 py-1.5 flx gap-1 text-center transition ${
                         isActive
                           ? "bg-primary/10 text-primary"
                           : isComplete
                             ? "text-slate-700 hover:bg-slate-100"
                             : "text-slate-400"
-                      } ${!isReached ? "cursor-not-allowed opacity-60" : ""}`}
+                        } ${!isReached ? "cursor-not-allowed opacity-60" : ""}`}
                     >
-                      <span className="block truncate text-[11px] font-medium leading-4">
+                      <CheckCheck className="shrink-0" size={14} />
+                      <span className="text-[11px] font-medium leading-4">
                         {step.title}
                       </span>
                     </button>

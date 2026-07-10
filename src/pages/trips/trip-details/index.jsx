@@ -1,13 +1,20 @@
-import Card from "@/components/ui/card";
-import TabMenu from "@/components/ui/tab";
-import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
-import { cn } from "@/lib/utils";
-import { Bell, Loader2, MessageSquareDot, Sparkles } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+import { cn } from "@/lib/utils";
+
+// components
+import Card from "@/components/ui/card";
+import TabMenu from "@/components/ui/tab";
 import TripAgentChat from "./components/trip-agent-chat";
 import TripOverview from "./components/trip-overview";
 import TripPlanningTabs from "./components/trip-planning-tabs";
+
+//icons
+import { Bell, Loader2, MessageSquareDot, Sparkles } from "lucide-react";
+
+// lib
+import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
+import useTitle from "@/hooks/useTitle";
 
 const mobileTabs = [
   { value: "overview", label: "Overview", icon: Sparkles },
@@ -213,6 +220,7 @@ const normalizeTripDetail = (sourceTrip) => {
 };
 
 const TripDetailPage = () => {
+  useTitle("Trip Details");
   const { trip_id } = useParams();
   const [activeMobileTab, setActiveMobileTab] = useState("overview");
 
@@ -273,7 +281,7 @@ const TripDetailPage = () => {
           activeTab={activeMobileTab}
           setActiveTab={setActiveMobileTab}
           className={cn(
-            "z-10 -mx-4 bg-white px-4 pt-1",
+            "z-20 -mx-4 bg-white px-4 pt-1.5",
             activeMobileTab === "overview" ? "sticky top-14" : "shrink-0",
           )}
         />

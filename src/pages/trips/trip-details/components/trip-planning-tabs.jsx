@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   AlertTriangle,
   Backpack,
@@ -51,12 +51,12 @@ const formatDate = (value) => {
 };
 
 const planningTabs = [
-  { value: "packing", label: "Packing" },
-  { value: "documents", label: "Documents" },
-  { value: "route", label: "Route plan" },
-  { value: "days", label: "Day wise plan" },
-  { value: "heads-up", label: "Heads-up" },
-  { value: "notes", label: "Notes" },
+  { value: "packing", label: "Packing", icon: Backpack },
+  { value: "documents", label: "Documents", icon: FileCheck2 },
+  { value: "route", label: "Route", icon: Route },
+  { value: "days", label: "Days", icon: CalendarDays },
+  { value: "heads-up", label: "Heads-up", icon: AlertTriangle },
+  { value: "notes", label: "Notes", icon: FileText },
 ];
 
 const PackingSection = ({ items = [] }) => (
@@ -464,27 +464,49 @@ const NotesSection = ({ notes = [] }) => {
 
 const TripPlanningTabs = ({ trip }) => {
   const [activeTab, setActiveTab] = useState("packing");
+  const contentRef = useRef(null);
+
+  const handleTabChange = (nextTab) => {
+    if (nextTab === activeTab) {
+      return;
+    }
+
+    setActiveTab(nextTab);
+    requestAnimationFrame(() => {
+      contentRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  };
 
   return (
     <section className="space-y-4">
       <TabMenu
         tabs={planningTabs}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        className="pt-2 sticky top-16 bg-white/50 backdrop-blur-xl z-20"
+        setActiveTab={handleTabChange}
+        scrollable
+        className="sticky top-[106px] z-20 -mx-4 bg-white/90 px-4 pt-2 backdrop-blur-xl md:top-16 md:mx-0 md:px-0"
       />
 
-      {activeTab === "packing" && <PackingSection items={trip.packing_items} />}
-      {activeTab === "documents" && (
-        <DocumentsSection
-          documents={trip.documents}
-          uploadedDocuments={trip.uploaded_documents}
-        />
-      )}
-      {activeTab === "route" && <RouteSection segments={trip.route_segments} />}
-      {activeTab === "days" && <DayPlanSection days={trip.days} />}
-      {activeTab === "heads-up" && <HeadsupSection alerts={trip.alerts} />}
-      {activeTab === "notes" && <NotesSection notes={trip.notes} />}
+      <div ref={contentRef} className="scroll-mt-[168px] md:scroll-mt-28">
+        {activeTab === "packing" && (
+          <PackingSection items={trip.packing_items} />
+        )}
+        {activeTab === "documents" && (
+          <DocumentsSection
+            documents={trip.documents}
+            uploadedDocuments={trip.uploaded_documents}
+          />
+        )}
+        {activeTab === "route" && (
+          <RouteSection segments={trip.route_segments} />
+        )}
+        {activeTab === "days" && <DayPlanSection days={trip.days} />}
+        {activeTab === "heads-up" && <HeadsupSection alerts={trip.alerts} />}
+        {activeTab === "notes" && <NotesSection notes={trip.notes} />}
+      </div>
     </section>
   );
 };
