@@ -26,12 +26,14 @@ function FloatingTextarea({
   onChange,
   onBlur,
   name,
+  ref,
   ...props
 }) {
   return (
     <div className={cn("w-full", className)}>
       <div className="relative">
         <textarea
+          ref={ref}
           id={name}
           name={name}
           rows={rows}

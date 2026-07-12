@@ -238,7 +238,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
     updateTripNote: builder.mutation({
       query: ({ trip_id, note_id, payload }) => {
         return {
-          url: `/trips/${trip_id}/notes/${note_id}/update/`,
+          url: `/trips/${trip_id}/notes/${note_id}/`,
           method: "PATCH",
           body: payload,
         };
@@ -249,7 +249,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
     deleteTripNote: builder.mutation({
       query: ({ trip_id, note_id }) => {
         return {
-          url: `/trips/${trip_id}/notes/${note_id}/delete/`,
+          url: `/trips/${trip_id}/notes/${note_id}/`,
           method: "DELETE",
         };
       },
@@ -259,7 +259,125 @@ export const tripApiSlice = apiSlice.injectEndpoints({
     tripNoteDetails: builder.query({
       query: ({ trip_id, note_id }) => {
         return {
-          url: `/trips/${trip_id}/notes/${note_id}/details/`,
+          url: `/trips/${trip_id}/notes/${note_id}/`,
+          method: "GET",
+        };
+      },
+    }),
+
+    // --- HEADSUP INFO ENDPOINT ---
+    tripHeadsUpList: builder.query({
+      query: (params = {}) => {
+        const { trip_id, page = 1, page_size = 10, search } = params;
+
+        const queryParams = new URLSearchParams({
+          page: String(page),
+          page_size: String(page_size),
+        });
+
+        const appendParam = (key, value) => {
+          if (!value || (Array.isArray(value) && !value.length)) return;
+          queryParams.set(key, Array.isArray(value) ? value.join(",") : value);
+        };
+
+        appendParam("search", search);
+
+        return {
+          url: `/trips/${trip_id}/heads-up/?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["trip-headsup-list"],
+    }),
+
+    createTripHeadsUp: builder.mutation({
+      query: ({ trip_id, payload }) => {
+        return {
+          url: `/trips/${trip_id}/heads-up/`,
+          method: "POST",
+          body: payload,
+        };
+      },
+    }),
+
+    updateTripHeadsUp: builder.mutation({
+      query: ({ trip_id, headsup_id, payload }) => {
+        return {
+          url: `/trips/${trip_id}/heads-up/${headsup_id}/`,
+          method: "PATCH",
+          body: payload,
+        };
+      },
+    }),
+
+    deleteTripHeadsUp: builder.mutation({
+      query: ({ trip_id, headsup_id }) => {
+        return {
+          url: `/trips/${trip_id}/heads-up/${headsup_id}/`,
+          method: "DELETE",
+        };
+      },
+    }),
+
+    // --- PACKING ITEMS ENDPOINT ---
+    tripPackingItemList: builder.query({
+      query: (params = {}) => {
+        const { trip_id, page = 1, page_size = 10, search } = params;
+
+        const queryParams = new URLSearchParams({
+          page: String(page),
+          page_size: String(page_size),
+        });
+
+        const appendParam = (key, value) => {
+          if (!value || (Array.isArray(value) && !value.length)) return;
+          queryParams.set(key, Array.isArray(value) ? value.join(",") : value);
+        };
+
+        appendParam("search", search);
+
+        return {
+          url: `/trips/${trip_id}/packing-items/?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["trip-packing-items-list"],
+    }),
+
+    createTripPackingItem: builder.mutation({
+      query: ({ trip_id, payload }) => {
+        return {
+          url: `/trips/${trip_id}/packing-items/`,
+          method: "POST",
+          body: payload,
+        };
+      },
+    }),
+
+    updateTripPackingItem: builder.mutation({
+      query: ({ trip_id, packing_item_id, payload }) => {
+        return {
+          url: `/trips/${trip_id}/packing-items/${packing_item_id}/`,
+          method: "PATCH",
+          body: payload,
+        };
+      },
+    }),
+
+    deleteTripPackingItem: builder.mutation({
+      query: ({ trip_id, packing_item_id }) => {
+        return {
+          url: `/trips/${trip_id}/packing-items/${packing_item_id}/`,
+          method: "DELETE",
+        };
+      },
+    }),
+
+    // ROUTES ENDPOINT
+    tripRouteList: builder.query({
+      query: ({ trip_id }) => {
+        return {
+          url: `/trips/${trip_id}/routes/`,
           method: "GET",
         };
       },
@@ -285,11 +403,26 @@ export const {
   useTripOverviewQuery,
   useTripActivateQuery,
   useLazyTripActivateQuery,
-  
+
   // notes
   useTripNoteListQuery,
   useCreateTripNoteMutation,
   useUpdateTripNoteMutation,
   useDeleteTripNoteMutation,
   useTripNoteDetailsQuery,
+
+  // headsup
+  useCreateTripHeadsUpMutation,
+  useTripHeadsUpListQuery,
+  useUpdateTripHeadsUpMutation,
+  useDeleteTripHeadsUpMutation,
+
+  // packing items
+  useTripPackingItemListQuery,
+  useCreateTripPackingItemMutation,
+  useDeleteTripPackingItemMutation,
+  useUpdateTripPackingItemMutation,
+
+  // routes
+  useTripRouteListQuery,
 } = tripApiSlice;

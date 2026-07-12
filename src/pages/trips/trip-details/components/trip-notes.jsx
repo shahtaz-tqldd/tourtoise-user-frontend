@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import PreviewContent from "@/components/shared/preview-content";
 import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
-import Card from "@/components/ui/card";
+import Card, { PreviewCard } from "@/components/ui/card";
 import { FloatingTextarea } from "@/components/ui/textarea";
 import {
   useDeleteTripNoteMutation,
@@ -72,7 +72,7 @@ const TripNotes = ({ tripId }) => {
 
   return (
     <>
-      <Card className="space-y-5">
+      <PreviewCard className="space-y-5 md:rounded-t-none">
         <div className="flex justify-between">
           <SectionHeader
             icon={ShieldCheck}
@@ -150,7 +150,7 @@ const TripNotes = ({ tripId }) => {
             )}
           </div>
         ) : null}
-      </Card>
+      </PreviewCard>
 
       <NotesCreateDialog
         open={isCreateNoteOpen}
