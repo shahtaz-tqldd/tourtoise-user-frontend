@@ -15,6 +15,7 @@ import { Bell, Loader2, MessageSquareDot, Sparkles } from "lucide-react";
 // lib
 import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
 import useTitle from "@/hooks/useTitle";
+import TripNotes from "./components/trip-notes";
 
 const mobileTabs = [
   { value: "overview", label: "Overview", icon: Sparkles },
@@ -115,10 +116,24 @@ const normalizeTripDetail = (sourceTrip) => {
   return {
     ...sourceTrip,
     overview:
+      sourceTrip.planning_description ||
+      sourceTrip.planning_summary ||
       itinerary.summary ||
       preparation.summary ||
-      sourceTrip.planning_summary ||
       "No planning summary available yet.",
+    budget: sourceTrip.budget || itinerary.rough_budget || {},
+    budget_currency:
+      sourceTrip.budget?.currency || sourceTrip.budget_currency || "USD",
+    preparation_stats: sourceTrip.preparation_stats || {
+      packing_items: {
+        total_count: packingItems.length,
+        is_packed_count: packingItems.filter((item) => item.packed).length,
+      },
+      documents: {
+        total_count: preparationDocuments.length,
+        uploaded_count: sourceTrip.uploaded_documents?.length || 0,
+      },
+    },
     trip_pace: preferences.travel_pace || sourceTrip.traveler_type || "custom",
     destinations: (sourceTrip.trip_destinations || []).map((destination) => ({
       id:
@@ -258,7 +273,8 @@ const TripDetailPage = () => {
       <section className="hidden gap-6 py-5 xl:grid xl:grid-cols-[minmax(0,1fr)_420px]">
         <div className="space-y-5">
           <TripOverview trip={trip} />
-          <TripPlanningTabs trip={trip} />
+          <TripPlanningTabs key={trip.id} trip={trip} />
+          <TripNotes tripId={trip.id} />
         </div>
 
         <TripAgentChat
@@ -281,7 +297,7 @@ const TripDetailPage = () => {
           activeTab={activeMobileTab}
           setActiveTab={setActiveMobileTab}
           className={cn(
-            "z-20 -mx-4 bg-white px-4 pt-1.5",
+            "z-[30] -mx-4 bg-white px-4 pt-1.5",
             activeMobileTab === "overview" ? "sticky top-14" : "shrink-0",
           )}
         />
@@ -295,7 +311,8 @@ const TripDetailPage = () => {
           {activeMobileTab === "overview" && (
             <div className="space-y-5">
               <TripOverview trip={trip} />
-              <TripPlanningTabs trip={trip} />
+              <TripPlanningTabs key={trip.id} trip={trip} />
+              <TripNotes tripId={trip.id} />
             </div>
           )}
 

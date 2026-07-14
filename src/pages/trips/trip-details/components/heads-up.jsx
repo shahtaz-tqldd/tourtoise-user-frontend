@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   GripVertical,
-  Loader2,
+  MoreVertical,
   PencilLine,
   Plus,
   RefreshCw,
@@ -16,9 +16,16 @@ import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { DeleteDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { PreviewCard } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { FloatingInput } from "@/components/ui/input";
 import {
   FloatingSelect,
+  InlinePillSelect,
   Select,
   SelectContent,
   SelectItem,
@@ -107,27 +114,31 @@ const getResponseItem = (response) => {
   return data?.id ? data : null;
 };
 
-const InlinePillSelect = ({
-  value,
-  onValueChange,
-  options,
-  disabled,
-  className = "",
-}) => (
-  <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-    <SelectTrigger
-      className={`!h-auto min-h-0 w-fit gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold shadow-none focus-visible:ring-2 [&_svg]:size-3 ${className}`}
-    >
-      <SelectValue />
-    </SelectTrigger>
-    <SelectContent align="start">
-      {options.map((option) => (
-        <SelectItem key={option.value} value={option.value}>
-          {option.label}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
+const HeadsUpListSkeleton = () => (
+  <div className="space-y-3" aria-label="Loading heads-up info">
+    {Array.from({ length: 3 }).map((_, index) => (
+      <div
+        key={index}
+        className="rounded-xl border border-slate-200 bg-white p-4"
+      >
+        <div className="flex items-start gap-3">
+          <div className="mt-1 h-5 w-4 animate-pulse rounded bg-slate-100" />
+          <div className="min-w-0 flex-1 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
+              <div className="h-5 w-20 animate-pulse rounded-full bg-primary/10" />
+              <div className="h-5 w-16 animate-pulse rounded-full bg-slate-100" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 w-full animate-pulse rounded-full bg-slate-100" />
+              <div className="h-3 w-4/5 animate-pulse rounded-full bg-slate-100" />
+            </div>
+          </div>
+          <div className="size-8 animate-pulse rounded-full bg-slate-100" />
+        </div>
+      </div>
+    ))}
+  </div>
 );
 
 const TripHeadsUp = ({ tripId }) => {
@@ -279,12 +290,7 @@ const TripHeadsUp = ({ tripId }) => {
           </Button>
         </div>
 
-        {isFetching ? (
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 p-4 text-sm font-semibold text-slate-500">
-            <Loader2 className="animate-spin text-primary" size={16} />
-            Loading heads-up info...
-          </div>
-        ) : null}
+        {isFetching ? <HeadsUpListSkeleton /> : null}
 
         {!isFetching && isError ? (
           <div className="rounded-xl border border-red-100 bg-red-50 p-4">
@@ -391,6 +397,23 @@ const HeadsUpCard = ({
 
     await onSave(payload);
   };
+  const handleDetailsChange = (event) => {
+    const textarea = event.target;
+
+    setDetails(textarea.value);
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
+
+  useEffect(() => {
+    const textarea = detailsRef.current;
+
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [details]);
 
   if (isEditing) {
     return (
@@ -469,11 +492,11 @@ const HeadsUpCard = ({
           ref={detailsRef}
           name={`headsup-details-${item.id}`}
           value={details}
-          onChange={(event) => setDetails(event.target.value)}
+          onChange={handleDetailsChange}
           disabled={isUpdating}
           required
-          rows={3}
-          className="mt-2 block min-h-20 w-full resize-y border-none bg-transparent pl-8 text-sm leading-6 text-slate-500 outline-none placeholder:text-slate-400 disabled:opacity-60"
+          rows={1}
+          className="mt-2 block w-full resize-none overflow-hidden border-none bg-transparent pl-8 text-sm leading-6 text-slate-500 outline-none placeholder:text-slate-400 disabled:opacity-60"
         />
       </form>
     );
@@ -481,7 +504,7 @@ const HeadsUpCard = ({
 
   return (
     <article
-      className={`rounded-xl border border-slate-200 bg-slate-50 p-4 transition ${
+      className={`rounded-xl border border-slate-200 p-4 transition ${
         isDragging ? "border-primary/40 bg-primary/5 opacity-70" : ""
       }`}
     >
@@ -518,30 +541,30 @@ const HeadsUpCard = ({
             </div>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Update heads-up"
-            className="text-blue-950/50 hover:bg-blue-50 hover:text-blue-800"
-            disabled={isDragDisabled}
-            onClick={onEdit}
-          >
-            <PencilLine size={12} />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Delete heads-up"
-            className="text-red-600 hover:bg-red-50 hover:text-red-700"
-            disabled={isDragDisabled}
-            onClick={onDelete}
-          >
-            <Trash2 size={12} />
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Heads-up actions"
+              className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 -mt-2 -mr-2"
+              disabled={isDragDisabled}
+            >
+              <MoreVertical size={16} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuItem onSelect={onEdit}>
+              <PencilLine size={14} />
+              Update
+            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+              <Trash2 size={14} />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <p className="pl-8 mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-500">
         {getHeadsUpDetails(item)}

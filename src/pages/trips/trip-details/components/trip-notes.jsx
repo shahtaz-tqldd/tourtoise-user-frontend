@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Loader2,
+  MoreVertical,
+  Notebook,
   PencilLine,
   Plus,
   RefreshCw,
@@ -12,7 +13,13 @@ import { toast } from "sonner";
 import PreviewContent from "@/components/shared/preview-content";
 import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
-import Card, { PreviewCard } from "@/components/ui/card";
+import { PreviewCard } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { FloatingTextarea } from "@/components/ui/textarea";
 import {
   useDeleteTripNoteMutation,
@@ -24,6 +31,7 @@ import {
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { DeleteDialog } from "@/components/shared/confirm-dialog";
 import { UserAvatar } from "@/components/shared/user-profile";
+import { cn } from "@/lib/utils";
 
 const formatNoteDate = (value) => {
   if (!value) return "No date";
@@ -38,16 +46,49 @@ const formatNoteDate = (value) => {
   }).format(date);
 };
 
+const getNoteContent = (note) => note?.content || note?.body || "";
+
+const resizeTextareaToContent = (textarea) => {
+  textarea.style.height = "auto";
+  textarea.style.height = `${textarea.scrollHeight}px`;
+};
+
+const NotesListSkeleton = () => (
+  <div className="space-y-4" aria-label="Loading notes">
+    {Array.from({ length: 3 }).map((_, index) => (
+      <div
+        key={index}
+        className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="size-6 animate-pulse rounded-full bg-slate-200" />
+            <div className="h-3 w-32 animate-pulse rounded-full bg-slate-200" />
+          </div>
+          <div className="size-8 animate-pulse rounded-full bg-slate-100" />
+        </div>
+        <div className="mt-4 space-y-2">
+          <div className="h-3 w-full animate-pulse rounded-full bg-slate-200" />
+          <div className="h-3 w-full animate-pulse rounded-full bg-slate-200" />
+          <div className="h-3 w-2/3 animate-pulse rounded-full bg-slate-200" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 const TripNotes = ({ tripId }) => {
   const [isCreateNoteOpen, setIsCreateNoteOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState(null);
   const [deletingNote, setDeletingNote] = useState(null);
-  const [viewingNote, setViewingNote] = useState(null);
   const { data, isFetching, isError, refetch } = useTripNoteListQuery(
     { trip_id: tripId, page_size: 100 },
     { skip: !tripId },
   );
   const [deleteTripNote, { isLoading: isDeleting }] =
     useDeleteTripNoteMutation();
+  const [updateTripNote, { isLoading: isUpdating }] =
+    useUpdateTripNoteMutation();
   const notes = useMemo(() => data?.data || [], [data]);
 
   const openCreateNote = () => {
@@ -64,20 +105,33 @@ const TripNotes = ({ tripId }) => {
       }).unwrap();
       toast.success(response?.message || "Note deleted.");
       setDeletingNote(null);
-      setViewingNote(null);
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Could not delete this note."));
     }
   };
 
+  const handleUpdateNote = async (noteId, payload) => {
+    try {
+      const response = await updateTripNote({
+        trip_id: tripId,
+        note_id: noteId,
+        payload,
+      }).unwrap();
+      toast.success(response?.message || "Note updated.");
+      setEditingNote(null);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not update this note."));
+    }
+  };
+
   return (
     <>
-      <PreviewCard className="space-y-5 md:rounded-t-none">
+      <PreviewCard className="space-y-5">
         <div className="flex justify-between">
           <SectionHeader
-            icon={ShieldCheck}
+            icon={Notebook}
             title="Notes"
-            description="Additional information for this trip."
+            description="Keep important staff in here"
           />
           <Button
             className="!pl-2 !pr-3.5 rounded-full"
@@ -90,12 +144,7 @@ const TripNotes = ({ tripId }) => {
           </Button>
         </div>
 
-        {isFetching ? (
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 p-4 text-sm font-semibold text-slate-500">
-            <Loader2 className="animate-spin text-primary" size={16} />
-            Loading notes...
-          </div>
-        ) : null}
+        {isFetching ? <NotesListSkeleton /> : null}
 
         {!isFetching && notes.length ? (
           <span className="text-sm text-slate-500 font-semibold block mb-4">
@@ -125,22 +174,16 @@ const TripNotes = ({ tripId }) => {
           <div className="space-y-4">
             {notes.length ? (
               notes.map((note) => (
-                <article
-                  key={note.id}
-                  className="cursor-pointer rounded-xl border border-slate-200 p-3 bg-slate-50 hover:bg-slate-100 tr"
-                  onClick={() => setViewingNote(note)}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="mt-1 leading-7 line-clamp-3 text-sm text-slate-500">
-                        {note.content}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-xs text-slate-400">
-                    {formatNoteDate(note.created_at || note.updated_at)}
-                  </p>
-                </article>
+                <NoteCard
+                  key={`${note.id}-${editingNote?.id === note.id ? "edit" : "view"}`}
+                  note={note}
+                  isEditing={editingNote?.id === note.id}
+                  isUpdating={isUpdating}
+                  onEdit={() => setEditingNote(note)}
+                  onCancelEdit={() => setEditingNote(null)}
+                  onSave={(payload) => handleUpdateNote(note.id, payload)}
+                  onDelete={() => setDeletingNote(note)}
+                />
               ))
             ) : (
               <EmptyState
@@ -167,154 +210,175 @@ const TripNotes = ({ tripId }) => {
         onConfirm={handleDeleteNote}
         isLoading={isDeleting}
       />
-      <NotesViewDialog
-        key={viewingNote?.id || "empty-note-view"}
-        open={Boolean(viewingNote)}
-        onOpenChange={(open) => {
-          if (!open) setViewingNote(null);
-        }}
-        tripId={tripId}
-        note={viewingNote}
-        onDelete={() => {
-          setDeletingNote(viewingNote);
-          setViewingNote(null);
-        }}
-      />
     </>
   );
 };
 
-const NotesViewDialog = ({ open, onOpenChange, tripId, note, onDelete }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [savedContent, setSavedContent] = useState("");
-  const { data: noteDetailsData, isFetching: isFetchingDetails } =
-    useTripNoteDetailsQuery(
-      { trip_id: tripId, note_id: note?.id },
-      { skip: !open || !tripId || !note?.id },
-    );
-  const [updateTripNote, { isLoading: isUpdating }] =
-    useUpdateTripNoteMutation();
-  const noteDetails = noteDetailsData?.data || noteDetailsData || {};
-  const content =
-    savedContent ||
-    noteDetails.content ||
-    noteDetails.body ||
-    note?.content ||
-    "";
-  const date = formatNoteDate(
-    noteDetails.created_at ||
-      noteDetails.updated_at ||
-      note?.created_at ||
-      note?.updated_at,
-  );
+const NoteCard = ({
+  note,
+  isEditing,
+  isUpdating,
+  onEdit,
+  onCancelEdit,
+  onSave,
+  onDelete,
+}) => {
+  const textareaRef = useRef(null);
+  const content = getNoteContent(note);
+  const [noteContent, setNoteContent] = useState(content);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isLonger = content.length > 500;
+  const visibleContent =
+    isExpanded || !isLonger ? content : content.slice(0, 500);
 
-  const handleUpdate = async (event) => {
+  useEffect(() => {
+    if (!isEditing) return;
+
+    requestAnimationFrame(() => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      resizeTextareaToContent(textarea);
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      requestAnimationFrame(() => {
+        textarea.scrollIntoView({ block: "end", inline: "nearest" });
+      });
+    });
+  }, [isEditing]);
+
+  useEffect(() => {
+    if (!isEditing) return;
+
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    resizeTextareaToContent(textarea);
+  }, [isEditing, noteContent]);
+
+  const handleContentChange = (event) => {
+    const textarea = event.target;
+
+    setNoteContent(textarea.value);
+    resizeTextareaToContent(textarea);
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const contentValue = String(formData.get("content") || "").trim();
+    const nextContent = noteContent.trim();
 
-    if (!contentValue) {
+    if (!nextContent) {
       toast.error("Add note body.");
       return;
     }
 
-    try {
-      const response = await updateTripNote({
-        trip_id: tripId,
-        note_id: note.id,
-        payload: { content: contentValue },
-      }).unwrap();
-      setSavedContent(response?.data?.content || contentValue);
-      setIsEditing(false);
-      toast.success(response?.message || "Note updated.");
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Could not update this note."));
-    }
+    await onSave({ content: nextContent });
   };
 
-  if (!note) return null;
-
-  return (
-    <PreviewContent
-      open={open}
-      onOpenChange={onOpenChange}
-      className="md:p-8 p-6 !max-w-xl h-[90vh] md:h-fit max-h-[90vh]"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <UserAvatar className="size-6" />
-          <div>
+  if (isEditing) {
+    return (
+      <form
+        className="rounded-xl border border-slate-200 bg-slate-50 p-4 pb-3"
+        onSubmit={handleSubmit}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <UserAvatar className="size-6" />
             <span className="text-xs font-medium text-slate-400">
-              Created on {date}
+              Created on {formatNoteDate(note.created_at || note.updated_at)}
             </span>
           </div>
-        </div>
-        {!isEditing && (
-          <div className="flex shrink-0 items-center gap-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Update note"
-              className="text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-              onClick={() => setIsEditing(true)}
-            >
-              <PencilLine size={12} />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Delete note"
-              className="text-red-600 hover:bg-red-50 hover:text-red-700"
-              onClick={onDelete}
-            >
-              <Trash2 size={12} />
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {isEditing ? (
-        <form
-          key={`${note.id}-${content}`}
-          className="mt-6 space-y-5"
-          onSubmit={handleUpdate}
-        >
-          <FloatingTextarea
-            name="content"
-            label="Notes"
-            defaultValue={content}
-            disabled={isFetchingDetails || isUpdating}
-            rows={8}
-            textareaClassName="min-h-52 leading-7"
-            required
-          />
-          <div className="flex flex-col gap-3 md:flex-row md:justify-end">
+          <div className="flex shrink-0 items-center gap-2">
             <Button
               type="button"
               variant="outline"
               disabled={isUpdating}
-              className="w-full md:w-auto"
-              onClick={() => setIsEditing(false)}
+              size="sm"
+              onClick={onCancelEdit}
+              className="!text-xs rounded-full"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={isFetchingDetails || isUpdating}
-              className="w-full md:w-auto"
+              disabled={isUpdating}
+              size="sm"
+              className="!text-xs rounded-full"
             >
               {isUpdating ? "Saving..." : "Save changes"}
             </Button>
           </div>
-        </form>
-      ) : (
-        <p className="mt-6 whitespace-pre-wrap text-sm leading-7 text-slate-600">
-          {isFetchingDetails ? "Loading note..." : content}
-        </p>
-      )}
-    </PreviewContent>
+        </div>
+        <textarea
+          ref={textareaRef}
+          value={noteContent}
+          onChange={handleContentChange}
+          disabled={isUpdating}
+          required
+          rows={1}
+          className="mt-4 block w-full resize-none overflow-hidden border-none bg-transparent text-sm leading-7 text-slate-500 outline-none placeholder:text-slate-400 disabled:opacity-60"
+        />
+      </form>
+    );
+  }
+
+  return (
+    <article className="rounded-xl border border-slate-200 bg-white p-4 pb-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <UserAvatar className="size-6" />
+          <span className="text-xs font-medium text-slate-400">
+            Created on {formatNoteDate(note.created_at || note.updated_at)}
+          </span>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Note actions"
+              className="text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+            >
+              <MoreVertical size={16} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuItem onSelect={onEdit}>
+              <PencilLine size={14} />
+              Update
+            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+              <Trash2 size={14} />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <p
+        className={cn(
+          "mt-2 whitespace-pre-wrap !leading-7 text-sm text-slate-500",
+          isLonger && !isExpanded ? "cursor-pointer" : "",
+        )}
+        onClick={() => {
+          if (isLonger && !isExpanded) setIsExpanded((current) => !current);
+        }}
+      >
+        {visibleContent}
+        <span>{isLonger && !isExpanded ? "..." : null}</span>
+        {isLonger ? (
+          <button
+            type="button"
+            className="mt-2 ml-2 text-xs font-semibold text-primary hover:text-primary/80"
+            onClick={() => {
+              if (isExpanded) setIsExpanded((current) => !current);
+            }}
+          >
+            {isExpanded ? "Show less" : "Show more"}
+          </button>
+        ) : null}
+      </p>
+    </article>
   );
 };
 

@@ -90,6 +90,7 @@ export const apiSlice = createApi({
     "saved-destination-list",
     "trip-list",
     "trip-note-list",
+    "trip-document-list",
     "trip-detail",
     "accommodation-type",
     "transport-type",

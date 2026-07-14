@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import StatusBadge from "@/components/ui/status";
+import PreviewContent from "@/components/shared/preview-content";
 import { Link } from "react-router-dom";
 
 const formatDate = (value) => {
@@ -44,17 +45,82 @@ const formatDateRange = (startDate, endDate) => {
   return formatShortDate(startDate || endDate) || "Dates not set";
 };
 
-const SummaryMetric = ({ icon, label, value }) => (
-  <div className="flx gap-2 rounded-xl border border-slate-200 p-4">
-    <div className="center h-8 w-8 rounded-lg bg-primary/10">
-      {React.createElement(icon, { className: "text-primary", size: 16 })}
-    </div>
-    <div className="flex-1">
+const formatMoney = (amount, currency) => {
+  if (amount === null || amount === undefined || amount === "")
+    return "Not set";
+
+  return new Intl.NumberFormat("en", {
+    style: "currency",
+    currency: currency || "USD",
+    maximumFractionDigits: 0,
+  }).format(Number(amount || 0));
+};
+
+const budgetRows = [
+  { key: "transport", label: "Transport" },
+  { key: "food", label: "Food" },
+  { key: "activities", label: "Activities" },
+  { key: "tickets_or_entry", label: "Tickets or entry" },
+  { key: "miscellaneous", label: "Miscellaneous" },
+];
+
+const SummaryMetric = ({ icon, label, value, component }) => (
+  <div className="rounded-xl border border-slate-200 p-3">
+    <div className="flx gap-2">
+      {React.createElement(icon, { className: "text-primary", size: 14 })}
       <p className="text-xs font-semibold uppercase text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-slate-950">{value}</p>
     </div>
+    <p className="mt-3 text-sm font-semibold text-slate-950">{value}</p>
+    {component ? component : null}
   </div>
 );
+
+const BudgetBreakdownDialog = ({ open, onOpenChange, budget, currency }) => {
+  const total = budget?.total_estimated ?? budget?.total_estimated_budget;
+
+  return (
+    <PreviewContent open={open} onOpenChange={onOpenChange} className="h-fit">
+      <div className="flex min-h-full flex-col bg-white pt-2 md:pt-0">
+        <div className="border-b border-slate-200 px-5 py-5 md:px-6">
+          <div>
+            <h2 className="text-lg font-bold text-slate-950">
+              Budget breakdown
+            </h2>
+            <p className="text-sm text-slate-500">
+              Estimated costs for this trip.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-6 p-5 md:p-6">
+          {budgetRows.map((row) => (
+            <div key={row.key} className="flbx gap-4">
+              <span className="text-sm font-semibold text-slate-600">
+                {row.label}
+              </span>
+              <span className="text-sm font-bold text-slate-950">
+                {formatMoney(budget?.[row.key], currency)}
+              </span>
+            </div>
+          ))}
+
+          <div className="flbx gap-4 border-t pt-4">
+            <span className="text-sm font-semibold">Total estimated</span>
+            <span className="text-md font-bold">
+              {formatMoney(total, currency)}
+            </span>
+          </div>
+
+          {budget?.note && (
+            <p className="rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+              {budget.note}
+            </p>
+          )}
+        </div>
+      </div>
+    </PreviewContent>
+  );
+};
 
 const DestinationSlider = ({
   destinations = [],
@@ -259,8 +325,17 @@ const DestinationSlider = ({
 };
 
 const TripOverview = ({ trip }) => {
-  const total_budget =
-    trip?.agent_context?.itinerary_design?.rough_budget?.total_estimated_budget;
+  const [isBudgetOpen, setIsBudgetOpen] = useState(false);
+  const budget = trip?.budget || {};
+  const totalBudget = budget.total_estimated ?? budget.total_estimated_budget;
+  const startAddress = [
+    trip?.start_location?.address,
+    trip?.start_location?.city,
+    trip?.start_location?.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <Card className="p-0 md:p-6 bg-transparent md:bg-white rounded-none md:rounded-2xl pt-4 md:pt-6">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -285,6 +360,11 @@ const TripOverview = ({ trip }) => {
           icon={CalendarDays}
           label="Start date"
           value={formatDate(trip.start_date)}
+          component={
+            <span className="mt-2 text-xs text-primary font-semibold">
+              returning {formatDate(trip.end_date)}
+            </span>
+          }
         />
         <SummaryMetric
           icon={Clock3}
@@ -294,6 +374,11 @@ const TripOverview = ({ trip }) => {
               ? `${trip.nights} nights`
               : `${trip.duration_days || "-"} days`
           }
+          component={
+            <span className="mt-2 text-xs text-primary font-semibold">
+              with {trip.duration_days} days
+            </span>
+          }
         />
         <SummaryMetric
           icon={Users}
@@ -301,19 +386,48 @@ const TripOverview = ({ trip }) => {
           value={`${trip.travelers_count || 1} traveler${
             Number(trip.travelers_count || 1) === 1 ? "" : "s"
           }`}
+          component={
+            <span className="mt-2 text-xs text-primary font-semibold">
+              {trip.traveler_type} tour
+            </span>
+          }
         />
         <SummaryMetric
           icon={DollarSign}
           label="Budget"
-          value={total_budget || "Not set"}
+          value={formatMoney(totalBudget, trip.budget_currency)}
+          component={
+            <button
+              onClick={() => setIsBudgetOpen(true)}
+              className="mt-2 text-xs text-primary font-semibold underline"
+            >
+              View breakdown
+            </button>
+          }
         />
       </div>
+      {startAddress && (
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-600 md:bg-slate-50">
+          <MapPin size={16} className="mt-0.5 shrink-0 text-primary" />
+          <div>
+            <p className="font-semibold text-slate-950">Start location</p>
+            <p className="mt-1 leading-6">{startAddress}</p>
+          </div>
+        </div>
+      )}
       <hr className="my-6" />
 
       <DestinationSlider
         destinations={trip.destinations}
         tripStartDate={trip.start_date}
         tripEndDate={trip.end_date}
+      />
+
+      <BudgetBreakdownDialog
+        open={isBudgetOpen}
+        onOpenChange={setIsBudgetOpen}
+        budget={budget}
+        currency={trip.budget_currency}
       />
     </Card>
   );

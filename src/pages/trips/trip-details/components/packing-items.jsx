@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Backpack,
-  Loader2,
+  MoreVertical,
   PencilLine,
   Plus,
   RefreshCw,
@@ -16,6 +16,12 @@ import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import { PreviewCard } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { FloatingInput } from "@/components/ui/input";
 import {
   FloatingSelect,
@@ -101,6 +107,35 @@ const buildPackingPayload = ({
   ...(typeof is_packed === "boolean" ? { is_packed } : {}),
 });
 
+const PackingListSkeleton = () => (
+  <div className="space-y-4" aria-label="Loading packing items">
+    {Array.from({ length: 4 }).map((_, index) => (
+      <div
+        key={index}
+        className="rounded-xl border border-slate-200 bg-white p-4"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-1 gap-3">
+            <div className="mt-1 size-5 animate-pulse rounded bg-slate-100" />
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="h-4 w-36 animate-pulse rounded-full bg-slate-200" />
+                <div className="h-5 w-16 animate-pulse rounded-full bg-slate-100" />
+                <div className="h-5 w-24 animate-pulse rounded-full bg-primary/10" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-3 w-full animate-pulse rounded-full bg-slate-100" />
+                <div className="h-3 w-2/3 animate-pulse rounded-full bg-slate-100" />
+              </div>
+            </div>
+          </div>
+          <div className="size-8 animate-pulse rounded-full bg-slate-100" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 const InlinePillSelect = ({
   value,
   onValueChange,
@@ -124,7 +159,7 @@ const InlinePillSelect = ({
   </Select>
 );
 
-const TripPackingItems = ({ tripId }) => {
+const TripPackingItems = ({ tripId, onStatsChange }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
@@ -167,6 +202,10 @@ const TripPackingItems = ({ tripId }) => {
         setLocalItems((currentItems) =>
           applySortOrder([...(currentItems || visibleItems), createdItem]),
         );
+        onStatsChange?.({
+          totalDelta: 1,
+          packedDelta: createdItem.is_packed ? 1 : 0,
+        });
       }
       toast.success(response?.message || "Packing item created.");
       return true;
@@ -202,6 +241,9 @@ const TripPackingItems = ({ tripId }) => {
     const previousItems = visibleItems;
 
     updateLocalItem(packingItem.id, { is_packed: isPacked });
+    if (Boolean(packingItem.is_packed) !== isPacked) {
+      onStatsChange?.({ packedDelta: isPacked ? 1 : -1 });
+    }
 
     try {
       await updateTripPackingItem({
@@ -211,6 +253,9 @@ const TripPackingItems = ({ tripId }) => {
       }).unwrap();
     } catch (error) {
       setLocalItems(previousItems);
+      if (Boolean(packingItem.is_packed) !== isPacked) {
+        onStatsChange?.({ packedDelta: isPacked ? -1 : 1 });
+      }
       toast.error(getApiErrorMessage(error, "Could not update packed status."));
     }
   };
@@ -226,6 +271,10 @@ const TripPackingItems = ({ tripId }) => {
     setLocalItems(nextItems);
     setDeletingItem(null);
     if (editingItem?.id === deletingItem.id) setEditingItem(null);
+    onStatsChange?.({
+      totalDelta: -1,
+      packedDelta: deletingItem.is_packed ? -1 : 0,
+    });
 
     try {
       const response = await deleteTripPackingItem({
@@ -236,6 +285,10 @@ const TripPackingItems = ({ tripId }) => {
     } catch (error) {
       setLocalItems(previousItems);
       setDeletingItem(deletingItem);
+      onStatsChange?.({
+        totalDelta: 1,
+        packedDelta: deletingItem.is_packed ? 1 : 0,
+      });
       toast.error(getApiErrorMessage(error, "Could not delete packing item."));
     }
   };
@@ -260,12 +313,7 @@ const TripPackingItems = ({ tripId }) => {
           </Button>
         </div>
 
-        {isFetching ? (
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 p-4 text-sm font-semibold text-slate-500">
-            <Loader2 className="animate-spin text-primary" size={16} />
-            Loading packing items...
-          </div>
-        ) : null}
+        {isFetching ? <PackingListSkeleton /> : null}
 
         {!isFetching && isError ? (
           <div className="rounded-xl border border-red-100 bg-red-50 p-4">
@@ -286,7 +334,7 @@ const TripPackingItems = ({ tripId }) => {
         ) : null}
 
         {!isFetching && !isError ? (
-          <div className="grid gap-2">
+          <div className="space-y-4">
             {visibleItems.length ? (
               visibleItems.map((packingItem) => (
                 <PackingItemCard
@@ -466,76 +514,78 @@ const PackingItemCard = ({
   }
 
   return (
-    <article className={cardClass}>
+    <article className="rounded-xl border border-slate-200 p-4 bg-white">
       <div className="flex items-start gap-3">
         <Checkbox
           checked={Boolean(item.is_packed)}
           disabled={isDisabled}
           onCheckedChange={onTogglePacked}
-          className="mt-0.5"
+          className="mt-[2px]"
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div className="min-w-0">
-              <div className="flex gap-2">
-                <p
-                  className={`font-semibold ${
-                    item.is_packed
-                      ? "text-slate-400 line-through"
-                      : "text-slate-900"
-                  }`}
-                >
-                  {item.item}
-                </p>
-                {item.quantity > 1 ? (
-                  <span className="size-5 rounded-full text-xs font-semibold bg-primary/10 text-primary center">
-                    {item.quantity}
-                  </span>
-                ) : null}
+            <div className="min-w-0 w-full">
+              <div className="flex justify-between gap-4">
+                <div className="flex gap-2">
+                  <h2
+                    className={`font-semibold text-sm ${
+                      item.is_packed
+                        ? "text-slate-400 line-through"
+                        : "text-slate-900"
+                    }`}
+                  >
+                    {item.item}
+                  </h2>
+                  {item.quantity > 1 ? (
+                    <span className="size-5 rounded-full text-xs font-semibold bg-primary/10 text-primary center">
+                      {item.quantity}
+                    </span>
+                  ) : null}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Packing item actions"
+                      className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 -mt-2 -mr-2"
+                      disabled={isDisabled}
+                    >
+                      <MoreVertical size={16} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-36">
+                    <DropdownMenuItem onSelect={onEdit}>
+                      <PencilLine size={14} />
+                      Update
+                    </DropdownMenuItem>
+                    <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+                      <Trash2 size={14} />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               {item.additional_notes ? (
-                <p className="mt-2 text-sm font-normal leading-5 text-slate-500">
+                <p className="mt-1 text-sm font-normal leading-5 text-slate-500">
                   {item.additional_notes}
                 </p>
               ) : null}
             </div>
           </div>
-          <div className="flbx mt-3 md:mt-1">
+          <div className="flbx mt-3">
             <div className="flex gap-2">
-              <span className="text-xs bg-blue-100 text-blue-800 py-0.5 px-2 rounded-full">
+              <span className="text-xs font-semibold bg-blue-100 text-blue-800 py-0.5 px-2 rounded-full">
                 {formatLabel(item.category)}
               </span>
               <span
-                className={`text-xs py-0.5 px-2 rounded-full ${
+                className={`text-xs py-0.5 px-2 rounded-full font-semibold ${
                   priorityStyles[item.priority] || "text-slate-500"
                 }`}
               >
                 {formatLabel(item.priority)}
               </span>
-            </div>
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Update packing item"
-                className="text-blue-950/50 hover:bg-blue-50 hover:text-blue-800"
-                disabled={isDisabled}
-                onClick={onEdit}
-              >
-                <PencilLine size={12} />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Delete packing item"
-                className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                disabled={isDisabled}
-                onClick={onDelete}
-              >
-                <Trash2 size={12} />
-              </Button>
             </div>
           </div>
         </div>

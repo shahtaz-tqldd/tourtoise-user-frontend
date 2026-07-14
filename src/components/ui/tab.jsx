@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TabMenu = ({
@@ -60,6 +61,7 @@ const TabMenu = ({
 const TabButton = ({ tab, active, onClick, scrollable, buttonRef }) => {
   const Icon = tab.icon;
   const hasCount = tab.count !== undefined && tab.count !== null;
+  const isComplete = Boolean(tab.isComplete);
 
   return (
     <button
@@ -78,13 +80,14 @@ const TabButton = ({ tab, active, onClick, scrollable, buttonRef }) => {
     >
       {Icon && <Icon size={15} />}
       {tab.label}
-      {hasCount && (
+      {(hasCount || isComplete) && (
         <span
           className={cn(
             "h-5 min-w-5 px-1 text-xs font-semibold center rounded-full bg-slate-100",
+            isComplete && "bg-emerald-100 text-emerald-700",
           )}
         >
-          {tab.count}
+          {isComplete ? <Check size={13} strokeWidth={3} /> : tab.count}
         </span>
       )}
     </button>

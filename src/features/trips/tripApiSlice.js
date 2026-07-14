@@ -373,11 +373,70 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       },
     }),
 
+    // --- DOCUMENTS ENDPOINT ---
+    tripDocumentList: builder.query({
+      query: ({ trip_id }) => {
+        return {
+          url: `/trips/${trip_id}/documents/`,
+          method: "GET",
+        };
+      },
+      providesTags: ["trip-document-list"],
+    }),
+
+    createDocumentItem: builder.mutation({
+      query: ({ trip_id, payload }) => {
+        return {
+          url: `/trips/${trip_id}/documents/`,
+          method: "POST",
+          body: payload,
+        };
+      },
+    }),
+
+    updateTripDocumentItem: builder.mutation({
+      query: ({ trip_id, document_item_id, payload }) => {
+        return {
+          url: `/trips/${trip_id}/documents/${document_item_id}/`,
+          method: "PATCH",
+          body: payload,
+        };
+      },
+    }),
+
+    deleteDocumentItem: builder.mutation({
+      query: ({ trip_id, document_item_id }) => {
+        return {
+          url: `/trips/${trip_id}/documents/${document_item_id}/`,
+          method: "DELETE",
+        };
+      },
+    }),
+
+    deleteDocumentFileItem: builder.mutation({
+      query: ({ trip_id, document_item_id }) => {
+        return {
+          url: `/trips/${trip_id}/documents/${document_item_id}/file/`,
+          method: "DELETE",
+        };
+      },
+    }),
+
     // ROUTES ENDPOINT
     tripRouteList: builder.query({
       query: ({ trip_id }) => {
         return {
           url: `/trips/${trip_id}/routes/`,
+          method: "GET",
+        };
+      },
+    }),
+
+    // DAYWISE PLAN ENDPOINT
+    daywisePlanList: builder.query({
+      query: ({ trip_id }) => {
+        return {
+          url: `/trips/${trip_id}/plan/daywise/`,
           method: "GET",
         };
       },
@@ -423,6 +482,16 @@ export const {
   useDeleteTripPackingItemMutation,
   useUpdateTripPackingItemMutation,
 
+  // documents
+  useCreateDocumentItemMutation,
+  useTripDocumentListQuery,
+  useUpdateTripDocumentItemMutation,
+  useDeleteDocumentItemMutation,
+  useDeleteDocumentFileItemMutation,
+
   // routes
   useTripRouteListQuery,
+
+  // daywise plan
+  useDaywisePlanListQuery,
 } = tripApiSlice;

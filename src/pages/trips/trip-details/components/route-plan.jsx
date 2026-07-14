@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import {
   Bus,
   Car,
-  Loader2,
   Plane,
   RefreshCw,
   Route,
@@ -125,6 +124,45 @@ const sortRoutes = (routes) =>
     return String(a.start_time || "").localeCompare(String(b.start_time || ""));
   });
 
+const RoutePlanSkeleton = () => (
+  <div className="space-y-4" aria-label="Loading route plan">
+    {Array.from({ length: 2 }).map((_, groupIndex) => (
+      <section
+        key={groupIndex}
+        className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+      >
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
+          <div className="h-6 w-20 animate-pulse rounded-full bg-white" />
+        </div>
+        <div className="relative space-y-4">
+          {Array.from({ length: 2 }).map((_, itemIndex) => (
+            <div key={itemIndex} className="relative flex gap-4">
+              {itemIndex === 0 ? (
+                <span className="absolute left-5 top-11 h-[calc(100%+1rem)] w-px bg-slate-200" />
+              ) : null}
+              <div className="z-10 size-10 shrink-0 animate-pulse rounded-full bg-white ring-1 ring-slate-200" />
+              <div className="min-w-0 flex-1 rounded-lg bg-white p-4 ring-1 ring-slate-200">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div className="min-w-0 flex-1 space-y-3">
+                    <div className="h-4 w-48 animate-pulse rounded-full bg-slate-200" />
+                    <div className="h-3 w-20 animate-pulse rounded-full bg-slate-100" />
+                    <div className="flex gap-2">
+                      <div className="h-6 w-14 animate-pulse rounded-md bg-slate-100" />
+                      <div className="h-6 w-16 animate-pulse rounded-md bg-slate-100" />
+                    </div>
+                  </div>
+                  <div className="h-6 w-20 animate-pulse rounded-md bg-primary/10" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+);
+
 const RouteSegmentCard = ({ segment, isLast }) => {
   const duration = formatDuration(segment.estimated_duration);
   const cost = formatMoney(segment.estimated_cost);
@@ -195,12 +233,7 @@ const TripRoutePlan = ({ tripId }) => {
         description="Visual movement plan showing origin, destination, vehicle, and timing."
       />
 
-      {isFetching ? (
-        <div className="flex items-center gap-2 rounded-xl border border-slate-200 p-4 text-sm font-semibold text-slate-500">
-          <Loader2 className="animate-spin text-primary" size={16} />
-          Loading route plan...
-        </div>
-      ) : null}
+      {isFetching ? <RoutePlanSkeleton /> : null}
 
       {!isFetching && isError ? (
         <div className="rounded-xl border border-red-100 bg-red-50 p-4">
