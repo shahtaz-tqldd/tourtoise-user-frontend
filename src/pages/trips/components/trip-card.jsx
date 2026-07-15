@@ -16,6 +16,7 @@ import { formatDate, formatUpdatedAt } from "@/lib/date-time";
 import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import TripPlanningDrawer from "../trip-create";
 import {
+  ArrowRight,
   ArrowUpRight,
   Ban,
   CalendarClock,
@@ -316,12 +317,16 @@ const TripCard = ({ trip, compact = false }) => {
               </span>
             </div>
             <div className="flex justify-end">
-              <Link className="w-full md:w-fit" to={getTripUrl(displayedTrip)}>
-                <Button className="w-full md:w-fit md:!pl-6 md:!pr-5">
-                  View Trip details
-                  <ArrowUpRight />
-                </Button>
-              </Link>
+              <div className="flx gap-2">
+                <Link
+                  className="w-full md:w-fit flx gap-2 text-sm text-primary font-semibold"
+                  to={getTripUrl(displayedTrip)}
+                  
+                >
+                  View Details
+                  <ArrowRight size={16}/>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

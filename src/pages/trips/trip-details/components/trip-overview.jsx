@@ -65,13 +65,15 @@ const budgetRows = [
 ];
 
 const SummaryMetric = ({ icon, label, value, component }) => (
-  <div className="rounded-xl border border-slate-200 p-3">
+  <div className="rounded-xl bg-primary/5 p-4">
     <div className="flx gap-2">
       {React.createElement(icon, { className: "text-primary", size: 14 })}
       <p className="text-xs font-semibold uppercase text-slate-500">{label}</p>
     </div>
-    <p className="mt-3 text-sm font-semibold text-slate-950">{value}</p>
-    {component ? component : null}
+    <div className="flex flex-col mt-4 gap-2">
+      <p className="text-sm font-semibold text-slate-950">{value}</p>
+      {component ? component : null}
+    </div>
   </div>
 );
 
@@ -361,8 +363,8 @@ const TripOverview = ({ trip }) => {
           label="Start date"
           value={formatDate(trip.start_date)}
           component={
-            <span className="mt-2 text-xs text-primary font-semibold">
-              returning {formatDate(trip.end_date)}
+            <span className="text-xs text-slate-500 font-medium capitalize">
+              Ending {formatDate(trip.end_date)}
             </span>
           }
         />
@@ -375,8 +377,8 @@ const TripOverview = ({ trip }) => {
               : `${trip.duration_days || "-"} days`
           }
           component={
-            <span className="mt-2 text-xs text-primary font-semibold">
-              with {trip.duration_days} days
+            <span className="text-xs text-slate-500 font-medium capitalize">
+              within {trip.duration_days} days
             </span>
           }
         />
@@ -387,7 +389,7 @@ const TripOverview = ({ trip }) => {
             Number(trip.travelers_count || 1) === 1 ? "" : "s"
           }`}
           component={
-            <span className="mt-2 text-xs text-primary font-semibold">
+            <span className="text-xs text-slate-500 font-medium capitalize">
               {trip.traveler_type} tour
             </span>
           }
@@ -399,7 +401,7 @@ const TripOverview = ({ trip }) => {
           component={
             <button
               onClick={() => setIsBudgetOpen(true)}
-              className="mt-2 text-xs text-primary font-semibold underline"
+              className="text-xs text-primary font-semibold underline w-fit"
             >
               View breakdown
             </button>

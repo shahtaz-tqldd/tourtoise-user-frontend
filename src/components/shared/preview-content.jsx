@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 // ui components
 import {
   Dialog,
@@ -34,20 +34,6 @@ function useMediaQuery(query) {
 
 const PreviewContent = ({ open, onOpenChange, children, className = "" }) => {
   const isMobile = useMediaQuery("(max-width: 767px)");
-  const touchStartY = useRef(null);
-
-  const handleTouchStart = (event) => {
-    touchStartY.current = event.touches[0].clientY;
-  };
-
-  const handleTouchEnd = (event) => {
-    if (touchStartY.current === null) return;
-
-    const distance = event.changedTouches[0].clientY - touchStartY.current;
-    touchStartY.current = null;
-
-    if (distance > 80) onOpenChange(false);
-  };
 
   if (isMobile) {
     return (
@@ -58,10 +44,7 @@ const PreviewContent = ({ open, onOpenChange, children, className = "" }) => {
             "h-[100dvh] gap-0 overflow-hidden rounded-none border-0 p-0",
             className,
           )}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
         >
-          <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-slate-300 absolute top-0 left-1/2 -translate-x-1/2" />
           <SheetTitle className="sr-only hidden"></SheetTitle>
           <SheetDescription className="sr-only hidden"></SheetDescription>
           <div className="hidden-scrollbar">{children}</div>

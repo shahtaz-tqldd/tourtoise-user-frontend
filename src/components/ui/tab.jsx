@@ -62,6 +62,7 @@ const TabButton = ({ tab, active, onClick, scrollable, buttonRef }) => {
   const Icon = tab.icon;
   const hasCount = tab.count !== undefined && tab.count !== null;
   const isComplete = Boolean(tab.isComplete);
+  const unreadCount = tab.unreadCount;
 
   return (
     <button
@@ -84,10 +85,19 @@ const TabButton = ({ tab, active, onClick, scrollable, buttonRef }) => {
         <span
           className={cn(
             "h-5 min-w-5 px-1 text-xs font-semibold center rounded-full bg-slate-100",
-            isComplete && "bg-emerald-100 text-emerald-700",
+            isComplete && "bg-primary/10 text-primary",
           )}
         >
           {isComplete ? <Check size={13} strokeWidth={3} /> : tab.count}
+        </span>
+      )}
+      {unreadCount && (
+        <span
+          className={cn(
+            "h-5 min-w-5 px-1 text-xs font-semibold center rounded-full bg-red-600 text-white",
+          )}
+        >
+          {unreadCount}
         </span>
       )}
     </button>

@@ -33,7 +33,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
           {
             url: "/accounts/refresh/",
             method: "POST",
-            body: { refresh_token: refreshToken },
+            body: { refresh: refreshToken },
             credentials: "include",
           },
           api,
@@ -104,6 +104,7 @@ export const apiSlice = createApi({
     "chat-session-list",
     "chat-session",
     "chat-message-list",
+    "notification-list",
   ],
   keepUnusedDataFor: 300, // Don't keep any unused data
   refetchOnMountOrArgChange: false, // Always refetch when component mounts

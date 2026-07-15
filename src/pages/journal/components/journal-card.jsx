@@ -9,11 +9,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Bookmark,
+  Forward,
+  Heart,
   MessageCircleMore,
   MoreVertical,
   Pencil,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -21,6 +24,21 @@ import "swiper/css/pagination";
 import JournalComments from "./comments";
 import Card from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+
+const getInitialReactionCount = (journal) =>
+  journal.likes_count ??
+  journal.reactions_count ??
+  journal.reacts_count ??
+  journal.likes ??
+  0;
+
+const getPostShareUrl = (journalId) => {
+  if (typeof window === "undefined") return "";
+
+  const url = new URL("/travel-journal", window.location.origin);
+  url.hash = `journal-${journalId}`;
+  return url.toString();
+};
 
 const JournalCard = ({
   journal,
@@ -32,6 +50,12 @@ const JournalCard = ({
 }) => {
   const [isStoryExpanded, setIsStoryExpanded] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [isReacted, setIsReacted] = useState(
+    Boolean(journal.is_liked || journal.is_reacted || journal.has_reacted),
+  );
+  const [reactionCount, setReactionCount] = useState(() =>
+    getInitialReactionCount(journal),
+  );
   const authorName = journal.author?.name || "Unknown traveler";
   const authorAvatar = journal.author?.avatar_url;
   const galleryImages = journal.images?.length
@@ -40,8 +64,38 @@ const JournalCard = ({
       ? [journal.cover_image]
       : [];
 
+  const handleReaction = () => {
+    setIsReacted((current) => {
+      setReactionCount((count) => Math.max(0, count + (current ? -1 : 1)));
+      return !current;
+    });
+  };
+
+  const handleShare = async () => {
+    const shareUrl = getPostShareUrl(journal.id);
+    if (!shareUrl) return;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Travel Journal",
+          text: journal.body || journal.content || "Check out this travel post.",
+          url: shareUrl,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Post link copied.");
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+      toast.error("Could not share this post.");
+    }
+  };
+
   return (
     <Card
+      id={`journal-${journal.id}`}
       className={cn(
         "p-0 bg-transparent md:bg-white md:p-6 rounded-none md:rounded-3xl",
         className,
@@ -76,7 +130,7 @@ const JournalCard = ({
                   ? { clickable: true, dynamicBullets: true }
                   : false
               }
-              className="mt-4 mb-2 journal-image-slider aspect-[16/9] w-full overflow-hidden rounded-2xl"
+              className="mt-4 mb-2 journal-image-slider aspect-[5/3] w-full overflow-hidden rounded-2xl"
             >
               {galleryImages.map((image, index) => (
                 <SwiperSlide key={`${image}-${index}`}>
@@ -96,18 +150,21 @@ const JournalCard = ({
                 expanded={isStoryExpanded}
                 onExpandedChange={setIsStoryExpanded}
               />
-              <CommentToggle
-                showComments={showComments}
+              <JournalPostActions
+                isReacted={isReacted}
+                reactionCount={reactionCount}
                 commentsCount={journal.comments_count}
-                onToggle={() => setShowComments((show) => !show)}
-                className="mt-3"
+                showComments={showComments}
+                onReact={handleReaction}
+                onShare={handleShare}
+                onToggleComments={() => setShowComments((show) => !show)}
               />
             </div>
             <JournalSaveButton
               journal={journal}
               isSaved={isSaved}
               onSaveToggle={onSaveToggle}
-              className="mb-0.5"
+              className=""
             />
           </div>
 
@@ -138,17 +195,57 @@ const AuthorAvatar = ({ src, name, size = "sm" }) => (
   </div>
 );
 
+const JournalPostActions = ({
+  isReacted,
+  reactionCount,
+  commentsCount,
+  showComments,
+  onReact,
+  onShare,
+  onToggleComments,
+}) => (
+  <div className="mt-4 flex items-center gap-2">
+    <button
+      type="button"
+      className={`inline-flex h-9 items-center gap-2 rounded-full px-3 text-sm font-semibold transition ${
+        isReacted
+          ? "bg-red-50 text-red-600"
+          : "bg-white text-slate-600 hover:bg-red-50 hover:text-red-600 md:bg-slate-100"
+      }`}
+      onClick={onReact}
+      aria-pressed={isReacted}
+      aria-label={isReacted ? "Remove reaction" : "React to post"}
+    >
+      <Heart size={16} className={isReacted ? "fill-current" : ""} />
+      {reactionCount > 0 && reactionCount}
+    </button>
+    <CommentToggle
+      showComments={showComments}
+      commentsCount={commentsCount}
+      onToggle={onToggleComments}
+    />
+    <button
+      type="button"
+      className="inline-flex h-9 items-center justify-center rounded-full bg-white px-3 text-slate-600 transition hover:bg-primary/10 hover:text-primary md:bg-slate-100"
+      onClick={onShare}
+      aria-label="Share post"
+    >
+      <Forward size={16} />
+    </button>
+  </div>
+);
+
 const CommentToggle = ({
   showComments,
   commentsCount,
   onToggle,
-  className = "",
 }) => (
   <button
     type="button"
-    className={`flx gap-2 text-sm font-semibold text-slate-600 py-2 px-3 bg-white md:bg-slate-100 hover:bg-primary/10 tr rounded-full ${className}`}
+    className="flx h-9 gap-2 rounded-full bg-white px-3 text-sm font-semibold text-slate-600 transition hover:bg-primary/10 md:bg-slate-100"
     onClick={onToggle}
     aria-expanded={showComments}
+    aria-label={showComments ? "Hide comments" : "Show comments"}
   >
     <MessageCircleMore size={15} className="text-primary" />
     {commentsCount > 0 && `${commentsCount}`}

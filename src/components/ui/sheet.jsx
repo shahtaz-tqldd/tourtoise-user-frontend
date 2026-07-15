@@ -1,8 +1,6 @@
 import * as React from "react";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { cva } from "class-variance-authority";
-import { XIcon } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 import { useCloseOnBack } from "@/hooks/useCloseOnBack";
 
@@ -46,7 +44,7 @@ function SheetOverlay({ className, ...props }) {
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        "fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200",
         className,
       )}
       {...props}
@@ -55,7 +53,7 @@ function SheetOverlay({ className, ...props }) {
 }
 
 const sheetVariants = cva(
-  "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:duration-300 data-[state=open]:duration-500",
+  "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-out will-change-transform data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:duration-200 data-[state=open]:duration-[250ms]",
   {
     variants: {
       side: {
@@ -78,8 +76,43 @@ function SheetContent({
   className,
   children,
   showCloseButton = true,
+  showDragHandle,
   ...props
 }) {
+  void showCloseButton;
+
+  const closeButtonRef = React.useRef(null);
+  const dragStartRef = React.useRef(null);
+  const shouldShowDragHandle = showDragHandle ?? side === "bottom";
+
+  const handleDragStart = (event) => {
+    const touch = event.touches?.[0];
+    if (!touch) return;
+
+    dragStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+    };
+  };
+
+  const handleDragEnd = (event) => {
+    if (!dragStartRef.current) return;
+
+    const touch = event.changedTouches?.[0];
+    if (!touch) {
+      dragStartRef.current = null;
+      return;
+    }
+
+    const distanceY = touch.clientY - dragStartRef.current.y;
+    const distanceX = Math.abs(touch.clientX - dragStartRef.current.x);
+    dragStartRef.current = null;
+
+    if (distanceY > 56 && distanceY > distanceX * 1.4) {
+      closeButtonRef.current?.click();
+    }
+  };
+
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -88,16 +121,26 @@ function SheetContent({
         className={cn(sheetVariants({ side }), className)}
         {...props}
       >
-        {children}
-        {showCloseButton && (
-          <SheetPrimitive.Close
-            data-slot="sheet-close"
-            className="ring-offset-background focus:ring-ring absolute right-4 top-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none"
-          >
-            <XIcon className="size-4 hidden md:block" />
-            <span className="sr-only">Close</span>
-          </SheetPrimitive.Close>
+        {shouldShowDragHandle && (
+          <>
+            <button
+              type="button"
+              aria-label="Swipe down to close"
+              className="absolute left-1/2 top-0 z-10 flex h-9 w-24 -translate-x-1/2 touch-none items-start justify-center pt-3 md:hidden"
+              onTouchStart={handleDragStart}
+              onTouchEnd={handleDragEnd}
+            >
+              <span className="h-1.5 w-12 rounded-full bg-slate-300" />
+            </button>
+            <SheetPrimitive.Close
+              ref={closeButtonRef}
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          </>
         )}
+        {children}
       </SheetPrimitive.Content>
     </SheetPortal>
   );

@@ -3,6 +3,7 @@ import React, { useMemo, useState } from "react";
 import { TripHistory } from "./components/trip-history";
 import TripsFeed from "./components/trips-feed";
 import TripsPageHeader from "./components/trips-page-header";
+import useTitle from "@/hooks/useTitle";
 
 const pageSize = 24;
 const historyPageSize = 12;
@@ -50,6 +51,7 @@ const filterCurrentTrips = (trips, status) =>
   );
 
 const TripsPage = () => {
+  useTitle("Trips");
   const [page, setPage] = useState(1);
   const [activeSearch, setActiveSearch] = useState("");
   const [activeStatus, setActiveStatus] = useState("all");

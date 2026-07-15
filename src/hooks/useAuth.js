@@ -7,7 +7,7 @@ const useAuth = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-  const { data, isSuccess, isLoading, refetch } = useSelfDetailsQuery(
+  const { data, isSuccess, isLoading, isFetching, isError, refetch } = useSelfDetailsQuery(
     undefined,
     {
       skip: !isAuthenticated,
@@ -23,7 +23,9 @@ const useAuth = () => {
   }, [isSuccess, data, dispatch, isAuthenticated]);
 
   return {
-    isLoading: isLoading || (isAuthenticated && !authChecked),
+    isLoading: isLoading || (isAuthenticated && !authChecked && !isError),
+    isFetching,
+    authError: isAuthenticated && isError,
     authChecked,
     refetchProfile: refetch,
     user,

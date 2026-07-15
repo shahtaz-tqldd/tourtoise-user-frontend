@@ -14,8 +14,10 @@ import {
   LoadingDestinationList,
 } from "./components/fallback";
 import { EmptyState } from "@/components/shared/utils";
+import useTitle from "@/hooks/useTitle";
 
 const DestinationPage = () => {
+  useTitle("tourtoise - let's find your next tour destination");
   // filter
   const [searchQuery, setSearchQuery] = useState("");
   const [countries, setCountries] = useState([]);
@@ -68,8 +70,8 @@ const DestinationPage = () => {
     hasNextPage: hasNextSavedPage,
     isFetchingNextPage: isFetchingSavedNextPage,
   } = useSaveDestinationInfiniteListInfiniteQuery({
-      pageSize: 6,
-    });
+    pageSize: 6,
+  });
   const savedDestinations = useMemo(
     () => savedData?.pages?.flatMap((page) => page?.data || []) || [],
     [savedData],

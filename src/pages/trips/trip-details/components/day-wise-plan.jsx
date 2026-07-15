@@ -1,14 +1,17 @@
 import React, { useMemo, useState } from "react";
 import { PreviewCard } from "@/components/ui/card";
 import {
+  Bed,
   CalendarDays,
+  Car,
   CheckCircle2,
   ChevronDown,
   Clock3,
   Info,
+  MapPin,
   RefreshCw,
   Sparkle,
-  Sparkles,
+  Utensils,
 } from "lucide-react";
 import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { formatDate } from "@/lib/date-time";
@@ -20,6 +23,18 @@ const formatLabel = (value) =>
   String(value || "")
     .replace(/_/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const itemTypeIconMap = {
+  cuisine: <Utensils size={13} aria-hidden="true" />,
+  activity: <Sparkle size={13} aria-hidden="true" />,
+  attraction: <MapPin size={13} aria-hidden="true" />,
+  rest: <Bed size={13} aria-hidden="true" />,
+  transfer: <Car size={13} aria-hidden="true" />,
+};
+
+const fallbackItemTypeIcon = <CheckCircle2 size={13} aria-hidden="true" />;
+
+const getItemTypeIcon = (type) => itemTypeIconMap[type] || fallbackItemTypeIcon;
 
 const formatTime = (value) => {
   if (!value) return "";
@@ -34,17 +49,6 @@ const formatTime = (value) => {
     hour: "numeric",
     minute: "2-digit",
   }).format(date);
-};
-
-const formatMoney = (value) => {
-  if (value === null || value === undefined || value === "") return "";
-
-  const numericValue = Number(value);
-  if (!Number.isFinite(numericValue)) return "";
-
-  return `$${numericValue.toLocaleString(undefined, {
-    maximumFractionDigits: 0,
-  })}`;
 };
 
 const unwrapDayWisePlan = (response) => {
@@ -167,7 +171,8 @@ const TripDayWisePlan = ({ tripId }) => {
 
 const DayPlanItem = ({ item }) => {
   const time = formatTime(item.time);
-  const cost = formatMoney(item.estimated_cost);
+  const itemTypeIcon = getItemTypeIcon(item.item_type);
+  const itemTypeLabel = formatLabel(item.item_type || "Other");
 
   return (
     <div className="rounded-xl bg-white p-4 ring-1 ring-slate-200">
@@ -180,14 +185,14 @@ const DayPlanItem = ({ item }) => {
                 {time}
               </span>
             ) : null}
-            <span className="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-semibold capitalize text-primary">
-              {formatLabel(item.item_type)}
-            </span>
-            {cost ? (
-              <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                {cost}
-              </span>
-            ) : null}
+            <div
+              className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary"
+              title={itemTypeLabel}
+              aria-label={itemTypeLabel}
+            >
+              {itemTypeIcon}
+              <span>{formatLabel(item.item_type)}</span>
+            </div>
           </div>
           <h4 className="mt-3 text-sm font-semibold text-slate-950">
             {item.title}

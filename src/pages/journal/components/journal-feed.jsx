@@ -1,8 +1,6 @@
 import React from "react";
-import { Plus, Search } from "lucide-react";
 
 import InfiniteScroll from "@/components/shared/infinite-scroll";
-import { UserAvatar } from "@/components/shared/user-profile";
 import { Button } from "@/components/ui/button";
 
 import JournalCard from "./journal-card";
@@ -19,39 +17,21 @@ const JournalListSkeleton = () => (
   </div>
 );
 
-const CreateJournalTrigger = ({ onCreate }) => (
-  <button
-    type="button"
-    className="flex w-full cursor-pointer gap-2"
-    onClick={onCreate}
-  >
-    <UserAvatar className="size-10" />
-    <div className="flex w-full flex-1 items-center gap-2 rounded-full border bg-white px-4 py-3 text-slate-400">
-      <Plus size={15} />
-      <span className="text-sm">Write Your Travel Journal</span>
-    </div>
-  </button>
-);
-
 const JournalFeed = ({
   journals,
   isLoading,
-  isSearchSettling,
   isError,
   onRetry,
   hasMore,
   isFetchingMore,
   onLoadMore,
-  onCreate,
   onSaveToggle,
   onEditJournal,
   onDeleteJournal,
   canManageJournal,
 }) => (
   <>
-    <CreateJournalTrigger onCreate={onCreate} />
-
-    {isLoading || isSearchSettling ? (
+    {isLoading ? (
       <JournalListSkeleton />
     ) : isError ? (
       <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
@@ -64,15 +44,21 @@ const JournalFeed = ({
       </div>
     ) : journals.length > 0 ? (
       <div className="space-y-6 md:space-y-4">
-        {journals.map((journal) => (
-          <JournalCard
-            key={journal.id}
-            journal={journal}
-            isSaved={journal.is_saved}
-            onSaveToggle={onSaveToggle}
-            onEdit={canManageJournal(journal) ? onEditJournal : undefined}
-            onDelete={canManageJournal(journal) ? onDeleteJournal : undefined}
-          />
+        {journals.map((journal, index) => (
+          <React.Fragment key={journal.id}>
+            <JournalCard
+              journal={journal}
+              isSaved={journal.is_saved}
+              onSaveToggle={onSaveToggle}
+              onEdit={canManageJournal(journal) ? onEditJournal : undefined}
+              onDelete={
+                canManageJournal(journal) ? onDeleteJournal : undefined
+              }
+            />
+            {index < journals.length - 1 && (
+              <hr className="border-slate-200 md:hidden" />
+            )}
+          </React.Fragment>
         ))}
         <InfiniteScroll
           hasMore={hasMore}

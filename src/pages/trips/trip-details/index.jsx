@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -14,12 +14,14 @@ import { Bell, Loader2, MessageSquareDot, Sparkles } from "lucide-react";
 
 // lib
 import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
+import { useNotificationListQuery } from "@/features/notification/notificationApiSlice";
+import useNotificationSocket from "@/features/notification/useNotificationSocket";
 import useTitle from "@/hooks/useTitle";
 import TripNotes from "./components/trip-notes";
 
 const mobileTabs = [
   { value: "overview", label: "Overview", icon: Sparkles },
-  { value: "assistant", label: "Trip Assistant", icon: MessageSquareDot },
+  { value: "assistant", label: "Trip Assistant", icon: MessageSquareDot, count: 0 },
   { value: "notifications", label: "Notification", icon: Bell },
 ];
 
@@ -92,12 +94,6 @@ const buildChatMessages = (trip) => {
 
   return messages;
 };
-
-const buildNotifications = (trip) =>
-  (trip?.alerts || []).map((alert) => ({
-    title: alert.title,
-    content: alert.body,
-  }));
 
 const normalizeTripDetail = (sourceTrip) => {
   if (!sourceTrip) return null;
@@ -240,11 +236,40 @@ const TripDetailPage = () => {
   const [activeMobileTab, setActiveMobileTab] = useState("overview");
 
   const { data, isFetching, isError } = useTripDetailQuery(trip_id);
+  const { data: notificationData, refetch: refetchNotifications } =
+    useNotificationListQuery({
+      trip_id,
+      page: 1,
+      page_size: 1,
+    });
   const trip = useMemo(
     () => normalizeTripDetail(unwrapTripDetail(data)),
     [data],
   );
-  const notifications = useMemo(() => buildNotifications(trip), [trip]);
+  const notificationUnreadCount = notificationData?.meta?.unread_count || 0;
+  const tabs = useMemo(
+    () =>
+      mobileTabs.map((tab) =>
+        tab.value === "notifications"
+          ? { ...tab, count: notificationUnreadCount }
+          : tab,
+      ),
+    [notificationUnreadCount],
+  );
+
+  const handleSocketNotification = useCallback(
+    (notification) => {
+      if (notification?.trip_id === trip_id) {
+        refetchNotifications();
+      }
+    },
+    [refetchNotifications, trip_id],
+  );
+
+  useNotificationSocket({
+    enabled: Boolean(trip_id),
+    onNotification: handleSocketNotification,
+  });
 
   if (isFetching) {
     return (
@@ -279,7 +304,8 @@ const TripDetailPage = () => {
 
         <TripAgentChat
           messages={trip.chat}
-          notifications={notifications}
+          tripId={trip.id}
+          notificationUnreadCount={notificationUnreadCount}
           className="sticky top-[92px]"
         />
       </section>
@@ -293,7 +319,7 @@ const TripDetailPage = () => {
         )}
       >
         <TabMenu
-          tabs={mobileTabs}
+          tabs={tabs}
           activeTab={activeMobileTab}
           setActiveTab={setActiveMobileTab}
           className={cn(
@@ -319,7 +345,8 @@ const TripDetailPage = () => {
           {activeMobileTab === "assistant" && (
             <TripAgentChat
               messages={trip.chat}
-              notifications={notifications}
+              tripId={trip.id}
+              notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="chat"
               className="h-full min-h-0 rounded-none md:rounded-3xl"
@@ -329,7 +356,8 @@ const TripDetailPage = () => {
           {activeMobileTab === "notifications" && (
             <TripAgentChat
               messages={trip.chat}
-              notifications={notifications}
+              tripId={trip.id}
+              notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="notifications"
               className="h-full min-h-0 rounded-none md:rounded-3xl"
