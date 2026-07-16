@@ -463,6 +463,44 @@ export const tripApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+
+    // TRIP MESSAGE ENDPOINT
+    tripMessageList: builder.query({
+      query: ({ trip_id, session_id, page, page_size, search }) => {
+        const queryParams = new URLSearchParams({
+          page: String(page),
+          page_size: String(page_size),
+        });
+
+        const appendParam = (key, value) => {
+          if (!value || (Array.isArray(value) && !value.length)) return;
+          queryParams.set(key, Array.isArray(value) ? value.join(",") : value);
+        };
+
+        appendParam("search", search);
+
+        return {
+          url: `/trips/${trip_id}/chat/${session_id}/messages/?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: (result, error, { session_id }) => [
+        { type: "trip-message-list", id: session_id },
+      ],
+    }),
+
+    createTripMessage: builder.mutation({
+      query: ({ trip_id, session_id, payload }) => {
+        return {
+          url: `/trips/${trip_id}/chat/${session_id}/create-message/`,
+          method: "POST",
+          body: payload,
+        };
+      },
+      invalidatesTags: (result, error, { session_id }) => [
+        { type: "trip-message-list", id: session_id },
+      ],
+    }),
   }),
 });
 
@@ -517,4 +555,8 @@ export const {
 
   // daywise plan
   useDaywisePlanListQuery,
+
+  // trip messages
+  useTripMessageListQuery,
+  useCreateTripMessageMutation,
 } = tripApiSlice;

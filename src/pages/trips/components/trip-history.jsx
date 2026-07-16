@@ -32,14 +32,14 @@ export const TripHistory = ({
       description="Your past completed trips"
       className="hidden md:block"
     />
-    {trips?.length > 5 ? (
+    {/* {trips?.length > 5 ? (
       <SearchField
         value={search}
         onChange={onSearchChange}
         onClear={() => onSearchChange("")}
         placeholder="Search past trips..."
       />
-    ) : null}
+    ) : null} */}
 
     {isFetching && <TripListLoader compact />}
 

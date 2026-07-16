@@ -232,13 +232,13 @@ const JournalPostActions = ({
   onShare,
   onToggleComments,
 }) => (
-  <div className="mt-4 flex items-center gap-2">
+  <div className="mt-6 flex items-center gap-2">
     <button
       type="button"
       className={`inline-flex h-9 items-center gap-2 rounded-full px-3 text-sm font-semibold transition ${
         isReacted
-          ? "bg-red-50 text-red-600"
-          : "bg-white text-slate-600 hover:bg-red-50 hover:text-red-600 md:bg-slate-100"
+          ? "bg-primary/10 text-primary"
+          : "bg-white text-slate-600 hover:bg-primary/10 hover:text-primary md:bg-slate-100"
       }`}
       onClick={onReact}
       disabled={isReacting}

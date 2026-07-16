@@ -4,31 +4,19 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import StatusBadge from "@/components/ui/status";
-import {
-  useDeleteTripMutation,
-  useUpdateTripMutation,
-} from "@/features/trips/tripApiSlice";
+import { useDeleteTripMutation } from "@/features/trips/tripApiSlice";
 import { formatDate, formatUpdatedAt } from "@/lib/date-time";
 import { getCloudinaryPreviewUrl } from "@/lib/utils";
-import TripPlanningDrawer from "../trip-create";
 import {
   ArrowRight,
-  ArrowUpRight,
-  Ban,
-  CalendarClock,
   CalendarDays,
   Clock3,
   Globe,
-  Globe2,
   MapPin,
   MoreHorizontal,
-  Pencil,
-  Route,
-  Share2,
   Trash2,
   User,
   Users,
@@ -36,9 +24,8 @@ import {
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import RescheduleDialog from "./reschedule-dialog";
 import { DeleteDialog } from "@/components/shared/confirm-dialog";
-import ShareTripDialog from "./share-trip-dialog";
+import TripActionsDropdown from "./trip-actions-dropdown";
 
 const getTripUrl = (trip) => `/trips/${trip.id}`;
 const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
@@ -91,12 +78,7 @@ const TripCard = ({ trip, compact = false }) => {
   const coverImage = getTripCoverImage(displayedTrip);
   const destinationMeta = getDestinationMeta(displayedTrip);
   const tripId = getTripId(displayedTrip);
-  const [rescheduleOpen, setRescheduleOpen] = useState(false);
-  const [planningOpen, setPlanningOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
-  const [cancelOpen, setCancelOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [updateTrip, { isLoading: isUpdatingTrip }] = useUpdateTripMutation();
   const [deleteTrip, { isLoading: isDeletingTrip }] = useDeleteTripMutation();
   const dateRange =
     displayedTrip.start_date && displayedTrip.end_date
@@ -105,36 +87,6 @@ const TripCard = ({ trip, compact = false }) => {
 
   const updateShareMeta = (updates) => {
     setShareMeta((current) => ({ ...current, ...updates }));
-  };
-
-  const handleRescheduleTrip = async (payload) => {
-    if (!tripId) {
-      toast.error("Trip id is missing.");
-      return;
-    }
-
-    try {
-      await updateTrip({ trip_id: tripId, ...payload }).unwrap();
-      toast.success("Trip rescheduled.");
-      setRescheduleOpen(false);
-    } catch (error) {
-      toast.error(error?.data?.message || "Could not reschedule this trip.");
-    }
-  };
-
-  const handleCancelTrip = async () => {
-    if (!tripId) {
-      toast.error("Trip id is missing.");
-      return;
-    }
-
-    try {
-      await updateTrip({ trip_id: tripId, status: "cancelled" }).unwrap();
-      toast.success("Trip cancelled.");
-      setCancelOpen(false);
-    } catch (error) {
-      toast.error(error?.data?.message || "Could not cancel this trip.");
-    }
   };
 
   const handleDeleteTrip = async () => {
@@ -331,86 +283,12 @@ const TripCard = ({ trip, compact = false }) => {
           </div>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className="rounded-full text-slate-500 bg-slate-50 hover:bg-slate-100 hover:text-slate-900 absolute top-4 md:top-5 right-4 md:right-5 tr"
-              aria-label="Trip actions"
-            >
-              <MoreHorizontal size={18} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-40 border border-slate-200 rounded-2xl"
-          >
-            <DropdownMenuItem onSelect={() => setRescheduleOpen(true)}>
-              <CalendarClock size={15} />
-              Reschedule
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setShareOpen(true)}>
-              <Share2 size={15} />
-              Share Trip
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setCancelOpen(true)}>
-              <Ban size={15} />
-              Cancel trip
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setPlanningOpen(true)}>
-              <Route size={15} />
-              View Planning
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              onSelect={() => setDeleteOpen(true)}
-            >
-              <Trash2 size={15} />
-              Delete trip
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <TripActionsDropdown
+          trip={displayedTrip}
+          onTripChange={updateShareMeta}
+          triggerClassName="absolute top-4 right-4 md:top-5 md:right-5 tr"
+        />
       </Card>
-      <RescheduleDialog
-        trip={displayedTrip}
-        open={rescheduleOpen}
-        onOpenChange={setRescheduleOpen}
-        isLoading={isUpdatingTrip}
-        onSubmit={handleRescheduleTrip}
-      />
-      <TripPlanningDrawer
-        trip={displayedTrip}
-        destination={displayedTrip.primary_destination}
-        open={planningOpen}
-        onOpenChange={setPlanningOpen}
-      />
-      <ShareTripDialog
-        trip={displayedTrip}
-        open={shareOpen}
-        onOpenChange={setShareOpen}
-        onTripChange={updateShareMeta}
-      />
-      <DeleteDialog
-        open={cancelOpen}
-        onOpenChange={setCancelOpen}
-        title="Cancel trip?"
-        description="This will mark the trip as cancelled. You can keep the trip record, but it will move out of active trips."
-        confirmLabel="Cancel trip"
-        cancelLabel="Keep trip"
-        isLoading={isUpdatingTrip}
-        onConfirm={handleCancelTrip}
-      />
-      <DeleteDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        title="Delete trip?"
-        description="This permanently removes the trip plan and cannot be undone."
-        confirmLabel="Delete trip"
-        isLoading={isDeletingTrip}
-        onConfirm={handleDeleteTrip}
-      />
     </>
   );
 };

@@ -21,7 +21,12 @@ import TripNotes from "./components/trip-notes";
 
 const mobileTabs = [
   { value: "overview", label: "Overview", icon: Sparkles },
-  { value: "assistant", label: "Trip Assistant", icon: MessageSquareDot, count: 0 },
+  {
+    value: "assistant",
+    label: "Trip Assistant",
+    icon: MessageSquareDot,
+    count: 0,
+  },
   { value: "notifications", label: "Notification", icon: Bell },
 ];
 
@@ -305,6 +310,7 @@ const TripDetailPage = () => {
         <TripAgentChat
           messages={trip.chat}
           tripId={trip.id}
+          sessionId={trip.session_id}
           notificationUnreadCount={notificationUnreadCount}
           className="sticky top-[92px]"
         />
@@ -344,8 +350,8 @@ const TripDetailPage = () => {
 
           {activeMobileTab === "assistant" && (
             <TripAgentChat
-              messages={trip.chat}
               tripId={trip.id}
+              sessionId={trip.session_id}
               notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="chat"
@@ -355,8 +361,8 @@ const TripDetailPage = () => {
 
           {activeMobileTab === "notifications" && (
             <TripAgentChat
-              messages={trip.chat}
               tripId={trip.id}
+              sessionId={trip.session_id}
               notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="notifications"

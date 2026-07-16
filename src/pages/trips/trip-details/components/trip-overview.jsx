@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import StatusBadge from "@/components/ui/status";
 import PreviewContent from "@/components/shared/preview-content";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import TripActionsDropdown from "../../components/trip-actions-dropdown";
 
 const formatDate = (value) => {
   if (!value) return "Not set";
@@ -327,6 +328,7 @@ const DestinationSlider = ({
 };
 
 const TripOverview = ({ trip }) => {
+  const navigate = useNavigate();
   const [isBudgetOpen, setIsBudgetOpen] = useState(false);
   const budget = trip?.budget || {};
   const totalBudget = budget.total_estimated ?? budget.total_estimated_budget;
@@ -341,7 +343,7 @@ const TripOverview = ({ trip }) => {
   return (
     <Card className="p-0 md:p-6 bg-transparent md:bg-white rounded-none md:rounded-2xl pt-4 md:pt-6">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="max-w-3xl">
+        <div className="max-w-3xl min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={trip.status} />
             <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize text-slate-600">
@@ -355,6 +357,12 @@ const TripOverview = ({ trip }) => {
             {trip.overview}
           </p>
         </div>
+        <TripActionsDropdown
+          trip={trip}
+          destination={trip.primary_destination || trip.destinations?.[0]}
+          onDeleted={() => navigate("/trips")}
+          triggerClassName="self-start border border-slate-200 bg-white shadow-sm"
+        />
       </div>
 
       <div className="mt-6 grid gap-3 grid-cols-2 md:grid-cols-4">
