@@ -21,6 +21,7 @@ const TripDetailPage = lazy(() => import("@/pages/trips/trip-details"));
 const AgentChatPage = lazy(() => import("@/pages/chat"));
 const ProfilePage = lazy(() => import("@/pages/profile"));
 const TravelJournalPage = lazy(() => import("@/pages/journal"));
+const SearchPage = lazy(() => import("@/pages/search"));
 
 const withSuspense = (element) => (
   <Suspense fallback={null}>{element}</Suspense>
@@ -66,6 +67,10 @@ export const routes = createBrowserRouter([
       {
         path: "/travel-journal/:journalId",
         element: withSuspense(<JournalDetailsPage />),
+      },
+      {
+        path: "/search",
+        element: withSuspense(<SearchPage />),
       },
       {
         path: "/profile/:username",

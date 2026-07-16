@@ -1,36 +1,58 @@
 import { apiSlice } from "../api/apiSlice";
 
+const nextTripPage = (lastPage, allPages, lastPageParam) =>
+  lastPage?.meta?.next ? lastPageParam + 1 : undefined;
+
+const tripListQueryParams = (params = {}) => {
+  const {
+    page = 1,
+    page_size = 10,
+    search,
+    search_query,
+    status,
+    destination_slug,
+  } = params;
+
+  const queryParams = new URLSearchParams({
+    page: String(page),
+    page_size: String(page_size),
+  });
+
+  const appendParam = (key, value) => {
+    if (!value || (Array.isArray(value) && !value.length)) return;
+    queryParams.set(key, Array.isArray(value) ? value.join(",") : value);
+  };
+
+  appendParam("search", search || search_query);
+  appendParam("status", status);
+  appendParam("destination_slug", destination_slug);
+
+  return queryParams.toString();
+};
+
 export const tripApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     tripList: builder.query({
       query: (params = {}) => {
-        const {
-          page = 1,
-          page_size = 10,
-          search,
-          search_query,
-          status,
-          destination_slug,
-        } = params;
-
-        const queryParams = new URLSearchParams({
-          page: String(page),
-          page_size: String(page_size),
-        });
-
-        const appendParam = (key, value) => {
-          if (!value || (Array.isArray(value) && !value.length)) return;
-          queryParams.set(key, Array.isArray(value) ? value.join(",") : value);
-        };
-
-        appendParam("search", search || search_query);
-        appendParam("status", status);
-        appendParam("destination_slug", destination_slug);
-
         return {
-          url: `/trips/list?${queryParams.toString()}`,
+          url: `/trips/list?${tripListQueryParams(params)}`,
           method: "GET",
         };
+      },
+      providesTags: ["trip-list"],
+    }),
+
+    tripInfiniteList: builder.infiniteQuery({
+      query: ({ queryArg = {}, pageParam }) => ({
+        url: `/trips/list?${tripListQueryParams({
+          ...queryArg,
+          page: pageParam,
+        })}`,
+        method: "GET",
+      }),
+      infiniteQueryOptions: {
+        initialPageParam: 1,
+        getNextPageParam: nextTripPage,
       },
       providesTags: ["trip-list"],
     }),
@@ -446,6 +468,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useTripListQuery,
+  useTripInfiniteListInfiniteQuery,
   useTripDetailQuery,
   useTripAgentConversationQuery,
   useCreateTripMutation,

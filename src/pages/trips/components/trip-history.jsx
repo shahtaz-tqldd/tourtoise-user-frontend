@@ -25,21 +25,21 @@ export const TripHistory = ({
   isFetching,
   isError,
 }) => (
-  <aside
-    className={`${className} space-y-5 lg:sticky lg:top-24 lg:self-start`}
-  >
+  <aside className={`${className} space-y-5 lg:sticky lg:top-24 lg:self-start`}>
     <SectionHeader
       icon={Luggage}
       title="Trip History"
       description="Your past completed trips"
+      className="hidden md:block"
     />
-
-    <SearchField
-      value={search}
-      onChange={onSearchChange}
-      onClear={() => onSearchChange("")}
-      placeholder="Search past trips..."
-    />
+    {trips?.length > 5 ? (
+      <SearchField
+        value={search}
+        onChange={onSearchChange}
+        onClear={() => onSearchChange("")}
+        placeholder="Search past trips..."
+      />
+    ) : null}
 
     {isFetching && <TripListLoader compact />}
 

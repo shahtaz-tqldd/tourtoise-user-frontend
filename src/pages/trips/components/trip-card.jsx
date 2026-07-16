@@ -155,7 +155,7 @@ const TripCard = ({ trip, compact = false }) => {
   if (compact) {
     return (
       <Link to={getTripUrl(displayedTrip)}>
-        <Card className="relative">
+        <Card className="relative border md:border-none">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-3">
               <div className="flex flex-wrap items-center gap-1.5">

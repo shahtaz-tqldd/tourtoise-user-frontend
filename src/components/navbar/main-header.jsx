@@ -9,47 +9,52 @@ import AlertMenu from "../shared/alerts";
 const MainHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchQuery, setSearchQuery] = React.useState(() => {
+    if (location.pathname !== "/search") return "";
 
-  const navigateToSearch = React.useCallback(
-    () => {
-      // const search = buildFeedFilterSearch({
-      //   ...filters,
-      //   searchTerm,
-      // });
+    return new URLSearchParams(location.search).get("q") || "";
+  });
 
-      navigate(
-        // {
-        //   pathname: "/feeds",
-        //   search: search ? `?${search}` : "",
-        // },
-        {
-          replace: location.pathname === "/feeds",
-        },
-      );
-    },
-    // [filters, location.pathname, navigate],
-    [location.pathname, navigate],
-  );
+  const navigateToSearch = React.useCallback(() => {
+    const params = new URLSearchParams(location.search);
+    const trimmedSearch = searchQuery.trim();
+
+    if (trimmedSearch) params.set("q", trimmedSearch);
+    else params.delete("q");
+
+    if (!params.get("tab")) params.set("tab", "destinations");
+
+    navigate({
+      pathname: "/search",
+      search: `?${params.toString()}`,
+    });
+  }, [location.search, navigate, searchQuery]);
 
   return (
     <header className="w-full sticky top-0 z-40 border-b border-b-primary/10 bg-white/10 backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-2.5 md:py-3">
         <Logo className="flex md:hidden" />
-        <label className="relative hidden min-w-0 max-w-xl flex-1 md:block">
+        <form
+          className="relative hidden min-w-0 max-w-xl flex-1 md:block"
+          onSubmit={(event) => {
+            event.preventDefault();
+            navigateToSearch();
+          }}
+        >
           <span className="sr-only">Search feed</span>
           <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-primary/55" />
           <Input
-            // value={filters.searchTerm}
-            onChange={(event) => navigateToSearch(event.target.value)}
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search destinations, tour plans and posts"
             className="h-11 rounded-full border-primary/15 bg-[#fcfdfb] pl-11 pr-4 text-sm shadow-none focus-visible:ring-2 focus-visible:ring-primary/20"
           />
-        </label>
+        </form>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <button
             type="button"
-            onClick={() => navigateToSearch("")}
+            onClick={navigateToSearch}
             className="size-9 md:size-11 items-center justify-center rounded-full border border-primary/10 bg-[#f8faf8] text-primary transition hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 flex md:hidden"
             aria-label="Search"
           >
