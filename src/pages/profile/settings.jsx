@@ -17,7 +17,7 @@ import {
 import ConfirmDialog from "@/components/shared/confirm-dialog";
 import { SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
-import Card from "@/components/ui/card";
+import Card, { PreviewCard } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -38,17 +38,11 @@ import useAuth from "@/hooks/useAuth";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { cn } from "@/lib/utils";
 
-const getUserPreference = (user, keys, fallback) => {
-  const value = keys
-    .map((key) => user?.[key])
-    .find((item) => item !== undefined);
-  return typeof value === "boolean" ? value : fallback;
-};
-
 const getCurrentDevice = () => {
   if (typeof navigator === "undefined") return "Current browser";
 
   const platform = navigator.userAgentData?.platform || navigator.platform;
+
   const browser = navigator.userAgentData?.brands?.at(-1)?.brand;
   return [browser, platform].filter(Boolean).join(" on ") || "Current browser";
 };
@@ -98,20 +92,8 @@ const ProfileSettings = () => {
 
   const basePreferences = useMemo(
     () => ({
-      locationSharing: getUserPreference(
-        user,
-        ["location_sharing", "location_sharing_enabled", "share_location"],
-        false,
-      ),
-      notificationAlert: getUserPreference(
-        user,
-        [
-          "notification_alert",
-          "notification_alert_enabled",
-          "receive_notification_alert",
-        ],
-        true,
-      ),
+      locationSharing: user?.is_location_sharing_enabled,
+      notificationAlert: user?.is_alert_notification_enabled,
     }),
     [user],
   );
@@ -130,7 +112,7 @@ const ProfileSettings = () => {
       },
       {
         label: "Last login",
-        value: formatLoginTime(user?.last_login || user?.lastLogin),
+        value: formatLoginTime(user?.last_login),
         icon: ShieldAlert,
       },
     ],
@@ -140,8 +122,8 @@ const ProfileSettings = () => {
   const updatePreference = async (key, value) => {
     const payload =
       key === "locationSharing"
-        ? { location_sharing_enabled: value }
-        : { notification_alert_enabled: value };
+        ? { is_location_sharing_enabled: value }
+        : { is_notification_alert_enabled: value };
 
     const previous = preferences[key];
     setPreferenceOverrides((current) => ({ ...current, [key]: value }));
@@ -220,7 +202,7 @@ const ProfileSettings = () => {
 
   return (
     <>
-      <Card className="space-y-10 p-6 md:p-8">
+      <PreviewCard className="space-y-10 md:p-8 md:rounded-t-none">
         <SectionHeader
           title="Profile Settings"
           description="Manage account preferences, password, and account access."
@@ -296,7 +278,7 @@ const ProfileSettings = () => {
             }
           />
         </div>
-      </Card>
+      </PreviewCard>
 
       <Dialog
         open={passwordDialogOpen}

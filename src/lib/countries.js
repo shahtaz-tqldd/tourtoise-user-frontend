@@ -1,4 +1,5 @@
 export const COUNTRY_LIST = [
+  { name: "Bangladesh", timezone: "UTC+6:00", flag: "🇧🇩" },
   { name: "India", timezone: "UTC+5:30", flag: "🇮🇳" },
   { name: "Indonesia", timezone: "UTC+7 to UTC+9", flag: "🇮🇩" },
   { name: "Malaysia", timezone: "UTC+8", flag: "🇲🇾" },

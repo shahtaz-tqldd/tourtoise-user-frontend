@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ImagePlus, Plus, X } from "lucide-react";
+import { ImagePlus, PencilLine, PenLine, Plus, X } from "lucide-react";
 
 import ConfirmDialog from "@/components/shared/confirm-dialog";
 import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
-import Card from "@/components/ui/card";
+import Card, { PreviewCard } from "@/components/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -68,7 +68,7 @@ const TravelJournal = ({ userId, isOwner = false }) => {
   };
 
   return (
-    <Card className="p-6 md:p-8">
+    <PreviewCard className="md:p-8 md:rounded-t-none">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <SectionHeader
           title="Travel Journal"
@@ -76,9 +76,13 @@ const TravelJournal = ({ userId, isOwner = false }) => {
         />
 
         {isOwner && (
-          <Button className="w-full md:w-auto" onClick={openCreate}>
-            <Plus size={16} />
-            New Journal
+          <Button
+            variant="outline"
+            className="w-full md:w-auto md:!pr-4"
+            onClick={openCreate}
+          >
+            <PencilLine size={16} />
+            Write Journal
           </Button>
         )}
       </div>
@@ -132,7 +136,7 @@ const TravelJournal = ({ userId, isOwner = false }) => {
         isLoading={isDeleting}
         onConfirm={handleDelete}
       />
-    </Card>
+    </PreviewCard>
   );
 };
 
