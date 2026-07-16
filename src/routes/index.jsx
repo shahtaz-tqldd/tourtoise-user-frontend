@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "@/layouts/main";
 import PrivateRoute from "./private-route";
+import JournalDetailsPage from "@/pages/journal/journal-details";
 
 const LoginPage = lazy(() => import("@/pages/auth/login"));
 const RegisterPage = lazy(() => import("@/pages/auth/register"));
@@ -10,10 +11,10 @@ const ResetPasswordPage = lazy(() => import("@/pages/auth/reset-password"));
 
 const DestiantionPage = lazy(() => import("@/pages/destinations"));
 const DestinationDetailsPage = lazy(
-  () => import("@/pages/destinations/destination-details")
+  () => import("@/pages/destinations/destination-details"),
 );
 const DestinationFeatureListPage = lazy(
-  () => import("@/pages/destinations/destination-features")
+  () => import("@/pages/destinations/destination-features"),
 );
 const TripsPage = lazy(() => import("@/pages/trips"));
 const TripDetailPage = lazy(() => import("@/pages/trips/trip-details"));
@@ -61,6 +62,10 @@ export const routes = createBrowserRouter([
       {
         path: "/travel-journal",
         element: withSuspense(<TravelJournalPage />),
+      },
+      {
+        path: "/travel-journal/:journalId",
+        element: withSuspense(<JournalDetailsPage />),
       },
       {
         path: "/profile/:username",

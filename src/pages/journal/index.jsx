@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 // components
@@ -39,6 +40,7 @@ const matchesSavedJournalSearch = (journal, searchQuery) => {
 
 const TravelJournalPage = () => {
   useTitle("tourtoise - travel journal");
+  const navigate = useNavigate();
   const [savedSearchQuery, setSavedSearchQuery] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingJournal, setEditingJournal] = useState(null);
@@ -70,6 +72,13 @@ const TravelJournalPage = () => {
   });
   const [saveJournal, { isLoading: isSaving }] = useSaveJournalMutation();
   const [deleteJournal, { isLoading: isDeleting }] = useDeleteJournalMutation();
+
+  useEffect(() => {
+    const journalId = window.location.hash.match(/^#journal-(.+)$/)?.[1];
+    if (journalId) {
+      navigate(`/travel-journal/${journalId}`, { replace: true });
+    }
+  }, [navigate]);
 
   const journals = useMemo(
     () => normalizeJournals(data?.pages.flatMap((page) => page.data)),

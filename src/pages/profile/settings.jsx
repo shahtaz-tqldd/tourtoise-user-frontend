@@ -17,7 +17,7 @@ import {
 import ConfirmDialog from "@/components/shared/confirm-dialog";
 import { SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
-import Card, { PreviewCard } from "@/components/ui/card";
+import { PreviewCard } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -256,6 +256,7 @@ const ProfileSettings = () => {
                   "You will need to sign in again before managing trips or profile settings.",
                 confirmLabel: "Logout",
                 onConfirm: handleLogout,
+                destructive: true,
               })
             }
           />
@@ -373,6 +374,7 @@ const ProfileSettings = () => {
         variant={confirmState?.variant}
         isLoading={isUpdatingAccount || isDeletingAccount}
         onConfirm={confirmState?.onConfirm}
+        destructive={confirmState?.destructive}
       />
     </>
   );

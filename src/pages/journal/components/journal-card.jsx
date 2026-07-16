@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,8 @@ import "swiper/css/pagination";
 import JournalComments from "./comments";
 import Card from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useReactJournalMutation } from "@/features/journal/journalApiSlice";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 
 const getInitialReactionCount = (journal) =>
   journal.likes_count ??
@@ -35,9 +37,10 @@ const getInitialReactionCount = (journal) =>
 const getPostShareUrl = (journalId) => {
   if (typeof window === "undefined") return "";
 
-  const url = new URL("/travel-journal", window.location.origin);
-  url.hash = `journal-${journalId}`;
-  return url.toString();
+  return new URL(
+    `/travel-journal/${journalId}`,
+    window.location.origin,
+  ).toString();
 };
 
 const JournalCard = ({
@@ -46,16 +49,21 @@ const JournalCard = ({
   onSaveToggle,
   onEdit,
   onDelete,
+  fullStory = false,
+  defaultShowComments = false,
+  forceShowComments = false,
+  showRepliesByDefault = false,
   className = "",
 }) => {
   const [isStoryExpanded, setIsStoryExpanded] = useState(false);
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState(defaultShowComments);
   const [isReacted, setIsReacted] = useState(
     Boolean(journal.is_liked || journal.is_reacted || journal.has_reacted),
   );
   const [reactionCount, setReactionCount] = useState(() =>
     getInitialReactionCount(journal),
   );
+  const [reactJournal, { isLoading: isReacting }] = useReactJournalMutation();
   const authorName = journal.author?.name || "Unknown traveler";
   const authorAvatar = journal.author?.avatar_url;
   const galleryImages = journal.images?.length
@@ -64,11 +72,20 @@ const JournalCard = ({
       ? [journal.cover_image]
       : [];
 
-  const handleReaction = () => {
-    setIsReacted((current) => {
-      setReactionCount((count) => Math.max(0, count + (current ? -1 : 1)));
-      return !current;
-    });
+  const handleReaction = async () => {
+    if (isReacting) return;
+
+    try {
+      await reactJournal({
+        journal_id: journal.id,
+        reacted: isReacted,
+      }).unwrap();
+
+      setIsReacted((current) => !current);
+      setReactionCount((count) => Math.max(0, count + (isReacted ? -1 : 1)));
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not update reaction."));
+    }
   };
 
   const handleShare = async () => {
@@ -79,7 +96,8 @@ const JournalCard = ({
       if (navigator.share) {
         await navigator.share({
           title: "Travel Journal",
-          text: journal.body || journal.content || "Check out this travel post.",
+          text:
+            journal.body || journal.content || "Check out this travel post.",
           url: shareUrl,
         });
         return;
@@ -147,17 +165,23 @@ const JournalCard = ({
             <div className="min-w-0 flex-1">
               <JournalStory
                 content={journal.body}
-                expanded={isStoryExpanded}
+                expanded={fullStory || isStoryExpanded}
+                fullStory={fullStory}
                 onExpandedChange={setIsStoryExpanded}
               />
               <JournalPostActions
                 isReacted={isReacted}
                 reactionCount={reactionCount}
                 commentsCount={journal.comments_count}
-                showComments={showComments}
+                showComments={forceShowComments || showComments}
                 onReact={handleReaction}
+                isReacting={isReacting}
                 onShare={handleShare}
-                onToggleComments={() => setShowComments((show) => !show)}
+                onToggleComments={
+                  forceShowComments
+                    ? undefined
+                    : () => setShowComments((show) => !show)
+                }
               />
             </div>
             <JournalSaveButton
@@ -168,9 +192,12 @@ const JournalCard = ({
             />
           </div>
 
-          {showComments && (
+          {(forceShowComments || showComments) && (
             <div className="mt-5">
-              <JournalComments journalId={journal.id} />
+              <JournalComments
+                journalId={journal.id}
+                showRepliesByDefault={showRepliesByDefault}
+              />
             </div>
           )}
         </div>
@@ -201,6 +228,7 @@ const JournalPostActions = ({
   commentsCount,
   showComments,
   onReact,
+  isReacting,
   onShare,
   onToggleComments,
 }) => (
@@ -213,17 +241,20 @@ const JournalPostActions = ({
           : "bg-white text-slate-600 hover:bg-red-50 hover:text-red-600 md:bg-slate-100"
       }`}
       onClick={onReact}
+      disabled={isReacting}
       aria-pressed={isReacted}
       aria-label={isReacted ? "Remove reaction" : "React to post"}
     >
       <Heart size={16} className={isReacted ? "fill-current" : ""} />
       {reactionCount > 0 && reactionCount}
     </button>
-    <CommentToggle
-      showComments={showComments}
-      commentsCount={commentsCount}
-      onToggle={onToggleComments}
-    />
+    {onToggleComments && (
+      <CommentToggle
+        showComments={showComments}
+        commentsCount={commentsCount}
+        onToggle={onToggleComments}
+      />
+    )}
     <button
       type="button"
       className="inline-flex h-9 items-center justify-center rounded-full bg-white px-3 text-slate-600 transition hover:bg-primary/10 hover:text-primary md:bg-slate-100"
@@ -235,11 +266,7 @@ const JournalPostActions = ({
   </div>
 );
 
-const CommentToggle = ({
-  showComments,
-  commentsCount,
-  onToggle,
-}) => (
+const CommentToggle = ({ showComments, commentsCount, onToggle }) => (
   <button
     type="button"
     className="flx h-9 gap-2 rounded-full bg-white px-3 text-sm font-semibold text-slate-600 transition hover:bg-primary/10 md:bg-slate-100"
@@ -281,55 +308,55 @@ const JournalOwnerActions = ({ onEdit, onDelete }) => {
   return <JournalActions onEdit={onEdit} onDelete={onDelete} />;
 };
 
-const JournalStory = ({ content, expanded, onExpandedChange }) => {
-  const storyRef = useRef(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
+const STORY_PREVIEW_LENGTH = 350;
 
-  useEffect(() => {
-    const story = storyRef.current;
-    if (!story) return undefined;
-
-    const measureOverflow = () => {
-      if (expanded) return;
-      setIsOverflowing(story.scrollHeight > story.clientHeight + 1);
-    };
-    const observer = new ResizeObserver(measureOverflow);
-    observer.observe(story);
-    requestAnimationFrame(measureOverflow);
-
-    return () => observer.disconnect();
-  }, [content, expanded]);
+const JournalStory = ({
+  content = "",
+  expanded,
+  fullStory,
+  onExpandedChange,
+}) => {
+  const shouldTruncate = !fullStory && content.length > STORY_PREVIEW_LENGTH;
+  const visibleContent =
+    shouldTruncate && !expanded
+      ? `${content.slice(0, STORY_PREVIEW_LENGTH).trimEnd()}...`
+      : content;
 
   return (
     <div className="mt-3">
       <p
-        ref={storyRef}
         className={`whitespace-pre-line leading-7 text-slate-600 ${
-          expanded ? "" : "line-clamp-2"
+          shouldTruncate && !expanded ? "cursor-pointer" : ""
         }`}
+        onClick={() => {
+          if (shouldTruncate && !expanded) onExpandedChange(true);
+        }}
       >
-        {content}
-        {expanded && (
+        {visibleContent}
+        {shouldTruncate && expanded && (
           <button
             type="button"
             className="ml-1 inline text-sm font-semibold text-primary"
-            onClick={() => onExpandedChange(false)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onExpandedChange(false);
+            }}
             aria-expanded={expanded}
           >
-            ... Show less
+            ...Show less
+          </button>
+        )}
+        {shouldTruncate && !expanded && (
+          <button
+            type="button"
+            className="ml-2 mt-1 inline text-sm font-semibold text-primary"
+            onClick={() => onExpandedChange(true)}
+            aria-expanded={expanded}
+          >
+            Read more
           </button>
         )}
       </p>
-      {isOverflowing && !expanded && (
-        <button
-          type="button"
-          className="mt-1 inline text-sm font-semibold text-primary"
-          onClick={() => onExpandedChange(true)}
-          aria-expanded={expanded}
-        >
-          Read more
-        </button>
-      )}
     </div>
   );
 };

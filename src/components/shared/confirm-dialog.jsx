@@ -5,13 +5,14 @@ import PreviewContent from "./preview-content";
 const ConfirmDialog = ({
   open,
   onOpenChange,
-  title = "Confirm action",
   description,
+  onConfirm,
+  title = "Confirm action",
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   variant = "default",
   isLoading = false,
-  onConfirm,
+  destructive = false,
 }) => {
   const handleConfirm = async () => {
     await onConfirm?.();
@@ -41,6 +42,7 @@ const ConfirmDialog = ({
           onClick={handleConfirm}
           variant={variant}
           disabled={isLoading}
+          className={destructive ? "bg-red-600 hover:bg-red-700" : ""}
         >
           {isLoading ? "Working..." : confirmLabel}
         </Button>
