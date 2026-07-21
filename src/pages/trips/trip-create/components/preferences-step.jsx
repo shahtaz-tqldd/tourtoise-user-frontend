@@ -4,13 +4,18 @@ import { FloatingInput } from "@/components/ui/input";
 import {
   useTripAgentActiveMutation,
   useTripAgentCreateMessageMutation,
-  useTripAgentMessageListQuery,
+  useTripPlanningQuery,
 } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { Bot, Loader2, Send, Sparkles } from "lucide-react";
+import { Loader2, Send, Sparkles } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
+import {
+  isPlanningStepAfter,
+  isPlanningStepAtOrAfter,
+  planningStepValues,
+} from "../planning-step-utils";
 
 const travelPaceOptions = [
   {
@@ -91,23 +96,70 @@ const normalizeListToOptions = (values, options) => {
     .filter(Boolean);
 };
 
+const normalizeTravelPace = (value) => {
+  const pace = String(value || "").toLowerCase();
+
+  if (pace === "fast") return "packed";
+  if (pace === "slow") return "relaxed";
+
+  return pace;
+};
+
 const getInitialAgentMessages = (trip) =>
   trip?.agent_active && trip?.agent_message
     ? [{ role: "agent", content: trip.agent_message }]
     : [];
 
+const unwrapPlanningPayload = (response) => response?.data || response || {};
+
 const unwrapAgentMessages = (response) => {
-  const messages = Array.isArray(response?.data) ? response.data : [];
+  const payload = unwrapPlanningPayload(response);
+  const messages = Array.isArray(payload?.messages)
+    ? payload.messages
+    : Array.isArray(payload)
+      ? payload
+      : [];
 
   return [...messages]
-    .sort((first, second) => Number(first.sequence) - Number(second.sequence))
+    .sort((first, second) => {
+      if (first.sequence !== undefined || second.sequence !== undefined) {
+        return Number(first.sequence || 0) - Number(second.sequence || 0);
+      }
+
+      return new Date(first.created_at || 0) - new Date(second.created_at || 0);
+    })
     .map((item) => ({
       id: item.id,
-      role: item.sender === "user" ? "user" : "agent",
+      role:
+        item.sender === "system"
+          ? "system"
+          : item.sender === "user"
+            ? "user"
+            : "agent",
       content: item.content,
+      metadata: item.metadata || {},
     }))
     .filter((item) => item.content);
 };
+
+const hasCompletedQna = (messages) =>
+  messages.some(
+    (item) => item.metadata?.qna_response?.is_qna_complete === true,
+  );
+
+const getMetadataPreferences = (messages) =>
+  messages.find((item) => item.metadata?.preferences)?.metadata?.preferences ||
+  {};
+
+const SystemMessageDivider = ({ message }) => (
+  <div className="flex items-center gap-3 py-2">
+    <span className="h-px flex-1 bg-slate-200" />
+    <span className="max-w-[72%] rounded-full bg-white px-3 text-center text-[11px] font-semibold leading-5 text-slate-500">
+      {message}
+    </span>
+    <span className="h-px flex-1 bg-slate-200" />
+  </div>
+);
 
 const ToggleOption = ({ selected, children, onClick }) => {
   return (
@@ -182,14 +234,55 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
   const [mobilityOther, setMobilityOther] = useState(
     preferences.mobility_other || "",
   );
-  const { data: messageListData, isFetching: isFetchingMessages } =
-    useTripAgentMessageListQuery(
-      tripId ? { trip_id: tripId, step: 2, page_size: 50 } : skipToken,
-    );
+
+  const {
+    data: messageListData,
+    isFetching: isFetchingMessages,
+    isError: isMessageListError,
+    refetch: refetchPlanning,
+  } = useTripPlanningQuery(
+    tripId
+      ? {
+          trip_id: tripId,
+          step: planningStepValues.preference,
+          page_size: 50,
+        }
+      : skipToken,
+  );
+
+  const planningPayload = useMemo(
+    () => unwrapPlanningPayload(messageListData),
+    [messageListData],
+  );
+  const planningSession = planningPayload?.session || null;
   const serverMessages = useMemo(
     () => unwrapAgentMessages(messageListData),
     [messageListData],
   );
+  const metadataPreferences = useMemo(
+    () => getMetadataPreferences(serverMessages),
+    [serverMessages],
+  );
+  const resolvedTravelPace =
+    travelPace || normalizeTravelPace(metadataPreferences.travel_pace);
+  const resolvedInterests = interests.length
+    ? interests
+    : normalizeListToOptions(
+        getPreferenceList(metadataPreferences, "interest_tags"),
+        interestOptions,
+      );
+  const resolvedDietaryNeeds = dietaryNeeds.length
+    ? dietaryNeeds
+    : normalizeListToOptions(
+        getPreferenceList(metadataPreferences, "dietary_needs"),
+        dietaryOptions,
+      );
+  const resolvedMobilityConstraints = mobilityConstraints.length
+    ? mobilityConstraints
+    : normalizeListToOptions(
+        getPreferenceList(metadataPreferences, "mobility_constraints"),
+        mobilityOptions,
+      );
   const [agentMessages, setAgentMessages] = useState([]);
   const conversationMessages = useMemo(
     () => [
@@ -215,9 +308,9 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
   const [isAgentActive, setIsAgentActive] = useState(
     trip?.agent_active === true,
   );
-  const [currentStep, setCurrentStep] = useState(Number(trip?.current_step));
-  const [isStepComplete, setIsStepComplete] = useState(
-    Number(trip?.current_step) > 2,
+  const [currentStep, setCurrentStep] = useState(trip?.current_step);
+  const [isLocallyStepComplete, setIsLocallyStepComplete] = useState(
+    isPlanningStepAfter(trip?.current_step, planningStepValues.preference),
   );
   const [message, setMessage] = useState("");
   const conversationEndRef = useRef(null);
@@ -225,7 +318,21 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
     useTripAgentActiveMutation();
   const [createAgentMessage, { isLoading: isSendingMessage }] =
     useTripAgentCreateMessageMutation();
-  const isRecommendationComplete = Number(currentStep) >= 4;
+  const isRecommendationComplete = isPlanningStepAtOrAfter(
+    currentStep,
+    planningStepValues.itinerary,
+  );
+  const isServerStepComplete = hasCompletedQna(serverMessages);
+  const isStepComplete =
+    isLocallyStepComplete ||
+    isServerStepComplete ||
+    isPlanningStepAfter(currentStep, planningStepValues.preference);
+  const isConversationAvailable =
+    isAgentActive || Boolean(planningSession) || Boolean(serverMessages.length);
+  const canReplyToAgent =
+    isConversationAvailable &&
+    !isStepComplete &&
+    planningSession?.is_active !== false;
   const recommendationButtonLabel = isRecommendationComplete
     ? "Recommendations"
     : "Start recommendation";
@@ -253,7 +360,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
   const buildPayload = ({ letAgentDecide = false } = {}) => {
     const payload = {
       trip_id: tripId,
-      current_step: 2,
+      current_step: planningStepValues.preference,
       let_agent_decide: letAgentDecide,
     };
 
@@ -261,12 +368,12 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
 
     return {
       ...payload,
-      travel_pace: travelPace,
-      interest_tags: interests,
-      dietary_needs: dietaryNeeds,
-      dietary_other: dietaryNeeds.includes("Other") ? dietaryOther : "",
-      mobility_constraints: mobilityConstraints,
-      mobility_other: mobilityConstraints.includes("Other")
+      travel_pace: resolvedTravelPace,
+      interest_tags: resolvedInterests,
+      dietary_needs: resolvedDietaryNeeds,
+      dietary_other: resolvedDietaryNeeds.includes("Other") ? dietaryOther : "",
+      mobility_constraints: resolvedMobilityConstraints,
+      mobility_other: resolvedMobilityConstraints.includes("Other")
         ? mobilityOther
         : "",
     };
@@ -274,7 +381,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
 
   const handleAgentResponse = (response) => {
     const data = unwrapAgentResponse(response);
-    const responseCurrentStep = Number(data.current_step);
+    const responseCurrentStep = data.current_step;
 
     if (data.agent_active === false) {
       setIsAgentActive(false);
@@ -287,7 +394,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
     setAgentFailureMessage("");
     setIsAgentActive(data.agent_active !== false);
 
-    if (Number.isFinite(responseCurrentStep)) {
+    if (responseCurrentStep) {
       setCurrentStep(responseCurrentStep);
     }
 
@@ -298,8 +405,11 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
       ]);
     }
 
-    if (data.is_step_complete || responseCurrentStep > 2) {
-      setIsStepComplete(true);
+    if (
+      data.is_step_complete ||
+      isPlanningStepAfter(responseCurrentStep, planningStepValues.preference)
+    ) {
+      setIsLocallyStepComplete(true);
     }
   };
 
@@ -309,7 +419,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
       return;
     }
 
-    if (!letAgentDecide && !travelPace) {
+    if (!letAgentDecide && !resolvedTravelPace) {
       toast.error("Choose a travel pace or let the agent decide.");
       return;
     }
@@ -319,6 +429,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
         buildPayload({ letAgentDecide }),
       ).unwrap();
       handleAgentResponse(response);
+      refetchPlanning?.();
     } catch (error) {
       toast.error(error?.data?.message || "Could not activate the agent.");
     }
@@ -337,16 +448,17 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
     try {
       const response = await createAgentMessage({
         trip_id: tripId,
-        current_step: 2,
+        current_step: planningStepValues.preference,
         message: trimmedMessage,
       }).unwrap();
       handleAgentResponse(response);
+      refetchPlanning?.();
     } catch (error) {
       toast.error(error?.data?.message || "Could not send message.");
     }
   };
 
-  const footer = !isAgentActive ? (
+  const footer = !isConversationAvailable ? (
     <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4 shadow-[0_-10px_24px_rgba(15,23,42,0.08)]">
       <Button
         type="button"
@@ -364,7 +476,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
       <Button
         type="button"
         onClick={() => handleActivateAgent()}
-        disabled={isActivatingAgent || isStepComplete}
+        // disabled={isActivatingAgent || isStepComplete}
       >
         {isActivatingAgent ? (
           <Loader2 className="animate-spin" size={17} />
@@ -376,7 +488,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
     </div>
   ) : (
     <>
-      {!isStepComplete && (
+      {canReplyToAgent && (
         <form
           onSubmit={handleSendMessage}
           className="flx gap-2 border-t border-slate-200 bg-white p-4"
@@ -434,7 +546,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
                   type="button"
                   onClick={() => setTravelPace(option.value)}
                   className={`rounded-xl border p-3 text-left transition ${
-                    travelPace === option.value
+                    resolvedTravelPace === option.value
                       ? "border-primary bg-primary/10"
                       : "border-slate-200 hover:border-primary/40"
                   }`}
@@ -455,9 +567,9 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
               {interestOptions.map((option) => (
                 <ToggleOption
                   key={option}
-                  selected={interests.includes(option)}
+                  selected={resolvedInterests.includes(option)}
                   onClick={() =>
-                    setInterests((current) => toggleListValue(current, option))
+                    setInterests(toggleListValue(resolvedInterests, option))
                   }
                 >
                   {option}
@@ -471,10 +583,10 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
               {dietaryOptions.map((option) => (
                 <ToggleOption
                   key={option}
-                  selected={dietaryNeeds.includes(option)}
+                  selected={resolvedDietaryNeeds.includes(option)}
                   onClick={() =>
-                    setDietaryNeeds((current) =>
-                      toggleListValue(current, option),
+                    setDietaryNeeds(
+                      toggleListValue(resolvedDietaryNeeds, option),
                     )
                   }
                 >
@@ -482,7 +594,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
                 </ToggleOption>
               ))}
             </div>
-            {dietaryNeeds.includes("Other") && (
+            {resolvedDietaryNeeds.includes("Other") && (
               <FloatingInput
                 name="dietary-other"
                 label="Other dietary need"
@@ -497,10 +609,10 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
               {mobilityOptions.map((option) => (
                 <ToggleOption
                   key={option}
-                  selected={mobilityConstraints.includes(option)}
+                  selected={resolvedMobilityConstraints.includes(option)}
                   onClick={() =>
-                    setMobilityConstraints((current) =>
-                      toggleListValue(current, option),
+                    setMobilityConstraints(
+                      toggleListValue(resolvedMobilityConstraints, option),
                     )
                   }
                 >
@@ -508,7 +620,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
                 </ToggleOption>
               ))}
             </div>
-            {mobilityConstraints.includes("Other") && (
+            {resolvedMobilityConstraints.includes("Other") && (
               <FloatingInput
                 name="mobility-other"
                 label="Other mobility constraint"
@@ -525,7 +637,14 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
           )}
         </div>
 
-        {isAgentActive && (
+        {isMessageListError && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-800">
+            Could not load preference conversation. Try reopening this step in a
+            moment.
+          </div>
+        )}
+
+        {isConversationAvailable && (
           <div className="space-y-3 pb-2">
             {isFetchingMessages && !conversationMessages.length && (
               <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-600">
@@ -535,6 +654,15 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
             )}
 
             {conversationMessages.map((item, index) => {
+              if (item.role === "system") {
+                return (
+                  <SystemMessageDivider
+                    key={item.id || `${item.role}-${index}`}
+                    message={item.content}
+                  />
+                );
+              }
+
               const isUser = item.role === "user";
 
               return (

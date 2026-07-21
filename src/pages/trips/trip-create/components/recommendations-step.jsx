@@ -1,11 +1,15 @@
 import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import TabMenu from "@/components/ui/tab";
-import { useTripAgentRecommendationsQuery } from "@/features/trips/tripApiSlice";
+import { useTripPlanningQuery } from "@/features/trips/tripApiSlice";
 import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Clock3, MapPin, Sparkles, Star, Utensils, Wallet } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import {
+  isPlanningStepAfter,
+  planningStepValues,
+} from "../planning-step-utils";
 
 const categories = [
   {
@@ -242,11 +246,20 @@ const RecommendationTabContent = ({ category, items, message }) => (
 const RecommendationsStep = ({ trip, onStepComplete, onStepSelect }) => {
   const tripId = getTripId(trip);
   const [activeCategory, setActiveCategory] = useState("attractions");
-  const { data, isLoading, isFetching, isError } =
-    useTripAgentRecommendationsQuery(tripId ? { trip_id: tripId } : skipToken);
+  const { data, isFetching, isLoading, isError } = useTripPlanningQuery(
+    tripId
+      ? {
+          trip_id: tripId,
+          step: planningStepValues.recommendation,
+        }
+      : skipToken,
+  );
+
   const recommendations = useMemo(() => unwrapRecommendations(data), [data]);
-  const currentStep = Number(trip?.current_step);
-  const isItineraryComplete = Number.isFinite(currentStep) && currentStep > 4;
+  const isItineraryComplete = isPlanningStepAfter(
+    trip?.current_step,
+    planningStepValues.itinerary,
+  );
   const itineraryButtonLabel = isItineraryComplete
     ? "Show itinerary"
     : "Start itinerary planning";

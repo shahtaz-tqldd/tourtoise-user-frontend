@@ -1,7 +1,11 @@
 import { apiSlice } from "../api/apiSlice";
 
 const nextTripPage = (lastPage, allPages, lastPageParam) =>
-  lastPage?.meta?.next ? lastPageParam + 1 : undefined;
+  lastPage?.meta?.next ||
+  lastPage?.data?.meta?.next ||
+  lastPage?.data?.pagination?.next
+    ? lastPageParam + 1
+    : undefined;
 
 const tripListQueryParams = (params = {}) => {
   const {
@@ -137,6 +141,15 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           url: `/trips/planning/agent-init/`,
           method: "POST",
           body: payload,
+        };
+      },
+    }),
+
+    tripPlanning: builder.query({
+      query: ({ trip_id, step }) => {
+        return {
+          url: `/trips/planning/?trip_id=${trip_id}&step=${step}`,
+          method: "GET",
         };
       },
     }),
@@ -448,7 +461,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
     tripRouteList: builder.query({
       query: ({ trip_id }) => {
         return {
-          url: `/trips/${trip_id}/routes/`,
+          url: `/trips/${trip_id}/plan/routes/`,
           method: "GET",
         };
       },
@@ -489,6 +502,35 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       ],
     }),
 
+    tripMessageInfiniteList: builder.infiniteQuery({
+      query: ({ queryArg = {}, pageParam }) => {
+        const { trip_id, session_id, page_size = 20, search } = queryArg;
+        const queryParams = new URLSearchParams({
+          page: String(pageParam),
+          page_size: String(page_size),
+        });
+
+        const appendParam = (key, value) => {
+          if (!value || (Array.isArray(value) && !value.length)) return;
+          queryParams.set(key, Array.isArray(value) ? value.join(",") : value);
+        };
+
+        appendParam("search", search);
+
+        return {
+          url: `/trips/${trip_id}/chat/${session_id}/messages/?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
+      infiniteQueryOptions: {
+        initialPageParam: 1,
+        getNextPageParam: nextTripPage,
+      },
+      providesTags: (result, error, { session_id }) => [
+        { type: "trip-message-list", id: session_id },
+      ],
+    }),
+
     createTripMessage: builder.mutation({
       query: ({ trip_id, session_id, payload }) => {
         return {
@@ -514,8 +556,11 @@ export const {
   useCreateTripShareTokenMutation,
   useUpdateTripVisibilityMutation,
   useDeleteTripMutation,
+
+  // planning
   useTripAgentActiveMutation,
   useTripAgentCreateMessageMutation,
+  useTripPlanningQuery,
   useTripAgentMessageListQuery,
   useTripAgentRecommendationsQuery,
   useTripItinerariesQuery,
@@ -558,5 +603,6 @@ export const {
 
   // trip messages
   useTripMessageListQuery,
+  useTripMessageInfiniteListInfiniteQuery,
   useCreateTripMessageMutation,
 } = tripApiSlice;

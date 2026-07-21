@@ -4,6 +4,11 @@ import { LocateFixed, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
+const compactAddressParts = (parts) =>
+  [...new Set(parts.filter(Boolean).map((part) => String(part).trim()))].filter(
+    Boolean,
+  );
+
 const getLocationAddress = async (latitude, longitude) => {
   const response = await fetch(
     `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
@@ -14,20 +19,15 @@ const getLocationAddress = async (latitude, longitude) => {
   }
 
   const location = await response.json();
+  const address = location?.address || {};
+  const shortAddress = compactAddressParts([
+    address.road || address.neighbourhood || address.suburb,
+    address.city || address.town || address.village || address.municipality,
+    address.state,
+    address.country,
+  ]).join(", ");
 
-  return (
-    location?.display_name ||
-    [
-      location?.address?.road,
-      location?.address?.suburb,
-      location?.address?.city ||
-        location?.address?.town ||
-        location?.address?.village,
-      location?.address?.country,
-    ]
-      .filter(Boolean)
-      .join(", ")
-  );
+  return shortAddress || location?.display_name || "";
 };
 
 const LocationInput = ({

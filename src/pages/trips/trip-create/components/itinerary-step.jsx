@@ -1,10 +1,14 @@
 import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import TabMenu from "@/components/ui/tab";
-import { useTripItinerariesQuery } from "@/features/trips/tripApiSlice";
+import { useTripPlanningQuery } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { CalendarDays, MapPinned, Route, Sparkles, Wallet } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import {
+  isPlanningStepAfter,
+  planningStepValues,
+} from "../planning-step-utils";
 
 const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
 
@@ -201,8 +205,13 @@ const itineraryTabs = [
 const ItineraryStep = ({ trip, onStepComplete, onStepSelect }) => {
   const tripId = getTripId(trip);
   const [view, setView] = useState("days");
-  const { data, isLoading, isFetching, isError } = useTripItinerariesQuery(
-    tripId ? { trip_id: tripId } : skipToken,
+  const { data, isFetching, isLoading, isError } = useTripPlanningQuery(
+    tripId
+      ? {
+          trip_id: tripId,
+          step: planningStepValues.itinerary,
+        }
+      : skipToken,
   );
   const itinerary = useMemo(() => unwrapItinerary(data), [data]);
   const days = getItineraryDays(itinerary);
@@ -211,8 +220,10 @@ const ItineraryStep = ({ trip, onStepComplete, onStepSelect }) => {
   const activeDayPlan = days.find((day) => day.day === activeDay) || days[0];
   const activeDayItems = getDayItems(activeDayPlan || {});
   const budget = itinerary.rough_budget || {};
-  const currentStep = Number(trip?.current_step);
-  const isPreparationComplete = Number.isFinite(currentStep) && currentStep > 5;
+  const isPreparationComplete = isPlanningStepAfter(
+    trip?.current_step,
+    planningStepValues.preparation,
+  );
   const preparationButtonLabel = isPreparationComplete
     ? "Show preparations"
     : "Start preparations";

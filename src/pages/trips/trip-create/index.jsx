@@ -21,9 +21,6 @@ import {
   Sparkles,
   Plus,
   Trash2,
-  CheckCircle,
-  CircleCheck,
-  Check,
   CheckCheck,
 } from "lucide-react";
 import {
@@ -43,6 +40,11 @@ import RecommendationsStep from "./components/recommendations-step";
 import ItineraryStep from "./components/itinerary-step";
 import TripPreparationStep from "./components/trip-preparation-step";
 import OverviewStep from "./components/overview-step";
+import { formatDate } from "@/lib/date-time";
+import {
+  getCurrentPlanningStepIndex,
+  planningStepValues,
+} from "./planning-step-utils";
 
 const createInitialForm = () => ({
   budget_tier: "mid",
@@ -75,45 +77,36 @@ const planningSteps = [
     component: TripPlanInitialInput,
   },
   {
-    key: "preferences",
+    key: planningStepValues.preference,
     title: "Preferences",
     description: "User profile and customization",
     component: PreferencesStep,
   },
   {
-    key: "recommendations",
+    key: planningStepValues.recommendation,
     title: "Recommendations",
     description: "Recommendations for spots, activities and foods",
     component: RecommendationsStep,
   },
   {
-    key: "itinerary",
+    key: planningStepValues.itinerary,
     title: "Itinerary",
     description: "Day wise itineraries planning",
     component: ItineraryStep,
   },
   {
-    key: "preparation",
+    key: planningStepValues.preparation,
     title: "Preparation",
     description: "Documents and packup",
     component: TripPreparationStep,
   },
   {
-    key: "overview",
+    key: planningStepValues.overview,
     title: "Overview",
     description: "Overview and locking up",
     component: OverviewStep,
   },
 ];
-
-const currentStepAliases = {
-  get_started: "get_started",
-  preferences: "preferences",
-  recommendations: "recommendations",
-  itinerary: "itinerary",
-  preparation: "preparation",
-  overview: "overview",
-};
 
 const getDestinationSlug = (destination) =>
   destination?.slug || destination?.destination_slug || destination?.id;
@@ -125,62 +118,11 @@ const getTripDetailId = (trip) =>
 
 const unwrapDetail = (response) => response?.data || response || null;
 
-const normalizeStepValue = (value) =>
-  String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-
-const getCurrentStepIndex = (trip) => {
-  const currentStep = trip?.current_step;
-  const numericStep = Number(currentStep);
-
-  if (Number.isInteger(numericStep)) {
-    const oneBasedStep = numericStep - 1;
-    if (oneBasedStep >= 0 && oneBasedStep < planningSteps.length) {
-      return oneBasedStep;
-    }
-
-    if (numericStep >= 0 && numericStep < planningSteps.length) {
-      return numericStep;
-    }
-  }
-
-  const stepKey = normalizeStepValue(currentStep);
-  const aliasedStepKey = currentStepAliases[stepKey] || stepKey;
-  const stepIndex = planningSteps.findIndex(
-    (step) => step.key === aliasedStepKey,
-  );
-
-  return stepIndex >= 0 ? stepIndex : 0;
-};
-
-const unwrapList = (response) => {
-  const data = response?.data || response;
-
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.results)) return data.results;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.data?.results)) return data.data.results;
-
-  return [];
-};
+const getCurrentStepIndex = (trip) =>
+  getCurrentPlanningStepIndex(trip?.current_step);
 
 const getTripTitle = (trip, destination) =>
-  trip?.title || trip?.name || trip?.trip_name || `${destination?.name} plan`;
-
-const getTripDates = (trip) => {
-  const startDate = trip?.start_date;
-  const endDate = trip?.end_date;
-
-  if (startDate && endDate) return `${startDate} to ${endDate}`;
-  if (startDate) return `Starts ${startDate}`;
-  if (trip?.days) return `${trip.days} days`;
-
-  return "Dates not set";
-};
+  trip?.title || `${destination?.name} plan`;
 
 const getGeneratedTripTitle = (destinationName) => {
   const placeName = destinationName || "Destination";
@@ -233,7 +175,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
   const [deleteTrip, { isLoading: isDeletingTrip }] = useDeleteTripMutation();
 
   const destinationTrips = useMemo(
-    () => unwrapList(tripListData),
+    () => (Array.isArray(tripListData?.data) ? tripListData.data : []),
     [tripListData],
   );
   const previousTrip = destinationTrips[0] || null;
@@ -611,7 +553,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
                           : isComplete
                             ? "text-slate-700 hover:bg-slate-100"
                             : "text-slate-400"
-                        } ${!isReached ? "cursor-not-allowed opacity-60" : ""}`}
+                      } ${!isReached ? "cursor-not-allowed opacity-60" : ""}`}
                     >
                       <CheckCheck className="shrink-0" size={14} />
                       <span className="text-[11px] font-medium leading-4">
@@ -703,7 +645,8 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
                         {getTripTitle(trip, resolvedDestination)}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
-                        {getTripDates(trip)}
+                        {formatDate(trip?.start_date)} -
+                        {formatDate(trip?.end_date)}
                       </p>
                       {trip?.trip_pace && (
                         <p className="mt-2 text-xs font-medium uppercase text-slate-400">
@@ -740,11 +683,11 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
               className={
                 [
                   "get_started",
-                  "preferences",
-                  "recommendations",
-                  "itinerary",
-                  "preparation",
-                  "overview",
+                  planningStepValues.preference,
+                  planningStepValues.recommendation,
+                  planningStepValues.itinerary,
+                  planningStepValues.preparation,
+                  planningStepValues.overview,
                 ].includes(displayedStepConfig.key)
                   ? "min-h-0 flex-1"
                   : "custom-scrollbar flex-1 space-y-3 overflow-y-auto p-4"

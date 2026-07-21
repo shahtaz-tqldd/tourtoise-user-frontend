@@ -10,18 +10,6 @@ const historyPageSize = 12;
 const pastStatuses = new Set(["completed", "archived", "cancelled"]);
 const activeStatusAliases = new Set(["active", "ready"]);
 
-const unwrapTrips = (response) => {
-  const payload = response?.data || response;
-
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.results)) return payload.results;
-  if (Array.isArray(payload?.items)) return payload.items;
-  if (Array.isArray(payload?.data)) return payload.data;
-  if (Array.isArray(payload?.data?.results)) return payload.data.results;
-
-  return [];
-};
-
 const getMeta = (response) => response?.meta || response?.data?.meta || {};
 
 const isPastTrip = (trip) => {
@@ -46,7 +34,7 @@ const statusMatches = (tripStatus, selectedStatus) => {
 };
 
 const filterCurrentTrips = (trips, status) =>
-  trips.filter(
+  trips?.filter(
     (trip) => !isPastTrip(trip) && statusMatches(trip.status, status),
   );
 
@@ -88,19 +76,19 @@ const TripsPage = () => {
     isFetching: isHistoryFetching,
     isError: isHistoryError,
   } = useTripListQuery(historyQueryArgs);
-  const trips = useMemo(() => unwrapTrips(data), [data]);
-  const historyTrips = useMemo(() => unwrapTrips(historyData), [historyData]);
+  const trips = useMemo(() => data?.data, [data]);
+  const historyTrips = useMemo(() => historyData?.data, [historyData]);
   const meta = getMeta(data);
   const activeTrips = useMemo(
     () => filterCurrentTrips(trips, activeStatus),
     [activeStatus, trips],
   );
   const pastTrips = useMemo(
-    () => historyTrips.filter(isPastTrip),
+    () => historyTrips?.filter(isPastTrip),
     [historyTrips],
   );
   const hasActiveFilters = activeSearch || activeStatus !== "all";
-  const totalTrips = meta.count ?? meta.total ?? trips.length;
+  const totalTrips = meta.count ?? meta.total ?? trips?.length;
 
   const updateActiveSearch = (value) => {
     setActiveSearch(value);
@@ -123,7 +111,7 @@ const TripsPage = () => {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="space-y-6">
           <TripsPageHeader
-            tripsCount={activeTrips.length}
+            tripsCount={activeTrips?.length}
             totalTrips={totalTrips}
             activeSearch={activeSearch}
             onActiveSearchChange={updateActiveSearch}

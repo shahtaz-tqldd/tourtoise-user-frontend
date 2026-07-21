@@ -7,6 +7,10 @@ import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useUpdateTripMutation } from "@/features/trips/tripApiSlice";
 import { AuthorMessage } from "@/components/shared/utils";
+import {
+  isPlanningStepAfter,
+  planningStepValues,
+} from "../planning-step-utils";
 
 const travelerTypes = [
   { value: "solo", label: "Solo" },
@@ -16,9 +20,11 @@ const travelerTypes = [
 ];
 
 const budgetTiers = [
+  { value: "backpacker", label: "Backpacker" },
   { value: "budget", label: "Budget" },
-  { value: "mid", label: "Mid-range" },
+  { value: "comfort", label: "Comfort" },
   { value: "premium", label: "Premium" },
+  { value: "luxury", label: "Luxury" },
 ];
 
 const currencies = [
@@ -50,25 +56,20 @@ const getTravelerCountForType = (travelerType, currentCount) => {
 
 const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
 
-const getStepNumber = (trip) => Number(trip?.current_step);
-
 const getInitialInfoForm = (trip = {}) => ({
-  budget_tier: trip?.budget_tier || "mid",
+  budget_tier: trip?.budget_tier || "comfort",
   budget_currency: trip?.budget_currency || "",
   start_date: trip?.start_date || "",
-  days: trip?.days ? String(trip.days) : "",
+  days: trip?.duration_days ? String(trip.duration_days) : "",
   travelers_count: trip?.travelers_count ? String(trip.travelers_count) : "1",
   traveler_type: trip?.traveler_type || "solo",
   accommodation_preference: trip?.accommodation_preference || "",
-  start_location_address: trip?.start_location_address || "",
-  start_location_latitude: trip?.start_location_latitude
-    ? String(trip.start_location_latitude)
+  start_location_address: trip?.start_location?.address || "",
+  start_location_latitude: trip?.start_location?.latitude
+    ? String(trip.start_location?.latitude)
     : "",
-  start_location_longitude: trip?.start_location_longitude
-    ? String(trip.start_location_longitude)
-    : "",
-  start_location_accuracy: trip?.start_location_accuracy
-    ? String(trip.start_location_accuracy)
+  start_location_longitude: trip?.start_location?.longitude
+    ? String(trip.start_location?.longitude)
     : "",
 });
 
@@ -94,9 +95,9 @@ const TripPlanInitialInput = ({
   const isExistingTrip = !!trip && !controlledForm;
   const isSubmitting = isControlledSubmitting || isUpdatingTrip;
   const formClassName = className || "flex h-full min-h-0 flex-col";
-  const tripStepNumber = getStepNumber(trip);
   const nextStepExists =
-    isExistingTrip && Number.isFinite(tripStepNumber) && tripStepNumber > 1;
+    isExistingTrip &&
+    isPlanningStepAfter(trip?.current_step, planningStepValues.getStarted);
   const resolvedSubmitLabel =
     submitLabel || (nextStepExists ? "View Preferences" : "Start Trip Plan");
   const showTravelerCount =
@@ -143,7 +144,6 @@ const TripPlanInitialInput = ({
 
     const startLatitude = Number(form.start_location_latitude);
     const startLongitude = Number(form.start_location_longitude);
-    const startAccuracy = Number(form.start_location_accuracy);
 
     try {
       const response = await updateTrip({
@@ -164,9 +164,6 @@ const TripPlanInitialInput = ({
           ? {
               start_location_latitude: startLatitude,
               start_location_longitude: startLongitude,
-              ...(Number.isFinite(startAccuracy)
-                ? { start_location_accuracy: startAccuracy }
-                : {}),
             }
           : {}),
       }).unwrap();
@@ -205,13 +202,11 @@ const TripPlanInitialInput = ({
               address: form.start_location_address,
               latitude: form.start_location_latitude,
               longitude: form.start_location_longitude,
-              accuracy: form.start_location_accuracy,
             }}
             onChange={(location) => {
               updateField("start_location_address", location.address || "");
               updateField("start_location_latitude", location.latitude || "");
               updateField("start_location_longitude", location.longitude || "");
-              updateField("start_location_accuracy", location.accuracy || "");
             }}
             className="!mb-6"
           />

@@ -3,7 +3,15 @@ import { userLoggedIn, userLoggedOut } from "@/features/auth/authSlice";
 import { getTokens } from "@/hooks/useToken";
 
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
-const MAX_RETRY_COUNT = 3;
+let refreshPromise = null;
+
+const getTokenPayload = (data = {}) => data.data || data;
+
+const getAccessToken = (data = {}) =>
+  data.access_token || data.accessToken || data.access;
+
+const getRefreshToken = (data = {}) =>
+  data.refresh_token || data.refreshToken || data.refresh;
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
@@ -19,59 +27,61 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  const { accessToken, refreshToken, rememberMe } = getTokens();
-  let retryCount = 0;
+  if (result.error?.status !== 401) {
+    return result;
+  }
 
-  while (
-    (!accessToken || (result.error && result.error.status === 401)) &&
-    retryCount < MAX_RETRY_COUNT
-  ) {
-    retryCount++;
-    try {
-      if (refreshToken) {
-        const refreshResult = await baseQuery(
-          {
-            url: "/accounts/refresh/",
-            method: "POST",
-            body: { refresh: refreshToken },
-            credentials: "include",
-          },
-          api,
-          extraOptions,
+  const { refreshToken, rememberMe } = getTokens();
+
+  if (!refreshToken) {
+    api.dispatch(userLoggedOut());
+    return result;
+  }
+
+  if (!refreshPromise) {
+    refreshPromise = baseQuery(
+      {
+        url: "/accounts/refresh/",
+        method: "POST",
+        body: { refresh: refreshToken },
+        credentials: "include",
+      },
+      api,
+      extraOptions,
+    )
+      .then((refreshResult) => {
+        const refreshData = getTokenPayload(refreshResult.data);
+        const nextAccessToken = getAccessToken(refreshData);
+
+        if (refreshResult.error || !nextAccessToken) {
+          api.dispatch(userLoggedOut());
+          return false;
+        }
+
+        api.dispatch(
+          userLoggedIn({
+            accessToken: nextAccessToken,
+            refreshToken: getRefreshToken(refreshData) || refreshToken,
+            rememberMe,
+          }),
         );
 
-        if (refreshResult.data?.success) {
-          const refreshData = refreshResult?.data?.data || {};
-          api.dispatch(
-            userLoggedIn({
-              accessToken: refreshData.access_token || refreshData.accessToken,
-              refreshToken:
-                refreshData.refresh_token ||
-                refreshData.refreshToken ||
-                refreshToken,
-              rememberMe,
-            }),
-          );
-
-          // Retry the original request with new token
-          result = await baseQuery(args, api, extraOptions);
-          break;
-        } else {
-          api.dispatch(userLoggedOut());
-          // api.dispatch(apiSlice.util.resetApiState());
-          break;
-        }
-      } else {
+        return true;
+      })
+      .catch((error) => {
+        console.error("Refresh token failed:", error);
         api.dispatch(userLoggedOut());
-        // api.dispatch(apiSlice.util.resetApiState());
-        break;
-      }
-    } catch (error) {
-      console.error("Refresh token failed:", error);
-      api.dispatch(userLoggedOut());
-      // api.dispatch(apiSlice.util.resetApiState());
-      break;
-    }
+        return false;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  const refreshSucceeded = await refreshPromise;
+
+  if (refreshSucceeded) {
+    result = await baseQuery(args, api, extraOptions);
   }
 
   return result;
@@ -104,6 +114,7 @@ export const apiSlice = createApi({
     "chat-session-list",
     "chat-session",
     "chat-message-list",
+    "trip-message-list",
     "notification-list",
   ],
   keepUnusedDataFor: 300, // Don't keep any unused data
