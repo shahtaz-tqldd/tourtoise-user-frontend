@@ -5,13 +5,14 @@ import PreviewContent from "./preview-content";
 const ConfirmDialog = ({
   open,
   onOpenChange,
-  title = "Confirm action",
   description,
+  onConfirm,
+  title = "Confirm action",
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   variant = "default",
   isLoading = false,
-  onConfirm,
+  destructive = false,
 }) => {
   const handleConfirm = async () => {
     await onConfirm?.();
@@ -32,7 +33,7 @@ const ConfirmDialog = ({
           type="button"
           variant="outline"
           disabled={isLoading}
-          onclick={() => onOpenChange(false)}
+          onClick={() => onOpenChange(false)}
         >
           {cancelLabel}
         </Button>
@@ -41,6 +42,7 @@ const ConfirmDialog = ({
           onClick={handleConfirm}
           variant={variant}
           disabled={isLoading}
+          className={destructive ? "bg-red-600 hover:bg-red-700" : ""}
         >
           {isLoading ? "Working..." : confirmLabel}
         </Button>
@@ -54,7 +56,7 @@ const DeleteDialog = ({
   onOpenChange,
   title = "Confirm action",
   description,
-  confirmLabel = "Confirm",
+  confirmLabel = "Delete",
   cancelLabel = "Cancel",
   variant = "default",
   isLoading = false,
@@ -79,7 +81,7 @@ const DeleteDialog = ({
           type="button"
           variant="outline"
           disabled={isLoading}
-          onclick={() => onOpenChange(false)}
+          onClick={() => onOpenChange(false)}
           className="w-full md:w-auto"
         >
           {cancelLabel}

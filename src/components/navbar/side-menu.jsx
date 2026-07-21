@@ -55,7 +55,7 @@ const LeftSideMenu = () => {
     },
     {
       id: 3,
-      label: "Tour Agent",
+      label: "Turtle Chat",
       shortLabel: "Agent",
       link: "/agent-chat",
       icon: ({ isActive }) => (

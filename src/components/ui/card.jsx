@@ -14,4 +14,17 @@ const Card = ({ children, className = "" }) => {
   );
 };
 
+export const PreviewCard = ({ children, className = "" }) => {
+  return (
+    <div
+      className={cn(
+        "md:rounded-3xl p-0 pt-5 md:p-6 md:pt-6 bg-transparent md:bg-white overflow-hidden",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+};
+
 export default Card;

@@ -14,8 +14,10 @@ import {
   LoadingDestinationList,
 } from "./components/fallback";
 import { EmptyState } from "@/components/shared/utils";
+import useTitle from "@/hooks/useTitle";
 
 const DestinationPage = () => {
+  useTitle("tourtoise - let's find your next tour destination");
   // filter
   const [searchQuery, setSearchQuery] = useState("");
   const [countries, setCountries] = useState([]);
@@ -68,8 +70,8 @@ const DestinationPage = () => {
     hasNextPage: hasNextSavedPage,
     isFetchingNextPage: isFetchingSavedNextPage,
   } = useSaveDestinationInfiniteListInfiniteQuery({
-      pageSize: 6,
-    });
+    pageSize: 6,
+  });
   const savedDestinations = useMemo(
     () => savedData?.pages?.flatMap((page) => page?.data || []) || [],
     [savedData],
@@ -88,7 +90,7 @@ const DestinationPage = () => {
   }, [fetchNextSavedPage, hasNextSavedPage, isFetchingSavedNextPage]);
 
   return (
-    <section className="grid gap-10 pt-5 pb-20 md:pb-5 lg:grid-cols-[minmax(0,1fr)_372px]">
+    <section className="pt-5 pb-20 md:pb-5">
       <div className="space-y-8">
         <ListingHeader
           title="Where's Next?"
@@ -118,7 +120,7 @@ const DestinationPage = () => {
           }
         />
 
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid gap-4 xl:grid-cols-3">
           {destinations.map((destination) => (
             <DestinationCard key={destination.slug} destination={destination} />
           ))}
@@ -145,14 +147,14 @@ const DestinationPage = () => {
         )}
       </div>
 
-      <BucketListPanel
+      {/* <BucketListPanel
         savedDestinations={savedDestinations}
         isFetching={isInitialSavedLoading}
         hasMore={hasNextSavedPage}
         isFetchingNextPage={isFetchingSavedNextPage}
         onLoadMore={handleLoadMoreSavedDestinations}
         className="hidden lg:block"
-      />
+      /> */}
     </section>
   );
 };

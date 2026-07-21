@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 // components
@@ -19,6 +20,7 @@ import {
 } from "@/features/journal/journalApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { normalizeJournals } from "./journal-utils";
+import useTitle from "@/hooks/useTitle";
 
 const matchesSavedJournalSearch = (journal, searchQuery) => {
   if (!searchQuery) return true;
@@ -37,13 +39,13 @@ const matchesSavedJournalSearch = (journal, searchQuery) => {
 };
 
 const TravelJournalPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  useTitle("tourtoise - travel journal");
+  const navigate = useNavigate();
   const [savedSearchQuery, setSavedSearchQuery] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingJournal, setEditingJournal] = useState(null);
   const [deletingJournal, setDeletingJournal] = useState(null);
   const currentUser = useSelector((state) => state.auth.user);
-  const debouncedSearchQuery = useDebounce(searchQuery.trim(), 400);
   const debouncedSavedSearchQuery = useDebounce(savedSearchQuery.trim(), 400);
   const {
     data,
@@ -55,7 +57,6 @@ const TravelJournalPage = () => {
     isFetchingNextPage,
   } = useJournalInfiniteListInfiniteQuery({
     page_size: 10,
-    search: debouncedSearchQuery,
   });
   const {
     data: savedData,
@@ -71,6 +72,13 @@ const TravelJournalPage = () => {
   });
   const [saveJournal, { isLoading: isSaving }] = useSaveJournalMutation();
   const [deleteJournal, { isLoading: isDeleting }] = useDeleteJournalMutation();
+
+  useEffect(() => {
+    const journalId = window.location.hash.match(/^#journal-(.+)$/)?.[1];
+    if (journalId) {
+      navigate(`/travel-journal/${journalId}`, { replace: true });
+    }
+  }, [navigate]);
 
   const journals = useMemo(
     () => normalizeJournals(data?.pages.flatMap((page) => page.data)),
@@ -132,14 +140,12 @@ const TravelJournalPage = () => {
 
   const isSavedSearchSettling =
     savedSearchQuery.trim() !== debouncedSavedSearchQuery;
-  const isJournalSearchSettling = searchQuery.trim() !== debouncedSearchQuery;
 
   return (
     <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_480px] lg:items-start pt-5 pb-20 md:pb-5">
       <div className="min-w-0 space-y-5">
         <JournalPageHeader
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
+          onCreate={openCreate}
           savedJournals={filteredSavedJournals}
           onSaveToggle={toggleSavedJournal}
           hasMoreSaved={hasNextSavedPage && !debouncedSavedSearchQuery}
@@ -155,13 +161,11 @@ const TravelJournalPage = () => {
         <JournalFeed
           journals={journals}
           isLoading={isLoading}
-          isSearchSettling={isJournalSearchSettling}
           isError={isError}
           onRetry={refetch}
           hasMore={hasNextPage}
           isFetchingMore={isFetchingNextPage}
           onLoadMore={fetchNextPage}
-          onCreate={openCreate}
           onSaveToggle={toggleSavedJournal}
           onEditJournal={openEdit}
           onDeleteJournal={setDeletingJournal}

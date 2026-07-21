@@ -195,6 +195,29 @@ function SelectScrollDownButton({ className, ...props }) {
   );
 }
 
+const InlinePillSelect = ({
+  value,
+  onValueChange,
+  options,
+  disabled,
+  className = "",
+}) => (
+  <Select value={value} onValueChange={onValueChange} disabled={disabled}>
+    <SelectTrigger
+      className={`!h-auto min-h-0 w-fit gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold shadow-none focus-visible:ring-2 [&_svg]:size-3 ${className}`}
+    >
+      <SelectValue />
+    </SelectTrigger>
+    <SelectContent align="start">
+      {options.map((option) => (
+        <SelectItem key={option.value} value={option.value}>
+          {option.label}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+);
+
 export {
   FloatingSelect,
   Select,
@@ -207,4 +230,5 @@ export {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
+  InlinePillSelect,
 };

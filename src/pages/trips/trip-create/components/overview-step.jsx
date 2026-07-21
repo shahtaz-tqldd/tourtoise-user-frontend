@@ -2,7 +2,7 @@ import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
   useLazyTripActivateQuery,
-  useTripOverviewQuery,
+  useTripPlanningQuery,
 } from "@/features/trips/tripApiSlice";
 import { formatLabel } from "@/lib/utils";
 import { skipToken } from "@reduxjs/toolkit/query";
@@ -20,6 +20,7 @@ import {
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { planningStepValues } from "../planning-step-utils";
 
 const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
 
@@ -84,8 +85,13 @@ const SectionCard = ({ title, children }) => (
 
 const OverviewStep = ({ trip }) => {
   const tripId = getTripId(trip);
-  const { data, isLoading, isFetching, isError } = useTripOverviewQuery(
-    tripId ? { trip_id: tripId } : skipToken,
+  const { data, isFetching, isLoading, isError } = useTripPlanningQuery(
+    tripId
+      ? {
+          trip_id: tripId,
+          step: planningStepValues.overview,
+        }
+      : skipToken,
   );
   const [activateTrip, { isFetching: isActivating }] =
     useLazyTripActivateQuery();

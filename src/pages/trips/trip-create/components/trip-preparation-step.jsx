@@ -1,7 +1,7 @@
 import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import TabMenu from "@/components/ui/tab";
-import { useTripPreparationQuery } from "@/features/trips/tripApiSlice";
+import { useTripPlanningQuery } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import {
   AlertTriangle,
@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import { planningStepValues } from "../planning-step-utils";
 
 const tabs = [
   { value: "packing", label: "Packing", icon: Backpack },
@@ -237,8 +238,13 @@ const EmptyState = ({ children }) => (
 const TripPreparationStep = ({ trip, onStepComplete, onStepSelect }) => {
   const tripId = getTripId(trip);
   const [activeTab, setActiveTab] = useState("packing");
-  const { data, isLoading, isFetching, isError } = useTripPreparationQuery(
-    tripId ? { trip_id: tripId } : skipToken,
+  const { data, isFetching, isLoading, isError } = useTripPlanningQuery(
+    tripId
+      ? {
+          trip_id: tripId,
+          step: planningStepValues.preparation,
+        }
+      : skipToken,
   );
   const preparation = useMemo(() => unwrapPreparation(data), [data]);
   const packingItems = preparation.packing_items || [];

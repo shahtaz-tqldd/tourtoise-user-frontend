@@ -118,6 +118,12 @@ export const journalApiSlice = apiSlice.injectEndpoints({
         { type: "journal-detail", id: journal_id },
       ],
     }),
+    reactJournal: builder.mutation({
+      query: ({ journal_id, reacted }) => ({
+        url: `/journals/${journal_id}/react/`,
+        method: reacted ? "DELETE" : "POST",
+      }),
+    }),
     journalComments: builder.query({
       query: ({ journal_id, ...params }) =>
         `/journals/${journal_id}/comments/?${paginationParams(params)}`,
@@ -158,6 +164,17 @@ export const journalApiSlice = apiSlice.injectEndpoints({
         { type: "journal-replies", id: comment_id },
       ],
     }),
+    updateJournalComment: builder.mutation({
+      query: ({ comment_id, body, method = "PATCH" }) => ({
+        url: `/journals/comments/${comment_id}/update/`,
+        method,
+        body,
+      }),
+      invalidatesTags: (result, error, { journal_id, parent_id }) => [
+        { type: "journal-comments", id: journal_id },
+        ...(parent_id ? [{ type: "journal-replies", id: parent_id }] : []),
+      ],
+    }),
     deleteJournalComment: builder.mutation({
       query: ({ comment_id }) => ({
         url: `/journals/comments/${comment_id}/delete/`,
@@ -186,9 +203,11 @@ export const {
   useUpdateJournalMutation,
   useDeleteJournalMutation,
   useSaveJournalMutation,
+  useReactJournalMutation,
   useJournalCommentsQuery,
   useCreateJournalCommentMutation,
   useJournalRepliesQuery,
   useCreateJournalReplyMutation,
+  useUpdateJournalCommentMutation,
   useDeleteJournalCommentMutation,
 } = journalApiSlice;

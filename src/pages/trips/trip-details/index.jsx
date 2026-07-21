@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -14,11 +14,19 @@ import { Bell, Loader2, MessageSquareDot, Sparkles } from "lucide-react";
 
 // lib
 import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
+import { useNotificationListQuery } from "@/features/notification/notificationApiSlice";
+import useNotificationSocket from "@/features/notification/useNotificationSocket";
 import useTitle from "@/hooks/useTitle";
+import TripNotes from "./components/trip-notes";
 
 const mobileTabs = [
   { value: "overview", label: "Overview", icon: Sparkles },
-  { value: "assistant", label: "Trip Assistant", icon: MessageSquareDot },
+  {
+    value: "assistant",
+    label: "Trip Assistant",
+    icon: MessageSquareDot,
+    count: 0,
+  },
   { value: "notifications", label: "Notification", icon: Bell },
 ];
 
@@ -92,12 +100,6 @@ const buildChatMessages = (trip) => {
   return messages;
 };
 
-const buildNotifications = (trip) =>
-  (trip?.alerts || []).map((alert) => ({
-    title: alert.title,
-    content: alert.body,
-  }));
-
 const normalizeTripDetail = (sourceTrip) => {
   if (!sourceTrip) return null;
 
@@ -115,10 +117,24 @@ const normalizeTripDetail = (sourceTrip) => {
   return {
     ...sourceTrip,
     overview:
+      sourceTrip.planning_description ||
+      sourceTrip.planning_summary ||
       itinerary.summary ||
       preparation.summary ||
-      sourceTrip.planning_summary ||
       "No planning summary available yet.",
+    budget: sourceTrip.budget || itinerary.rough_budget || {},
+    budget_currency:
+      sourceTrip.budget?.currency || sourceTrip.budget_currency || "USD",
+    preparation_stats: sourceTrip.preparation_stats || {
+      packing_items: {
+        total_count: packingItems.length,
+        is_packed_count: packingItems.filter((item) => item.packed).length,
+      },
+      documents: {
+        total_count: preparationDocuments.length,
+        uploaded_count: sourceTrip.uploaded_documents?.length || 0,
+      },
+    },
     trip_pace: preferences.travel_pace || sourceTrip.traveler_type || "custom",
     destinations: (sourceTrip.trip_destinations || []).map((destination) => ({
       id:
@@ -225,11 +241,40 @@ const TripDetailPage = () => {
   const [activeMobileTab, setActiveMobileTab] = useState("overview");
 
   const { data, isFetching, isError } = useTripDetailQuery(trip_id);
+  const { data: notificationData, refetch: refetchNotifications } =
+    useNotificationListQuery({
+      trip_id,
+      page: 1,
+      page_size: 1,
+    });
   const trip = useMemo(
     () => normalizeTripDetail(unwrapTripDetail(data)),
     [data],
   );
-  const notifications = useMemo(() => buildNotifications(trip), [trip]);
+  const notificationUnreadCount = notificationData?.meta?.unread_count || 0;
+  const tabs = useMemo(
+    () =>
+      mobileTabs.map((tab) =>
+        tab.value === "notifications"
+          ? { ...tab, count: notificationUnreadCount }
+          : tab,
+      ),
+    [notificationUnreadCount],
+  );
+
+  const handleSocketNotification = useCallback(
+    (notification) => {
+      if (notification?.trip_id === trip_id) {
+        refetchNotifications();
+      }
+    },
+    [refetchNotifications, trip_id],
+  );
+
+  useNotificationSocket({
+    enabled: Boolean(trip_id),
+    onNotification: handleSocketNotification,
+  });
 
   if (isFetching) {
     return (
@@ -258,12 +303,15 @@ const TripDetailPage = () => {
       <section className="hidden gap-6 py-5 xl:grid xl:grid-cols-[minmax(0,1fr)_420px]">
         <div className="space-y-5">
           <TripOverview trip={trip} />
-          <TripPlanningTabs trip={trip} />
+          <TripPlanningTabs key={trip.id} trip={trip} />
+          <TripNotes tripId={trip.id} />
         </div>
 
         <TripAgentChat
           messages={trip.chat}
-          notifications={notifications}
+          tripId={trip.id}
+          sessionId={trip.session_id}
+          notificationUnreadCount={notificationUnreadCount}
           className="sticky top-[92px]"
         />
       </section>
@@ -277,11 +325,11 @@ const TripDetailPage = () => {
         )}
       >
         <TabMenu
-          tabs={mobileTabs}
+          tabs={tabs}
           activeTab={activeMobileTab}
           setActiveTab={setActiveMobileTab}
           className={cn(
-            "z-20 -mx-4 bg-white px-4 pt-1.5",
+            "z-[30] -mx-4 bg-white px-4 pt-1.5",
             activeMobileTab === "overview" ? "sticky top-14" : "shrink-0",
           )}
         />
@@ -295,14 +343,16 @@ const TripDetailPage = () => {
           {activeMobileTab === "overview" && (
             <div className="space-y-5">
               <TripOverview trip={trip} />
-              <TripPlanningTabs trip={trip} />
+              <TripPlanningTabs key={trip.id} trip={trip} />
+              <TripNotes tripId={trip.id} />
             </div>
           )}
 
           {activeMobileTab === "assistant" && (
             <TripAgentChat
-              messages={trip.chat}
-              notifications={notifications}
+              tripId={trip.id}
+              sessionId={trip.session_id}
+              notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="chat"
               className="h-full min-h-0 rounded-none md:rounded-3xl"
@@ -311,8 +361,9 @@ const TripDetailPage = () => {
 
           {activeMobileTab === "notifications" && (
             <TripAgentChat
-              messages={trip.chat}
-              notifications={notifications}
+              tripId={trip.id}
+              sessionId={trip.session_id}
+              notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="notifications"
               className="h-full min-h-0 rounded-none md:rounded-3xl"

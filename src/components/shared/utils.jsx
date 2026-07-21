@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
-import { GhostIcon } from "@/assets/icons/svg-icons";
+import { BoxIcon, ImageIcon } from "@/assets/icons/svg-icons";
 
 export const DetailPill = ({ children, className }) => {
   if (!children) return null;
@@ -125,14 +125,14 @@ export const SectionHeader = ({
   <div className={cn("flex items-start justify-between gap-4", className)}>
     <div className="flex gap-3">
       {icon && (
-        <div className="hidden md:flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="hidden md:flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           {React.createElement(icon, { size: 20 })}
         </div>
       )}
       <div>
-        <h2 className="text-lg font-bold text-slate-950">{title}</h2>
+        <h2 className="font-bold text-slate-950">{title}</h2>
         {description && (
-          <p className="mt-1 text-sm text-slate-500 line-clamp-1">
+          <p className="mt-0.5 text-[13px] text-slate-500 line-clamp-1">
             {description}
           </p>
         )}
@@ -144,11 +144,11 @@ export const SectionHeader = ({
 export const EmptyState = ({ title, description, onClear, className = "" }) => (
   <div
     className={cn(
-      "border border-dashed border-slate-300 bg-white text-center flex flex-col items-center rounded-3xl px-10 py-24",
+      "bg-white text-center flex flex-col items-center rounded-3xl px-10 py-24",
       className,
     )}
   >
-    <GhostIcon size={12} />
+    <BoxIcon size={12} />
     <h2 className="mt-4 font-semibold text-slate-950 text-base">{title}</h2>
     <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
       {description}
