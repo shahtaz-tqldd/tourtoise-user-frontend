@@ -4,9 +4,7 @@ import { FloatingInput } from "@/components/ui/input";
 import {
   useTripAgentActiveMutation,
   useTripAgentCreateMessageMutation,
-  useTripPlanningQuery,
 } from "@/features/trips/tripApiSlice";
-import { skipToken } from "@reduxjs/toolkit/query";
 import { Loader2, Send, Sparkles } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -18,6 +16,7 @@ import {
   TRAVEL_INTEREST_OPTIONS,
   TRAVEL_PACE_OPTIONS,
 } from "../../constants";
+import { useTripPlanningStep } from "../hooks/use-trip-planning-step";
 
 const EMPTY_LIST = [];
 
@@ -38,6 +37,7 @@ const normalizeTravelPace = (value) => {
 
   if (pace === "fast") return "packed";
   if (pace === "slow") return "relaxed";
+  if (pace === "balanced") return "moderate";
 
   return pace;
 };
@@ -47,10 +47,8 @@ const getInitialAgentMessages = (trip) =>
     ? [{ role: "agent", content: trip.agent_message }]
     : [];
 
-const unwrapPlanningPayload = (response) => response?.data || response || {};
-
 const unwrapAgentMessages = (response) => {
-  const payload = unwrapPlanningPayload(response);
+  const payload = unwrapAgentResponse(response);
   const messages = Array.isArray(payload?.messages)
     ? payload.messages
     : Array.isArray(payload)
@@ -148,7 +146,12 @@ const AgentThinkingMessage = () => (
   </div>
 );
 
-const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
+const PreferencesStep = ({
+  trip,
+  onStepComplete,
+  onStepSelect,
+  onPlanningStateChange,
+}) => {
   const user = useSelector((state) => state.auth.user);
 
   // user specific
@@ -162,34 +165,25 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
 
   // trip specific
   const tripId = trip?.id;
-  console.log(trip);
   // preference
   const {
-    data: preferenceData,
+    payload: planningPayload,
     isFetching: isPreferenceFetching,
     isError: isPreferenceError,
-  } = useTripPlanningQuery(
-    tripId
-      ? {
-          trip_id: tripId,
-          step: planningStepValues.preference,
-        }
-      : skipToken,
-  );
-
-  const tripTravelInterests = preferenceData?.data?.interest_tags;
-  const tripDietaryPreferences = preferenceData?.data?.dietary_needs;
-  const tripMobilityConstraints = preferenceData?.data?.mobility_constraints;
-  const tripTravelPace = preferenceData?.data?.travel_pace;
-
-  const planningPayload = useMemo(
-    () => unwrapPlanningPayload(preferenceData),
-    [preferenceData],
-  );
+  } = useTripPlanningStep({
+    tripId,
+    step: planningStepValues.preference,
+    onPlanningStateChange,
+  });
+  const savedPreferences = planningPayload.preferences || {};
+  const tripTravelInterests = savedPreferences.interest_tags;
+  const tripDietaryPreferences = savedPreferences.dietary_needs;
+  const tripMobilityConstraints = savedPreferences.mobility_constraints;
+  const tripTravelPace = savedPreferences.travel_pace;
   const planningSession = planningPayload?.session || null;
   const serverMessages = useMemo(
-    () => unwrapAgentMessages(preferenceData),
-    [preferenceData],
+    () => unwrapAgentMessages(planningPayload),
+    [planningPayload],
   );
   const hasTripPreferences = Boolean(
     tripTravelPace ||
@@ -209,12 +203,12 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
           tripDietaryPreferences,
           DIETARY_OPTIONS,
         ),
-        dietary_other: preferenceData?.data?.dietary_other || "",
+        dietary_other: savedPreferences.dietary_other || "",
         mobility_constraints: normalizeListToOptions(
           tripMobilityConstraints,
           MOBILITY_OPTIONS,
         ),
-        mobility_other: preferenceData?.data?.mobility_other || "",
+        mobility_other: savedPreferences.mobility_other || "",
       };
     }
 
@@ -237,8 +231,8 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
     };
   }, [
     hasTripPreferences,
-    preferenceData?.data?.dietary_other,
-    preferenceData?.data?.mobility_other,
+    savedPreferences.dietary_other,
+    savedPreferences.mobility_other,
     tripDietaryPreferences,
     tripMobilityConstraints,
     tripTravelInterests,
@@ -280,6 +274,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
     trip?.agent_active === false ? trip?.agent_active_failed_message || "" : "",
   );
   const [localAgentActive, setLocalAgentActive] = useState(null);
+  const [localSessionId, setLocalSessionId] = useState("");
 
   const [message, setMessage] = useState("");
   const conversationEndRef = useRef(null);
@@ -302,7 +297,9 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
     serverAgentActive ??
     Boolean(planningSession || serverMessages.length);
   const isStepComplete =
-    isLocallyStepComplete || planningPayload?.is_step_complete === true;
+    isLocallyStepComplete ||
+    planningPayload?.is_step_complete === true ||
+    planningPayload?.is_qna_complete === true;
   const displayedAgentFailureMessage =
     !isAgentActive && planningPayload?.agent_active === false
       ? agentFailureMessage ||
@@ -315,7 +312,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
 
   const isAgentThinking = isActivatingAgent || isSendingMessage;
 
-  const recommendationButtonLabel = preferenceData?.data
+  const recommendationButtonLabel = planningPayload
     ?.is_recommendation_complete
     ? "Recommendations"
     : "Start recommendation";
@@ -356,7 +353,6 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
   const buildPayload = ({ letAgentDecide = false } = {}) => {
     const payload = {
       trip_id: tripId,
-      current_step: planningStepValues.preference,
       let_agent_decide: letAgentDecide,
     };
 
@@ -364,7 +360,13 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
 
     return {
       ...payload,
-      travel_pace: resolvedTravelPace,
+      travel_pace:
+        resolvedTravelPace === "moderate" ? "balanced" : resolvedTravelPace,
+      accommodation_preference:
+        trip?.accommodation_preference ||
+        trip?.preferences?.accommodation_preference ||
+        trip?.preferences?.accommotation_preference ||
+        "",
       interest_tags: resolvedInterests,
       dietary_needs: resolvedDietaryNeeds,
       dietary_other: resolvedDietaryNeeds.includes("Other")
@@ -379,6 +381,8 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
 
   const handleAgentResponse = (response) => {
     const data = unwrapAgentResponse(response);
+    onPlanningStateChange?.(data);
+    setLocalSessionId(data.session_id || data.preferences?.session_id || "");
 
     if (data.agent_active === false) {
       setLocalAgentActive(false);
@@ -398,8 +402,9 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
       ]);
     }
 
-    if (data?.is_step_complete) {
+    if (data?.is_step_complete || data?.is_qna_complete) {
       setIsLocallyStepComplete(true);
+      onStepComplete?.();
     }
   };
 
@@ -427,6 +432,16 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
 
     const trimmedMessage = message.trim();
     if (!trimmedMessage) return;
+    const sessionId =
+      localSessionId ||
+      planningPayload?.session?.id ||
+      planningPayload?.session_id ||
+      savedPreferences?.session_id;
+
+    if (!sessionId) {
+      toast.error("The preference session is not ready yet.");
+      return;
+    }
 
     const userMessage = { role: "user", content: trimmedMessage };
     setAgentMessages((current) => [...current, userMessage]);
@@ -435,7 +450,7 @@ const PreferencesStep = ({ trip, onStepComplete, onStepSelect }) => {
     try {
       const response = await createAgentMessage({
         trip_id: tripId,
-        current_step: planningStepValues.preference,
+        session_id: sessionId,
         message: trimmedMessage,
       }).unwrap();
       handleAgentResponse(response);

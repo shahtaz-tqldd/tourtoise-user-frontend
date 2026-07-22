@@ -21,8 +21,6 @@ import {
   Sparkles,
   Plus,
   Trash2,
-  CheckCircle2,
-  Circle,
 } from "lucide-react";
 import {
   useCreateTripMutation,
@@ -31,154 +29,33 @@ import {
   useTripShortDetailsQuery,
 } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 // components
 import TripPlanInitialInput from "./components/initial-input";
-import PreferencesStep from "./components/preferences-step";
-import RecommendationsStep from "./components/recommendations-step";
-import ItineraryStep from "./components/itinerary-step";
-import TripPreparationStep from "./components/trip-preparation-step";
-import OverviewStep from "./components/overview-step";
+import PlanningStepRail from "./components/planning-step-rail";
 import { formatDate } from "@/lib/date-time";
 import {
+  canOpenStep,
   getCurrentPlanningStepIndex,
+  getPayloadCurrentStep,
   planningStepValues,
 } from "./planning-step-utils";
-
-const createInitialForm = () => ({
-  budget_tier: "comfort",
-  budget_currency: "",
-  start_date: "",
-  days: "",
-  travelers_count: "1",
-  traveler_type: "solo",
-  accommodation_preference: "",
-  start_location_address: "",
-  start_location_latitude: "",
-  start_location_longitude: "",
-  start_location_accuracy: "",
-});
-
-const titleTemplates = [
-  "{destination} travel plan",
-  "{destination} getaway",
-  "{destination} itinerary",
-  "{destination} holiday plan",
-  "{destination} trip",
-  "Explore {destination}",
-];
-
-const planningSteps = [
-  {
-    key: "get_started",
-    title: "Get Started",
-    description: "Initial info taking",
-    component: TripPlanInitialInput,
-  },
-  {
-    key: planningStepValues.preference,
-    title: "Preferences",
-    description: "User profile and customization",
-    component: PreferencesStep,
-  },
-  {
-    key: planningStepValues.recommendation,
-    title: "Recommendations",
-    description: "Recommendations for spots, activities and foods",
-    component: RecommendationsStep,
-  },
-  {
-    key: planningStepValues.itinerary,
-    title: "Itinerary",
-    description: "Day wise itineraries planning",
-    component: ItineraryStep,
-  },
-  {
-    key: planningStepValues.preparation,
-    title: "Preparation",
-    description: "Documents and packup",
-    component: TripPreparationStep,
-  },
-  {
-    key: planningStepValues.overview,
-    title: "Overview",
-    description: "Overview and locking up",
-    component: OverviewStep,
-  },
-];
-
-const getDestinationSlug = (destination) =>
-  destination?.slug || destination?.destination_slug || destination?.id;
-
-const getTripId = (trip) => trip?.id;
-
-const getTripDetailId = (trip) =>
-  getTripId(trip) || trip?.slug || trip?.trip_slug;
-
-const unwrapDetail = (response) => response?.data || response || null;
+import { planningSteps } from "./planning-steps";
+import {
+  createInitialTripForm,
+  getDestinationSlug,
+  getEndDate,
+  getGeneratedTripTitle,
+  getTripDetailId,
+  getTripId,
+  getTripTitle,
+  unwrapApiData,
+} from "./trip-planning-utils";
 
 const getCurrentStepIndex = (trip) =>
   getCurrentPlanningStepIndex(trip?.current_step);
-
-const getStepComplete = (trip, stepKey) => {
-  const stats = trip?.planning_stats || {};
-
-  if (trip?.current_step === planningStepValues.completed) return true;
-  if (stepKey === planningStepValues.getStarted) return Boolean(trip);
-  if (stepKey === planningStepValues.preference) {
-    return (
-      stats.is_qna_complete ||
-      getCurrentPlanningStepIndex(trip?.current_step) >
-        getCurrentPlanningStepIndex(planningStepValues.preference)
-    );
-  }
-  if (stepKey === planningStepValues.recommendation) {
-    return (
-      stats.is_recommendation_complete ||
-      getCurrentPlanningStepIndex(trip?.current_step) >
-        getCurrentPlanningStepIndex(planningStepValues.recommendation)
-    );
-  }
-  if (stepKey === planningStepValues.itinerary) {
-    return (
-      stats.is_itinerary_design_complete ||
-      getCurrentPlanningStepIndex(trip?.current_step) >
-        getCurrentPlanningStepIndex(planningStepValues.itinerary)
-    );
-  }
-  if (stepKey === planningStepValues.preparation) {
-    return (
-      stats.is_trip_preparation_complete ||
-      getCurrentPlanningStepIndex(trip?.current_step) >
-        getCurrentPlanningStepIndex(planningStepValues.preparation)
-    );
-  }
-
-  return trip?.current_step === planningStepValues.completed;
-};
-
-const getTripTitle = (trip, destination) =>
-  trip?.title || `${destination?.name} plan`;
-
-const getGeneratedTripTitle = (destinationName) => {
-  const placeName = destinationName || "Destination";
-  const template =
-    titleTemplates[Math.floor(Math.random() * titleTemplates.length)];
-
-  return template.replace("{destination}", placeName);
-};
-
-const getEndDate = (startDate, days) => {
-  const tripDays = Number(days);
-  if (!startDate || !Number.isFinite(tripDays) || tripDays < 1) return "";
-
-  const date = new Date(`${startDate}T00:00:00`);
-  date.setDate(date.getDate() + tripDays - 1);
-
-  return date.toISOString().slice(0, 10);
-};
 
 const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
   const resolvedDestination =
@@ -187,7 +64,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
   const destinationName = resolvedDestination?.name || "";
   const directTripId = getTripDetailId(trip);
   const shouldSkipTripList = Boolean(trip);
-  const [form, setForm] = useState(createInitialForm);
+  const [form, setForm] = useState(createInitialTripForm);
   const [createdTrip, setCreatedTrip] = useState(null);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [isStartingNewPlan, setIsStartingNewPlan] = useState(false);
@@ -195,6 +72,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
   const [tripTitle, setTripTitle] = useState(null);
   const [activeStep, setActiveStep] = useState(null);
   const [furthestStep, setFurthestStep] = useState(0);
+  const [planningState, setPlanningState] = useState(null);
   const generatedTripTitle = useMemo(
     () => getGeneratedTripTitle(destinationName),
     [destinationName],
@@ -235,7 +113,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
     open && detailTripId ? { trip_id: detailTripId } : skipToken,
   );
   const detailedTrip = useMemo(
-    () => unwrapDetail(tripDetailData),
+    () => unwrapApiData(tripDetailData, null),
     [tripDetailData],
   );
   const loadedDetailTrip =
@@ -253,32 +131,18 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
     tripTitle ??
     getTripTitle(activeTrip || trip, resolvedDestination) ??
     generatedTripTitle;
-  const tripCurrentStep = activeTrip ? getCurrentStepIndex(activeTrip) : 0;
+  const serverCurrentStep = getPayloadCurrentStep(
+    planningState,
+    activeTrip?.current_step,
+  );
+  const tripCurrentStep = activeTrip
+    ? getCurrentPlanningStepIndex(serverCurrentStep)
+    : 0;
   const displayedStep = activeStep ?? tripCurrentStep;
   const unlockedStep = Math.max(furthestStep, tripCurrentStep, displayedStep);
   const displayedStepConfig = planningSteps[displayedStep];
   const ActiveStepComponent = displayedStepConfig.component;
   const activeTripId = getTripId(activeTrip);
-  const stepRailRef = useRef(null);
-  const stepButtonRefs = useRef({});
-
-  useEffect(() => {
-    const stepRail = stepRailRef.current;
-    const activeButton = stepButtonRefs.current[displayedStep];
-
-    if (!stepRail || !activeButton) return;
-
-    const targetLeft =
-      activeButton.offsetLeft -
-      stepRail.clientWidth / 2 +
-      activeButton.clientWidth / 2;
-
-    stepRail.scrollTo({
-      left: targetLeft,
-      behavior: "smooth",
-    });
-  }, [displayedStep]);
-
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
@@ -345,6 +209,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
       setCreatedTrip(createdTrip);
       setActiveStep(currentStep);
       setFurthestStep(currentStep);
+      setPlanningState(null);
       toast.success("Trip planning started.");
       setIsStartingNewPlan(false);
       setSelectedTrip(null);
@@ -361,9 +226,10 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
     setIsStartingNewPlan(true);
     setIsViewingPlanList(false);
     setTripTitle(null);
-    setForm(createInitialForm());
+    setForm(createInitialTripForm());
     setActiveStep(null);
     setFurthestStep(0);
+    setPlanningState(null);
   };
 
   const handleViewPlanList = () => {
@@ -374,6 +240,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
     setTripTitle(null);
     setActiveStep(null);
     setFurthestStep(0);
+    setPlanningState(null);
   };
 
   const handleSelectTrip = (trip) => {
@@ -386,6 +253,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
     setTripTitle(getTripTitle(trip, resolvedDestination));
     setActiveStep(currentStep);
     setFurthestStep(currentStep);
+    setPlanningState(null);
   };
 
   const handleDeleteActiveTrip = async () => {
@@ -410,6 +278,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
       setTripTitle(null);
       setActiveStep(null);
       setFurthestStep(0);
+      setPlanningState(null);
       refetchTripList?.();
     } catch (error) {
       toast.error(error?.data?.message || "Could not delete this trip plan.");
@@ -417,7 +286,12 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
   };
 
   const handleStepSelect = (stepIndex) => {
-    if (stepIndex > unlockedStep) return;
+    const step = planningSteps[stepIndex];
+    const isAvailable = planningState?.flow?.length
+      ? canOpenStep({ trip: activeTrip, payload: planningState, stepKey: step.key })
+      : stepIndex <= unlockedStep;
+
+    if (!isAvailable) return;
     setActiveStep(stepIndex);
   };
 
@@ -455,6 +329,16 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
     );
   };
 
+  const handlePlanningStateChange = useCallback((payload) => {
+    if (!payload) return;
+
+    setPlanningState(payload);
+    const currentStep = getCurrentPlanningStepIndex(
+      getPayloadCurrentStep(payload),
+    );
+    setFurthestStep((previous) => Math.max(previous, currentStep));
+  }, []);
+
   const showTripList =
     !shouldSkipTripList &&
     !isCheckingTrips &&
@@ -485,10 +369,11 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
       setSelectedTrip(null);
       setIsStartingNewPlan(false);
       setIsViewingPlanList(false);
-      setForm(createInitialForm());
+      setForm(createInitialTripForm());
       setTripTitle(null);
       setActiveStep(null);
       setFurthestStep(0);
+      setPlanningState(null);
     }
     onOpenChange(nextOpen);
   };
@@ -575,48 +460,14 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
           </SheetHeader>
 
           {showAgent && (
-            <div className="border-slate-200 py-3 px-4 border-b">
-              <div
-                ref={stepRailRef}
-                className="flex overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              >
-                {planningSteps.map((step, index) => {
-                  const isReached = index <= unlockedStep;
-                  const isActive = index === displayedStep;
-                  const isComplete = getStepComplete(activeTrip, step.key);
-                  const StepIcon = isComplete ? CheckCircle2 : Circle;
-
-                  return (
-                    <button
-                      ref={(node) => {
-                        stepButtonRefs.current[index] = node;
-                      }}
-                      key={step.title}
-                      type="button"
-                      onClick={() => handleStepSelect(index)}
-                      disabled={!isReached}
-                      className={`shrink-0 whitespace-nowrap rounded-md pr-3 pl-2.5 py-1.5 flx gap-1 text-center transition ${
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : isComplete
-                            ? "text-slate-700 hover:bg-slate-100"
-                            : "text-slate-400"
-                      } ${!isReached ? "cursor-not-allowed opacity-60" : ""}`}
-                    >
-                      <StepIcon
-                        className={`shrink-0 ${
-                          isComplete ? "fill-primary/10" : "fill-current"
-                        }`}
-                        size={14}
-                      />
-                      <span className="text-[11px] font-medium leading-4">
-                        {step.title}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <PlanningStepRail
+              steps={planningSteps}
+              activeStep={displayedStep}
+              unlockedStep={unlockedStep}
+              trip={activeTrip}
+              planningState={planningState}
+              onStepSelect={handleStepSelect}
+            />
           )}
 
           {showInitialLoader && (
@@ -754,6 +605,8 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
                 onTripUpdated={handleTripUpdated}
                 onStepComplete={handleStepComplete}
                 onStepSelect={handleStepSelect}
+                onPlanningStateChange={handlePlanningStateChange}
+                onStartNewPlan={handleStartNewPlan}
                 onClose={() => handleOpenChange(false)}
               />
             </div>

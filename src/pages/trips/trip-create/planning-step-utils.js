@@ -74,3 +74,58 @@ export const isPlanningStepAfter = (currentStep, stepKey) =>
 export const isPlanningStepAtOrAfter = (currentStep, stepKey) =>
   getCurrentPlanningStepIndex(currentStep) >=
   getCurrentPlanningStepIndex(stepKey);
+
+const completionFields = {
+  [planningStepValues.preference]: "is_qna_complete",
+  [planningStepValues.recommendation]: "is_recommendation_complete",
+  [planningStepValues.itinerary]: "is_itinerary_design_complete",
+  [planningStepValues.preparation]: "is_trip_preparation_complete",
+};
+
+export const getPlanningProgress = (payload) =>
+  payload?.progress || payload?.planning_progress || {};
+
+export const getPlanningFlow = (payload) =>
+  Array.isArray(payload?.flow) ? payload.flow : [];
+
+export const getFlowStep = (payload, stepKey) =>
+  getPlanningFlow(payload).find(
+    (item) => getCurrentPlanningStepKey(item.step) === stepKey,
+  );
+
+export const getPayloadCurrentStep = (payload, fallback) =>
+  getPlanningProgress(payload)?.current_step || fallback;
+
+export const isStepComplete = ({ trip, payload, stepKey }) => {
+  if (stepKey === planningStepValues.getStarted) return Boolean(trip);
+  if (trip?.current_step === planningStepValues.completed) return true;
+
+  const flowStep = getFlowStep(payload, stepKey);
+  if (typeof flowStep?.is_complete === "boolean") return flowStep.is_complete;
+
+  const field = completionFields[stepKey];
+  const progress = getPlanningProgress(payload);
+  const stats = trip?.planning_stats || {};
+
+  if (field && (payload?.[field] || progress[field] || stats[field])) return true;
+
+  return (
+    getCurrentPlanningStepIndex(
+      getPayloadCurrentStep(payload, trip?.current_step),
+    ) > getCurrentPlanningStepIndex(stepKey)
+  );
+};
+
+export const canOpenStep = ({ trip, payload, stepKey }) => {
+  if (stepKey === planningStepValues.getStarted) return true;
+
+  const flowStep = getFlowStep(payload, stepKey);
+  if (typeof flowStep?.can_open === "boolean") return flowStep.can_open;
+
+  return (
+    getCurrentPlanningStepIndex(stepKey) <=
+    getCurrentPlanningStepIndex(
+      getPayloadCurrentStep(payload, trip?.current_step),
+    )
+  );
+};

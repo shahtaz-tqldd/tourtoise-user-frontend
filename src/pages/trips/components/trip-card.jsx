@@ -183,7 +183,7 @@ const TripCard = ({ trip, compact = false }) => {
   }
 
   return (
-    <>
+    <Link to={getTripUrl(displayedTrip)}>
       <Card className="group relative md:p-5">
         <div className="grid gap-6 lg:flex">
           {/* Cover image — full-width hero strip */}
@@ -270,14 +270,10 @@ const TripCard = ({ trip, compact = false }) => {
             </div>
             <div className="flex justify-end">
               <div className="flx gap-2">
-                <Link
-                  className="w-full md:w-fit flx gap-2 text-sm text-primary font-semibold"
-                  to={getTripUrl(displayedTrip)}
-                  
-                >
+                <span className="w-full md:w-fit flx gap-2 text-sm text-primary font-semibold">
                   View Details
-                  <ArrowRight size={16}/>
-                </Link>
+                  <ArrowRight size={16} />
+                </span>
               </div>
             </div>
           </div>
@@ -289,7 +285,7 @@ const TripCard = ({ trip, compact = false }) => {
           triggerClassName="absolute top-4 right-4 md:top-5 md:right-5 tr"
         />
       </Card>
-    </>
+    </Link>
   );
 };
 

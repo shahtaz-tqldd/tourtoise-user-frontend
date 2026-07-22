@@ -39,7 +39,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
     tripList: builder.query({
       query: (params = {}) => {
         return {
-          url: `/trips/list?${tripListQueryParams(params)}`,
+          url: `/trips/list/?${tripListQueryParams(params)}`,
           method: "GET",
         };
       },
@@ -48,7 +48,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
 
     tripInfiniteList: builder.infiniteQuery({
       query: ({ queryArg = {}, pageParam }) => ({
-        url: `/trips/list?${tripListQueryParams({
+        url: `/trips/list/?${tripListQueryParams({
           ...queryArg,
           page: pageParam,
         })}`,
@@ -154,11 +154,9 @@ export const tripApiSlice = apiSlice.injectEndpoints({
         };
       },
       invalidatesTags: (result, error, payload) => [
-        {
-          type: "trip-planning",
-          id: `${payload?.trip_id}-${payload?.current_step}`,
-        },
+        { type: "trip-planning", id: `${payload?.trip_id}-preference` },
         "trip-detail",
+        "trip-short-details",
       ],
     }),
 
@@ -192,15 +190,13 @@ export const tripApiSlice = apiSlice.injectEndpoints({
         };
       },
       invalidatesTags: (result, error, payload) => [
-        {
-          type: "trip-planning",
-          id: `${payload?.trip_id}-${payload?.current_step}`,
-        },
+        { type: "trip-planning", id: `${payload?.trip_id}-preference` },
         "trip-detail",
+        "trip-short-details",
       ],
     }),
 
-    tripActivate: builder.query({
+    tripActivate: builder.mutation({
       query: ({ trip_id }) => {
         return {
           url: `/trips/planning/activate/`,
@@ -208,6 +204,7 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           body: { trip_id: trip_id },
         };
       },
+      invalidatesTags: ["trip-list", "trip-detail", "trip-short-details"],
     }),
 
     // --- NOTES ENDPOINT ---
@@ -538,8 +535,7 @@ export const {
   useTripAgentActiveMutation,
   useTripAgentCreateMessageMutation,
   useTripPlanningQuery,
-  useTripActivateQuery,
-  useLazyTripActivateQuery,
+  useTripActivateMutation,
 
   // notes
   useTripNoteListQuery,

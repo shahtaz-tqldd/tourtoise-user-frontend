@@ -1,8 +1,6 @@
 import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import TabMenu from "@/components/ui/tab";
-import { useTripPlanningQuery } from "@/features/trips/tripApiSlice";
-import { skipToken } from "@reduxjs/toolkit/query";
 import {
   AlertTriangle,
   Backpack,
@@ -11,8 +9,9 @@ import {
   ShieldAlert,
   Sparkles,
 } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { planningStepValues } from "../planning-step-utils";
+import { useTripPlanningStep } from "../hooks/use-trip-planning-step";
 
 const tabs = [
   { value: "packing", label: "Packing", icon: Backpack },
@@ -39,8 +38,6 @@ const severityStyles = {
 };
 
 const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
-
-const unwrapPreparation = (response) => response?.data || response || {};
 
 const formatLabel = (value) =>
   String(value || "")
@@ -235,18 +232,24 @@ const EmptyState = ({ children }) => (
   </div>
 );
 
-const TripPreparationStep = ({ trip, onStepComplete, onStepSelect }) => {
+const TripPreparationStep = ({
+  trip,
+  onStepComplete,
+  onStepSelect,
+  onPlanningStateChange,
+}) => {
   const tripId = getTripId(trip);
   const [activeTab, setActiveTab] = useState("packing");
-  const { data, isFetching, isLoading, isError } = useTripPlanningQuery(
-    tripId
-      ? {
-          trip_id: tripId,
-          step: planningStepValues.preparation,
-        }
-      : skipToken,
-  );
-  const preparation = useMemo(() => unwrapPreparation(data), [data]);
+  const {
+    payload: preparation,
+    isFetching,
+    isLoading,
+    isError,
+  } = useTripPlanningStep({
+    tripId,
+    step: planningStepValues.preparation,
+    onPlanningStateChange,
+  });
   const packingItems = preparation.packing_items || [];
   const documents = preparation.required_documents || [];
   const headsUp = preparation.heads_up || [];

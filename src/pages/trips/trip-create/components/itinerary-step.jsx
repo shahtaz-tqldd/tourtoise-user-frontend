@@ -1,18 +1,15 @@
 import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import TabMenu from "@/components/ui/tab";
-import { useTripPlanningQuery } from "@/features/trips/tripApiSlice";
-import { skipToken } from "@reduxjs/toolkit/query";
 import { CalendarDays, MapPinned, Route, Sparkles, Wallet } from "lucide-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   isPlanningStepAfter,
   planningStepValues,
 } from "../planning-step-utils";
+import { useTripPlanningStep } from "../hooks/use-trip-planning-step";
 
 const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
-
-const unwrapItinerary = (response) => response?.data || response || {};
 
 const formatLabel = (value) =>
   String(value || "")
@@ -204,22 +201,22 @@ const itineraryTabs = [
 
 const ItineraryStep = ({
   trip,
-  onTripUpdated,
   onStepComplete,
   onStepSelect,
+  onPlanningStateChange,
 }) => {
   const tripId = getTripId(trip);
   const [view, setView] = useState("days");
-  const completionSyncedRef = useRef(false);
-  const { data, isFetching, isLoading, isError } = useTripPlanningQuery(
-    tripId
-      ? {
-          trip_id: tripId,
-          step: planningStepValues.itinerary,
-        }
-      : skipToken,
-  );
-  const itinerary = useMemo(() => unwrapItinerary(data), [data]);
+  const {
+    payload: itinerary,
+    isFetching,
+    isLoading,
+    isError,
+  } = useTripPlanningStep({
+    tripId,
+    step: planningStepValues.itinerary,
+    onPlanningStateChange,
+  });
   const days = getItineraryDays(itinerary);
   const routePlan = getRoutePlan(itinerary);
   const [activeDay, setActiveDay] = useState(days[0]?.day || 1);
@@ -239,20 +236,6 @@ const ItineraryStep = ({
   const preparationButtonLabel = isPreparationComplete
     ? "Show preparations"
     : "Start preparations";
-
-  useEffect(() => {
-    if (!tripId || !isItineraryComplete || completionSyncedRef.current) return;
-
-    completionSyncedRef.current = true;
-    onTripUpdated?.({
-      ...trip,
-      current_step: planningStepValues.preparation,
-      planning_stats: {
-        ...(trip?.planning_stats || {}),
-        is_itinerary_design_complete: true,
-      },
-    });
-  }, [isItineraryComplete, onTripUpdated, trip, tripId]);
 
   if (isLoading || isFetching) {
     return <ItinerarySkeleton />;
