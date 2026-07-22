@@ -1,11 +1,7 @@
 import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
-import {
-  useLazyTripActivateQuery,
-  useTripPlanningQuery,
-} from "@/features/trips/tripApiSlice";
+import { useTripActivateMutation } from "@/features/trips/tripApiSlice";
 import { formatLabel } from "@/lib/utils";
-import { skipToken } from "@reduxjs/toolkit/query";
 import {
   ArrowUpRight,
   CalendarDays,
@@ -17,14 +13,13 @@ import {
   UserRound,
   Wallet,
 } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { planningStepValues } from "../planning-step-utils";
+import { useTripPlanningStep } from "../hooks/use-trip-planning-step";
 
 const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
-
-const unwrapOverview = (response) => response?.data || response || {};
 
 const formatDateRange = (startDate, endDate) => {
   if (!startDate && !endDate) return "Dates not set";
@@ -83,23 +78,32 @@ const SectionCard = ({ title, children }) => (
   </section>
 );
 
-const OverviewStep = ({ trip }) => {
+const OverviewStep = ({
+  trip,
+  onTripUpdated,
+  onPlanningStateChange,
+  onStartNewPlan,
+}) => {
   const tripId = getTripId(trip);
-  const { data, isFetching, isLoading, isError } = useTripPlanningQuery(
-    tripId
-      ? {
-          trip_id: tripId,
-          step: planningStepValues.overview,
-        }
-      : skipToken,
-  );
-  const [activateTrip, { isFetching: isActivating }] =
-    useLazyTripActivateQuery();
-  const overview = useMemo(() => unwrapOverview(data), [data]);
+  const [localTripStatus, setLocalTripStatus] = useState("");
+  const {
+    payload: overview,
+    isFetching,
+    isLoading,
+    isError,
+  } = useTripPlanningStep({
+    tripId,
+    step: planningStepValues.overview,
+    onPlanningStateChange,
+  });
+  const [activateTrip, { isLoading: isActivating }] = useTripActivateMutation();
   const tripOverview = overview.trip || {};
+  const resolvedTripStatus =
+    localTripStatus || tripOverview.status || trip?.status || "";
   const recommendations = overview.recommendations_overview || {};
   const itinerary = overview.itinerary_overview || {};
   const preparation = overview.preparation_overview || {};
+  const activation = overview.activation || {};
   const navigate = useNavigate();
   const handleTripRedirect = (id) => {
     navigate(`/trips/${id}`);
@@ -112,10 +116,34 @@ const OverviewStep = ({ trip }) => {
     }
 
     try {
-      await activateTrip({ trip_id: tripId }).unwrap();
+      const response = await activateTrip({ trip_id: tripId }).unwrap();
+      const updatedTrip = response?.data || response || {};
+
+      setLocalTripStatus("ready");
+      onTripUpdated?.({
+        ...trip,
+        ...updatedTrip,
+        id: getTripId(updatedTrip) || tripId,
+        status: updatedTrip.status || "ready",
+        current_step: planningStepValues.completed,
+        planning_stats: {
+          ...(trip?.planning_stats || {}),
+          ...(updatedTrip.planning_stats || {}),
+          agent_active: true,
+          is_qna_complete: true,
+          is_recommendation_complete: true,
+          is_itinerary_design_complete: true,
+          is_trip_preparation_complete: true,
+        },
+      });
       toast.success("Trip is ready.");
     } catch (error) {
-      toast.error(error?.data?.message || "Could not activate this trip.");
+      const blockingMessage = error?.data?.errors?.blocking_steps?.[0];
+      toast.error(
+        blockingMessage ||
+          error?.data?.message ||
+          "Could not activate this trip.",
+      );
     }
   };
 
@@ -132,7 +160,7 @@ const OverviewStep = ({ trip }) => {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-        {tripOverview.status === "draft" && (
+        {resolvedTripStatus === "draft" && (
           <NotificationCard
             title="This trip is saved as draft"
             message="Review the overview below. You can proceed with this trip or
@@ -146,6 +174,13 @@ const OverviewStep = ({ trip }) => {
             "Review the final planning summary before locking the trip."
           }
         />
+
+        {activation.blocking_steps?.length > 0 && (
+          <NotificationCard
+            title="Finish planning before activation"
+            message={activation.blocking_steps.join(" ")}
+          />
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <StatCard
@@ -228,15 +263,20 @@ const OverviewStep = ({ trip }) => {
       </div>
 
       <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
-        <Button type="button" variant="outline" disabled={isActivating}>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isActivating}
+          onClick={onStartNewPlan}
+        >
           <Plus size={17} />
           Start a New Plan
         </Button>
-        {tripOverview.status !== "ready" ? (
+        {resolvedTripStatus !== "ready" ? (
           <Button
             type="button"
             onClick={handleActivateTrip}
-            disabled={isActivating}
+            disabled={isActivating || activation.can_activate === false}
           >
             {isActivating ? (
               <Loader2 className="animate-spin" size={17} />
@@ -246,7 +286,7 @@ const OverviewStep = ({ trip }) => {
             Complete Trip Planning
           </Button>
         ) : (
-          <Button onClick={() => handleTripRedirect(tripOverview.id)}>
+          <Button onClick={() => handleTripRedirect(tripOverview.id || tripId)}>
             <ArrowUpRight size={17} />
             View Your Trip
           </Button>

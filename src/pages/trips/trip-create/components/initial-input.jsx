@@ -11,41 +11,12 @@ import {
   isPlanningStepAfter,
   planningStepValues,
 } from "../planning-step-utils";
-
-const travelerTypes = [
-  { value: "solo", label: "Solo" },
-  { value: "couple", label: "Couple" },
-  { value: "family", label: "Family" },
-  { value: "group", label: "Group" },
-];
-
-const budgetTiers = [
-  { value: "backpacker", label: "Backpacker" },
-  { value: "budget", label: "Budget" },
-  { value: "comfort", label: "Comfort" },
-  { value: "premium", label: "Premium" },
-  { value: "luxury", label: "Luxury" },
-];
-
-const currencies = [
-  { value: "USD", label: "USD" },
-  { value: "BDT", label: "BDT" },
-  { value: "EUR", label: "EUR" },
-  { value: "GBP", label: "GBP" },
-  { value: "INR", label: "INR" },
-  { value: "THB", label: "THB" },
-  { value: "AED", label: "AED" },
-];
-
-const accommodationPreferences = [
-  { value: "budget", label: "Budget stays" },
-  { value: "mid_range", label: "Mid Range" },
-  { value: "boutique", label: "Boutique stays" },
-  { value: "luxury", label: "Luxury hotels" },
-  { value: "apartment", label: "Apartment / villa" },
-  { value: "hostel", label: "Hostel" },
-  { value: "any", label: "Flexible" },
-];
+import {
+  ACCOMMODATION_OPTIONS,
+  BUDGET_TIER_OPTIONS,
+  CURRENCY_OPTIONS,
+  TRAVELLER_TYPE_OPTIONS,
+} from "../../constants";
 
 const getTravelerCountForType = (travelerType, currentCount) => {
   if (travelerType === "solo") return "1";
@@ -56,6 +27,12 @@ const getTravelerCountForType = (travelerType, currentCount) => {
 
 const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
 
+const getAccommodationPreference = (trip) =>
+  trip?.accommodation_preference ||
+  trip?.preferences?.accommodation_preference ||
+  trip?.preferences?.accommotation_preference ||
+  "";
+
 const getInitialInfoForm = (trip = {}) => ({
   budget_tier: trip?.budget_tier || "comfort",
   budget_currency: trip?.budget_currency || "",
@@ -63,7 +40,7 @@ const getInitialInfoForm = (trip = {}) => ({
   days: trip?.duration_days ? String(trip.duration_days) : "",
   travelers_count: trip?.travelers_count ? String(trip.travelers_count) : "1",
   traveler_type: trip?.traveler_type || "solo",
-  accommodation_preference: trip?.accommodation_preference || "",
+  accommodation_preference: getAccommodationPreference(trip),
   start_location_address: trip?.start_location?.address || "",
   start_location_latitude: trip?.start_location?.latitude
     ? String(trip.start_location?.latitude)
@@ -246,7 +223,7 @@ const TripPlanInitialInput = ({
               value={form.budget_currency}
               onValueChange={(value) => updateField("budget_currency", value)}
             >
-              {currencies.map((currency) => (
+              {CURRENCY_OPTIONS.map((currency) => (
                 <SelectItem key={currency.value} value={currency.value}>
                   {currency.label}
                 </SelectItem>
@@ -261,7 +238,7 @@ const TripPlanInitialInput = ({
                 updateField("accommodation_preference", value)
               }
             >
-              {accommodationPreferences.map((preference) => (
+              {ACCOMMODATION_OPTIONS.map((preference) => (
                 <SelectItem key={preference.value} value={preference.value}>
                   {preference.label}
                 </SelectItem>
@@ -272,7 +249,7 @@ const TripPlanInitialInput = ({
           <div className="space-y-4">
             <p className="text-sm font-medium text-slate-800">Traveller type</p>
             <div className="flex flex-wrap gap-x-8 gap-y-4">
-              {travelerTypes.map((type) => (
+              {TRAVELLER_TYPE_OPTIONS.map((type) => (
                 <label
                   key={type.value}
                   className={`flex cursor-pointer items-center gap-2 text-sm transition ${
@@ -314,7 +291,7 @@ const TripPlanInitialInput = ({
           <div className="space-y-4 -mt-2">
             <p className="text-sm font-medium text-slate-800">Budget tier</p>
             <div className="flex flex-wrap gap-x-8 gap-y-4">
-              {budgetTiers.map((tier) => (
+              {BUDGET_TIER_OPTIONS.map((tier) => (
                 <label
                   key={tier.value}
                   className={`flex cursor-pointer items-center gap-2 text-sm transition ${

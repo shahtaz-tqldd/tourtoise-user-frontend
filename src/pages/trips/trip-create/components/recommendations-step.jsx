@@ -1,15 +1,14 @@
 import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import TabMenu from "@/components/ui/tab";
-import { useTripPlanningQuery } from "@/features/trips/tripApiSlice";
 import { getCloudinaryPreviewUrl } from "@/lib/utils";
-import { skipToken } from "@reduxjs/toolkit/query";
 import { Clock3, MapPin, Sparkles, Star, Utensils, Wallet } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   isPlanningStepAfter,
   planningStepValues,
 } from "../planning-step-utils";
+import { useTripPlanningStep } from "../hooks/use-trip-planning-step";
 
 const categories = [
   {
@@ -36,8 +35,6 @@ const categories = [
 ];
 
 const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
-
-const unwrapRecommendations = (response) => response?.data || response || {};
 
 const formatLabel = (value) =>
   String(value || "")
@@ -243,19 +240,24 @@ const RecommendationTabContent = ({ category, items, message }) => (
   </div>
 );
 
-const RecommendationsStep = ({ trip, onStepComplete, onStepSelect }) => {
+const RecommendationsStep = ({
+  trip,
+  onStepComplete,
+  onStepSelect,
+  onPlanningStateChange,
+}) => {
   const tripId = getTripId(trip);
   const [activeCategory, setActiveCategory] = useState("attractions");
-  const { data, isFetching, isLoading, isError } = useTripPlanningQuery(
-    tripId
-      ? {
-          trip_id: tripId,
-          step: planningStepValues.recommendation,
-        }
-      : skipToken,
-  );
-
-  const recommendations = useMemo(() => unwrapRecommendations(data), [data]);
+  const {
+    payload: recommendations,
+    isFetching,
+    isLoading,
+    isError,
+  } = useTripPlanningStep({
+    tripId,
+    step: planningStepValues.recommendation,
+    onPlanningStateChange,
+  });
   const isItineraryComplete = isPlanningStepAfter(
     trip?.current_step,
     planningStepValues.itinerary,
