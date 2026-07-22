@@ -17,7 +17,7 @@ import {
   UserRound,
   Wallet,
 } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { planningStepValues } from "../planning-step-utils";
@@ -83,8 +83,9 @@ const SectionCard = ({ title, children }) => (
   </section>
 );
 
-const OverviewStep = ({ trip }) => {
+const OverviewStep = ({ trip, onTripUpdated }) => {
   const tripId = getTripId(trip);
+  const [localTripStatus, setLocalTripStatus] = useState("");
   const { data, isFetching, isLoading, isError } = useTripPlanningQuery(
     tripId
       ? {
@@ -97,6 +98,8 @@ const OverviewStep = ({ trip }) => {
     useLazyTripActivateQuery();
   const overview = useMemo(() => unwrapOverview(data), [data]);
   const tripOverview = overview.trip || {};
+  const resolvedTripStatus =
+    localTripStatus || tripOverview.status || trip?.status || "";
   const recommendations = overview.recommendations_overview || {};
   const itinerary = overview.itinerary_overview || {};
   const preparation = overview.preparation_overview || {};
@@ -112,7 +115,26 @@ const OverviewStep = ({ trip }) => {
     }
 
     try {
-      await activateTrip({ trip_id: tripId }).unwrap();
+      const response = await activateTrip({ trip_id: tripId }).unwrap();
+      const updatedTrip = response?.data || response || {};
+
+      setLocalTripStatus("ready");
+      onTripUpdated?.({
+        ...trip,
+        ...updatedTrip,
+        id: getTripId(updatedTrip) || tripId,
+        status: updatedTrip.status || "ready",
+        current_step: planningStepValues.completed,
+        planning_stats: {
+          ...(trip?.planning_stats || {}),
+          ...(updatedTrip.planning_stats || {}),
+          agent_active: true,
+          is_qna_complete: true,
+          is_recommendation_complete: true,
+          is_itinerary_design_complete: true,
+          is_trip_preparation_complete: true,
+        },
+      });
       toast.success("Trip is ready.");
     } catch (error) {
       toast.error(error?.data?.message || "Could not activate this trip.");
@@ -132,7 +154,7 @@ const OverviewStep = ({ trip }) => {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-        {tripOverview.status === "draft" && (
+        {resolvedTripStatus === "draft" && (
           <NotificationCard
             title="This trip is saved as draft"
             message="Review the overview below. You can proceed with this trip or
@@ -232,7 +254,7 @@ const OverviewStep = ({ trip }) => {
           <Plus size={17} />
           Start a New Plan
         </Button>
-        {tripOverview.status !== "ready" ? (
+        {resolvedTripStatus !== "ready" ? (
           <Button
             type="button"
             onClick={handleActivateTrip}

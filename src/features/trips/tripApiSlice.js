@@ -124,6 +124,16 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       providesTags: ["trip-detail"],
     }),
 
+    tripShortDetails: builder.query({
+      query: ({ trip_id }) => {
+        return {
+          url: `/trips/${trip_id}/short-details/`,
+          method: "GET",
+        };
+      },
+      providesTags: ["trip-short-details"],
+    }),
+
     tripAgentConversation: builder.query({
       query: (trip_id) => {
         return {
@@ -143,15 +153,34 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           body: payload,
         };
       },
+      invalidatesTags: (result, error, payload) => [
+        {
+          type: "trip-planning",
+          id: `${payload?.trip_id}-${payload?.current_step}`,
+        },
+        "trip-detail",
+      ],
     }),
 
     tripPlanning: builder.query({
-      query: ({ trip_id, step }) => {
+      query: ({ trip_id, step, page_size }) => {
+        const queryParams = new URLSearchParams({
+          trip_id,
+          step,
+        });
+
+        if (page_size) {
+          queryParams.set("page_size", String(page_size));
+        }
+
         return {
-          url: `/trips/planning/?trip_id=${trip_id}&step=${step}`,
+          url: `/trips/planning/?${queryParams.toString()}`,
           method: "GET",
         };
       },
+      providesTags: (result, error, { trip_id, step }) => [
+        { type: "trip-planning", id: `${trip_id}-${step}` },
+      ],
     }),
 
     tripAgentCreateMessage: builder.mutation({
@@ -162,66 +191,13 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           body: payload,
         };
       },
-    }),
-
-    tripAgentMessageList: builder.query({
-      query: (params = {}) => {
-        const { trip_id, step, page = 1, page_size = 10 } = params;
-
-        const queryParams = new URLSearchParams({
-          page: String(page),
-          page_size: String(page_size),
-        });
-
-        const appendParam = (key, value) => {
-          if (!value || (Array.isArray(value) && !value.length)) return;
-          queryParams.set(key, Array.isArray(value) ? value.join(",") : value);
-        };
-
-        appendParam("trip_id", trip_id);
-        appendParam("step", step);
-
-        return {
-          url: `/trips/planning/messages/?${queryParams.toString()}`,
-          method: "GET",
-        };
-      },
-    }),
-
-    tripAgentRecommendations: builder.query({
-      query: ({ trip_id }) => {
-        return {
-          url: `/trips/planning/recommendations/?trip_id=${trip_id}`,
-          method: "GET",
-        };
-      },
-    }),
-
-    tripItineraries: builder.query({
-      query: ({ trip_id }) => {
-        return {
-          url: `/trips/planning/itineraries/?trip_id=${trip_id}`,
-          method: "GET",
-        };
-      },
-    }),
-
-    tripPreparation: builder.query({
-      query: ({ trip_id }) => {
-        return {
-          url: `/trips/planning/preparation/?trip_id=${trip_id}`,
-          method: "GET",
-        };
-      },
-    }),
-
-    tripOverview: builder.query({
-      query: ({ trip_id }) => {
-        return {
-          url: `/trips/planning/overview/?trip_id=${trip_id}`,
-          method: "GET",
-        };
-      },
+      invalidatesTags: (result, error, payload) => [
+        {
+          type: "trip-planning",
+          id: `${payload?.trip_id}-${payload?.current_step}`,
+        },
+        "trip-detail",
+      ],
     }),
 
     tripActivate: builder.query({
@@ -550,6 +526,7 @@ export const {
   useTripListQuery,
   useTripInfiniteListInfiniteQuery,
   useTripDetailQuery,
+  useTripShortDetailsQuery,
   useTripAgentConversationQuery,
   useCreateTripMutation,
   useUpdateTripMutation,
@@ -561,11 +538,6 @@ export const {
   useTripAgentActiveMutation,
   useTripAgentCreateMessageMutation,
   useTripPlanningQuery,
-  useTripAgentMessageListQuery,
-  useTripAgentRecommendationsQuery,
-  useTripItinerariesQuery,
-  useTripPreparationQuery,
-  useTripOverviewQuery,
   useTripActivateQuery,
   useLazyTripActivateQuery,
 

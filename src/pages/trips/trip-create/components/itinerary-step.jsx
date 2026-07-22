@@ -4,7 +4,7 @@ import TabMenu from "@/components/ui/tab";
 import { useTripPlanningQuery } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { CalendarDays, MapPinned, Route, Sparkles, Wallet } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   isPlanningStepAfter,
   planningStepValues,
@@ -202,9 +202,15 @@ const itineraryTabs = [
   { value: "budget", label: "Budget", icon: Wallet },
 ];
 
-const ItineraryStep = ({ trip, onStepComplete, onStepSelect }) => {
+const ItineraryStep = ({
+  trip,
+  onTripUpdated,
+  onStepComplete,
+  onStepSelect,
+}) => {
   const tripId = getTripId(trip);
   const [view, setView] = useState("days");
+  const completionSyncedRef = useRef(false);
   const { data, isFetching, isLoading, isError } = useTripPlanningQuery(
     tripId
       ? {
@@ -220,6 +226,12 @@ const ItineraryStep = ({ trip, onStepComplete, onStepSelect }) => {
   const activeDayPlan = days.find((day) => day.day === activeDay) || days[0];
   const activeDayItems = getDayItems(activeDayPlan || {});
   const budget = itinerary.rough_budget || {};
+  const isItineraryComplete = Boolean(
+    itinerary.is_finalized ||
+      itinerary.is_itinerary_complete ||
+      itinerary.is_itinerary_design_complete ||
+      days.length,
+  );
   const isPreparationComplete = isPlanningStepAfter(
     trip?.current_step,
     planningStepValues.preparation,
@@ -227,6 +239,20 @@ const ItineraryStep = ({ trip, onStepComplete, onStepSelect }) => {
   const preparationButtonLabel = isPreparationComplete
     ? "Show preparations"
     : "Start preparations";
+
+  useEffect(() => {
+    if (!tripId || !isItineraryComplete || completionSyncedRef.current) return;
+
+    completionSyncedRef.current = true;
+    onTripUpdated?.({
+      ...trip,
+      current_step: planningStepValues.preparation,
+      planning_stats: {
+        ...(trip?.planning_stats || {}),
+        is_itinerary_design_complete: true,
+      },
+    });
+  }, [isItineraryComplete, onTripUpdated, trip, tripId]);
 
   if (isLoading || isFetching) {
     return <ItinerarySkeleton />;
@@ -352,7 +378,7 @@ const ItineraryStep = ({ trip, onStepComplete, onStepSelect }) => {
           </div>
         )}
 
-        {(itinerary.is_finalized || itinerary.is_itinerary_complete) && (
+        {isItineraryComplete && (
           <NotificationCard
             message="Itinerary planning is complete. Review the days, routes, and budget
             before moving forward."

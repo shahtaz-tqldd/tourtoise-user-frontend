@@ -21,13 +21,14 @@ import {
   Sparkles,
   Plus,
   Trash2,
-  CheckCheck,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 import {
   useCreateTripMutation,
   useDeleteTripMutation,
-  useTripDetailQuery,
   useTripListQuery,
+  useTripShortDetailsQuery,
 } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -47,7 +48,7 @@ import {
 } from "./planning-step-utils";
 
 const createInitialForm = () => ({
-  budget_tier: "mid",
+  budget_tier: "comfort",
   budget_currency: "",
   start_date: "",
   days: "",
@@ -111,7 +112,7 @@ const planningSteps = [
 const getDestinationSlug = (destination) =>
   destination?.slug || destination?.destination_slug || destination?.id;
 
-const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
+const getTripId = (trip) => trip?.id;
 
 const getTripDetailId = (trip) =>
   getTripId(trip) || trip?.slug || trip?.trip_slug;
@@ -120,6 +121,43 @@ const unwrapDetail = (response) => response?.data || response || null;
 
 const getCurrentStepIndex = (trip) =>
   getCurrentPlanningStepIndex(trip?.current_step);
+
+const getStepComplete = (trip, stepKey) => {
+  const stats = trip?.planning_stats || {};
+
+  if (trip?.current_step === planningStepValues.completed) return true;
+  if (stepKey === planningStepValues.getStarted) return Boolean(trip);
+  if (stepKey === planningStepValues.preference) {
+    return (
+      stats.is_qna_complete ||
+      getCurrentPlanningStepIndex(trip?.current_step) >
+        getCurrentPlanningStepIndex(planningStepValues.preference)
+    );
+  }
+  if (stepKey === planningStepValues.recommendation) {
+    return (
+      stats.is_recommendation_complete ||
+      getCurrentPlanningStepIndex(trip?.current_step) >
+        getCurrentPlanningStepIndex(planningStepValues.recommendation)
+    );
+  }
+  if (stepKey === planningStepValues.itinerary) {
+    return (
+      stats.is_itinerary_design_complete ||
+      getCurrentPlanningStepIndex(trip?.current_step) >
+        getCurrentPlanningStepIndex(planningStepValues.itinerary)
+    );
+  }
+  if (stepKey === planningStepValues.preparation) {
+    return (
+      stats.is_trip_preparation_complete ||
+      getCurrentPlanningStepIndex(trip?.current_step) >
+        getCurrentPlanningStepIndex(planningStepValues.preparation)
+    );
+  }
+
+  return trip?.current_step === planningStepValues.completed;
+};
 
 const getTripTitle = (trip, destination) =>
   trip?.title || `${destination?.name} plan`;
@@ -193,15 +231,24 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
     data: tripDetailData,
     isFetching: isFetchingTripDetail,
     isError: tripDetailError,
-  } = useTripDetailQuery(open && detailTripId ? detailTripId : skipToken);
+  } = useTripShortDetailsQuery(
+    open && detailTripId ? { trip_id: detailTripId } : skipToken,
+  );
   const detailedTrip = useMemo(
     () => unwrapDetail(tripDetailData),
     [tripDetailData],
   );
+  const loadedDetailTrip =
+    detailTripId && getTripDetailId(detailedTrip) === detailTripId
+      ? detailedTrip
+      : null;
+  const selectedActiveTrip = selectedTrip
+    ? { ...(loadedDetailTrip || {}), ...selectedTrip }
+    : null;
   const activeTrip =
     isStartingNewPlan || isViewingPlanList
       ? null
-      : createdTrip || detailedTrip || trip || null;
+      : createdTrip || selectedActiveTrip || loadedDetailTrip || trip || null;
   const currentTripTitle =
     tripTitle ??
     getTripTitle(activeTrip || trip, resolvedDestination) ??
@@ -536,7 +583,8 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
                 {planningSteps.map((step, index) => {
                   const isReached = index <= unlockedStep;
                   const isActive = index === displayedStep;
-                  const isComplete = index < displayedStep;
+                  const isComplete = getStepComplete(activeTrip, step.key);
+                  const StepIcon = isComplete ? CheckCircle2 : Circle;
 
                   return (
                     <button
@@ -555,7 +603,12 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
                             : "text-slate-400"
                       } ${!isReached ? "cursor-not-allowed opacity-60" : ""}`}
                     >
-                      <CheckCheck className="shrink-0" size={14} />
+                      <StepIcon
+                        className={`shrink-0 ${
+                          isComplete ? "fill-primary/10" : "fill-current"
+                        }`}
+                        size={14}
+                      />
                       <span className="text-[11px] font-medium leading-4">
                         {step.title}
                       </span>
