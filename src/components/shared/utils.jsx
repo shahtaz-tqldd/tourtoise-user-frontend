@@ -5,14 +5,17 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { BoxIcon, ImageIcon } from "@/assets/icons/svg-icons";
 
-export const DetailPill = ({ children, className }) => {
+export const DetailPill = ({ children, className, variant = "primary" }) => {
   if (!children) return null;
 
   return (
     <span
       className={cn(
-        "rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold capitalize text-slate-800 shadow-sm",
+        "rounded-full px-2.5 py-1 text-xs font-semibold capitalize",
         className,
+        variant === "primary" ? "bg-primary/10 text-primary" : "",
+        variant === "accent" ? "bg-white text-slate-800" : "",
+        variant === "alert" ? "bg-orange-600/10 text-orange-600" : "",
       )}
     >
       {children}

@@ -103,7 +103,7 @@ const HighlightItemCard = ({ item, onSelect }) => {
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
       <div className="absolute left-3 top-3">
         {item.is_featured && (
-          <DetailPill>
+          <DetailPill variant="accent">
             <Star
               size={12}
               className="mr-1 -translate-y-[1px] inline-block fill-current"

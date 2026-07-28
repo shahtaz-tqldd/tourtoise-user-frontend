@@ -80,16 +80,33 @@ const unwrapAgentMessages = (response) => {
 const getMessageKey = (message) =>
   message.id || `${message.role}-${message.content}`;
 
-const mergeConversationMessages = (serverMessages, localMessages) => {
-  const seen = new Set();
+const getMessageContentKey = (message) =>
+  `${message.role}-${message.content}`;
 
-  return [...serverMessages, ...localMessages].filter((message) => {
+const mergeConversationMessages = (serverMessages, localMessages) => {
+  const seenServerMessages = new Set();
+  const serverMessageContent = new Set(
+    serverMessages.map(getMessageContentKey),
+  );
+  const mergedServerMessages = serverMessages.filter((message) => {
     const key = getMessageKey(message);
 
-    if (seen.has(key)) return false;
-    seen.add(key);
+    if (seenServerMessages.has(key)) return false;
+    seenServerMessages.add(key);
     return true;
   });
+  const seenLocalMessages = new Set();
+  const pendingLocalMessages = localMessages.filter((message) => {
+    if (serverMessageContent.has(getMessageContentKey(message))) return false;
+
+    const key = getMessageKey(message);
+
+    if (seenLocalMessages.has(key)) return false;
+    seenLocalMessages.add(key);
+    return true;
+  });
+
+  return [...mergedServerMessages, ...pendingLocalMessages];
 };
 
 const SystemMessageDivider = ({ message }) => (

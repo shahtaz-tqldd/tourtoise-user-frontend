@@ -19,6 +19,7 @@ import { DetailPill } from "@/components/shared/utils";
 import ImagePreview from "@/components/shared/image-slider";
 import SnapshotCard from "@/components/shared/snapshot-card";
 import PreviewContent from "@/components/shared/preview-content";
+import { formatMonths } from "@/lib/date-time";
 
 const getFeatureType = (item) =>
   formatLabel(
@@ -45,16 +46,8 @@ const formatCost = (value) => {
 
 const formatSeason = (value) => {
   if (!value) return null;
-
-  const months = value
-    .toString()
-    .split(";")
-    .filter(Boolean)
-    .map(Number);
-
-  if (months.length === 12) return "All year";
-
-  return value;
+  const months = value.toString().split(";").filter(Boolean).map(Number);
+  return months;
 };
 
 const getFeatureCategory = (item) => {
@@ -71,11 +64,6 @@ const getSnapshotFeatures = (item) => {
   if (category === "activity") {
     return [
       {
-        label: "Activity Type",
-        value: formatLabel(item.activity_type),
-        icon: Activity,
-      },
-      {
         label: "Difficulty",
         value: formatLabel(item.difficulty_level),
         icon: TreePalm,
@@ -90,18 +78,18 @@ const getSnapshotFeatures = (item) => {
         value: formatCost(item.approx_cost) || formatLabel(item.budget_tier),
         icon: Currency,
       },
+      {
+        label: "Best Time",
+        value: formatMonths(formatSeason(item.best_season)),
+        icon: Activity,
+      },
     ];
   }
 
   if (category === "cuisine") {
     return [
       {
-        label: "Cuisine Type",
-        value: formatLabel(item.cuisine_type),
-        icon: Utensils,
-      },
-      {
-        label: "Meal",
+        label: "Meal Type",
         value: formatLabel(item.meal_type),
         icon: Clock,
       },
@@ -114,6 +102,11 @@ const getSnapshotFeatures = (item) => {
         label: "Cost",
         value: formatCost(item.approx_cost) || item.approx_price_range,
         icon: Currency,
+      },
+      {
+        label: "Vegetarian Friendly",
+        value: item.is_vegetarian_friendly ? "Yes" : "No",
+        icon: Utensils,
       },
     ];
   }
@@ -151,20 +144,11 @@ const getExtraSections = (item) => {
         title: "Booking",
         body: item.booking_required ? "Booking required" : "Booking optional",
       },
-      {
-        title: "Best Season",
-        body: formatSeason(item.best_season),
-      },
-    ].filter((section) => section.body);
+    ];
   }
 
   if (category === "cuisine") {
-    return [
-      {
-        title: "Vegetarian Friendly",
-        body: item.is_vegetarian_friendly ? "Yes" : "No",
-      },
-    ];
+    return [];
   }
 
   return [
@@ -204,25 +188,39 @@ function FeatureDetailContent({ feature }) {
   const features = getSnapshotFeatures(item).filter((feature) => feature.value);
   const extraSections = getExtraSections(item);
   const tags = item.tags || [];
-  const leadLine = item.address || item.how_to_reach || type;
+  const leadLine = item.address || type;
 
   return (
     <div className="overflow-hidden bg-white">
       <ImagePreview images={images} />
       <div className="md:p-6 p-4">
         <div className="">
-          <h4 className="text-xs font-semibold uppercase text-primary">
-            {feature.title || type}
-          </h4>
-          <h2 className="mt-1 text-xl font-bold leading-tight">{item.name}</h2>
+          <DetailPill variant="alert">{feature.title || type}</DetailPill>
+          <h2 className="mt-2 text-xl font-bold leading-tight">{item.name}</h2>
           {leadLine && (
             <p className="mt-2 flex items-start gap-2 text-sm text-slate-500">
               {category === "cuisine" ? (
-                <Utensils size={14} className="mt-0.5 shrink-0 text-primary" />
+                <>
+                  <Utensils
+                    size={14}
+                    className="mt-0.5 shrink-0 text-primary"
+                  />
+                  <span className="capitalize">{type} Cuisine</span>
+                </>
+              ) : category === "activity" ? (
+                <>
+                  <Activity
+                    size={14}
+                    className="mt-0.5 shrink-0 text-primary"
+                  />
+                  <span className="capitalize">{type}</span>
+                </>
               ) : (
-                <MapPin size={14} className="mt-0.5 shrink-0 text-primary" />
+                <>
+                  <MapPin size={14} className="mt-0.5 shrink-0 text-primary" />
+                  <span className="capitalize">{item.address} </span>
+                </>
               )}
-              <span>{leadLine}</span>
             </p>
           )}
           <p className="mt-4 leading-7 text-slate-600 text-sm">

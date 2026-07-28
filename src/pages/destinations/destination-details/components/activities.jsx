@@ -99,7 +99,9 @@ const ActivityCard = ({ item, onSelect }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/20" />
         <div className="absolute left-3 right-3 top-3 flex items-start justify-between gap-2">
           {item.difficulty_level && (
-            <DetailPill>{formatLabel(item.difficulty_level)}</DetailPill>
+            <DetailPill variant="accent">
+              {formatLabel(item.difficulty_level)}
+            </DetailPill>
           )}
         </div>
       </div>

@@ -5,7 +5,11 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { cn } from "@/lib/utils";
 
-const ImagePreview = ({ images, className = "" }) => {
+const ImagePreview = ({
+  images,
+  className = "",
+  altPrefix = "Gallery photo",
+}) => {
   return (
     <div className={cn("overflow-hidden", className)}>
       {images.length > 0 && (
@@ -22,7 +26,7 @@ const ImagePreview = ({ images, className = "" }) => {
             <SwiperSlide key={`${image}-${index}`}>
               <img
                 src={image}
-                alt={`Journal photo ${index + 1}`}
+                alt={`${altPrefix} ${index + 1}`}
                 className="h-full w-full object-cover"
               />
             </SwiperSlide>
