@@ -95,6 +95,7 @@ const SystemMessageDivider = ({ message }) => (
 const TripAgentChat = ({
   tripId,
   sessionId,
+  messageUnreadCount = 0,
   notificationUnreadCount = 0,
   showTabs = true,
   activeSection = "chat",
@@ -104,12 +105,16 @@ const TripAgentChat = ({
   const selectedSection = showTabs ? activeTab : activeSection;
   const tabs = useMemo(
     () =>
-      asideTabs.map((tab) =>
-        tab.value === "notifications"
-          ? { ...tab, unreadCount: notificationUnreadCount }
-          : tab,
-      ),
-    [notificationUnreadCount],
+      asideTabs.map((tab) => {
+        if (tab.value === "chat") {
+          return { ...tab, unreadCount: messageUnreadCount };
+        }
+        if (tab.value === "notifications") {
+          return { ...tab, unreadCount: notificationUnreadCount };
+        }
+        return tab;
+      }),
+    [messageUnreadCount, notificationUnreadCount],
   );
 
   return (

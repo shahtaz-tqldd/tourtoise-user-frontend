@@ -13,7 +13,10 @@ import TripPlanningTabs from "./components/trip-planning-tabs";
 import { Bell, Loader2, MessageSquareDot, Sparkles } from "lucide-react";
 
 // lib
-import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
+import {
+  useTripDetailQuery,
+  useTripMessageListQuery,
+} from "@/features/trips/tripApiSlice";
 import { useNotificationListQuery } from "@/features/notification/notificationApiSlice";
 import useNotificationSocket from "@/features/notification/useNotificationSocket";
 import useTitle from "@/hooks/useTitle";
@@ -25,7 +28,6 @@ const mobileTabs = [
     value: "assistant",
     label: "Trip Assistant",
     icon: MessageSquareDot,
-    count: 0,
   },
   { value: "notifications", label: "Notification", icon: Bell },
 ];
@@ -38,6 +40,14 @@ const formatMoney = (amount, currency) =>
   }).format(Number(amount || 0));
 
 const unwrapTripDetail = (response) => response?.data || response;
+
+const getUnreadMessageCount = (response) =>
+  Number(
+    response?.meta?.unread_count ??
+      response?.data?.meta?.unread_count ??
+      response?.data?.unread_count ??
+      0,
+  );
 
 const normalizeTransportMode = (mode = "") => {
   const normalizedMode = mode.toLowerCase();
@@ -251,15 +261,32 @@ const TripDetailPage = () => {
     () => normalizeTripDetail(unwrapTripDetail(data)),
     [data],
   );
+  const chatSessionId = trip?.is_chat_available
+    ? trip.conversation_session_id
+    : null;
+  const { data: messageData } = useTripMessageListQuery(
+    {
+      trip_id,
+      session_id: chatSessionId,
+      page: 1,
+      page_size: 1,
+    },
+    { skip: !trip_id || !chatSessionId },
+  );
   const notificationUnreadCount = notificationData?.meta?.unread_count || 0;
+  const messageUnreadCount = getUnreadMessageCount(messageData);
   const tabs = useMemo(
     () =>
-      mobileTabs.map((tab) =>
-        tab.value === "notifications"
-          ? { ...tab, count: notificationUnreadCount }
-          : tab,
-      ),
-    [notificationUnreadCount],
+      mobileTabs.map((tab) => {
+        if (tab.value === "assistant") {
+          return { ...tab, unreadCount: messageUnreadCount };
+        }
+        if (tab.value === "notifications") {
+          return { ...tab, unreadCount: notificationUnreadCount };
+        }
+        return tab;
+      }),
+    [messageUnreadCount, notificationUnreadCount],
   );
 
   const handleSocketNotification = useCallback(
@@ -310,7 +337,8 @@ const TripDetailPage = () => {
         <TripAgentChat
           messages={trip.chat}
           tripId={trip.id}
-          sessionId={trip.session_id}
+          sessionId={chatSessionId}
+          messageUnreadCount={messageUnreadCount}
           notificationUnreadCount={notificationUnreadCount}
           className="sticky top-[92px]"
         />
@@ -351,7 +379,8 @@ const TripDetailPage = () => {
           {activeMobileTab === "assistant" && (
             <TripAgentChat
               tripId={trip.id}
-              sessionId={trip.session_id}
+              sessionId={chatSessionId}
+              messageUnreadCount={messageUnreadCount}
               notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="chat"
@@ -362,7 +391,8 @@ const TripDetailPage = () => {
           {activeMobileTab === "notifications" && (
             <TripAgentChat
               tripId={trip.id}
-              sessionId={trip.session_id}
+              sessionId={chatSessionId}
+              messageUnreadCount={messageUnreadCount}
               notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="notifications"
