@@ -48,4 +48,48 @@ function Button({ className, variant, size, asChild = false, ...props }) {
   );
 }
 
-export { Button };
+const IconNumberButton = ({
+  icon: Icon,
+  onClick,
+  disabled = false,
+  isFocused = false,
+  focusedText = "",
+  unFocusedText = "",
+  count = 0,
+  className = "",
+}) => {
+  const label = isFocused ? focusedText : unFocusedText;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-pressed={isFocused}
+      aria-label={label}
+      title={label}
+      className={cn(
+        "inline-flex h-9 items-center justify-center gap-2 rounded-full px-3",
+        "text-sm font-semibold transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+        "disabled:pointer-events-none disabled:opacity-50",
+        isFocused
+          ? "bg-primary/10 text-primary"
+          : "bg-white text-slate-600 hover:bg-primary/10 hover:text-primary md:bg-slate-100",
+        className,
+      )}
+    >
+      {Icon && (
+        <Icon
+          size={16}
+          strokeWidth={2}
+          aria-hidden="true"
+          className={cn("shrink-0", isFocused && "fill-current")}
+        />
+      )}
+
+      {count > 0 && <span>{count}</span>}
+    </button>
+  );
+};
+export { Button, IconNumberButton };

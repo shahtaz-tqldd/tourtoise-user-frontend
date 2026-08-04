@@ -12,7 +12,7 @@ import TabMenu from "@/components/ui/tab";
 import TripHeadsUp from "./heads-up";
 import TripPackingItems from "./packing-items";
 import TripRoutePlan from "./route-plan";
-import TripDocumentList from "./document-list";
+import TripDocumentList from "./documents";
 import TripDayWisePlan from "./day-wise-plan";
 
 const planningTabs = [

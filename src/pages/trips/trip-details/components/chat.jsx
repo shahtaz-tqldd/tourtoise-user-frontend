@@ -155,6 +155,7 @@ const ChatSection = ({ tripId, sessionId }) => {
   const messagesEndRef = useRef(null);
   const preserveScrollRef = useRef(null);
   const hasScrolledInitialRef = useRef(false);
+  const lastLoadedMessageRef = useRef(null);
   const {
     data: messageListData,
     isFetching: isFetchingMessages,
@@ -228,6 +229,26 @@ const ChatSection = ({ tripId, sessionId }) => {
     if (!pendingMessage) return;
     messagesEndRef.current?.scrollIntoView({ block: "end" });
   }, [pendingMessage]);
+
+  useEffect(() => {
+    const latestMessage = messages.at(-1);
+    if (!latestMessage) return;
+
+    const latestMessageSignature = `${latestMessage.id}-${latestMessage.content}`;
+    const previousMessageSignature = lastLoadedMessageRef.current;
+    lastLoadedMessageRef.current = latestMessageSignature;
+
+    if (
+      previousMessageSignature &&
+      previousMessageSignature !== latestMessageSignature &&
+      latestMessage.role === "agent"
+    ) {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [messages]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -330,7 +351,11 @@ const ChatSection = ({ tripId, sessionId }) => {
                 {message.content}
               </div>
             ) : (
-              <AuthorMessage key={message.id || index} message={message.content} />
+              <AuthorMessage
+                key={message.id || index}
+                message={message.content}
+                renderHtml
+              />
             );
           })
         ) : (

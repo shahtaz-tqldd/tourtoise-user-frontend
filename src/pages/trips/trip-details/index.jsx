@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 // components
 import Card from "@/components/ui/card";
 import TabMenu from "@/components/ui/tab";
-import TripAgentChat from "./components/trip-agent-chat";
-import TripOverview from "./components/trip-overview";
-import TripPlanningTabs from "./components/trip-planning-tabs";
+import TripAgentChat from "./components/chat";
+import TripOverview from "./components/overview";
+import TripPlanningTabs from "./components/planning-tabs";
 
 //icons
 import { Bell, Loader2, MessageSquareDot, Sparkles } from "lucide-react";
@@ -20,7 +20,7 @@ import {
 import { useNotificationListQuery } from "@/features/notification/notificationApiSlice";
 import useNotificationSocket from "@/features/notification/useNotificationSocket";
 import useTitle from "@/hooks/useTitle";
-import TripNotes from "./components/trip-notes";
+import TripNotes from "./components/notes";
 
 const mobileTabs = [
   { value: "overview", label: "Overview", icon: Sparkles },
