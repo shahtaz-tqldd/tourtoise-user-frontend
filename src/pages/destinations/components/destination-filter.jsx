@@ -9,19 +9,7 @@ import {
 import { FloatingSelect, SelectItem } from "@/components/ui/select";
 import { COUNTRY_LIST } from "@/lib/countries";
 import { cn } from "@/lib/utils";
-import {
-  Banknote,
-  Building2,
-  Compass,
-  Footprints,
-  Landmark,
-  Mountain,
-  Palmtree,
-  SlidersHorizontal,
-  Sparkles,
-  Sprout,
-  Umbrella,
-} from "lucide-react";
+import { Banknote, Compass, SlidersHorizontal, Sparkles } from "lucide-react";
 import SearchBar from "@/components/shared/search-bar";
 import { DESTINATION_TYPE_OPTIONS } from "../constants";
 

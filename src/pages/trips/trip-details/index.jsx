@@ -1,23 +1,26 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 // components
 import Card from "@/components/ui/card";
 import TabMenu from "@/components/ui/tab";
-import TripAgentChat from "./components/trip-agent-chat";
-import TripOverview from "./components/trip-overview";
-import TripPlanningTabs from "./components/trip-planning-tabs";
+import TripAgentChat from "./components/chat";
+import TripOverview from "./components/overview";
+import TripPlanningTabs from "./components/planning-tabs";
 
 //icons
 import { Bell, Loader2, MessageSquareDot, Sparkles } from "lucide-react";
 
 // lib
-import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
+import {
+  useTripDetailQuery,
+  useTripMessageListQuery,
+} from "@/features/trips/tripApiSlice";
 import { useNotificationListQuery } from "@/features/notification/notificationApiSlice";
 import useNotificationSocket from "@/features/notification/useNotificationSocket";
 import useTitle from "@/hooks/useTitle";
-import TripNotes from "./components/trip-notes";
+import TripNotes from "./components/notes";
 
 const mobileTabs = [
   { value: "overview", label: "Overview", icon: Sparkles },
@@ -25,7 +28,6 @@ const mobileTabs = [
     value: "assistant",
     label: "Trip Assistant",
     icon: MessageSquareDot,
-    count: 0,
   },
   { value: "notifications", label: "Notification", icon: Bell },
 ];
@@ -239,6 +241,9 @@ const TripDetailPage = () => {
   useTitle("Trip Details");
   const { trip_id } = useParams();
   const [activeMobileTab, setActiveMobileTab] = useState("overview");
+  const [incomingMessages, setIncomingMessages] = useState([]);
+  const [unreadCountOverrides, setUnreadCountOverrides] = useState({});
+  const receivedSocketMessageIdsRef = useRef(new Set());
 
   const { data, isFetching, isError } = useTripDetailQuery(trip_id);
   const { data: notificationData, refetch: refetchNotifications } =
@@ -251,15 +256,36 @@ const TripDetailPage = () => {
     () => normalizeTripDetail(unwrapTripDetail(data)),
     [data],
   );
+  const chatSessionId = trip?.is_chat_available
+    ? trip.conversation_session_id
+    : null;
+  const { data: messageData } = useTripMessageListQuery(
+    {
+      trip_id,
+      session_id: chatSessionId,
+      page: 1,
+      page_size: 1,
+    },
+    { skip: !trip_id || !chatSessionId },
+  );
   const notificationUnreadCount = notificationData?.meta?.unread_count || 0;
+  const serverMessageUnreadCount = Number(
+    messageData?.meta?.unread_count || 0,
+  );
+  const messageUnreadCount =
+    unreadCountOverrides[chatSessionId] ?? serverMessageUnreadCount;
   const tabs = useMemo(
     () =>
-      mobileTabs.map((tab) =>
-        tab.value === "notifications"
-          ? { ...tab, count: notificationUnreadCount }
-          : tab,
-      ),
-    [notificationUnreadCount],
+      mobileTabs.map((tab) => {
+        if (tab.value === "assistant") {
+          return { ...tab, unreadCount: messageUnreadCount };
+        }
+        if (tab.value === "notifications") {
+          return { ...tab, unreadCount: notificationUnreadCount };
+        }
+        return tab;
+      }),
+    [messageUnreadCount, notificationUnreadCount],
   );
 
   const handleSocketNotification = useCallback(
@@ -271,9 +297,48 @@ const TripDetailPage = () => {
     [refetchNotifications, trip_id],
   );
 
+  const handleSocketTripMessage = useCallback(
+    (socketEvent) => {
+      if (
+        !chatSessionId ||
+        socketEvent?.conversation_id !== chatSessionId ||
+        !socketEvent.message
+      ) {
+        return;
+      }
+
+      const socketMessageKey = `${socketEvent.conversation_id}-${socketEvent.message.id}`;
+      if (receivedSocketMessageIdsRef.current.has(socketMessageKey)) return;
+      receivedSocketMessageIdsRef.current.add(socketMessageKey);
+
+      setIncomingMessages((currentMessages) => {
+        return [...currentMessages, socketEvent.message];
+      });
+
+      if (socketEvent.message.sender === "agent") {
+        setUnreadCountOverrides((currentCounts) => ({
+          ...currentCounts,
+          [chatSessionId]:
+            (currentCounts[chatSessionId] ?? serverMessageUnreadCount) + 1,
+        }));
+      }
+    },
+    [chatSessionId, serverMessageUnreadCount],
+  );
+
+  const handleMessagesRead = useCallback(() => {
+    if (!chatSessionId) return;
+
+    setUnreadCountOverrides((currentCounts) => ({
+      ...currentCounts,
+      [chatSessionId]: 0,
+    }));
+  }, [chatSessionId]);
+
   useNotificationSocket({
     enabled: Boolean(trip_id),
     onNotification: handleSocketNotification,
+    onTripMessage: handleSocketTripMessage,
   });
 
   if (isFetching) {
@@ -310,7 +375,10 @@ const TripDetailPage = () => {
         <TripAgentChat
           messages={trip.chat}
           tripId={trip.id}
-          sessionId={trip.session_id}
+          sessionId={chatSessionId}
+          incomingMessages={incomingMessages}
+          messageUnreadCount={messageUnreadCount}
+          onMessagesRead={handleMessagesRead}
           notificationUnreadCount={notificationUnreadCount}
           className="sticky top-[92px]"
         />
@@ -351,7 +419,10 @@ const TripDetailPage = () => {
           {activeMobileTab === "assistant" && (
             <TripAgentChat
               tripId={trip.id}
-              sessionId={trip.session_id}
+              sessionId={chatSessionId}
+              incomingMessages={incomingMessages}
+              messageUnreadCount={messageUnreadCount}
+              onMessagesRead={handleMessagesRead}
               notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="chat"
@@ -362,7 +433,8 @@ const TripDetailPage = () => {
           {activeMobileTab === "notifications" && (
             <TripAgentChat
               tripId={trip.id}
-              sessionId={trip.session_id}
+              sessionId={chatSessionId}
+              messageUnreadCount={messageUnreadCount}
               notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="notifications"

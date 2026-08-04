@@ -124,7 +124,7 @@ const DestinationDetailsPage = () => {
             <TripEssentials destination={destination} />
           </div>
 
-          <aside className="min-w-0 xl:sticky xl:top-24 xl:self-start space-y-5 md:space-y-6">
+          <aside className="min-w-0 space-y-5 md:space-y-6 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7rem)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
             <div className="hidden xl:block space-y-4">
               <TripSnapshot
                 destination={destination}

@@ -16,6 +16,7 @@ const monthLabels = [
 
 export const formatMonths = (months) => {
   if (!months?.length) return "N/A";
+  if (months.length === 12) return "Anytime";
 
   const monthIndexes = [
     ...new Set(

@@ -342,7 +342,7 @@ const TripOverview = ({ trip }) => {
 
   return (
     <Card className="p-0 md:p-6 bg-transparent md:bg-white rounded-none md:rounded-2xl pt-4 md:pt-6">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex gap-5 items-start justify-between">
         <div className="max-w-3xl min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={trip.status} />

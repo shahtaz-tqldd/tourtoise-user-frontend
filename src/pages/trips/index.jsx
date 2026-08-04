@@ -1,16 +1,18 @@
-import { useTripListQuery } from "@/features/trips/tripApiSlice";
 import React, { useMemo, useState } from "react";
+
+// trips
 import { TripHistory } from "./components/trip-history";
 import TripsFeed from "./components/trips-feed";
 import TripsPageHeader from "./components/trips-page-header";
+
+// hooks and services
 import useTitle from "@/hooks/useTitle";
+import { useTripListQuery } from "@/features/trips/tripApiSlice";
 
 const pageSize = 24;
 const historyPageSize = 12;
 const pastStatuses = new Set(["completed", "archived", "cancelled"]);
-const activeStatusAliases = new Set(["active", "ready"]);
-
-const getMeta = (response) => response?.meta || response?.data?.meta || {};
+const activeStatusAliases = new Set(["in_progress", "ready", "draft"]);
 
 const isPastTrip = (trip) => {
   const status = trip.status?.toLowerCase();
@@ -23,20 +25,6 @@ const isPastTrip = (trip) => {
 
   return endDate < today;
 };
-
-const statusMatches = (tripStatus, selectedStatus) => {
-  if (selectedStatus === "all") return true;
-
-  const status = tripStatus?.toLowerCase();
-  if (selectedStatus === "active") return activeStatusAliases.has(status);
-
-  return status === selectedStatus;
-};
-
-const filterCurrentTrips = (trips, status) =>
-  trips?.filter(
-    (trip) => !isPastTrip(trip) && statusMatches(trip.status, status),
-  );
 
 const TripsPage = () => {
   useTitle("Trips");
@@ -52,7 +40,7 @@ const TripsPage = () => {
       search: activeSearch || undefined,
       status:
         activeStatus === "all"
-          ? undefined
+          ? Array.from(activeStatusAliases)
           : activeStatus === "active"
             ? Array.from(activeStatusAliases)
             : activeStatus,
@@ -71,24 +59,22 @@ const TripsPage = () => {
   );
 
   const { data, isFetching, isError } = useTripListQuery(queryArgs);
+
   const {
     data: historyData,
     isFetching: isHistoryFetching,
     isError: isHistoryError,
   } = useTripListQuery(historyQueryArgs);
+
   const trips = useMemo(() => data?.data, [data]);
   const historyTrips = useMemo(() => historyData?.data, [historyData]);
-  const meta = getMeta(data);
-  const activeTrips = useMemo(
-    () => filterCurrentTrips(trips, activeStatus),
-    [activeStatus, trips],
-  );
+
   const pastTrips = useMemo(
     () => historyTrips?.filter(isPastTrip),
     [historyTrips],
   );
+
   const hasActiveFilters = activeSearch || activeStatus !== "all";
-  const totalTrips = meta.count ?? meta.total ?? trips?.length;
 
   const updateActiveSearch = (value) => {
     setActiveSearch(value);
@@ -111,8 +97,6 @@ const TripsPage = () => {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="space-y-6">
           <TripsPageHeader
-            tripsCount={activeTrips?.length}
-            totalTrips={totalTrips}
             activeSearch={activeSearch}
             onActiveSearchChange={updateActiveSearch}
             activeStatus={activeStatus}
@@ -125,7 +109,7 @@ const TripsPage = () => {
           />
 
           <TripsFeed
-            trips={activeTrips}
+            trips={trips}
             isFetching={isFetching}
             isError={isError}
             hasActiveFilters={hasActiveFilters}

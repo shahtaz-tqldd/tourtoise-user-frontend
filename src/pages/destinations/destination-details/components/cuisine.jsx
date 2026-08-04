@@ -95,7 +95,7 @@ export const CuisineCard = ({ item, metaItems, onSelect }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/20" />
         <div className="absolute left-3 top-3">
           {item.is_must_try && (
-            <DetailPill>
+            <DetailPill variant="accent">
               <Star
                 size={12}
                 className="mr-1 -translate-y-[1px] inline-block fill-current"

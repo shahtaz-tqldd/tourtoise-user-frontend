@@ -1,8 +1,23 @@
 import { Link } from "react-router-dom";
-import { PageTitle } from "@/components/shared/utils";
+import { DetailPill, PageTitle } from "@/components/shared/utils";
+import ImagePreview from "@/components/shared/image-slider";
 import { ArrowLeft } from "lucide-react";
 
 const DestinationCover = ({ destination }) => {
+  const images = [
+    destination.cover_image && {
+      url: destination.cover_image,
+      sortOrder: 0,
+    },
+    ...(destination.images || []).map((image) => ({
+      url: image.image_url,
+      sortOrder: image.sort_order,
+    })),
+  ]
+    .filter((image) => image?.url)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .map((image) => image.url);
+
   const tags =
     destination.tags
       ?.map((tag) => tag.name || tag.slug || tag)
@@ -18,34 +33,18 @@ const DestinationCover = ({ destination }) => {
         >
           <ArrowLeft size={16} />
         </Link>
-        <div className="aspect-[16/9]">
-          <img
-            src={destination.cover_image}
-            alt={destination.name}
-            className="h-full w-full object-cover"
-          />
-        </div>
-        <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent" />
-        <div className="hidden md:block absolute bottom-0 left-0 right-0 p-4 text-white md:p-8">
-          <PageTitle
-            title={destination.name}
-            text={destination.tagline}
-            variant="light"
-          />
-        </div>
+        <ImagePreview
+          images={images}
+          altPrefix={destination.name || "Destination"}
+        />
       </div>
-      <div className="block md:hidden mt-3">
+      <div className="mt-3">
         <PageTitle title={destination.name} text={destination.tagline} />
       </div>
       {!!tags.length && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 -mt-4">
           {tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
-            >
-              {tag}
-            </span>
+            <DetailPill key={tag}>{tag}</DetailPill>
           ))}
         </div>
       )}

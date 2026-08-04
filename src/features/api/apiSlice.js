@@ -116,7 +116,6 @@ export const apiSlice = createApi({
     "chat-session-list",
     "chat-session",
     "chat-message-list",
-    "trip-message-list",
     "notification-list",
   ],
   keepUnusedDataFor: 300, // Don't keep any unused data

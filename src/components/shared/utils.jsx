@@ -4,15 +4,29 @@ import { Sparkles } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import { BoxIcon, ImageIcon } from "@/assets/icons/svg-icons";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
 
-export const DetailPill = ({ children, className }) => {
+const renderRichMessage = (message) => {
+  const normalizedMarkdown = String(message ?? "").replace(
+    /\*\*[ \t]+(.+?)[ \t]+\*\*/g,
+    "**$1**",
+  );
+
+  return DOMPurify.sanitize(marked.parse(normalizedMarkdown));
+};
+
+export const DetailPill = ({ children, className, variant = "primary" }) => {
   if (!children) return null;
 
   return (
     <span
       className={cn(
-        "rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold capitalize text-slate-800 shadow-sm",
+        "rounded-full px-2.5 py-1 text-xs font-semibold capitalize",
         className,
+        variant === "primary" ? "bg-primary/10 text-primary" : "",
+        variant === "accent" ? "bg-white text-slate-800" : "",
+        variant === "alert" ? "bg-orange-600/10 text-orange-600" : "",
       )}
     >
       {children}
@@ -26,6 +40,7 @@ export const AuthorMessage = ({
   component = null,
   className = "",
   author = "turtle",
+  renderHtml = false,
 }) => {
   return (
     <div className={cn("flex gap-3 w-fit md:max-w-[88%]", className)}>
@@ -39,7 +54,16 @@ export const AuthorMessage = ({
         {title && (
           <h3 className="text-sm font-semibold text-slate-950 mb-1">{title}</h3>
         )}
-        <p className="text-sm md:leading-6 text-slate-700">{message}</p>
+        {renderHtml ? (
+          <div
+            className="text-sm md:leading-6 text-slate-700 [&_p+p]:mt-2 [&_strong]:font-bold"
+            dangerouslySetInnerHTML={{
+              __html: renderRichMessage(message),
+            }}
+          />
+        ) : (
+          <p className="text-sm md:leading-6 text-slate-700">{message}</p>
+        )}
         {component && component}
       </div>
     </div>
