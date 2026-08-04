@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Bell, BellRing } from "lucide-react";
 import { useSelector } from "react-redux";
 import {
@@ -10,19 +10,30 @@ import {
 import NotificationList from "@/features/notification/notification-list";
 import { useNotificationListQuery } from "@/features/notification/notificationApiSlice";
 import useNotificationSocket from "@/features/notification/useNotificationSocket";
+import useNotificationAlert from "@/features/notification/useNotificationAlert";
 
 const notificationQuery = { page: 1, page_size: 5 };
 
 const AlertMenu = () => {
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { data, refetch } = useNotificationListQuery(notificationQuery, {
     skip: !isAuthenticated,
   });
   const unreadCount = data?.meta?.unread_count || 0;
+  const showNotificationAlert = useNotificationAlert({
+    enabled: user?.is_alert_notification_enabled !== false,
+  });
+  const handleSocketNotification = useCallback(
+    (notification) => {
+      refetch();
+      showNotificationAlert(notification);
+    },
+    [refetch, showNotificationAlert],
+  );
 
   useNotificationSocket({
     enabled: isAuthenticated,
-    onNotification: refetch,
+    onNotification: handleSocketNotification,
   });
 
   return (

@@ -470,9 +470,6 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: (result, error, { session_id }) => [
-        { type: "trip-message-list", id: session_id },
-      ],
     }),
 
     tripMessageInfiniteList: builder.infiniteQuery({
@@ -499,9 +496,6 @@ export const tripApiSlice = apiSlice.injectEndpoints({
         initialPageParam: 1,
         getNextPageParam: nextTripPage,
       },
-      providesTags: (result, error, { session_id }) => [
-        { type: "trip-message-list", id: session_id },
-      ],
     }),
 
     createTripMessage: builder.mutation({
@@ -512,9 +506,15 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           body: payload,
         };
       },
-      invalidatesTags: (result, error, { session_id }) => [
-        { type: "trip-message-list", id: session_id },
-      ],
+    }),
+
+    readAllMessages: builder.mutation({
+      query: ({ trip_id, session_id }) => {
+        return {
+          url: `/trips/${trip_id}/chat/${session_id}/read-all/`,
+          method: "PATCH",
+        };
+      },
     }),
   }),
 });
@@ -573,4 +573,5 @@ export const {
   useTripMessageListQuery,
   useTripMessageInfiniteListInfiniteQuery,
   useCreateTripMessageMutation,
+  useReadAllMessagesMutation,
 } = tripApiSlice;

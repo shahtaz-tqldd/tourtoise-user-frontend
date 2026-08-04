@@ -1,16 +1,18 @@
-import { useTripListQuery } from "@/features/trips/tripApiSlice";
 import React, { useMemo, useState } from "react";
+
+// trips
 import { TripHistory } from "./components/trip-history";
 import TripsFeed from "./components/trips-feed";
 import TripsPageHeader from "./components/trips-page-header";
+
+// hooks and services
 import useTitle from "@/hooks/useTitle";
+import { useTripListQuery } from "@/features/trips/tripApiSlice";
 
 const pageSize = 24;
 const historyPageSize = 12;
 const pastStatuses = new Set(["completed", "archived", "cancelled"]);
-const activeStatusAliases = new Set(["active", "ready"]);
-
-const getMeta = (response) => response?.meta || response?.data?.meta || {};
+const activeStatusAliases = new Set(["in_progress", "ready", "draft"]);
 
 const isPastTrip = (trip) => {
   const status = trip.status?.toLowerCase();
@@ -23,9 +25,6 @@ const isPastTrip = (trip) => {
 
   return endDate < today;
 };
-
-
-
 
 const TripsPage = () => {
   useTitle("Trips");
@@ -41,7 +40,7 @@ const TripsPage = () => {
       search: activeSearch || undefined,
       status:
         activeStatus === "all"
-          ? undefined
+          ? Array.from(activeStatusAliases)
           : activeStatus === "active"
             ? Array.from(activeStatusAliases)
             : activeStatus,
@@ -69,9 +68,6 @@ const TripsPage = () => {
 
   const trips = useMemo(() => data?.data, [data]);
   const historyTrips = useMemo(() => historyData?.data, [historyData]);
-
-  const meta = getMeta(data);
-  const totalTrips = meta.count ?? meta.total ?? trips?.length;
 
   const pastTrips = useMemo(
     () => historyTrips?.filter(isPastTrip),
@@ -101,8 +97,6 @@ const TripsPage = () => {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="space-y-6">
           <TripsPageHeader
-            tripsCount={totalTrips}
-            totalTrips={totalTrips}
             activeSearch={activeSearch}
             onActiveSearchChange={updateActiveSearch}
             activeStatus={activeStatus}

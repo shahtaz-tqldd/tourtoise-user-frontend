@@ -23,7 +23,7 @@ const TripsFeed = ({
     )}
 
     {!isFetching && !isError && trips.length > 0 && (
-      <div className="space-y-4">
+      <div className="flex flex-col gap-4">
         {trips.map((trip) => (
           <TripCard key={trip.id || trip.slug} trip={trip} />
         ))}

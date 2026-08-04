@@ -18,7 +18,11 @@ const getNotificationSocketUrl = (accessToken) => {
   }
 };
 
-const useNotificationSocket = ({ enabled = true, onNotification } = {}) => {
+const useNotificationSocket = ({
+  enabled = true,
+  onNotification,
+  onTripMessage,
+} = {}) => {
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return undefined;
 
@@ -30,7 +34,20 @@ const useNotificationSocket = ({ enabled = true, onNotification } = {}) => {
 
     socket.onmessage = (event) => {
       try {
-        onNotification?.(JSON.parse(event.data));
+        const socketEvent = JSON.parse(event.data);
+
+        if (socketEvent?.type === "notification.created") {
+          onNotification?.(socketEvent.notification);
+          return;
+        }
+
+        if (socketEvent?.type === "trip.message.created") {
+          onTripMessage?.(socketEvent);
+          return;
+        }
+
+        // Keep supporting the previous unwrapped notification payload.
+        onNotification?.(socketEvent);
       } catch {
         onNotification?.(null);
       }
@@ -39,7 +56,7 @@ const useNotificationSocket = ({ enabled = true, onNotification } = {}) => {
     return () => {
       socket.close();
     };
-  }, [enabled, onNotification]);
+  }, [enabled, onNotification, onTripMessage]);
 };
 
 export default useNotificationSocket;

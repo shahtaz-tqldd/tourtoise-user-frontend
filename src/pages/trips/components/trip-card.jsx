@@ -91,6 +91,9 @@ const TripCard = ({ trip, compact = false }) => {
     setShareMeta((current) => ({ ...current, ...updates }));
   };
 
+  const notificationUnreadCount = trip.unread_notification || 0;
+  const messageUnreadCount = trip.unread_message || 0;
+
   const handleDeleteTrip = async () => {
     if (!tripId) {
       toast.error("Trip id is missing.");
@@ -271,15 +274,23 @@ const TripCard = ({ trip, compact = false }) => {
               </span>
             </div>
             <div className="flbx">
-              <div className="flx gap-5">
-                <div className="flx gap-1.5">
-                  <Bell size={16} className="text-red-600" />
-                  <span className="text-xs font-medium text-red-600">4 New Alert</span>
-                </div>
-                <div className="flx gap-1.5">
-                  <MessageCircle size={16} className=" text-primary"/>
-                  <span className="text-xs font-medium text-primary">2 New Message</span>
-                </div>
+              <div className="flx gap-6">
+                {notificationUnreadCount ? (
+                  <div className="flx gap-1.5">
+                    <Bell size={16} className="text-red-600" />
+                    <span className="text-xs font-medium text-red-600">
+                      {notificationUnreadCount} Alert
+                    </span>
+                  </div>
+                ) : null}
+                {messageUnreadCount ? (
+                  <div className="flx gap-1.5">
+                    <MessageCircle size={16} className="text-red-600" />
+                    <span className="text-xs font-medium text-red-600">
+                      {messageUnreadCount} Message
+                    </span>
+                  </div>
+                ) : null}
               </div>
               <div className="flx gap-2">
                 <span className="w-full md:w-fit flx gap-2 text-sm text-primary font-semibold">

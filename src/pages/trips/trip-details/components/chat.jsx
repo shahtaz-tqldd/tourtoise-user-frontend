@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import NotificationList from "@/features/notification/notification-list";
 import {
   useCreateTripMessageMutation,
+  useReadAllMessagesMutation,
   useTripMessageInfiniteListInfiniteQuery,
 } from "@/features/trips/tripApiSlice";
 
@@ -54,7 +55,7 @@ const normalizeMessage = (item) => {
 
 const sortMessages = (items) =>
   [...items].sort((a, b) => {
-    if (a.sequence !== undefined || b.sequence !== undefined) {
+    if (a.sequence !== undefined && b.sequence !== undefined) {
       return Number(a.sequence || 0) - Number(b.sequence || 0);
     }
 
@@ -92,10 +93,38 @@ const SystemMessageDivider = ({ message }) => (
   </div>
 );
 
+const UnreadMessagesDivider = ({ count }) => (
+  <div className="flex items-center gap-3 py-1" role="separator">
+    <span className="h-px flex-1 bg-red-200" />
+    <span className="rounded-full bg-red-50 px-3 py-1 text-[11px] font-semibold text-red-600">
+      {count} unread message{count === 1 ? "" : "s"}
+    </span>
+    <span className="h-px flex-1 bg-red-200" />
+  </div>
+);
+
+const ChatMessage = ({ message }) => {
+  if (message.role === "system") {
+    return <SystemMessageDivider message={message.content} />;
+  }
+
+  if (message.role === "user") {
+    return (
+      <div className="max-w-[88%] w-fit overflow-hidden rounded-2xl px-4 py-3 text-sm leading-6 break-words whitespace-pre-wrap ml-auto rounded-tr-md bg-primary text-white">
+        {message.content}
+      </div>
+    );
+  }
+
+  return <AuthorMessage message={message.content} renderHtml />;
+};
+
 const TripAgentChat = ({
   tripId,
   sessionId,
+  incomingMessages = [],
   messageUnreadCount = 0,
+  onMessagesRead,
   notificationUnreadCount = 0,
   showTabs = true,
   activeSection = "chat",
@@ -137,6 +166,9 @@ const TripAgentChat = ({
           key={`${tripId || "trip"}-${sessionId || "session"}`}
           sessionId={sessionId}
           tripId={tripId}
+          incomingMessages={incomingMessages}
+          messageUnreadCount={messageUnreadCount}
+          onMessagesRead={onMessagesRead}
         />
       )}
       {selectedSection === "notifications" && (
@@ -146,7 +178,13 @@ const TripAgentChat = ({
   );
 };
 
-const ChatSection = ({ tripId, sessionId }) => {
+const ChatSection = ({
+  tripId,
+  sessionId,
+  incomingMessages,
+  messageUnreadCount,
+  onMessagesRead,
+}) => {
   const [message, setMessage] = useState("");
   const [pendingMessage, setPendingMessage] = useState(null);
   const composerRef = useRef(null);
@@ -175,6 +213,8 @@ const ChatSection = ({ tripId, sessionId }) => {
   );
   const [createTripMessage, { isLoading: isSendingMessage }] =
     useCreateTripMessageMutation();
+  const [readAllMessages, { isLoading: isReadingMessages }] =
+    useReadAllMessagesMutation();
   const loadedPageCount = messageListData?.pages?.length || 0;
   const isInitialLoading =
     isLoadingMessages || (isFetchingMessages && !loadedPageCount);
@@ -195,11 +235,22 @@ const ChatSection = ({ tripId, sessionId }) => {
         });
       });
 
+    incomingMessages.forEach((incomingMessage) => {
+      if (incomingMessage.session_id !== sessionId) return;
+
+      const normalizedMessage = normalizeMessage(incomingMessage);
+      messageMap.set(normalizedMessage.id, normalizedMessage);
+    });
+
     return sortMessages([...messageMap.values()]);
-  }, [messageListData]);
+  }, [incomingMessages, messageListData, sessionId]);
   const renderedMessages = useMemo(
     () => (pendingMessage ? [...messages, pendingMessage] : messages),
     [messages, pendingMessage],
+  );
+  const unreadStartIndex = Math.max(
+    renderedMessages.length - messageUnreadCount,
+    0,
   );
 
   useEffect(() => {
@@ -306,6 +357,34 @@ const ChatSection = ({ tripId, sessionId }) => {
     [createTripMessage, isSendingMessage, refetchMessages, sessionId, tripId],
   );
 
+  const markMessagesRead = useCallback(async () => {
+    if (
+      !messageUnreadCount ||
+      isReadingMessages ||
+      !tripId ||
+      !sessionId
+    ) {
+      return;
+    }
+
+    try {
+      await readAllMessages({
+        trip_id: tripId,
+        session_id: sessionId,
+      }).unwrap();
+      onMessagesRead?.();
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not mark messages as read."));
+    }
+  }, [
+    isReadingMessages,
+    messageUnreadCount,
+    onMessagesRead,
+    readAllMessages,
+    sessionId,
+    tripId,
+  ]);
+
   if (!sessionId) {
     return (
       <div className="flex min-h-0 flex-1 flex-col">
@@ -334,28 +413,13 @@ const ChatSection = ({ tripId, sessionId }) => {
           </div>
         ) : renderedMessages.length ? (
           renderedMessages.map((message, index) => {
-            if (message.role === "system") {
-              return (
-                <SystemMessageDivider
-                  key={message.id || index}
-                  message={message.content}
-                />
-              );
-            }
-
-            return message.role === "user" ? (
-              <div
-                key={message.id || index}
-                className="max-w-[88%] w-fit overflow-hidden rounded-2xl px-4 py-3 text-sm leading-6 break-words whitespace-pre-wrap ml-auto rounded-tr-md bg-primary text-white"
-              >
-                {message.content}
-              </div>
-            ) : (
-              <AuthorMessage
-                key={message.id || index}
-                message={message.content}
-                renderHtml
-              />
+            return (
+              <React.Fragment key={message.id || index}>
+                {messageUnreadCount > 0 && index === unreadStartIndex && (
+                  <UnreadMessagesDivider count={messageUnreadCount} />
+                )}
+                <ChatMessage message={message} />
+              </React.Fragment>
             );
           })
         ) : (
@@ -377,6 +441,7 @@ const ChatSection = ({ tripId, sessionId }) => {
           message={message}
           onSubmitMessage={submitMessage}
           onMessageChange={setMessage}
+          onFocus={markMessagesRead}
           isSendingMessage={isSendingMessage}
         />
       </div>

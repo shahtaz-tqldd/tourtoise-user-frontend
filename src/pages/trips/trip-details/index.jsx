@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -40,14 +40,6 @@ const formatMoney = (amount, currency) =>
   }).format(Number(amount || 0));
 
 const unwrapTripDetail = (response) => response?.data || response;
-
-const getUnreadMessageCount = (response) =>
-  Number(
-    response?.meta?.unread_count ??
-      response?.data?.meta?.unread_count ??
-      response?.data?.unread_count ??
-      0,
-  );
 
 const normalizeTransportMode = (mode = "") => {
   const normalizedMode = mode.toLowerCase();
@@ -249,6 +241,9 @@ const TripDetailPage = () => {
   useTitle("Trip Details");
   const { trip_id } = useParams();
   const [activeMobileTab, setActiveMobileTab] = useState("overview");
+  const [incomingMessages, setIncomingMessages] = useState([]);
+  const [unreadCountOverrides, setUnreadCountOverrides] = useState({});
+  const receivedSocketMessageIdsRef = useRef(new Set());
 
   const { data, isFetching, isError } = useTripDetailQuery(trip_id);
   const { data: notificationData, refetch: refetchNotifications } =
@@ -274,7 +269,11 @@ const TripDetailPage = () => {
     { skip: !trip_id || !chatSessionId },
   );
   const notificationUnreadCount = notificationData?.meta?.unread_count || 0;
-  const messageUnreadCount = getUnreadMessageCount(messageData);
+  const serverMessageUnreadCount = Number(
+    messageData?.meta?.unread_count || 0,
+  );
+  const messageUnreadCount =
+    unreadCountOverrides[chatSessionId] ?? serverMessageUnreadCount;
   const tabs = useMemo(
     () =>
       mobileTabs.map((tab) => {
@@ -298,9 +297,48 @@ const TripDetailPage = () => {
     [refetchNotifications, trip_id],
   );
 
+  const handleSocketTripMessage = useCallback(
+    (socketEvent) => {
+      if (
+        !chatSessionId ||
+        socketEvent?.conversation_id !== chatSessionId ||
+        !socketEvent.message
+      ) {
+        return;
+      }
+
+      const socketMessageKey = `${socketEvent.conversation_id}-${socketEvent.message.id}`;
+      if (receivedSocketMessageIdsRef.current.has(socketMessageKey)) return;
+      receivedSocketMessageIdsRef.current.add(socketMessageKey);
+
+      setIncomingMessages((currentMessages) => {
+        return [...currentMessages, socketEvent.message];
+      });
+
+      if (socketEvent.message.sender === "agent") {
+        setUnreadCountOverrides((currentCounts) => ({
+          ...currentCounts,
+          [chatSessionId]:
+            (currentCounts[chatSessionId] ?? serverMessageUnreadCount) + 1,
+        }));
+      }
+    },
+    [chatSessionId, serverMessageUnreadCount],
+  );
+
+  const handleMessagesRead = useCallback(() => {
+    if (!chatSessionId) return;
+
+    setUnreadCountOverrides((currentCounts) => ({
+      ...currentCounts,
+      [chatSessionId]: 0,
+    }));
+  }, [chatSessionId]);
+
   useNotificationSocket({
     enabled: Boolean(trip_id),
     onNotification: handleSocketNotification,
+    onTripMessage: handleSocketTripMessage,
   });
 
   if (isFetching) {
@@ -338,7 +376,9 @@ const TripDetailPage = () => {
           messages={trip.chat}
           tripId={trip.id}
           sessionId={chatSessionId}
+          incomingMessages={incomingMessages}
           messageUnreadCount={messageUnreadCount}
+          onMessagesRead={handleMessagesRead}
           notificationUnreadCount={notificationUnreadCount}
           className="sticky top-[92px]"
         />
@@ -380,7 +420,9 @@ const TripDetailPage = () => {
             <TripAgentChat
               tripId={trip.id}
               sessionId={chatSessionId}
+              incomingMessages={incomingMessages}
               messageUnreadCount={messageUnreadCount}
+              onMessagesRead={handleMessagesRead}
               notificationUnreadCount={notificationUnreadCount}
               showTabs={false}
               activeSection="chat"

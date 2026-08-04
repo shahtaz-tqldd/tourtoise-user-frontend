@@ -116,7 +116,7 @@ const TripActionsDropdown = ({
             variant="ghost"
             size="icon-sm"
             className={cn(
-              "rounded-full bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-900",
+              "rounded-full bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-900 !border-none !shadow-none",
               triggerClassName,
             )}
             aria-label={ariaLabel}

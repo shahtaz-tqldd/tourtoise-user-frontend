@@ -8,6 +8,7 @@ const ChatInputForm = ({
   message,
   onSubmitMessage,
   onMessageChange,
+  onFocus,
   isSendingMessage = false,
   className = "",
 }) => {
@@ -43,6 +44,7 @@ const ChatInputForm = ({
         id="agent-message"
         value={message}
         onChange={(event) => onMessageChange(event.target.value)}
+        onFocus={onFocus}
         onKeyDown={handleComposerKeyDown}
         placeholder="Message turtle..."
         rows={1}
