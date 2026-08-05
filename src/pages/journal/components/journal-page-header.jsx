@@ -1,40 +1,13 @@
-import React from "react";
-
 import ListingHeader from "@/components/shared/listing-header";
-import { SavedJournalsDrawer } from "./saved-journals";
 import { UserAvatar } from "@/components/shared/user-profile";
 import { Plus } from "lucide-react";
 
-const JournalPageHeader = ({
-  onCreate,
-  savedJournals,
-  onSaveToggle,
-  hasMoreSaved,
-  isSavedLoading,
-  isFetchingMoreSaved,
-  isSavedError,
-  onRetrySaved,
-  onLoadMoreSaved,
-  savedSearchQuery,
-  onSavedSearchChange,
-}) => (
+const JournalPageHeader = ({ onCreate }) => (
   <ListingHeader
     title="Travel Journal"
     filters={
-      <div className="flex w-full gap-3 md:justify-end">
+      <div className="flex w-full md:justify-end">
         <CreateJournalTrigger onCreate={onCreate} />
-        <SavedJournalsDrawer
-          journals={savedJournals}
-          onSaveToggle={onSaveToggle}
-          hasMore={hasMoreSaved}
-          isLoading={isSavedLoading}
-          isFetchingMore={isFetchingMoreSaved}
-          isError={isSavedError}
-          onRetry={onRetrySaved}
-          onLoadMore={onLoadMoreSaved}
-          searchQuery={savedSearchQuery}
-          onSearchChange={onSavedSearchChange}
-        />
       </div>
     }
   />

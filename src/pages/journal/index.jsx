@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -7,46 +7,24 @@ import { toast } from "sonner";
 import JournalFeed from "./components/journal-feed";
 import JournalPageHeader from "./components/journal-page-header";
 import ConfirmDialog from "@/components/shared/confirm-dialog";
-import { SavedJournalsPanel } from "./components/saved-journals";
 import { JournalFormDialog } from "../profile/travel_journal";
 
-// lib
-import useDebounce from "@/hooks/useDebounce";
 import {
   useDeleteJournalMutation,
   useJournalInfiniteListInfiniteQuery,
-  useSavedJournalInfiniteListInfiniteQuery,
   useSaveJournalMutation,
 } from "@/features/journal/journalApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { normalizeJournals } from "./journal-utils";
 import useTitle from "@/hooks/useTitle";
 
-const matchesSavedJournalSearch = (journal, searchQuery) => {
-  if (!searchQuery) return true;
-
-  const searchableText = [
-    journal.body,
-    journal.author?.name,
-    journal.date,
-    ...(journal.tags || []),
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
-  return searchableText.includes(searchQuery.toLowerCase());
-};
-
 const TravelJournalPage = () => {
   useTitle("tourtoise - travel journal");
   const navigate = useNavigate();
-  const [savedSearchQuery, setSavedSearchQuery] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingJournal, setEditingJournal] = useState(null);
   const [deletingJournal, setDeletingJournal] = useState(null);
   const currentUser = useSelector((state) => state.auth.user);
-  const debouncedSavedSearchQuery = useDebounce(savedSearchQuery.trim(), 400);
   const {
     data,
     isLoading,
@@ -57,18 +35,6 @@ const TravelJournalPage = () => {
     isFetchingNextPage,
   } = useJournalInfiniteListInfiniteQuery({
     page_size: 10,
-  });
-  const {
-    data: savedData,
-    fetchNextPage: fetchNextSavedPage,
-    hasNextPage: hasNextSavedPage,
-    isLoading: isLoadingSaved,
-    isError: isSavedError,
-    isFetchingNextPage: isFetchingNextSavedPage,
-    refetch: refetchSavedJournals,
-  } = useSavedJournalInfiniteListInfiniteQuery({
-    page_size: debouncedSavedSearchQuery ? 100 : 10,
-    search: debouncedSavedSearchQuery,
   });
   const [saveJournal, { isLoading: isSaving }] = useSaveJournalMutation();
   const [deleteJournal, { isLoading: isDeleting }] = useDeleteJournalMutation();
@@ -84,26 +50,19 @@ const TravelJournalPage = () => {
     () => normalizeJournals(data?.pages.flatMap((page) => page.data)),
     [data],
   );
-  const savedJournals = useMemo(
-    () => normalizeJournals(savedData?.pages.flatMap((page) => page.data)),
-    [savedData],
-  );
-  const filteredSavedJournals = useMemo(
-    () =>
-      savedJournals.filter((journal) =>
-        matchesSavedJournalSearch(journal, debouncedSavedSearchQuery),
-      ),
-    [debouncedSavedSearchQuery, savedJournals],
-  );
 
   const toggleSavedJournal = async (journal) => {
-    if (isSaving) return;
+    if (!journal?.id || isSaving) return;
+
     try {
       const response = await saveJournal({
         journal_id: journal.id,
         saved: journal.is_saved,
       }).unwrap();
-      toast.success(response.message);
+      toast.success(
+        response?.message ||
+          (journal.is_saved ? "Journal removed from saved items." : "Journal saved."),
+      );
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Could not update this journal."));
     }
@@ -138,25 +97,10 @@ const TravelJournalPage = () => {
     return String(currentUser.id) === String(journal.author.id);
   };
 
-  const isSavedSearchSettling =
-    savedSearchQuery.trim() !== debouncedSavedSearchQuery;
-
   return (
     <section className="mx-auto max-w-3xl pt-5 pb-20 md:pb-5">
       <div className="min-w-0 space-y-5">
-        <JournalPageHeader
-          onCreate={openCreate}
-          savedJournals={filteredSavedJournals}
-          onSaveToggle={toggleSavedJournal}
-          hasMoreSaved={hasNextSavedPage && !debouncedSavedSearchQuery}
-          isSavedLoading={isLoadingSaved || isSavedSearchSettling}
-          isFetchingMoreSaved={isFetchingNextSavedPage}
-          isSavedError={isSavedError}
-          onRetrySaved={refetchSavedJournals}
-          onLoadMoreSaved={fetchNextSavedPage}
-          savedSearchQuery={savedSearchQuery}
-          onSavedSearchChange={setSavedSearchQuery}
-        />
+        <JournalPageHeader onCreate={openCreate} />
 
         <JournalFeed
           journals={journals}
@@ -172,19 +116,6 @@ const TravelJournalPage = () => {
           canManageJournal={isOwnJournal}
         />
       </div>
-
-      {/* <SavedJournalsPanel
-        journals={filteredSavedJournals}
-        onSaveToggle={toggleSavedJournal}
-        hasMore={hasNextSavedPage && !debouncedSavedSearchQuery}
-        isLoading={isLoadingSaved || isSavedSearchSettling}
-        isFetchingMore={isFetchingNextSavedPage}
-        isError={isSavedError}
-        onRetry={refetchSavedJournals}
-        onLoadMore={fetchNextSavedPage}
-        searchQuery={savedSearchQuery}
-        onSearchChange={setSavedSearchQuery}
-      /> */}
       {formOpen && (
         <JournalFormDialog
           key={editingJournal?.id || "new-journal"}

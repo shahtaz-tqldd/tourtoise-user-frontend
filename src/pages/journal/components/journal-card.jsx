@@ -115,7 +115,7 @@ const JournalCard = ({
     <Card
       id={`journal-${journal.id}`}
       className={cn(
-        "p-0 bg-transparent md:bg-white md:p-6 rounded-none md:rounded-3xl",
+        "p-0 bg-transparent md:bg-white md:p-6 rounded-none md:rounded-3xl border-transparent md:border md:border-slate-200",
         className,
       )}
     >

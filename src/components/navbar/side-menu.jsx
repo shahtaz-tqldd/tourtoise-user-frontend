@@ -90,7 +90,7 @@ const LeftSideMenu = () => {
           color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
         />
       ),
-      isMobile: true,
+      isMobile: false,
     },
   ];
 
