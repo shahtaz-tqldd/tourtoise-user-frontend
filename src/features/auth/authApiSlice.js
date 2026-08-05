@@ -63,6 +63,16 @@ export const authApiSlice = apiSlice.injectEndpoints({
       providesTags: ["my-profile"],
     }),
 
+    profileStates: builder.query({
+      query: () => {
+        return {
+          url: `/accounts/profile-states/`,
+          method: "GET",
+        };
+      },
+      providesTags: ["profile-states"],
+    }),
+
     updateAccount: builder.mutation({
       query: (payload) => {
         return {
@@ -123,6 +133,7 @@ export const {
   useRefreshMutation,
   usePublicAccountQuery,
   useSelfDetailsQuery,
+  useProfileStatesQuery,
   useUpdateAccountMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation,

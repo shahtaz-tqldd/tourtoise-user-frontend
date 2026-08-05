@@ -51,7 +51,7 @@ export const notificationApiSlice = apiSlice.injectEndpoints({
         }`,
         method: "PATCH",
       }),
-      invalidatesTags: ["notification-list"],
+      invalidatesTags: ["notification-list", "profile-states"],
     }),
 
     readAllNotifications: builder.mutation({
@@ -59,7 +59,7 @@ export const notificationApiSlice = apiSlice.injectEndpoints({
         url: `/notifications/read-all/?${notificationListParams(params)}`,
         method: "PATCH",
       }),
-      invalidatesTags: ["notification-list"],
+      invalidatesTags: ["notification-list", "profile-states"],
     }),
   }),
 });

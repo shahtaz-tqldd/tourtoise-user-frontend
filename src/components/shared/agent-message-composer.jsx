@@ -21,7 +21,7 @@ const AgentMessageComposer = ({
     const initialMessage = input.trim();
     if (!initialMessage) return;
 
-    navigate("/agent-chat", {
+    navigate("/ask-turtle", {
       state: { initialMessage },
     });
   };

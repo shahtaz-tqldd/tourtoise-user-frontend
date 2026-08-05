@@ -64,6 +64,39 @@ export const formatDate = (value) => {
   }).format(new Date(`${value}T00:00:00`));
 };
 
+export const formatDateRange = (startDate, endDate) => {
+  if (!startDate || !endDate) return "Not set";
+
+  // Parse YYYY-MM-DD inputs in local time context
+  const start = new Date(`${startDate}T00:00:00`);
+  const end = new Date(`${endDate}T00:00:00`);
+
+  const monthFormat = new Intl.DateTimeFormat("en", { month: "short" });
+  const dayFormat = new Intl.DateTimeFormat("en", { day: "numeric" });
+  const yearFormat = new Intl.DateTimeFormat("en", { year: "numeric" });
+
+  const startMonth = monthFormat.format(start);
+  const startDay = dayFormat.format(start);
+  const startYear = yearFormat.format(start);
+
+  const endMonth = monthFormat.format(end);
+  const endDay = dayFormat.format(end);
+  const endYear = yearFormat.format(end);
+
+  // Same day
+  if (startDate === endDate) {
+    return `${startMonth} ${startDay}, ${startYear}`;
+  }
+
+  // Same year
+  if (startYear === endYear) {
+    return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${startYear}`;
+  }
+
+  // Different years
+  return `${startMonth} ${startDay}, ${startYear} - ${endMonth} ${endDay}, ${endYear}`;
+};
+
 export const formatUpdatedAt = (value) => {
   if (!value) return "Recently updated";
 
