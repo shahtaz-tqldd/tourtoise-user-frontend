@@ -21,7 +21,6 @@ const LeftSideMenu = () => {
   const pathname = location.pathname;
   const { user } = useSelector((state) => state.auth);
   const fullName = user?.name || "Guest User";
-  const email = user?.email || "Signed in";
   const username = user?.username;
   const profileImage = user?.avatar_url;
   const profilePath = `/profile/${username || "my-profile"}`;
@@ -102,6 +101,8 @@ const LeftSideMenu = () => {
     return pathname === link || pathname.startsWith(`${link}/`);
   };
 
+  const isPremium = user?.status === "PREMIUM";
+
   return (
     <>
       <aside className="sticky top-0 hidden h-screen w-[360px] border-r border-slate-200 bg-white md:flex">
@@ -167,9 +168,15 @@ const LeftSideMenu = () => {
               <span className="block truncate text-sm font-semibold text-slate-950">
                 {fullName}
               </span>
-              <span className="block truncate text-xs text-slate-500">
-                {username ? `@${username}` : email}
-              </span>
+              {isPremium ? (
+                <span className="block truncate text-xs text-slate-500">
+                  Premium User
+                </span>
+              ) : (
+                <span className="block truncate text-xs text-slate-500 font-medium">
+                  {user?.credit} Credit Balance
+                </span>
+              )}
             </span>
             <ChevronRight className="size-4 shrink-0 text-slate-400" />
           </Link>
