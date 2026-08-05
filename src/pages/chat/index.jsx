@@ -24,6 +24,7 @@ const toDisplayMessage = (message) => ({
   id: message.id,
   role: message.sender === "user" ? "user" : "assistant",
   message: message.content,
+  metadata: message.metadata || {},
   meta: message.sender === "user" ? "You" : "turtle",
   created_at: message.created_at,
 });
@@ -73,8 +74,9 @@ const AgentChatPage = () => {
       return activeSessionId;
     }
 
-    return sessions[0]?.id || null;
+    return null;
   }, [activeSessionId, sessions]);
+
   const activeSession = sessions.find(
     (session) => session.id === selectedSessionId,
   );

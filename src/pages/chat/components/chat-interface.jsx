@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import ChatHeader from "./chat-header";
 import { MessageErrorState, MessageListSkeleton } from "./fallback";
 import ChatInputForm from "./chat-input-form";
+import MessageMetadata from "./message-metadata";
+import { UserAvatar } from "@/components/shared/user-profile";
 
 const suggestedPrompts = [
   "Recommend a 5 day beach trip under $900",
@@ -81,6 +83,14 @@ const ChatInterface = ({
   onRefetchMessages,
   onSubmitMessage,
 }) => {
+  const destinationNamesById = new Map(
+    messages.flatMap((item) =>
+      (item.metadata?.destinations || [])
+        .filter((destination) => destination.destination_id)
+        .map((destination) => [destination.destination_id, destination.name]),
+    ),
+  );
+
   const handlePromptClick = (prompt) => {
     onSubmitMessage(prompt);
   };
@@ -164,10 +174,21 @@ const ChatInterface = ({
                 )}
               >
                 {!isUser ? (
-                  <AuthorMessage message={messageContent} />
+                  <div className="flex flex-col">
+                    <AuthorMessage message={messageContent} />
+                    <MessageMetadata
+                      metadata={item.metadata}
+                      handoffDestinationName={destinationNamesById.get(
+                        item.metadata?.handoff?.destination_id,
+                      )}
+                    />
+                  </div>
                 ) : (
-                  <div className="max-w-[82%] rounded-xl rounded-tr-md bg-primary px-4 py-3 text-white sm:max-w-[78%] md:max-w-[72%]">
-                    <p className="text-sm leading-6">{messageContent}</p>
+                  <div className="flex items-end gap-2 md:max-w-[82%] w-full justify-end">
+                    <div className="rounded-xl rounded-br-none bg-primary px-3.5 py-2.5 text-white">
+                      <p className="text-sm leading-6">{messageContent}</p>
+                    </div>
+                    <UserAvatar className="size-8" />
                   </div>
                 )}
               </div>

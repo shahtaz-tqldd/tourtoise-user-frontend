@@ -216,7 +216,7 @@ const ProfileOverview = ({ profile, canEdit = false, onUpdated }) => {
             </Button>
           ))}
         <div className="bg-primary/10 h-36 -mx-6 -mt-6 overflow-hidden">
-          <img src="/profile_bg.png" className=" w-full object-bottom" />
+          <img src="/profile_bg.jpg" className="h-full w-full object-cover" />
         </div>
         <div className="-mt-16 flex flex-col items-center text-center">
           <div className="relative size-28 shrink-0">
