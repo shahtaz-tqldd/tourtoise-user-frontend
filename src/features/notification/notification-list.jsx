@@ -24,6 +24,30 @@ const isNotificationInScope = (notification, scopeParams = {}) => {
   return true;
 };
 
+const NotificationListSkeleton = ({ compact }) => (
+  <div
+    className="space-y-2"
+    role="status"
+    aria-label="Loading notifications"
+  >
+    {Array.from({ length: compact ? 3 : 5 }, (_, index) => (
+      <div
+        key={index}
+        className="flex animate-pulse items-start gap-3 rounded-2xl border border-slate-100 bg-white p-3"
+      >
+        <span className="size-9 shrink-0 rounded-full bg-slate-200" />
+        <span className="min-w-0 flex-1 space-y-2 py-1">
+          <span className="block h-3 w-2/5 rounded-full bg-slate-200" />
+          <span className="block h-3 w-full rounded-full bg-slate-100" />
+          <span className="block h-3 w-3/4 rounded-full bg-slate-100" />
+          <span className="block h-2.5 w-1/4 rounded-full bg-slate-100" />
+        </span>
+      </div>
+    ))}
+    <span className="sr-only">Loading notifications...</span>
+  </div>
+);
+
 const NotificationList = ({
   scopeParams = {},
   pageSize = 20,
@@ -179,7 +203,11 @@ const NotificationList = ({
           </p>
         )}
 
-        {isFetching && (
+        {isFetching && !notifications.length && (
+          <NotificationListSkeleton compact={compact} />
+        )}
+
+        {isFetching && notifications.length > 0 && (
           <p className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-500">
             <Loader2 className="size-4 animate-spin" />
             Loading notifications...

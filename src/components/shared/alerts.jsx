@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { Bell, BellRing } from "lucide-react";
 import { useSelector } from "react-redux";
 import {
@@ -8,27 +8,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import NotificationList from "@/features/notification/notification-list";
-import { useNotificationListQuery } from "@/features/notification/notificationApiSlice";
 import useNotificationSocket from "@/features/notification/useNotificationSocket";
 import useNotificationAlert from "@/features/notification/useNotificationAlert";
 
-const notificationQuery = { page: 1, page_size: 5 };
-
-const AlertMenu = () => {
+const AlertMenu = ({ unreadCount = 0, onNotification }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
-  const { data, refetch } = useNotificationListQuery(notificationQuery, {
-    skip: !isAuthenticated,
-  });
-  const unreadCount = data?.meta?.unread_count || 0;
   const showNotificationAlert = useNotificationAlert({
     enabled: user?.is_alert_notification_enabled !== false,
   });
   const handleSocketNotification = useCallback(
     (notification) => {
-      refetch();
+      onNotification?.();
       showNotificationAlert(notification);
     },
-    [refetch, showNotificationAlert],
+    [onNotification, showNotificationAlert],
   );
 
   useNotificationSocket({
@@ -37,7 +31,7 @@ const AlertMenu = () => {
   });
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -71,7 +65,7 @@ const AlertMenu = () => {
             </span>
           </span>
         </DropdownMenuLabel>
-        {isAuthenticated ? (
+        {isAuthenticated && isOpen ? (
           <NotificationList
             pageSize={5}
             compact
@@ -79,11 +73,11 @@ const AlertMenu = () => {
             className="pt-2"
             emptyMessage="No notifications available yet."
           />
-        ) : (
+        ) : !isAuthenticated ? (
           <p className="m-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-600">
             Sign in to see notifications.
           </p>
-        )}
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

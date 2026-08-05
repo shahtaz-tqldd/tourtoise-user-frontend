@@ -2,13 +2,15 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "@/layouts/main";
 import PrivateRoute from "./private-route";
-import JournalDetailsPage from "@/pages/journal/journal-details";
 
+// auth
 const LoginPage = lazy(() => import("@/pages/auth/login"));
 const RegisterPage = lazy(() => import("@/pages/auth/register"));
 const ForgotPasswordPage = lazy(() => import("@/pages/auth/forgot-password"));
 const ResetPasswordPage = lazy(() => import("@/pages/auth/reset-password"));
+const ProfilePage = lazy(() => import("@/pages/profile"));
 
+// destination
 const DestiantionPage = lazy(() => import("@/pages/destinations"));
 const DestinationDetailsPage = lazy(
   () => import("@/pages/destinations/destination-details"),
@@ -16,11 +18,25 @@ const DestinationDetailsPage = lazy(
 const DestinationFeatureListPage = lazy(
   () => import("@/pages/destinations/destination-features"),
 );
+
+// trips
 const TripsPage = lazy(() => import("@/pages/trips"));
 const TripDetailPage = lazy(() => import("@/pages/trips/trip-details"));
+const PublicTripDetailsPage = lazy(
+  () => import("@/pages/trips/public-trip-details"),
+);
+
+// chat
 const AgentChatPage = lazy(() => import("@/pages/chat"));
-const ProfilePage = lazy(() => import("@/pages/profile"));
+
+// journal
 const TravelJournalPage = lazy(() => import("@/pages/journal"));
+const JournalDetailsPage = lazy(
+  () => import("@/pages/journal/journal-details"),
+);
+
+// others
+const SavedItemsPage = lazy(() => import("@/pages/saved-items"));
 const SearchPage = lazy(() => import("@/pages/search"));
 
 const withSuspense = (element) => (
@@ -57,7 +73,7 @@ export const routes = createBrowserRouter([
         element: withSuspense(<TripDetailPage />),
       },
       {
-        path: "/agent-chat",
+        path: "/ask-turtle",
         element: withSuspense(<AgentChatPage />),
       },
       {
@@ -67,6 +83,10 @@ export const routes = createBrowserRouter([
       {
         path: "/travel-journal/:journalId",
         element: withSuspense(<JournalDetailsPage />),
+      },
+      {
+        path: "/saved-items",
+        element: withSuspense(<SavedItemsPage />),
       },
       {
         path: "/search",
@@ -93,5 +113,9 @@ export const routes = createBrowserRouter([
   {
     path: "/reset-password",
     element: withSuspense(<ResetPasswordPage />),
+  },
+  {
+    path: "/trip/public/:tripId",
+    element: withSuspense(<PublicTripDetailsPage />),
   },
 ]);

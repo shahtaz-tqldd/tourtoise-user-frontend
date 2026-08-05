@@ -55,9 +55,9 @@ const LeftSideMenu = () => {
     },
     {
       id: 3,
-      label: "Turtle Chat",
+      label: "Ask Turtle",
       shortLabel: "Agent",
-      link: "/agent-chat",
+      link: "/ask-turtle",
       icon: ({ isActive }) => (
         <ChatIcon
           size={5}
@@ -73,6 +73,19 @@ const LeftSideMenu = () => {
       link: "/travel-journal",
       icon: ({ isActive }) => (
         <JournalIcon
+          size={5}
+          color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
+        />
+      ),
+      isMobile: true,
+    },
+    {
+      id: 5,
+      label: "Saved Items",
+      shortLabel: "Saved",
+      link: "/saved-items",
+      icon: ({ isActive }) => (
+        <SaveIcon
           size={5}
           color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
         />

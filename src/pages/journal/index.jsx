@@ -142,7 +142,7 @@ const TravelJournalPage = () => {
     savedSearchQuery.trim() !== debouncedSavedSearchQuery;
 
   return (
-    <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_480px] lg:items-start pt-5 pb-20 md:pb-5">
+    <section className="mx-auto max-w-3xl pt-5 pb-20 md:pb-5">
       <div className="min-w-0 space-y-5">
         <JournalPageHeader
           onCreate={openCreate}
@@ -173,7 +173,7 @@ const TravelJournalPage = () => {
         />
       </div>
 
-      <SavedJournalsPanel
+      {/* <SavedJournalsPanel
         journals={filteredSavedJournals}
         onSaveToggle={toggleSavedJournal}
         hasMore={hasNextSavedPage && !debouncedSavedSearchQuery}
@@ -184,7 +184,7 @@ const TravelJournalPage = () => {
         onLoadMore={fetchNextSavedPage}
         searchQuery={savedSearchQuery}
         onSearchChange={setSavedSearchQuery}
-      />
+      /> */}
       {formOpen && (
         <JournalFormDialog
           key={editingJournal?.id || "new-journal"}

@@ -93,6 +93,7 @@ export const apiSlice = createApi({
   tagTypes: [
     "auth",
     "my-profile",
+    "profile-states",
     "destination-list",
     "destination-detail",
     "destination-short-detail",
