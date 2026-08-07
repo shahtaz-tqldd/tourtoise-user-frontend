@@ -6,11 +6,13 @@ import React, {
   useState,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 
 import useDebounce from "@/hooks/useDebounce";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import {
+  chatApiSlice,
   useAskChatQuestionMutation,
   useChatMessageListQuery,
   useChatSessionListQuery,
@@ -30,6 +32,7 @@ const toDisplayMessage = (message) => ({
 });
 
 const AgentChatPage = () => {
+  const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const initialMessage =
@@ -50,6 +53,8 @@ const AgentChatPage = () => {
   const [messageSearch, setMessageSearch] = useState("");
   const [message, setMessage] = useState("");
   const [pendingMessage, setPendingMessage] = useState(null);
+  const [isReconcilingMessage, setIsReconcilingMessage] = useState(false);
+  const [activeSessionSnapshot, setActiveSessionSnapshot] = useState(null);
   const debouncedSessionSearch = useDebounce(sessionSearch.trim(), 350);
   const trimmedMessageSearch = messageSearch.trim();
   const debouncedMessageSearch = useDebounce(trimmedMessageSearch, 350);
@@ -69,20 +74,18 @@ const AgentChatPage = () => {
     () => sessionListResponse?.data || [],
     [sessionListResponse?.data],
   );
-  const selectedSessionId = useMemo(() => {
-    if (sessions.some((session) => session.id === activeSessionId)) {
-      return activeSessionId;
-    }
-
-    return null;
-  }, [activeSessionId, sessions]);
-
-  const activeSession = sessions.find(
+  const selectedSessionId = activeSessionId;
+  const listedActiveSession = sessions.find(
     (session) => session.id === selectedSessionId,
   );
+  const activeSession =
+    listedActiveSession ||
+    (activeSessionSnapshot?.id === selectedSessionId
+      ? activeSessionSnapshot
+      : null);
 
   const {
-    data: messageListResponse,
+    currentData: currentMessageListResponse,
     isFetching: isFetchingMessages,
     isError: isMessageListError,
     refetch: refetchMessages,
@@ -96,12 +99,15 @@ const AgentChatPage = () => {
     { skip: !selectedSessionId },
   );
 
+  const messageListResponse = currentMessageListResponse;
+
   const [createChatSession, { isLoading: isCreatingSession }] =
     useCreateChatSessionMutation();
   const [deleteChatSession, { isLoading: isDeletingSession }] =
     useDeleteChatSessionMutation();
   const [askChatQuestion, { isLoading: isSendingMessage }] =
     useAskChatQuestionMutation();
+  const isChatBusy = isSendingMessage || isReconcilingMessage;
 
   const messages = useMemo(() => {
     const serverMessages = (messageListResponse?.data || [])
@@ -111,6 +117,7 @@ const AgentChatPage = () => {
 
     if (!pendingMessage) return serverMessages;
     if (
+      isMessageSearchOpen &&
       debouncedMessageSearch &&
       !String(pendingMessage.message || "")
         .toLowerCase()
@@ -120,7 +127,12 @@ const AgentChatPage = () => {
     }
 
     return [...serverMessages, pendingMessage];
-  }, [debouncedMessageSearch, messageListResponse?.data, pendingMessage]);
+  }, [
+    debouncedMessageSearch,
+    isMessageSearchOpen,
+    messageListResponse?.data,
+    pendingMessage,
+  ]);
 
   const messageResultCount =
     messageListResponse?.meta?.count ??
@@ -144,7 +156,11 @@ const AgentChatPage = () => {
       }).unwrap();
       const session = response?.data;
 
-      if (session?.id) setActiveSessionId(session.id);
+      if (session?.id) {
+        setActiveSessionSnapshot(session);
+        setActiveSessionId(session.id);
+      }
+      setSessionSearch("");
       setIsMobileChatOpen(true);
       setMessage("");
       toast.success(response?.message || "Chat session created.");
@@ -161,6 +177,7 @@ const AgentChatPage = () => {
       const response = await deleteChatSession(deletingId).unwrap();
       const nextSession = sessions.find((session) => session.id !== deletingId);
 
+      setActiveSessionSnapshot(nextSession || null);
       setActiveSessionId(nextSession?.id || null);
       setIsMobileChatOpen(Boolean(nextSession?.id));
       setMessage("");
@@ -197,9 +214,11 @@ const AgentChatPage = () => {
   const submitMessage = useCallback(
     async (nextMessage) => {
       const trimmedMessage = nextMessage.trim();
-      if (!trimmedMessage || isSendingMessage) return;
+      if (!trimmedMessage || isChatBusy) return;
 
       setMessage("");
+      setIsMessageSearchOpen(false);
+      setMessageSearch("");
       shouldRefocusComposerRef.current = true;
       setPendingMessage({
         id: `pending-${pendingMessageIdRef.current}`,
@@ -214,17 +233,58 @@ const AgentChatPage = () => {
           ? { session_id: selectedSessionId, message: trimmedMessage }
           : { message: trimmedMessage };
         const response = await askChatQuestion(payload).unwrap();
-        const sessionId = response?.data?.session_id;
+        const sessionId =
+          response?.data?.session?.id ||
+          response?.data?.chat_session?.id ||
+          response?.data?.session_id ||
+          selectedSessionId;
 
-        if (sessionId) setActiveSessionId(sessionId);
+        if (sessionId) {
+          const responseSession =
+            response?.data?.session || response?.data?.chat_session;
+
+          if (responseSession?.id) {
+            setActiveSessionSnapshot(responseSession);
+          } else if (!selectedSessionId) {
+            setSessionSearch("");
+            setActiveSessionSnapshot({
+              id: sessionId,
+              title: "New travel chat",
+              last_message: { content: trimmedMessage },
+              updated_at: new Date().toISOString(),
+            });
+          }
+
+          setIsReconcilingMessage(true);
+
+          try {
+            await dispatch(
+              chatApiSlice.endpoints.chatMessageList.initiate(
+                {
+                  session_id: sessionId,
+                  page: 1,
+                  page_size: 100,
+                },
+                { forceRefetch: true, subscribe: false },
+              ),
+            ).unwrap();
+          } catch {
+            toast.warning(
+              "Message sent, but the latest reply could not be refreshed.",
+            );
+          }
+
+          setActiveSessionId(sessionId);
+        }
       } catch (error) {
         setMessage(trimmedMessage);
         toast.error(getApiErrorMessage(error, "Could not send message."));
       } finally {
+        setIsReconcilingMessage(false);
         setPendingMessage(null);
       }
     },
-    [askChatQuestion, isSendingMessage, selectedSessionId],
+    [askChatQuestion, dispatch, isChatBusy, selectedSessionId],
   );
 
   useEffect(() => {
@@ -241,11 +301,11 @@ const AgentChatPage = () => {
   }, [messages.length, selectedSessionId]);
 
   useEffect(() => {
-    if (isSendingMessage || !shouldRefocusComposerRef.current) return;
+    if (isChatBusy || !shouldRefocusComposerRef.current) return;
 
     shouldRefocusComposerRef.current = false;
     window.requestAnimationFrame(() => composerRef.current?.focus());
-  }, [isSendingMessage]);
+  }, [isChatBusy]);
 
   return (
     <section className="-mx-4 mt-0 h-[calc(100dvh-112px)] min-h-0 md:mx-0 md:mt-3 lg:mt-4 lg:grid lg:h-[calc(100vh-100px)] lg:min-h-[560px] lg:grid-cols-[420px_minmax(0,1fr)] lg:gap-5">
@@ -260,6 +320,9 @@ const AgentChatPage = () => {
         onSessionSearchChange={setSessionSearch}
         onCreateSession={createNewSession}
         onSelectSession={(sessionId) => {
+          setActiveSessionSnapshot(
+            sessions.find((session) => session.id === sessionId) || null,
+          );
           setActiveSessionId(sessionId);
           setIsMobileChatOpen(true);
           setMessage("");
@@ -278,7 +341,7 @@ const AgentChatPage = () => {
         isMessageListError={isMessageListError}
         isMessageSearchOpen={isMessageSearchOpen}
         isMobileChatOpen={isMobileChatOpen}
-        isSendingMessage={isSendingMessage}
+        isSendingMessage={isChatBusy}
         message={message}
         messageResultCount={messageResultCount}
         messageSearch={messageSearch}

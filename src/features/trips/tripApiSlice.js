@@ -1,4 +1,14 @@
 import { apiSlice } from "../api/apiSlice";
+import { userCreditSpent } from "../auth/authSlice";
+
+const updateCreditBalance = async (queryFulfilled, dispatch) => {
+  try {
+    const { data } = await queryFulfilled;
+    dispatch(userCreditSpent(data?.meta?.credit_spent));
+  } catch {
+    // Failed requests do not spend credit.
+  }
+};
 
 const nextTripPage = (lastPage, allPages, lastPageParam) =>
   lastPage?.meta?.next ||
@@ -179,6 +189,8 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       providesTags: (result, error, { trip_id, step }) => [
         { type: "trip-planning", id: `${trip_id}-${step}` },
       ],
+      onQueryStarted: (args, { dispatch, queryFulfilled }) =>
+        updateCreditBalance(queryFulfilled, dispatch),
     }),
 
     tripAgentCreateMessage: builder.mutation({
@@ -506,6 +518,8 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           body: payload,
         };
       },
+      onQueryStarted: (args, { dispatch, queryFulfilled }) =>
+        updateCreditBalance(queryFulfilled, dispatch),
     }),
 
     readAllMessages: builder.mutation({
