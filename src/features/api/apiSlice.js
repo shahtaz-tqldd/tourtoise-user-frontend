@@ -114,9 +114,6 @@ export const apiSlice = createApi({
     "journal-detail",
     "journal-comments",
     "journal-replies",
-    "chat-session-list",
-    "chat-session",
-    "chat-message-list",
     "notification-list",
   ],
   keepUnusedDataFor: 300, // Don't keep any unused data

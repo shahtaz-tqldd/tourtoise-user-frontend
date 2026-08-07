@@ -29,6 +29,20 @@ export const authSlice = createSlice({
     userDetailsFetched: (state, action) => {
       state.user = action.payload;
     },
+    userCreditSpent: (state, action) => {
+      const creditSpent = Number(action.payload);
+      const currentCredit = Number(state.user?.credit);
+
+      if (
+        !Number.isInteger(creditSpent) ||
+        creditSpent <= 0 ||
+        !Number.isFinite(currentCredit)
+      ) {
+        return;
+      }
+
+      state.user.credit = Math.max(0, currentCredit - creditSpent);
+    },
     userLoggedOut: (state) => {
       state.accessToken = null;
       state.user = null;
@@ -38,7 +52,11 @@ export const authSlice = createSlice({
   },
 });
 
-export const { userLoggedIn, userDetailsFetched, userLoggedOut } =
-  authSlice.actions;
+export const {
+  userLoggedIn,
+  userDetailsFetched,
+  userCreditSpent,
+  userLoggedOut,
+} = authSlice.actions;
 
 export default authSlice.reducer;
