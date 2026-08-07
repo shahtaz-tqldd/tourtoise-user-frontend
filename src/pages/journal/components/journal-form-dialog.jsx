@@ -1,11 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ImagePlus, PencilLine, PenLine, Plus, X } from "lucide-react";
+import { ImagePlus, X } from "lucide-react";
 
-import ConfirmDialog from "@/components/shared/confirm-dialog";
-import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
-import Card, { PreviewCard } from "@/components/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -15,132 +12,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FloatingInput, Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { FloatingTextarea } from "@/components/ui/textarea";
 import {
   useCreateJournalMutation,
-  useDeleteJournalMutation,
-  useMyJournalListQuery,
   useUpdateJournalMutation,
-  useUserJournalListQuery,
 } from "@/features/journal/journalApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
-import JournalCard from "../journal/components/journal-card";
-import {
-  createJournalFormData,
-  normalizeJournals,
-} from "../journal/journal-utils";
+import { createJournalFormData } from "../journal-utils";
 
-const TravelJournal = ({ userId, isOwner = false }) => {
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingJournal, setEditingJournal] = useState(null);
-  const [deletingJournal, setDeletingJournal] = useState(null);
-  const myQuery = useMyJournalListQuery({ page_size: 100 }, { skip: !isOwner });
-  const userQuery = useUserJournalListQuery(
-    { user_id: userId, page_size: 100 },
-    { skip: isOwner || !userId },
-  );
-  const query = isOwner ? myQuery : userQuery;
-  const journals = useMemo(
-    () => normalizeJournals(query.data?.data),
-    [query.data],
-  );
-  const [deleteJournal, { isLoading: isDeleting }] = useDeleteJournalMutation();
-
-  const openCreate = () => {
-    setEditingJournal(null);
-    setFormOpen(true);
-  };
-
-  const openEdit = (journal) => {
-    setEditingJournal(journal);
-    setFormOpen(true);
-  };
-
-  const handleDelete = async () => {
-    try {
-      const response = await deleteJournal(deletingJournal.id).unwrap();
-      toast.success(response.message);
-      setDeletingJournal(null);
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Could not delete this journal."));
-    }
-  };
-
-  return (
-    <PreviewCard className="md:p-8 md:rounded-t-none">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <SectionHeader
-          title="Travel Journal"
-          description="Save trip stories, photo memories, and small reminders from places worth revisiting."
-        />
-
-        {isOwner && (
-          <Button
-            variant="outline"
-            className="w-full md:w-auto md:!pr-4"
-            onClick={openCreate}
-          >
-            <PencilLine size={16} />
-            Write Journal
-          </Button>
-        )}
-      </div>
-
-      <div className="mt-8">
-        {query.isLoading || query.isFetching ? (
-          <JournalSkeleton />
-        ) : query.isError ? (
-          <div className="rounded-2xl bg-red-50 p-6 text-center text-sm font-semibold text-red-700">
-            Could not load journals.
-          </div>
-        ) : journals.length ? (
-          <div className="grid gap-5">
-            {journals.map((journal) => (
-              <JournalCard
-                key={journal.id}
-                journal={journal}
-                onEdit={isOwner ? openEdit : undefined}
-                onDelete={isOwner ? setDeletingJournal : undefined}
-                className="border"
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="No Journal added yet"
-            description={
-              isOwner
-                ? "You have not kept any travel journal yet!"
-                : "No public journals are available"
-            }
-          />
-        )}
-      </div>
-
-      {isOwner && formOpen && (
-        <JournalFormDialog
-          key={editingJournal?.id || "new-journal"}
-          open={formOpen}
-          onOpenChange={setFormOpen}
-          journal={editingJournal}
-        />
-      )}
-      <ConfirmDialog
-        open={Boolean(deletingJournal)}
-        onOpenChange={(open) => !open && setDeletingJournal(null)}
-        title="Delete journal?"
-        description="This permanently deletes this journal and all its comments."
-        confirmLabel="Delete"
-        variant="destructive"
-        isLoading={isDeleting}
-        onConfirm={handleDelete}
-      />
-    </PreviewCard>
-  );
-};
-
-export const JournalFormDialog = ({ open, onOpenChange, journal }) => {
+const JournalFormDialog = ({ open, onOpenChange, journal }) => {
   const [content, setContent] = useState(journal?.body || "");
   const [visibility, setVisibility] = useState(journal?.visibility || "public");
   const [images, setImages] = useState([]);
@@ -337,15 +218,4 @@ const ImageTile = ({ src, onRemove }) => (
   </div>
 );
 
-const JournalSkeleton = () => (
-  <div className="grid gap-5">
-    {Array.from({ length: 2 }).map((_, index) => (
-      <div
-        key={index}
-        className="h-64 animate-pulse rounded-2xl bg-slate-100"
-      />
-    ))}
-  </div>
-);
-
-export default TravelJournal;
+export default JournalFormDialog;

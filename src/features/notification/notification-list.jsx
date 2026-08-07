@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from "react";
-import { Bell, CheckCheck, Loader2 } from "lucide-react";
+import { ArrowUpRight, Bell, CheckCheck, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { cn, titleCase } from "@/lib/utils";
 import { duration } from "@/lib/date-time";
@@ -56,6 +57,7 @@ const NotificationList = ({
   emptyMessage = "No notifications available yet.",
   showHeader = true,
   compact = false,
+  onAction,
 }) => {
   const scopeKey = JSON.stringify(scopeParams);
   const scopedParams = useMemo(() => JSON.parse(scopeKey), [scopeKey]);
@@ -149,52 +151,72 @@ const NotificationList = ({
 
         {!isError &&
           notifications.map((notification) => (
-            <button
-              type="button"
+            <article
               key={notification.id}
-              onClick={() => markRead(notification)}
               className={cn(
-                "w-full rounded-2xl border p-3 text-left transition hover:bg-primary/5",
+                "overflow-hidden rounded-2xl border text-left transition hover:bg-primary/5",
                 notification.is_read
                   ? "border-slate-100 bg-slate-50"
                   : "border-primary/15 bg-white shadow-sm",
                 itemClassName,
               )}
             >
-              <span className="flex items-start gap-3">
-                <span
-                  className={cn(
-                    "mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full",
-                    notification.is_read
-                      ? "bg-slate-100 text-slate-500"
-                      : "bg-primary text-white",
-                  )}
-                >
-                  <Bell className="size-4" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-start justify-between gap-3">
-                    <span className="min-w-0 text-sm font-semibold text-slate-950">
-                      {notification.title}
-                    </span>
-                    {!notification.is_read && (
-                      <span className="mt-1 size-2 shrink-0 rounded-full bg-[#ffcf36]" />
+              <button
+                type="button"
+                onClick={() => markRead(notification)}
+                className="block w-full p-3 text-left"
+              >
+                <span className="flex items-start gap-3">
+                  <span
+                    className={cn(
+                      "mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full",
+                      notification.is_read
+                        ? "bg-slate-100 text-slate-500"
+                        : "bg-primary text-white",
                     )}
+                  >
+                    <Bell className="size-4" />
                   </span>
-                  <span className="mt-1 block text-sm leading-6 text-slate-500">
-                    {notification.message}
-                  </span>
-                  <span className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                    <span>
-                      {titleCase(notification.notification_type) ||
-                        "Notification"}
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-start justify-between gap-3">
+                      <span className="min-w-0 text-sm font-semibold text-slate-950">
+                        {notification.title}
+                      </span>
+                      {!notification.is_read && (
+                        <span className="mt-1 size-2 shrink-0 rounded-full bg-[#ffcf36]" />
+                      )}
                     </span>
-                    <span aria-hidden="true">.</span>
-                    <span>{duration(notification.created_at)}</span>
+                    <span className="mt-1 block text-sm leading-6 text-slate-500">
+                      {notification.message}
+                    </span>
+                    <span className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                      <span>
+                        {titleCase(notification.notification_type) ||
+                          "Notification"}
+                      </span>
+                      <span aria-hidden="true">.</span>
+                      <span>{duration(notification.created_at)}</span>
+                    </span>
                   </span>
                 </span>
-              </span>
-            </button>
+              </button>
+
+              {notification.metadata?.show_app_feature ? (
+                <div className="border-t border-slate-100 px-3 py-2">
+                  <Link
+                    to="/app-features"
+                    onClick={() => {
+                      void markRead(notification);
+                      onAction?.();
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition hover:bg-primary/15"
+                  >
+                    Explore Tourtoise features
+                    <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                  </Link>
+                </div>
+              ) : null}
+            </article>
           ))}
 
         {!isError && !notifications.length && !isFetching && (

@@ -72,6 +72,7 @@ const AlertMenu = ({ unreadCount = 0, onNotification }) => {
             showHeader={false}
             className="pt-2"
             emptyMessage="No notifications available yet."
+            onAction={() => setIsOpen(false)}
           />
         ) : !isAuthenticated ? (
           <p className="m-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-600">
