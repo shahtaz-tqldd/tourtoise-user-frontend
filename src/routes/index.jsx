@@ -38,6 +38,7 @@ const JournalDetailsPage = lazy(
 // others
 const SavedItemsPage = lazy(() => import("@/pages/saved-items"));
 const SearchPage = lazy(() => import("@/pages/search"));
+const AppFeaturesPage = lazy(() => import("@/pages/app-features"));
 
 const withSuspense = (element) => (
   <Suspense fallback={null}>{element}</Suspense>
@@ -95,6 +96,10 @@ export const routes = createBrowserRouter([
       {
         path: "/profile/:username",
         element: withSuspense(<ProfilePage />),
+      },
+      {
+        path: "/app-features",
+        element: withSuspense(<AppFeaturesPage />),
       },
     ],
   },

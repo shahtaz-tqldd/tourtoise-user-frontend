@@ -1,4 +1,5 @@
 import Card from "@/components/ui/card";
+import BrokenPage from "@/components/shared/broken-page";
 import { Button } from "@/components/ui/button";
 import { FloatingInput } from "@/components/ui/input";
 import { FloatingSelect, SelectItem } from "@/components/ui/select";
@@ -14,19 +15,20 @@ import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import {
   Camera,
   GalleryVerticalEnd,
+  Gift,
   Loader2,
   MapPin,
   PenLine,
   Settings,
-  Sparkles,
+  UserRoundX,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-import Overview from "./overview";
-import ProfileSettings from "./settings";
-import TripProfile from "./travel_journal";
+import Overview from "./components/overview";
+import ProfileSettings from "./components/settings";
+import CreditHistory from "./components/credit-history";
 
 const mergeProfile = (account) => ({
   ...account,
@@ -48,7 +50,7 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const currentUser = useSelector((state) => state.auth.user);
 
-  const { data, isLoading, isFetching, refetch } =
+  const { data, error, isLoading, isFetching, isError, refetch } =
     usePublicAccountQuery(username);
   const account = data?.data;
   const profile = useMemo(
@@ -64,8 +66,28 @@ const ProfilePage = () => {
     return <ProfileSkeleton />;
   }
 
-  if (!account && data) {
-    return <NoAccountExist />;
+  if (error?.status === 404 || (!account && data)) {
+    return (
+      <BrokenPage
+        title="Account not found"
+        description={`We couldn't find a profile for @${username} Check the username or explore somewhere else.`}
+        icon={UserRoundX}
+        actionLabel="Explore destinations"
+      />
+    );
+  }
+
+  if (isError) {
+    return (
+      <BrokenPage
+        statusCode="Oops"
+        title="Could not load this profile"
+        description="Something interrupted the request. Check your connection and try again."
+        icon={UserRoundX}
+        actionLabel="Back to home"
+        onRetry={refetch}
+      />
+    );
   }
 
   return (
@@ -85,9 +107,9 @@ const ProfilePage = () => {
                 icon: GalleryVerticalEnd,
               },
               {
-                label: "Travel Journal",
-                value: "travel_days",
-                icon: Sparkles,
+                label: "Credit History",
+                value: "credit_history",
+                icon: Gift,
               },
               { label: "Settings", value: "settings", icon: Settings },
             ]}
@@ -104,8 +126,8 @@ const ProfilePage = () => {
                 onUpdated={refetch}
               />
             )}
-            {activeTab === "travel_days" && (
-              <TripProfile userId={account?.id} isOwner={isOwner} />
+            {activeTab === "credit_history" && (
+              <CreditHistory userId={account?.id} isOwner={isOwner} />
             )}
             {activeTab === "settings" && <ProfileSettings />}
           </div>
@@ -339,18 +361,5 @@ const ProfileSkeleton = () => (
     </div>
   </section>
 );
-
-const NoAccountExist = () => {
-  return (
-    <div className="center min-h-[55vh] rounded-3xl border border-dashed border-slate-300 bg-white px-6 text-center">
-      <div>
-        <h1 className="text-xl font-bold text-slate-950">Account not found</h1>
-        <p className="mt-2 text-sm text-slate-500">
-          The profile you are looking for is unavailable.
-        </p>
-      </div>
-    </div>
-  );
-};
 
 export default ProfilePage;

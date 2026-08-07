@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import JournalFeed from "./components/journal-feed";
 import JournalPageHeader from "./components/journal-page-header";
 import ConfirmDialog from "@/components/shared/confirm-dialog";
-import { JournalFormDialog } from "../profile/travel_journal";
 
 import {
   useDeleteJournalMutation,
@@ -17,6 +16,7 @@ import {
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { normalizeJournals } from "./journal-utils";
 import useTitle from "@/hooks/useTitle";
+import JournalFormDialog from "./components/journal-form-dialog";
 
 const TravelJournalPage = () => {
   useTitle("tourtoise - travel journal");
