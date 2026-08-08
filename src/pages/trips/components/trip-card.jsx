@@ -1,36 +1,22 @@
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import StatusBadge from "@/components/ui/status";
-import { useDeleteTripMutation } from "@/features/trips/tripApiSlice";
-import { formatDate, formatUpdatedAt } from "@/lib/date-time";
+import { formatDateRange, formatUpdatedAt } from "@/lib/date-time";
 import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import {
-  ArrowRight,
   Bell,
   CalendarDays,
-  Clock3,
+  Dot,
   Globe,
   MapPin,
   MessageCircle,
-  MoreHorizontal,
-  Trash2,
   User,
   Users,
 } from "lucide-react";
-import { useState } from "react";
+
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
-import { DeleteDialog } from "@/components/shared/confirm-dialog";
-import TripActionsDropdown from "./trip-actions-dropdown";
 
 const getTripUrl = (trip) => `/trips/${trip.id}`;
-const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
 const getDestinationLabel = (trip) => {
   if (trip.primary_destination?.name) return trip.primary_destination.name;
   if (trip.destinations_count) {
@@ -72,42 +58,11 @@ const formatTravelers = (trip) => {
 };
 
 const TripCard = ({ trip, compact = false }) => {
-  const [shareMeta, setShareMeta] = useState(() => ({
-    share_url: trip.share_url || "",
-    visibility: trip.visibility || "",
-  }));
-  const displayedTrip = { ...trip, ...shareMeta };
+  const displayedTrip = { ...trip };
   const coverImage = getTripCoverImage(displayedTrip);
   const destinationMeta = getDestinationMeta(displayedTrip);
-  const tripId = getTripId(displayedTrip);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleteTrip, { isLoading: isDeletingTrip }] = useDeleteTripMutation();
-  const dateRange =
-    displayedTrip.start_date && displayedTrip.end_date
-      ? `${formatDate(displayedTrip.start_date)} - ${formatDate(displayedTrip.end_date)}`
-      : formatDate(displayedTrip.start_date);
-
-  const updateShareMeta = (updates) => {
-    setShareMeta((current) => ({ ...current, ...updates }));
-  };
-
   const notificationUnreadCount = trip.unread_notification || 0;
   const messageUnreadCount = trip.unread_message || 0;
-
-  const handleDeleteTrip = async () => {
-    if (!tripId) {
-      toast.error("Trip id is missing.");
-      return;
-    }
-
-    try {
-      await deleteTrip({ trip_id: tripId }).unwrap();
-      toast.success("Trip deleted.");
-      setDeleteOpen(false);
-    } catch (error) {
-      toast.error(error?.data?.message || "Could not delete this trip.");
-    }
-  };
 
   if (compact) {
     return (
@@ -134,35 +89,17 @@ const TripCard = ({ trip, compact = false }) => {
                 </p>
               </div>
             </div>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  className="-mr-2 -mt-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                  aria-label="Trip history actions"
-                >
-                  <MoreHorizontal size={18} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-36">
-                <DropdownMenuItem
-                  variant="destructive"
-                  onSelect={() => setDeleteOpen(true)}
-                >
-                  <Trash2 size={15} />
-                  Delete trip
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
 
           <div className="mt-4 gap-2 text-xs text-slate-600 flex flex-wrap">
             <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-2">
               <CalendarDays size={14} className="shrink-0 text-slate-400" />
-              <span className="truncate">{dateRange}</span>
+              <span className="truncate">
+                {formatDateRange(
+                  displayedTrip.start_date,
+                  displayedTrip.end_date,
+                )}
+              </span>
             </span>
 
             <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-2">
@@ -173,16 +110,6 @@ const TripCard = ({ trip, compact = false }) => {
             </span>
           </div>
         </Card>
-
-        <DeleteDialog
-          open={deleteOpen}
-          onOpenChange={setDeleteOpen}
-          title="Delete trip?"
-          description="This permanently removes the trip plan and cannot be undone."
-          confirmLabel="Delete trip"
-          isLoading={isDeletingTrip}
-          onConfirm={handleDeleteTrip}
-        />
       </Link>
     );
   }
@@ -242,18 +169,19 @@ const TripCard = ({ trip, compact = false }) => {
               {/* Date */}
               <div className="flex items-center gap-1.5 text-sm text-slate-500">
                 <CalendarDays size={15} className="shrink-0 text-slate-400" />
-                <span className="truncate">{dateRange}</span>
+                {formatDateRange(
+                  displayedTrip.start_date,
+                  displayedTrip.end_date,
+                )}
+                <Dot />
+                <span className="truncate">
+                  {formatDuration(displayedTrip)}
+                </span>
               </div>
             </div>
 
             {/* Pills */}
             <div className="flex flex-wrap gap-2">
-              <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
-                <Clock3 size={14} className="shrink-0 text-slate-400" />
-                <span className="truncate">
-                  {formatDuration(displayedTrip)}
-                </span>
-              </span>
               <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
                 <Users size={14} className="shrink-0 text-slate-400" />
                 <span className="truncate capitalize">
@@ -293,20 +221,16 @@ const TripCard = ({ trip, compact = false }) => {
                 ) : null}
               </div>
               <div className="flx gap-2">
-                <span className="w-full md:w-fit flx gap-2 text-sm text-primary font-semibold">
+                <Button
+                  size="sm"
+                  className="rounded-full px-4 text-xs font-semibold"
+                >
                   View Details
-                  <ArrowRight size={16} />
-                </span>
+                </Button>
               </div>
             </div>
           </div>
         </div>
-
-        <TripActionsDropdown
-          trip={displayedTrip}
-          onTripChange={updateShareMeta}
-          triggerClassName="absolute top-4 right-4 md:top-5 md:right-5 tr"
-        />
       </Card>
     </Link>
   );

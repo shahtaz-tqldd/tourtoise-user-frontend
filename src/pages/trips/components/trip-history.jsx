@@ -1,7 +1,6 @@
 import React from "react";
-import { History, Luggage, X } from "lucide-react";
+import { ArrowLeft, History, Luggage } from "lucide-react";
 
-import SearchField from "@/components/shared/search";
 import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,14 +31,6 @@ export const TripHistory = ({
       description="Your past completed trips"
       className="hidden md:block"
     />
-    {/* {trips?.length > 5 ? (
-      <SearchField
-        value={search}
-        onChange={onSearchChange}
-        onClear={() => onSearchChange("")}
-        placeholder="Search past trips..."
-      />
-    ) : null} */}
 
     {isFetching && <TripListLoader compact />}
 
@@ -94,24 +85,27 @@ export const TripHistoryDrawer = ({
     </SheetTrigger>
     <SheetContent
       side="right"
-      className="w-[min(92vw,420px)] gap-0 overflow-y-auto p-0"
+      className="w-screen gap-0 overflow-y-auto p-0"
       showCloseButton={false}
     >
       <SheetHeader className="border-b border-slate-100 pr-12 text-left">
-        <SheetTitle>Trip History</SheetTitle>
-        <SheetDescription>Your past completed trips.</SheetDescription>
+        <div className="mb-4 flex h-10 items-center gap-2">
+          <SheetClose asChild>
+            <button
+              type="button"
+              className="-ml-2 flex size-10 shrink-0 items-center justify-center rounded-full text-slate-700 transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+              aria-label="Close profile menu"
+            >
+              <ArrowLeft className="size-5" />
+            </button>
+          </SheetClose>
+          <div>
+            <SheetTitle>Trip History</SheetTitle>
+            <SheetDescription>Your past completed trips.</SheetDescription>
+          </div>
+        </div>
       </SheetHeader>
-      <SheetClose asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="absolute right-3 top-3 rounded-full"
-          aria-label="Close trip history"
-        >
-          <X size={16} />
-        </Button>
-      </SheetClose>
+
       <div className="p-4">
         <TripHistory
           trips={trips}

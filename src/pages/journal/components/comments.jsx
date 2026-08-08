@@ -10,13 +10,8 @@ import {
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 
+import PreviewActionsDropdown from "@/components/shared/preview-actions-dropdown";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import {
   useCreateJournalCommentMutation,
@@ -322,8 +317,11 @@ const CommentBody = ({
             </p>
           </div>
           {canManage && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <PreviewActionsDropdown
+              title="Comment actions"
+              description="Choose an action for this comment."
+              contentClassName="w-36"
+              trigger={
                 <Button
                   type="button"
                   variant="ghost"
@@ -334,24 +332,26 @@ const CommentBody = ({
                 >
                   <MoreVertical size={14} />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-fit">
-                <DropdownMenuItem
-                  onSelect={() => {
+              }
+              actions={[
+                {
+                  value: "update",
+                  label: "Update",
+                  icon: <Pencil size={14} className="shrink-0" />,
+                  onSelect: () => {
                     setEditText(comment.text || "");
                     setIsEditing(true);
-                  }}
-                  className="!text-xs font-medium"
-                >
-                  <Pencil size={12} />
-                  Update Comment
-                </DropdownMenuItem>
-                <DropdownMenuItem variant="destructive" onSelect={onDelete} className="text-xs font-medium">
-                  <Trash2 size={12} />
-                  Delete Comment
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  },
+                },
+                {
+                  value: "delete",
+                  label: "Delete",
+                  icon: <Trash2 size={14} className="shrink-0" />,
+                  destructive: true,
+                  onSelect: onDelete,
+                },
+              ]}
+            />
           )}
         </div>
         {isEditing ? (

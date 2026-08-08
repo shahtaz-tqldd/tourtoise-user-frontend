@@ -60,7 +60,7 @@ const NavDrawer = () => {
             />
           ) : (
             <span
-              className={`flex size-7 items-center justify-center rounded-full text-xs font-bold transition-transform group-active:scale-90 ${
+              className={`size-8 center rounded-full text-xs font-bold transition-transform group-active:scale-90 ${
                 isProfileActive
                   ? "bg-primary text-white"
                   : "bg-primary/15 text-primary"

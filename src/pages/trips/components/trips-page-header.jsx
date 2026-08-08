@@ -21,7 +21,7 @@ const TripsPageHeader = ({
     title="My Trips"
     // description="Trip Plan Lists"
     filters={
-      <div className="flex w-full gap-3 md:justify-end">
+      <div className="flex w-full gap-1.5 mf:gap-3 md:justify-end">
         <SearchBar
           searchQuery={activeSearch}
           setSearchQuery={onActiveSearchChange}

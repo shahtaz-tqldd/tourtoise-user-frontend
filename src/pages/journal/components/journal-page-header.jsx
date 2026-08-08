@@ -1,17 +1,131 @@
-import ListingHeader from "@/components/shared/listing-header";
-import { UserAvatar } from "@/components/shared/user-profile";
-import { Plus } from "lucide-react";
+import { useState } from "react";
 
-const JournalPageHeader = ({ onCreate }) => (
+import ListingHeader from "@/components/shared/listing-header";
+import PreviewDropdown from "@/components/shared/preview-dropdown";
+import { UserAvatar } from "@/components/shared/user-profile";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Globe2, Plus, SlidersHorizontal, UserRound } from "lucide-react";
+
+const journalScopeOptions = [
+  { value: "public", label: "Public Journal", icon: Globe2 },
+  { value: "mine", label: "My Journal", icon: UserRound },
+];
+
+const JournalPageHeader = ({ onCreate, journalScope, onJournalScopeChange }) => (
   <ListingHeader
     title="Travel Journal"
     filters={
-      <div className="flex w-full md:justify-end">
+      <div className="flex w-full items-center gap-2 md:justify-end">
         <CreateJournalTrigger onCreate={onCreate} />
+        <JournalScopeFilter
+          value={journalScope}
+          onApply={onJournalScopeChange}
+        />
       </div>
     }
   />
 );
+
+const JournalScopeFilter = ({ value, onApply }) => {
+  const [open, setOpen] = useState(false);
+  const [draftScope, setDraftScope] = useState(value);
+
+  const handleOpenChange = (nextOpen) => {
+    if (nextOpen) setDraftScope(value);
+    setOpen(nextOpen);
+  };
+
+  const applyFilter = () => {
+    onApply(draftScope);
+    setOpen(false);
+  };
+
+  const cancelFilter = () => {
+    setDraftScope(value);
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative shrink-0">
+      <PreviewDropdown
+        open={open}
+        onOpenChange={handleOpenChange}
+        title="Filter journals"
+        description="Choose public journals or journals you created."
+        desktopClassName="w-[min(calc(100vw-2rem),320px)]"
+        trigger={
+          <Button
+            type="button"
+            variant="outline"
+            className="h-12 w-12 rounded-full border-slate-200"
+            aria-label="Filter journals"
+          >
+            <SlidersHorizontal size={16} />
+          </Button>
+        }
+      >
+        <div className="border-b border-slate-100 p-4">
+          <h2 className="text-base font-bold text-slate-950">
+            Filter journals
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Choose which journals to show.
+          </p>
+        </div>
+
+        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4">
+          <p className="text-xs font-semibold uppercase text-slate-500">
+            Journal type
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {journalScopeOptions.map((option) => {
+              const OptionIcon = option.icon;
+
+              return (
+                <label
+                  key={option.value}
+                  className={cn(
+                    "flex w-fit cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
+                    draftScope === option.value
+                      ? "bg-primary text-white"
+                      : "bg-slate-100 text-slate-700 hover:bg-primary/10",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="journal-scope-filter"
+                    value={option.value}
+                    checked={draftScope === option.value}
+                    onChange={(event) => setDraftScope(event.target.value)}
+                    className="hidden"
+                  />
+                  <OptionIcon size={15} />
+                  {option.label}
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex shrink-0 justify-end gap-2 border-t border-slate-100 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <Button type="button" variant="outline" onClick={cancelFilter}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={applyFilter}>
+            Apply
+          </Button>
+        </div>
+      </PreviewDropdown>
+
+      {value === "mine" && (
+        <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
+          1
+        </span>
+      )}
+    </div>
+  );
+};
 
 const CreateJournalTrigger = ({ onCreate }) => (
   <button
@@ -22,7 +136,7 @@ const CreateJournalTrigger = ({ onCreate }) => (
     <UserAvatar className="size-10" />
     <div className="flex w-full flex-1 items-center gap-2 rounded-full border bg-white px-4 py-3 text-slate-400">
       <Plus size={15} />
-      <span className="text-sm">Write Your Travel Journal</span>
+      <span className="text-sm whitespace-nowrap truncate">Write Your Travel Journal</span>
     </div>
   </button>
 );

@@ -14,16 +14,11 @@ import {
 import { toast } from "sonner";
 
 import PreviewContent from "@/components/shared/preview-content";
+import PreviewActionsDropdown from "@/components/shared/preview-actions-dropdown";
 import { DeleteDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import { PreviewCard } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { FloatingInput } from "@/components/ui/input";
 import {
   FloatingSelect,
@@ -631,8 +626,11 @@ const DocumentItemCard = ({
                 {formatLabel(getDocumentLevel(item))}
               </span>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <PreviewActionsDropdown
+              title="Document actions"
+              description="Choose an action for this document."
+              contentClassName="w-36"
+              trigger={
                 <Button
                   type="button"
                   variant="ghost"
@@ -643,18 +641,23 @@ const DocumentItemCard = ({
                 >
                   <MoreVertical size={16} />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-36">
-                <DropdownMenuItem onSelect={onEdit}>
-                  <PencilLine size={14} />
-                  Update
-                </DropdownMenuItem>
-                <DropdownMenuItem variant="destructive" onSelect={onDelete}>
-                  <Trash2 size={14} />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              }
+              actions={[
+                {
+                  value: "update",
+                  label: "Update",
+                  icon: <PencilLine size={15} className="shrink-0" />,
+                  onSelect: onEdit,
+                },
+                {
+                  value: "delete",
+                  label: "Delete",
+                  icon: <Trash2 size={15} className="shrink-0" />,
+                  destructive: true,
+                  onSelect: onDelete,
+                },
+              ]}
+            />
           </div>
           {getDocumentNote(item) ? (
             <p className="mt-2 text-sm font-normal leading-6 text-slate-600">

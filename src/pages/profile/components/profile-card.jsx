@@ -170,7 +170,7 @@ const ProfileCard = ({
                   {displayLocation ? (
                     <span className="truncate">{displayLocation}</span>
                   ) : (
-                    <span className="text-slate-400">No Location found</span>
+                    <span className="text-slate-400">Address was not added</span>
                   )}
                 </span>
               </div>

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { MapPin, Newspaper, Plane, Search, X } from "lucide-react";
+import { CalendarDays, MapPin, Newspaper, Plane, PlaneTakeoff, Search, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import InfiniteScroll from "@/components/shared/infinite-scroll";
@@ -19,7 +19,7 @@ import { normalizeJournals } from "@/pages/journal/journal-utils";
 
 const SEARCH_TABS = [
   { value: "destinations", label: "Destinations", icon: MapPin },
-  { value: "trips", label: "Trips", icon: Plane },
+  { value: "trips", label: "Trips", icon: CalendarDays },
   { value: "journals", label: "Journals", icon: Newspaper },
 ];
 
@@ -202,7 +202,7 @@ const SearchPage = () => {
             <h1 className="text-xl font-bold text-slate-950 md:text-2xl">
               Search
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 md:block hidden text-sm text-slate-500">
               Search destinations, trips, and journals from one place.
             </p>
           </div>
