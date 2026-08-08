@@ -11,7 +11,7 @@ import NotificationList from "@/features/notification/notification-list";
 import useNotificationSocket from "@/features/notification/useNotificationSocket";
 import useNotificationAlert from "@/features/notification/useNotificationAlert";
 
-const AlertMenu = ({ unreadCount = 0, onNotification }) => {
+const NotificationMenu = ({ unreadCount = 0, onNotification }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const showNotificationAlert = useNotificationAlert({
@@ -84,4 +84,4 @@ const AlertMenu = ({ unreadCount = 0, onNotification }) => {
   );
 };
 
-export default AlertMenu;
+export default NotificationMenu;

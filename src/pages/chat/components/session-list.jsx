@@ -1,5 +1,5 @@
 import React from "react";
-import { Loader2, MessageSquareDot, Plus, Search } from "lucide-react";
+import { Loader2, MessageSquareDot, Plus, Search, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
@@ -44,6 +44,9 @@ const ChatSessionList = ({
   isFetchingSessions,
   isSessionListError,
   sessionSearch,
+  isSessionSearchOpen,
+  onCloseSessionSearch,
+  onOpenSessionSearch,
   sessions,
   selectedSessionId,
   onSessionSearchChange,
@@ -53,11 +56,11 @@ const ChatSessionList = ({
 }) => (
   <Card
     className={cn(
-      "h-full min-h-0 flex flex-col",
-      isMobileChatOpen ? "hidden lg:flex" : "flex flex-col",
+      "absolute inset-0 z-0 flex h-full w-full min-h-0 flex-col lg:static",
+      isMobileChatOpen && "pointer-events-none lg:pointer-events-auto",
     )}
   >
-    <div className="border-b border-slate-200 pb-4">
+    <div className="pb-3.5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-bold text-slate-950">Chat Sessions</h2>
@@ -65,32 +68,60 @@ const ChatSessionList = ({
             Pick up a previous travel chat
           </p>
         </div>
-        <Button
-          type="button"
-          size="icon"
-          onClick={onCreateSession}
-          disabled={isCreatingSession}
-          aria-label="Create new session"
-          className="rounded-full"
-        >
-          {isCreatingSession ? (
-            <Loader2 size={18} className="animate-spin" />
-          ) : (
-            <Plus size={18} />
-          )}
-        </Button>
+        <div className="flx gap-2.5">
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={onOpenSessionSearch}
+            aria-label="Search Session"
+            className="rounded-full"
+          >
+            <Search size={18} className="text-slate-600" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            onClick={onCreateSession}
+            disabled={isCreatingSession}
+            aria-label="Create new session"
+            className="rounded-full"
+          >
+            {isCreatingSession ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <Plus size={18} />
+            )}
+          </Button>
+        </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
-        <Search size={16} className="shrink-0" />
-        <input
-          value={sessionSearch}
-          onChange={(event) => onSessionSearchChange(event.target.value)}
-          placeholder="Search sessions"
-          className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
-        />
-      </div>
+      {isSessionSearchOpen && (
+        <>
+          <div className="mt-4 flex items-center gap-2 bg-slate-50 px-3 py-1 rounded-xl text-sm text-slate-500">
+            <Search size={16} className="shrink-0" />
+            <input
+              value={sessionSearch}
+              onChange={(event) => onSessionSearchChange(event.target.value)}
+              placeholder="Search sessions"
+              className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onCloseSessionSearch}
+              aria-label="Close session search"
+              className="rounded-full"
+            >
+              <X size={17} />
+            </Button>
+          </div>
+        </>
+      )}
     </div>
+
+    <hr className="border-t border-slate-200 -mx-6" />
 
     <div className="hidden-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto py-3 pr-1">
       {isFetchingSessions && !sessions.length ? (

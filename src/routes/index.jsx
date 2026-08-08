@@ -9,6 +9,10 @@ const RegisterPage = lazy(() => import("@/pages/auth/register"));
 const ForgotPasswordPage = lazy(() => import("@/pages/auth/forgot-password"));
 const ResetPasswordPage = lazy(() => import("@/pages/auth/reset-password"));
 const ProfilePage = lazy(() => import("@/pages/profile"));
+const CreditHistoryPage = lazy(
+  () => import("@/pages/profile/components/credit-history"),
+);
+const SettingsPage = lazy(() => import("@/pages/profile/components/settings"));
 
 // destination
 const DestiantionPage = lazy(() => import("@/pages/destinations"));
@@ -98,8 +102,12 @@ export const routes = createBrowserRouter([
         element: withSuspense(<ProfilePage />),
       },
       {
-        path: "/app-features",
-        element: withSuspense(<AppFeaturesPage />),
+        path: "/profile/credit-history",
+        element: withSuspense(<CreditHistoryPage />),
+      },
+      {
+        path: "/profile/settings",
+        element: withSuspense(<SettingsPage />),
       },
     ],
   },
@@ -122,5 +130,9 @@ export const routes = createBrowserRouter([
   {
     path: "/trip/public/:tripId",
     element: withSuspense(<PublicTripDetailsPage />),
+  },
+  {
+    path: "/app-features",
+    element: withSuspense(<AppFeaturesPage />),
   },
 ]);
