@@ -8,7 +8,7 @@ const MobileBottomNavbar = ({ isActiveRoute }) => {
   const isMobileNavVisible = useMobileNavVisibility(location.key);
   return (
     <nav
-      className={`bg-white/90 backdrop-blur-xl shadow-[0_12px_40px_rgba(15,23,42,0.18)] fixed inset-x-0 bottom-0 z-50 px-3 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:hidden ${
+      className={`bg-cyan-50 backdrop-blur-xl shadow-[0_12px_40px_rgba(15,23,42,0.18)] fixed inset-x-0 bottom-0 z-50 px-3 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:hidden ${
         isMobileNavVisible
           ? "translate-y-0 delay-0"
           : "pointer-events-none translate-y-[calc(100%+1.5rem)] delay-200"
