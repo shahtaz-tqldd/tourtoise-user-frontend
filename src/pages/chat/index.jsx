@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 
 import useDebounce from "@/hooks/useDebounce";
+import useMobileBottomNavbar from "@/hooks/useMobileBottomNavbar";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import {
   chatApiSlice,
@@ -50,11 +51,15 @@ const AgentChatPage = () => {
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [sessionSearch, setSessionSearch] = useState("");
   const [isMessageSearchOpen, setIsMessageSearchOpen] = useState(false);
+  const [isSessionSearchOpen, setIsSessionSearchOpen] = useState(false);
   const [messageSearch, setMessageSearch] = useState("");
   const [message, setMessage] = useState("");
   const [pendingMessage, setPendingMessage] = useState(null);
   const [isReconcilingMessage, setIsReconcilingMessage] = useState(false);
   const [activeSessionSnapshot, setActiveSessionSnapshot] = useState(null);
+  const isMobileConversationOpen = isMobileChatOpen && Boolean(activeSessionId);
+  useMobileBottomNavbar({ hidden: isMobileConversationOpen });
+
   const debouncedSessionSearch = useDebounce(sessionSearch.trim(), 350);
   const trimmedMessageSearch = messageSearch.trim();
   const debouncedMessageSearch = useDebounce(trimmedMessageSearch, 350);
@@ -147,6 +152,11 @@ const AgentChatPage = () => {
   const closeMessageSearch = () => {
     setIsMessageSearchOpen(false);
     setMessageSearch("");
+  };
+
+  const closeSessionSearch = () => {
+    setIsSessionSearchOpen(false);
+    setSessionSearch("");
   };
 
   const createNewSession = async () => {
@@ -308,12 +318,21 @@ const AgentChatPage = () => {
   }, [isChatBusy]);
 
   return (
-    <section className="-mx-4 mt-0 h-[calc(100dvh-112px)] min-h-0 md:mx-0 md:mt-3 lg:mt-4 lg:grid lg:h-[calc(100vh-100px)] lg:min-h-[560px] lg:grid-cols-[420px_minmax(0,1fr)] lg:gap-5">
+    <section
+      className={`relative -mx-4 mt-0 min-h-0 overflow-hidden transition-[height] duration-300 ease-out md:mx-0 md:mt-3 md:h-[calc(100dvh-81px)] lg:mt-4 lg:grid lg:h-[calc(100vh-100px)] lg:min-h-[560px] lg:grid-cols-[420px_minmax(0,1fr)] lg:gap-5 lg:overflow-visible ${
+        isMobileConversationOpen
+          ? "h-[calc(100dvh-57px)]"
+          : "h-[calc(100dvh-112px)]"
+      }`}
+    >
       <ChatSessionList
-        isMobileChatOpen={isMobileChatOpen}
+        isMobileChatOpen={isMobileConversationOpen}
         isCreatingSession={isCreatingSession}
         isFetchingSessions={isFetchingSessions}
         isSessionListError={isSessionListError}
+        isSessionSearchOpen={isSessionSearchOpen}
+        onCloseSessionSearch={closeSessionSearch}
+        onOpenSessionSearch={() => setIsSessionSearchOpen(!isSessionSearchOpen)}
         sessionSearch={sessionSearch}
         sessions={sessions}
         selectedSessionId={selectedSessionId}
@@ -340,7 +359,7 @@ const AgentChatPage = () => {
         isFetchingMessages={isFetchingMessages}
         isMessageListError={isMessageListError}
         isMessageSearchOpen={isMessageSearchOpen}
-        isMobileChatOpen={isMobileChatOpen}
+        isMobileChatOpen={isMobileConversationOpen}
         isSendingMessage={isChatBusy}
         message={message}
         messageResultCount={messageResultCount}

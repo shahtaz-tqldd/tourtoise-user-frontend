@@ -96,7 +96,7 @@ const CreditHistory = () => {
 
   return (
     <PreviewCard className="md:p-8 md:rounded-t-none">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flbx gap-5">
         <SectionHeader
           title="Credit History"
           description={

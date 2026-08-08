@@ -3,10 +3,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, MessageCircle, PlaneTakeoff, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-import AlertMenu from "../shared/alerts";
 import { Logo } from "../shared/utils";
 import { useProfileStatesQuery } from "@/features/auth/authApiSlice";
 import { formatDateRange } from "@/lib/date-time";
+import NotificationMenu from "./components/notification-menu";
 
 const formatUnreadCount = (count) => (count > 99 ? "99+" : count);
 
@@ -116,7 +116,7 @@ const MainHeader = () => {
           >
             <Search className="size-4 md:size-5" />
           </button>
-          <AlertMenu
+          <NotificationMenu
             unreadCount={unreadNotificationCount}
             onNotification={refetchProfileStates}
           />

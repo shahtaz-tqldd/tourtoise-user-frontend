@@ -97,9 +97,10 @@ const ChatInterface = ({
 
   return (
     <Card
+      style={{ left: isMobileChatOpen ? "0" : "100%" }}
       className={cn(
-        "h-full min-h-0 lg:flex lg:flex-col",
-        isMobileChatOpen ? "flex flex-col" : "hidden lg:flex",
+        "absolute inset-y-0 z-10 flex h-full w-full min-h-0 flex-col rounded-none transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:static lg:z-auto lg:rounded-3xl lg:pointer-events-auto",
+        isMobileChatOpen ? "pointer-events-auto" : "pointer-events-none",
       )}
     >
       <ChatHeader
@@ -113,43 +114,46 @@ const ChatInterface = ({
       />
 
       {isMessageSearchOpen && (
-        <div className="mt-4 flex flex-col gap-2 border-b border-slate-200 bg-white pb-4 sm:flex-row sm:items-center">
-          <div className="flex min-h-11 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
-            <Search size={16} className="shrink-0" />
-            <label htmlFor="message-search" className="sr-only">
-              Search messages
-            </label>
-            <input
-              ref={messageSearchInputRef}
-              id="message-search"
-              value={messageSearch}
-              onChange={(event) => onMessageSearchChange(event.target.value)}
-              placeholder="Search messages"
-              className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
-            />
+        <>
+          <div className="mt-3.5 flex flex-col gap-2 bg-white pb-3.5 sm:flex-row sm:items-center">
+            <div className="flex min-h-11 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
+              <Search size={16} className="shrink-0" />
+              <label htmlFor="message-search" className="sr-only">
+                Search messages
+              </label>
+              <input
+                ref={messageSearchInputRef}
+                id="message-search"
+                value={messageSearch}
+                onChange={(event) => onMessageSearchChange(event.target.value)}
+                placeholder="Search messages"
+                className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+              />
+            </div>
+            <div className="flex items-center justify-between gap-2 sm:justify-end">
+              <span className="text-xs font-semibold text-slate-500">
+                {trimmedMessageSearch
+                  ? isFetchingMessages
+                    ? "Searching..."
+                    : `${messageResultCount} result${
+                        messageResultCount === 1 ? "" : "s"
+                      }`
+                  : `${messages.length} messages`}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={onCloseMessageSearch}
+                aria-label="Close message search"
+                className="rounded-full"
+              >
+                <X size={17} />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center justify-between gap-2 sm:justify-end">
-            <span className="text-xs font-semibold text-slate-500">
-              {trimmedMessageSearch
-                ? isFetchingMessages
-                  ? "Searching..."
-                  : `${messageResultCount} result${
-                      messageResultCount === 1 ? "" : "s"
-                    }`
-                : `${messages.length} messages`}
-            </span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={onCloseMessageSearch}
-              aria-label="Close message search"
-              className="rounded-full"
-            >
-              <X size={17} />
-            </Button>
-          </div>
-        </div>
+          <hr className="border-t border-slate-200 -mx-6" />
+        </>
       )}
 
       <div className="hidden-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto py-4 pr-1 lg:space-y-5 lg:pr-2">
@@ -236,8 +240,8 @@ const ChatInterface = ({
         )}
         <div ref={messagesEndRef} />
       </div>
-
-      <div className="border-t border-slate-200 bg-white pt-3 lg:pt-4">
+      <hr className="border-t border-slate-200 -mx-6" />
+      <div className="bg-white pt-2.5 lg:pt-3.5 -mb-1.5">
         <ChatInputForm
           composerRef={composerRef}
           message={message}
