@@ -11,15 +11,10 @@ import {
 import { toast } from "sonner";
 
 import PreviewContent from "@/components/shared/preview-content";
+import PreviewActionsDropdown from "@/components/shared/preview-actions-dropdown";
 import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import { PreviewCard } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { FloatingTextarea } from "@/components/ui/textarea";
 import {
   useDeleteTripNoteMutation,
@@ -331,8 +326,11 @@ const NoteCard = ({
             Created on {formatNoteDate(note.created_at || note.updated_at)}
           </span>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <PreviewActionsDropdown
+          title="Note actions"
+          description="Choose an action for this note."
+          contentClassName="w-36"
+          trigger={
             <Button
               type="button"
               variant="ghost"
@@ -342,18 +340,23 @@ const NoteCard = ({
             >
               <MoreVertical size={16} />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-36">
-            <DropdownMenuItem onSelect={onEdit}>
-              <PencilLine size={14} />
-              Update
-            </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" onSelect={onDelete}>
-              <Trash2 size={14} />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          }
+          actions={[
+            {
+              value: "update",
+              label: "Update",
+              icon: <PencilLine size={15} className="shrink-0" />,
+              onSelect: onEdit,
+            },
+            {
+              value: "delete",
+              label: "Delete",
+              icon: <Trash2 size={15} className="shrink-0" />,
+              destructive: true,
+              onSelect: onDelete,
+            },
+          ]}
+        />
       </div>
       <p
         className={cn(

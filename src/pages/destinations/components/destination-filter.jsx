@@ -1,16 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { FloatingSelect, SelectItem } from "@/components/ui/select";
 import { COUNTRY_LIST } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 import { Banknote, Compass, SlidersHorizontal, Sparkles } from "lucide-react";
 import SearchBar from "@/components/shared/search-bar";
+import PreviewDropdown from "@/components/shared/preview-dropdown";
 import { DESTINATION_TYPE_OPTIONS } from "../constants";
 
 const COUNTRY_CODE_BY_NAME = {
@@ -98,7 +94,7 @@ const OptionGroup = ({ title, icon, options, selectedValues, onToggle }) => {
             <label
               key={option.value}
               className={cn(
-                "w-fit flx gap-2 rounded-full py-2 pl-3 pr-4 text-sm font-semibold transition cursor-pointer",
+                "flex w-fit cursor-pointer gap-2 rounded-full py-2 pl-3 pr-4 text-sm font-semibold transition",
                 isSelected
                   ? "bg-primary text-white"
                   : "bg-slate-100 text-slate-700 hover:bg-primary/10",
@@ -196,11 +192,16 @@ const DestinationFilter = ({
     setOpen(false);
   };
 
-  const clearDraftFilters = () => {
+  const clearFilters = () => {
     setDraftCountries([]);
     setDraftDestinationTypes([]);
     setDraftBudgetTiers([]);
     setDraftDifficulties([]);
+    setCountries([]);
+    setDestinationTypes([]);
+    setBudgetTiers([]);
+    setDifficulties([]);
+    setOpen(false);
   };
 
   const handleOpenChange = (nextOpen) => {
@@ -229,8 +230,12 @@ const DestinationFilter = ({
       />
 
       <div className="relative">
-        <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-          <DropdownMenuTrigger asChild>
+        <PreviewDropdown
+          open={open}
+          onOpenChange={handleOpenChange}
+          title="Filter destinations"
+          description="Choose destination types, country, budget, and difficulty."
+          trigger={
             <Button
               type="button"
               variant="outline"
@@ -239,72 +244,67 @@ const DestinationFilter = ({
             >
               <SlidersHorizontal size={16} />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-[min(calc(100vw-2rem),420px)] rounded-2xl border-slate-200 bg-white p-0 shadow-xl"
-            onCloseAutoFocus={(event) => event.preventDefault()}
-          >
-            <div className="border-b border-slate-100 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <h2 className="text-base font-bold text-slate-950">
-                  Filter Destination
-                </h2>
-              </div>
+          }
+        >
+          <div className="border-b border-slate-100 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-base font-bold text-slate-950">
+                Filter Destination
+              </h2>
             </div>
+          </div>
 
-            <div className="max-h-[64vh] space-y-5 overflow-y-auto p-4">
-              <OptionGroup
-                title="Trip style"
-                icon={Compass}
-                options={DESTINATION_TYPE_OPTIONS}
-                selectedValues={draftDestinationTypes}
-                onToggle={(value) =>
-                  setDraftDestinationTypes((values) =>
-                    toggleValue(values, value),
-                  )
-                }
-              />
-              <CountrySelect
-                countries={countries}
-                selectedValue={draftCountries[0]}
-                onValueChange={(value) => setDraftCountries([value])}
-              />
-              <OptionGroup
-                title="Budget level"
-                icon={Banknote}
-                options={BUDGET_TIER_OPTIONS}
-                selectedValues={draftBudgetTiers}
-                onToggle={(value) =>
-                  setDraftBudgetTiers((values) => toggleValue(values, value))
-                }
-              />
-              <OptionGroup
-                title="Difficulty"
-                icon={Sparkles}
-                options={DIFFICULTY_OPTIONS}
-                selectedValues={draftDifficulties}
-                onToggle={(value) =>
-                  setDraftDifficulties((values) => toggleValue(values, value))
-                }
-              />
-            </div>
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4">
+            <OptionGroup
+              title="Trip style"
+              icon={Compass}
+              options={DESTINATION_TYPE_OPTIONS}
+              selectedValues={draftDestinationTypes}
+              onToggle={(value) =>
+                setDraftDestinationTypes((values) =>
+                  toggleValue(values, value),
+                )
+              }
+            />
+            <CountrySelect
+              countries={countries}
+              selectedValue={draftCountries[0]}
+              onValueChange={(value) => setDraftCountries([value])}
+            />
+            <OptionGroup
+              title="Budget level"
+              icon={Banknote}
+              options={BUDGET_TIER_OPTIONS}
+              selectedValues={draftBudgetTiers}
+              onToggle={(value) =>
+                setDraftBudgetTiers((values) => toggleValue(values, value))
+              }
+            />
+            <OptionGroup
+              title="Difficulty"
+              icon={Sparkles}
+              options={DIFFICULTY_OPTIONS}
+              selectedValues={draftDifficulties}
+              onToggle={(value) =>
+                setDraftDifficulties((values) => toggleValue(values, value))
+              }
+            />
+          </div>
 
-            <div className="flex items-center justify-end gap-2 border-t border-slate-100 p-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={draftFilterCount ? clearDraftFilters : cancelFilters}
-                aria-label="Reset selected filter options"
-              >
-                {draftFilterCount ? "Clear Filter" : "Cancel"}
-              </Button>
-              <Button type="button" onClick={applyFilters}>
-                Apply
-              </Button>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-slate-100 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={draftFilterCount ? clearFilters : cancelFilters}
+              aria-label="Reset selected filter options"
+            >
+              {draftFilterCount ? "Clear Filter" : "Cancel"}
+            </Button>
+            <Button type="button" onClick={applyFilters}>
+              Apply
+            </Button>
+          </div>
+        </PreviewDropdown>
         {appliedFilterCount > 0 && (
           <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
             {appliedFilterCount}

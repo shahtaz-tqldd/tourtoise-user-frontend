@@ -1,94 +1,31 @@
-import Card, { PreviewCard } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { PreviewCard } from "@/components/ui/card";
 import { FloatingInput } from "@/components/ui/input";
 import { FloatingSelect, SelectItem } from "@/components/ui/select";
-import { useUpdateAccountMutation } from "@/features/auth/authApiSlice";
-import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { cn } from "@/lib/utils";
 import {
   BadgeCheck,
   Cake,
   Languages,
-  Loader2,
   Phone,
-  PenLine,
   Rabbit,
   ShieldCheck,
   TentTree,
   Utensils,
   WalletCards,
 } from "lucide-react";
-import React, { useMemo, useState } from "react";
-import { toast } from "sonner";
+import React from "react";
+import {
+  currencies,
+  dietaryOptions,
+  formatList,
+  genderOptions,
+  interestOptions,
+  languageOptions,
+  mobilityOptions,
+  travelPaceOptions,
+} from "../profile-form-state";
 
 const EMPTY_VALUE = "Not set";
-
-const interestOptions = [
-  "Food",
-  "History",
-  "Nature",
-  "Nightlife",
-  "Adventure",
-  "Shopping",
-  "Culture",
-  "Beaches",
-  "Photography",
-  "Local experiences",
-  "Family-friendly activities",
-  "Luxury experiences",
-  "Hidden gems",
-];
-
-const dietaryOptions = [
-  "No restriction",
-  "Vegetarian",
-  "Vegan",
-  "Halal",
-  "Gluten-free",
-  "Seafood allergy",
-  "Nut allergy",
-  "Avoid pork",
-  "Other",
-];
-
-const mobilityOptions = [
-  "No mobility constraints",
-  "Avoid long walking",
-  "Avoid stairs",
-  "Wheelchair-friendly places preferred",
-  "Senior-friendly plan",
-  "Kid-friendly pacing",
-  "Avoid intense physical activities",
-  "Other",
-];
-
-const genderOptions = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-  { value: "other", label: "Other" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
-];
-
-const languageOptions = [
-  { value: "en", label: "English" },
-  { value: "bn", label: "Bangla" },
-];
-
-const currencies = [
-  { value: "USD", label: "USD" },
-  { value: "BDT", label: "BDT" },
-  { value: "EUR", label: "EUR" },
-  { value: "GBP", label: "GBP" },
-  { value: "INR", label: "INR" },
-  { value: "THB", label: "THB" },
-  { value: "AED", label: "AED" },
-];
-
-const travelPaceOptions = [
-  { value: "moderate", label: "Moderate" },
-  { value: "fast", label: "Fast" },
-  { value: "slow", label: "Slow" },
-];
 
 const formatDate = (value) => {
   if (!value) return EMPTY_VALUE;
@@ -101,32 +38,6 @@ const formatDate = (value) => {
     day: "numeric",
     year: "numeric",
   }).format(date);
-};
-
-const formatList = (value) => {
-  if (Array.isArray(value)) return value.filter(Boolean);
-  if (typeof value === "string" && value.trim()) return [value.trim()];
-  return [];
-};
-
-const normalizeOptionList = (values, options) => {
-  const optionMap = new Map(
-    options.map((option) => [option.toLowerCase(), option]),
-  );
-
-  return formatList(values)
-    .map((value) => optionMap.get(String(value).toLowerCase()))
-    .filter(Boolean);
-};
-
-const normalizeSelectValue = (value, options) => {
-  if (!value) return "";
-
-  const match = options.find(
-    (option) => option.value.toLowerCase() === String(value).toLowerCase(),
-  );
-
-  return match?.value || "";
 };
 
 const getOptionLabel = (value, options, fallback = EMPTY_VALUE) => {
@@ -145,54 +56,7 @@ const titleize = (value) => {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 };
 
-const getOverviewFormState = (profile = {}) => ({
-  personal: {
-    date_of_birth: profile.date_of_birth || "",
-    gender: normalizeSelectValue(profile.gender, genderOptions),
-  },
-  travel: {
-    travel_interests: normalizeOptionList(
-      profile.travel_interests,
-      interestOptions,
-    ),
-    dietary_preferences: normalizeOptionList(
-      profile.dietary_preferences,
-      dietaryOptions,
-    ),
-    mobility_constraints: normalizeOptionList(
-      profile.mobility_constraints,
-      mobilityOptions,
-    ),
-  },
-  defaults: {
-    preferred_language: normalizeSelectValue(
-      profile.preferred_language,
-      languageOptions,
-    ),
-    preferred_currency: normalizeSelectValue(
-      profile.preferred_currency,
-      currencies,
-    ),
-    travel_pace: normalizeSelectValue(profile.travel_pace, travelPaceOptions),
-  },
-  emergency: {
-    emergency_contact_name: profile.emergency_contact_name || "",
-    emergency_contact_phone: profile.emergency_contact_phone || "",
-  },
-});
-
-const Overview = ({ profile = {}, canEdit = false, onUpdated }) => {
-  const [editingSection, setEditingSection] = useState(null);
-  const [formState, setFormState] = useState(() =>
-    getOverviewFormState(profile),
-  );
-  const [updateAccount, { isLoading: isUpdating }] = useUpdateAccountMutation();
-
-  const latestFormState = useMemo(
-    () => getOverviewFormState(profile),
-    [profile],
-  );
-
+const Overview = ({ isEditing, profile = {}, formState, onFormStateChange }) => {
   const travelInterests = formatList(profile.travel_interests);
   const dietaryPreferences = formatList(profile.dietary_preferences);
   const mobilityConstraints = formatList(profile.mobility_constraints);
@@ -235,18 +99,8 @@ const Overview = ({ profile = {}, canEdit = false, onUpdated }) => {
   const hasEmergencyContact =
     profile.emergency_contact_name || profile.emergency_contact_phone;
 
-  const startEditing = (section) => {
-    setFormState(latestFormState);
-    setEditingSection(section);
-  };
-
-  const cancelEditing = () => {
-    setFormState(latestFormState);
-    setEditingSection(null);
-  };
-
   const updateField = (section, field, value) => {
-    setFormState((current) => ({
+    onFormStateChange((current) => ({
       ...current,
       [section]: {
         ...current[section],
@@ -256,7 +110,7 @@ const Overview = ({ profile = {}, canEdit = false, onUpdated }) => {
   };
 
   const toggleListField = (field, value) => {
-    setFormState((current) => {
+    onFormStateChange((current) => {
       const values = current.travel[field] || [];
       const nextValues = values.includes(value)
         ? values.filter((item) => item !== value)
@@ -272,58 +126,17 @@ const Overview = ({ profile = {}, canEdit = false, onUpdated }) => {
     });
   };
 
-  const saveSection = async (section) => {
-    const sectionState = formState[section];
-    const payloadBySection = {
-      personal: {
-        date_of_birth: sectionState?.date_of_birth || null,
-        gender: sectionState?.gender?.trim() || "",
-      },
-      travel: {
-        travel_interests: sectionState?.travel_interests || [],
-        dietary_preferences: sectionState?.dietary_preferences || [],
-        mobility_constraints: sectionState?.mobility_constraints || [],
-      },
-      defaults: {
-        preferred_language: sectionState?.preferred_language?.trim() || "",
-        preferred_currency: sectionState?.preferred_currency?.trim() || "",
-        travel_pace: sectionState?.travel_pace?.trim() || "",
-      },
-      emergency: {
-        emergency_contact_name:
-          sectionState?.emergency_contact_name?.trim() || "",
-        emergency_contact_phone:
-          sectionState?.emergency_contact_phone?.trim() || "",
-      },
-    };
-
-    try {
-      await updateAccount(payloadBySection[section]).unwrap();
-      await onUpdated?.();
-      setEditingSection(null);
-      toast.success("Profile updated.");
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Could not update profile."));
-    }
-  };
-
   return (
     <PreviewCard className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] md:p-8 md:rounded-t-none">
       <div className="space-y-10 md:space-y-12">
         <ProfileInfoCard
-          section="personal"
           title="Personal Details"
           description="Basic information connected to this travel profile."
           items={personalDetails}
-          canEdit={canEdit}
-          isEditing={editingSection === "personal"}
-          isUpdating={isUpdating}
-          onEdit={() => startEditing("personal")}
-          onCancel={cancelEditing}
-          onSave={() => saveSection("personal")}
+          isEditing={isEditing}
         />
-        {editingSection === "personal" && (
-          <div className="grid gap-4 sm:grid-cols-2">
+        {isEditing ? (
+          <div className="-mt-4 grid gap-4 sm:grid-cols-2">
             <FloatingInput
               name="date_of_birth"
               label="Date of birth"
@@ -347,21 +160,15 @@ const Overview = ({ profile = {}, canEdit = false, onUpdated }) => {
               ))}
             </FloatingSelect>
           </div>
-        )}
+        ) : null}
 
         <div>
           <SectionTitle
             section="travel"
             title="Travel Profile"
             description="Preferences Tourtoise can use while shaping trips."
-            canEdit={canEdit}
-            isEditing={editingSection === "travel"}
-            isUpdating={isUpdating}
-            onEdit={() => startEditing("travel")}
-            onCancel={cancelEditing}
-            onSave={() => saveSection("travel")}
           />
-          {editingSection === "travel" ? (
+          {isEditing ? (
             <div className="mt-5 grid gap-4">
               <OptionButtonGroup
                 title="Travel interests"
@@ -412,20 +219,14 @@ const Overview = ({ profile = {}, canEdit = false, onUpdated }) => {
         </div>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-8 md:space-y-10">
         <ProfileInfoCard
-          section="defaults"
           title="Travel Defaults"
           description="Locale and trip-planning defaults."
           items={preferenceDetails}
-          canEdit={canEdit}
-          isEditing={editingSection === "defaults"}
-          isUpdating={isUpdating}
-          onEdit={() => startEditing("defaults")}
-          onCancel={cancelEditing}
-          onSave={() => saveSection("defaults")}
+          isEditing={isEditing}
         />
-        {editingSection === "defaults" && (
+        {isEditing ? (
           <div className="grid gap-4">
             <FloatingSelect
               label="Preferred language"
@@ -467,21 +268,15 @@ const Overview = ({ profile = {}, canEdit = false, onUpdated }) => {
               ))}
             </FloatingSelect>
           </div>
-        )}
+        ) : null}
 
-        <Card>
+        <div>
           <SectionTitle
             section="emergency"
             title="Emergency Contact"
             description="Contact information saved for travel support."
-            canEdit={canEdit}
-            isEditing={editingSection === "emergency"}
-            isUpdating={isUpdating}
-            onEdit={() => startEditing("emergency")}
-            onCancel={cancelEditing}
-            onSave={() => saveSection("emergency")}
           />
-          {editingSection === "emergency" ? (
+          {isEditing ? (
             <div className="mt-5 grid gap-4">
               <FloatingInput
                 name="emergency_contact_name"
@@ -519,34 +314,15 @@ const Overview = ({ profile = {}, canEdit = false, onUpdated }) => {
           ) : (
             <EmptyState message="No emergency contact added." />
           )}
-        </Card>
+        </div>
       </div>
     </PreviewCard>
   );
 };
 
-const ProfileInfoCard = ({
-  title,
-  description,
-  items,
-  canEdit,
-  isEditing,
-  isUpdating,
-  onEdit,
-  onCancel,
-  onSave,
-}) => (
+const ProfileInfoCard = ({ title, description, items, isEditing }) => (
   <div>
-    <SectionTitle
-      title={title}
-      description={description}
-      canEdit={canEdit}
-      isEditing={isEditing}
-      isUpdating={isUpdating}
-      onEdit={onEdit}
-      onCancel={onCancel}
-      onSave={onSave}
-    />
+    <SectionTitle title={title} description={description} />
     {!isEditing && (
       <div className="mt-5 space-y-4">
         {items.map((item) => (
@@ -557,16 +333,7 @@ const ProfileInfoCard = ({
   </div>
 );
 
-const SectionTitle = ({
-  title,
-  description,
-  canEdit,
-  isEditing,
-  isUpdating,
-  onEdit,
-  onCancel,
-  onSave,
-}) => (
+const SectionTitle = ({ title, description }) => (
   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div>
       <h2 className="text-base font-bold text-slate-950">{title}</h2>
@@ -574,42 +341,6 @@ const SectionTitle = ({
         <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
       )}
     </div>
-    {canEdit &&
-      (isEditing ? (
-        <div className="flex shrink-0 items-center gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={isUpdating}
-            onClick={onCancel}
-            className="h-8 rounded-lg px-3 text-xs"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            disabled={isUpdating}
-            onClick={onSave}
-            className="h-8 rounded-lg px-3 text-xs"
-          >
-            {isUpdating && <Loader2 className="animate-spin" />}
-            Save changes
-          </Button>
-        </div>
-      ) : (
-        <Button
-          type="button"
-          size="icon-sm"
-          variant="ghost"
-          onClick={onEdit}
-          className="rounded-full text-slate-500 hover:text-primary"
-          aria-label={`Edit ${title}`}
-        >
-          <PenLine className="!size-3.5" />
-        </Button>
-      ))}
   </div>
 );
 

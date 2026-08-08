@@ -24,6 +24,7 @@ const TravelJournalPage = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [editingJournal, setEditingJournal] = useState(null);
   const [deletingJournal, setDeletingJournal] = useState(null);
+  const [journalScope, setJournalScope] = useState("public");
   const currentUser = useSelector((state) => state.auth.user);
   const {
     data,
@@ -35,6 +36,7 @@ const TravelJournalPage = () => {
     isFetchingNextPage,
   } = useJournalInfiniteListInfiniteQuery({
     page_size: 10,
+    scope: journalScope,
   });
   const [saveJournal, { isLoading: isSaving }] = useSaveJournalMutation();
   const [deleteJournal, { isLoading: isDeleting }] = useDeleteJournalMutation();
@@ -100,7 +102,11 @@ const TravelJournalPage = () => {
   return (
     <section className="mx-auto max-w-3xl pt-5 pb-20 md:pb-5">
       <div className="min-w-0 space-y-5">
-        <JournalPageHeader onCreate={openCreate} />
+        <JournalPageHeader
+          onCreate={openCreate}
+          journalScope={journalScope}
+          onJournalScopeChange={setJournalScope}
+        />
 
         <JournalFeed
           journals={journals}
@@ -114,6 +120,11 @@ const TravelJournalPage = () => {
           onEditJournal={openEdit}
           onDeleteJournal={setDeletingJournal}
           canManageJournal={isOwnJournal}
+          emptyDescription={
+            journalScope === "mine"
+              ? "Create your first travel journal to see it here."
+              : "No public travel journals are available yet."
+          }
         />
       </div>
       {formOpen && (

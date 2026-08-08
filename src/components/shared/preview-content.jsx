@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+
 // ui components
 import {
   Dialog,
@@ -13,27 +14,26 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/lib/mobile-visible";
 
-function useMediaQuery(query) {
-  const [matches, setMatches] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-
-    const mediaQuery = window.matchMedia(query);
-    const handleChange = () => setMatches(mediaQuery.matches);
-
-    handleChange();
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [query]);
-
-  return matches;
-}
-
-const PreviewContent = ({ open, onOpenChange, children, className = "" }) => {
-  const isMobile = useMediaQuery("(max-width: 767px)");
+/**
+ * Responsive modal for rich preview and form content.
+ *
+ * It is centered on desktop and presented as a rounded bottom drawer on
+ * mobile. Content scrolls inside the surface so the drawer never exceeds the
+ * available viewport height.
+ */
+const PreviewContent = ({
+  open,
+  onOpenChange,
+  children,
+  title = "Preview",
+  description,
+  className,
+  desktopClassName,
+  mobileClassName,
+}) => {
+  const isMobile = useMediaQuery();
 
   if (isMobile) {
     return (
@@ -41,13 +41,18 @@ const PreviewContent = ({ open, onOpenChange, children, className = "" }) => {
         <SheetContent
           side="bottom"
           className={cn(
-            "h-[100dvh] gap-0 overflow-hidden rounded-none border-0 p-0",
+            "max-h-[85dvh] gap-0 overflow-hidden rounded-t-3xl border-x-0 border-b-0 bg-white p-0 pt-4",
             className,
+            mobileClassName,
           )}
         >
-          <SheetTitle className="sr-only hidden"></SheetTitle>
-          <SheetDescription className="sr-only hidden"></SheetDescription>
-          <div className="hidden-scrollbar">{children}</div>
+          <SheetTitle className="sr-only">{title}</SheetTitle>
+          <SheetDescription className="sr-only">
+            {description || title}
+          </SheetDescription>
+          <div className="hidden-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     );
@@ -57,13 +62,18 @@ const PreviewContent = ({ open, onOpenChange, children, className = "" }) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "max-h-[92vh] overflow-hidden p-0 sm:max-w-2xl border-none rounded-3xl hidden-scrollbar",
+          "max-h-[92dvh] overflow-hidden rounded-3xl border-none bg-white p-0 shadow-xl sm:max-w-2xl",
           className,
+          desktopClassName,
         )}
       >
-        <DialogTitle className="sr-only hidden"></DialogTitle>
-        <DialogDescription className="sr-only hidden"></DialogDescription>
-        <div className="hidden-scrollbar overflow-y-auto">{children}</div>
+        <DialogTitle className="sr-only">{title}</DialogTitle>
+        <DialogDescription className="sr-only">
+          {description || title}
+        </DialogDescription>
+        <div className="hidden-scrollbar min-h-0 overflow-y-auto overscroll-contain">
+          {children}
+        </div>
       </DialogContent>
     </Dialog>
   );

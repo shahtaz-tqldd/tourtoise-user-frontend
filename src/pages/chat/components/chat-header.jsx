@@ -9,12 +9,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import PreviewActionsDropdown from "@/components/shared/preview-actions-dropdown";
 
 const ChatHeader = ({
   activeSession,
@@ -51,8 +46,11 @@ const ChatHeader = ({
         </div>
       </div>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <PreviewActionsDropdown
+        title="Session options"
+        description="Choose an action for this chat session."
+        contentClassName="w-fit"
+        trigger={
           <Button
             type="button"
             variant="outline"
@@ -62,35 +60,32 @@ const ChatHeader = ({
           >
             <MoreVertical size={18} />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-40 rounded-xl">
-          <DropdownMenuItem
-            onClick={onOpenSearch}
-            disabled={!activeSession || !hasMessages}
-            className="cursor-pointer rounded-lg"
-          >
-            <Search size={16} />
-            Search Message
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={onDownload}
-            disabled={!activeSession || !hasMessages}
-            className="cursor-pointer rounded-lg"
-          >
-            <Download size={16} />
-            Download
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={onDelete}
-            disabled={!activeSession || isDeletingSession}
-            className="cursor-pointer rounded-lg"
-          >
-            <Trash2 size={16} />
-            Delete session
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        }
+        actions={[
+          {
+            value: "search",
+            label: "Search Message",
+            icon: <Search size={16} className="shrink-0" />,
+            disabled: !activeSession || !hasMessages,
+            onSelect: onOpenSearch,
+          },
+          {
+            value: "download",
+            label: "Download",
+            icon: <Download size={16} className="shrink-0" />,
+            disabled: !activeSession || !hasMessages,
+            onSelect: onDownload,
+          },
+          {
+            value: "delete",
+            label: "Delete session",
+            icon: <Trash2 size={16} className="shrink-0" />,
+            destructive: true,
+            disabled: !activeSession || isDeletingSession,
+            onSelect: onDelete,
+          },
+        ]}
+      />
     </div>
     <hr className="border-t border-slate-200 -mx-6" />
   </>

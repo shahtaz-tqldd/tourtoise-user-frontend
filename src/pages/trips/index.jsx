@@ -12,7 +12,7 @@ import { useTripListQuery } from "@/features/trips/tripApiSlice";
 const pageSize = 24;
 const historyPageSize = 12;
 const pastStatuses = new Set(["completed", "archived", "cancelled"]);
-const activeStatusAliases = new Set(["in_progress", "ready", "draft"]);
+const activeStatuses = ["draft", "ready", "in_progress"];
 
 const isPastTrip = (trip) => {
   const status = trip.status?.toLowerCase();
@@ -30,7 +30,7 @@ const TripsPage = () => {
   useTitle("Trips");
   const [page, setPage] = useState(1);
   const [activeSearch, setActiveSearch] = useState("");
-  const [activeStatus, setActiveStatus] = useState("all");
+  const [activeStatus, setActiveStatus] = useState(["active"]);
   const [historySearch, setHistorySearch] = useState("");
 
   const queryArgs = useMemo(
@@ -38,12 +38,13 @@ const TripsPage = () => {
       page,
       page_size: pageSize,
       search: activeSearch || undefined,
-      status:
-        activeStatus === "all"
-          ? Array.from(activeStatusAliases)
-          : activeStatus === "active"
-            ? Array.from(activeStatusAliases)
-            : activeStatus,
+      status: Array.from(
+        new Set(
+          activeStatus.flatMap((status) =>
+            status === "active" ? activeStatuses : status,
+          ),
+        ),
+      ),
     }),
     [activeSearch, activeStatus, page],
   );
@@ -74,7 +75,8 @@ const TripsPage = () => {
     [historyTrips],
   );
 
-  const hasActiveFilters = activeSearch || activeStatus !== "all";
+  const hasActiveFilters =
+    activeSearch || activeStatus.length !== 1 || activeStatus[0] !== "active";
 
   const updateActiveSearch = (value) => {
     setActiveSearch(value);
@@ -88,7 +90,7 @@ const TripsPage = () => {
 
   const clearActiveFilters = () => {
     setActiveSearch("");
-    setActiveStatus("all");
+    setActiveStatus(["active"]);
     setPage(1);
   };
 

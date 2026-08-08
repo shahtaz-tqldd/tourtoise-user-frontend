@@ -10,7 +10,8 @@ import { FloatingInput } from "@/components/ui/input";
 import { useLoginMutation } from "@/features/auth/authApiSlice";
 import { userLoggedIn } from "@/features/auth/authSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
-import GoogleAuthButton from "./google-auth-button";
+import GoogleAuthButton from "./components/google-auth";
+import AuthContainer from "./components/container";
 
 const LoginPage = () => {
   const [login, { isLoading }] = useLoginMutation();
@@ -40,7 +41,11 @@ const LoginPage = () => {
     navigate("/", { replace: true });
   };
 
-  const handleGoogleAuthSuccess = ({ accessToken, refreshToken, rememberMe }) => {
+  const handleGoogleAuthSuccess = ({
+    accessToken,
+    refreshToken,
+    rememberMe,
+  }) => {
     handleAuthSuccess(accessToken, refreshToken, rememberMe);
     setError("");
   };
@@ -74,133 +79,126 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-amber-50/25 to-cyan-50 center py-5 md:py-10 px-6 md:px-8">
-      <div className="w-full max-w-md">
-        <div className="md:rounded-3xl md:border border-slate-200 md:bg-white md:p-8 md:shadow-xl shadow-slate-200/60">
-          <div className="mb-10">
-            <img src="/logo.png" className="h-12 object-contain mb-2" />
-            <h2 className="mt-2 text-2xl md:text-3xl font-semibold text-slate-900">
-              Let's get started
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Sign in to access your tourtoise account.
-            </p>
-          </div>
-          {error && (
-            <div
-              key={errorAnimationKey}
-              className="error-bounce mb-6 -mt-6 rounded-lg border border-red-200 bg-red-100 p-2 text-center text-xs"
-            >
-              <span className="text-red-500">{error}</span>
-            </div>
-          )}
+    <AuthContainer
+      title="Let's get started"
+      description="Sign in to access your tourtoise account."
+    >
+      {error && (
+        <div
+          key={errorAnimationKey}
+          className="error-bounce mb-6 -mt-6 rounded-lg border border-red-200 bg-red-100 p-2 text-center text-xs"
+        >
+          <span className="text-red-500">{error}</span>
+        </div>
+      )}
 
-          {!error && successMessage && (
-            <div className="mb-6 -mt-6 rounded-lg border border-green-200 bg-green-100 p-2 text-center text-xs">
-              <span className="text-green-700">{successMessage}</span>
-            </div>
-          )}
+      {!error && successMessage && (
+        <div className="mb-6 -mt-6 rounded-lg border border-green-200 bg-green-100 p-2 text-center text-xs">
+          <span className="text-green-700">{successMessage}</span>
+        </div>
+      )}
 
-          <div className="space-y-5">
-            <GoogleAuthButton
-              rememberMe={rememberMe}
-              onAuthenticated={handleGoogleAuthSuccess}
-              onError={handleAuthError}
-            />
+      <div className="space-y-5">
+        <GoogleAuthButton
+          rememberMe={rememberMe}
+          onAuthenticated={handleGoogleAuthSuccess}
+          onError={handleAuthError}
+        />
 
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-slate-200" />
-              <span className="text-xs font-medium uppercase text-slate-400">
-                Or
-              </span>
-              <div className="h-px flex-1 bg-slate-200" />
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-5">
-            <Controller
-              name="email"
-              control={control}
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Enter a valid email address",
-                },
-              }}
-              render={({ field }) => (
-                <FloatingInput
-                  {...field}
-                  label="Email Address"
-                  type="email"
-                  error={errors.email?.message}
-                />
-              )}
-            />
-
-            <Controller
-              name="password"
-              control={control}
-              rules={{
-                required: "Password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters",
-                },
-              }}
-              render={({ field }) => (
-                <FloatingInput
-                  {...field}
-                  label="Password"
-                  type="password"
-                  error={errors.password?.message}
-                />
-              )}
-            />
-
-            <div className="flex items-center justify-between gap-4">
-              <Controller
-                name="rememberMe"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="rememberMe"
-                      checked={field.value}
-                      onCheckedChange={(checked) =>
-                        field.onChange(Boolean(checked))
-                      }
-                    />
-                    <label
-                      htmlFor="rememberMe"
-                      className="cursor-pointer text-sm text-slate-600"
-                    >
-                      Remember me
-                    </label>
-                  </div>
-                )}
-              />
-              <Link
-                to="/forgot-password"
-                className="text-sm font-medium text-primary hover:underline"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            <Button type="submit" disabled={isLoading} className="w-full h-11">
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
-          <p className="mt-6 text-center text-sm text-slate-500">
-            Don't have an account?{" "}
-            <Link to="/register" className="font-medium text-primary hover:underline">
-              Create one
-            </Link>
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs font-medium uppercase text-slate-400">
+            Or
+          </span>
+          <div className="h-px flex-1 bg-slate-200" />
         </div>
       </div>
-    </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-5">
+        <Controller
+          name="email"
+          control={control}
+          rules={{
+            required: "Email is required",
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Enter a valid email address",
+            },
+          }}
+          render={({ field }) => (
+            <FloatingInput
+              {...field}
+              label="Email Address"
+              type="email"
+              error={errors.email?.message}
+            />
+          )}
+        />
+
+        <Controller
+          name="password"
+          control={control}
+          rules={{
+            required: "Password is required",
+            minLength: {
+              value: 6,
+              message: "Password must be at least 6 characters",
+            },
+          }}
+          render={({ field }) => (
+            <FloatingInput
+              {...field}
+              label="Password"
+              type="password"
+              error={errors.password?.message}
+            />
+          )}
+        />
+
+        <div className="flex items-center justify-between gap-4">
+          <Controller
+            name="rememberMe"
+            control={control}
+            render={({ field }) => (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="rememberMe"
+                  checked={field.value}
+                  onCheckedChange={(checked) =>
+                    field.onChange(Boolean(checked))
+                  }
+                />
+                <label
+                  htmlFor="rememberMe"
+                  className="cursor-pointer text-sm text-slate-600"
+                >
+                  Remember me
+                </label>
+              </div>
+            )}
+          />
+          <Link
+            to="/forgot-password"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
+        <Button type="submit" disabled={isLoading} className="w-full h-11">
+          {isLoading ? "Signing in..." : "Sign In"}
+        </Button>
+      </form>
+      <p className="mt-6 text-center text-sm text-slate-500">
+        Don't have an account?{" "}
+        <Link
+          to="/register"
+          className="font-medium text-primary hover:underline"
+        >
+          Create one
+        </Link>
+      </p>
+    </AuthContainer>
   );
 };
 

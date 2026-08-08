@@ -1,12 +1,7 @@
 import React, { useState } from "react";
 
+import PreviewActionsDropdown from "@/components/shared/preview-actions-dropdown";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Bookmark,
   Forward,
@@ -362,8 +357,11 @@ const JournalStory = ({
 };
 
 const JournalActions = ({ onEdit, onDelete }) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
+  <PreviewActionsDropdown
+    title="Journal actions"
+    description="Choose an action for this journal."
+    contentClassName="w-36"
+    trigger={
       <Button
         type="button"
         variant="ghost"
@@ -373,22 +371,23 @@ const JournalActions = ({ onEdit, onDelete }) => (
       >
         <MoreVertical size={16} />
       </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="w-36">
-      {onEdit && (
-        <DropdownMenuItem onSelect={onEdit}>
-          <Pencil size={14} />
-          Update
-        </DropdownMenuItem>
-      )}
-      {onDelete && (
-        <DropdownMenuItem variant="destructive" onSelect={onDelete}>
-          <Trash2 size={14} />
-          Delete
-        </DropdownMenuItem>
-      )}
-    </DropdownMenuContent>
-  </DropdownMenu>
+    }
+    actions={[
+      onEdit && {
+        value: "update",
+        label: "Update",
+        icon: <Pencil size={15} className="shrink-0" />,
+        onSelect: onEdit,
+      },
+      onDelete && {
+        value: "delete",
+        label: "Delete",
+        icon: <Trash2 size={15} className="shrink-0" />,
+        destructive: true,
+        onSelect: onDelete,
+      },
+    ].filter(Boolean)}
+  />
 );
 
 export default JournalCard;

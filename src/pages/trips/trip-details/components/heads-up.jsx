@@ -12,16 +12,11 @@ import { toast } from "sonner";
 
 import DraggableList from "@/components/shared/draggable-list";
 import PreviewContent from "@/components/shared/preview-content";
+import PreviewActionsDropdown from "@/components/shared/preview-actions-dropdown";
 import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { DeleteDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { PreviewCard } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { FloatingInput } from "@/components/ui/input";
 import {
   FloatingSelect,
@@ -541,8 +536,11 @@ const HeadsUpCard = ({
             </div>
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <PreviewActionsDropdown
+          title="Heads-up actions"
+          description="Choose an action for this heads-up."
+          contentClassName="w-36"
+          trigger={
             <Button
               type="button"
               variant="ghost"
@@ -553,18 +551,23 @@ const HeadsUpCard = ({
             >
               <MoreVertical size={16} />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-36">
-            <DropdownMenuItem onSelect={onEdit}>
-              <PencilLine size={14} />
-              Update
-            </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" onSelect={onDelete}>
-              <Trash2 size={14} />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          }
+          actions={[
+            {
+              value: "update",
+              label: "Update",
+              icon: <PencilLine size={15} className="shrink-0" />,
+              onSelect: onEdit,
+            },
+            {
+              value: "delete",
+              label: "Delete",
+              icon: <Trash2 size={15} className="shrink-0" />,
+              destructive: true,
+              onSelect: onDelete,
+            },
+          ]}
+        />
       </div>
       <p className="pl-8 mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-500">
         {getHeadsUpDetails(item)}

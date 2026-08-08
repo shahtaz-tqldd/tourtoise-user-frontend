@@ -36,11 +36,16 @@ export const journalApiSlice = apiSlice.injectEndpoints({
       providesTags: journalTags,
     }),
     journalInfiniteList: builder.infiniteQuery({
-      query: ({ queryArg = {}, pageParam }) =>
-        `/journals/list/?${paginationParams({
-          ...queryArg,
+      query: ({ queryArg = {}, pageParam }) => {
+        const { scope = "public", ...params } = queryArg;
+        const path =
+          scope === "mine" ? "/journals/mine/list/" : "/journals/list/";
+
+        return `${path}?${paginationParams({
+          ...params,
           page: pageParam,
-        })}`,
+        })}`;
+      },
       infiniteQueryOptions: {
         initialPageParam: 1,
         getNextPageParam: nextJournalPage,

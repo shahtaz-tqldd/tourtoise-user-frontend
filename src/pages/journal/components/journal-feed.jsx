@@ -29,6 +29,7 @@ const JournalFeed = ({
   onEditJournal,
   onDeleteJournal,
   canManageJournal,
+  emptyDescription,
 }) => (
   <>
     {isLoading ? (
@@ -70,7 +71,7 @@ const JournalFeed = ({
     ) : (
       <EmptyState
         title="No journals found"
-        description="Adjust the search or tag filter to browse more travel stories."
+        description={emptyDescription}
       />
     )}
   </>

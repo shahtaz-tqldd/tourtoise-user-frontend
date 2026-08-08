@@ -112,7 +112,7 @@ const CreditHistory = () => {
               Current balance
             </p>
             <p className="mt-0.5 text-xl font-bold text-slate-950">
-              {user?.credit ?? 0}
+              <span className="text-slate-950">{user?.credit ?? 0}</span>
               <span className="ml-1 text-xs font-semibold text-slate-500">
                 credits
               </span>
