@@ -44,7 +44,7 @@ const NavDrawer = () => {
       <SheetTrigger asChild>
         <button
           type="button"
-          className={`group relative flex size-10 min-w-0 items-center justify-center rounded-xl border-0 p-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+          className={`group relative flex size-10 min-w-0 items-center justify-center rounded-full border-0 p-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
             isProfileActive ? "bg-primary/10" : "hover:bg-slate-100/80"
           }`}
           aria-label="Open profile menu"
