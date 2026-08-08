@@ -56,8 +56,8 @@ const ChatSessionList = ({
 }) => (
   <Card
     className={cn(
-      "absolute inset-0 z-0 flex h-full w-full min-h-0 flex-col lg:static",
-      isMobileChatOpen && "pointer-events-none lg:pointer-events-auto",
+      "rounded-none h-full min-h-0 flex-col lg:flex",
+      isMobileChatOpen ? "hidden lg:flex" : "flex",
     )}
   >
     <div className="pb-3.5">
