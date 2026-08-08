@@ -134,7 +134,9 @@ const normalizeTripDetail = (sourceTrip) => {
       },
       documents: {
         total_count: preparationDocuments.length,
-        uploaded_count: sourceTrip.uploaded_documents?.length || 0,
+        is_packed_count: preparationDocuments.filter(
+          (document) => document.is_packed,
+        ).length,
       },
     },
     trip_pace: preferences.travel_pace || sourceTrip.traveler_type || "custom",
@@ -269,9 +271,7 @@ const TripDetailPage = () => {
     { skip: !trip_id || !chatSessionId },
   );
   const notificationUnreadCount = notificationData?.meta?.unread_count || 0;
-  const serverMessageUnreadCount = Number(
-    messageData?.meta?.unread_count || 0,
-  );
+  const serverMessageUnreadCount = Number(messageData?.meta?.unread_count || 0);
   const messageUnreadCount =
     unreadCountOverrides[chatSessionId] ?? serverMessageUnreadCount;
   const tabs = useMemo(

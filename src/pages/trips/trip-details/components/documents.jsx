@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   FileCheck2,
   Loader2,
@@ -19,6 +25,7 @@ import { DeleteDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import { PreviewCard } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { FloatingInput } from "@/components/ui/input";
 import {
   FloatingSelect,
@@ -71,6 +78,16 @@ const getDocumentUrl = (document) =>
 
 const hasUploadedDocument = (document) =>
   Boolean(getDocumentUrl(document) || getUploadedDocumentName(document));
+
+const byPackedStateAndSortOrder = (items = []) =>
+  [...items].sort((a, b) => {
+    const packedDifference =
+      Number(Boolean(a.is_packed)) - Number(Boolean(b.is_packed));
+
+    if (packedDifference) return packedDifference;
+
+    return (a.sort_order || 0) - (b.sort_order || 0);
+  });
 
 const getUploadedDocumentName = (document) => {
   if (document.document_file_name) return document.document_file_name;
@@ -187,6 +204,8 @@ const TripDocumentList = ({ tripId, onStatsChange }) => {
   const [uploadingDocumentId, setUploadingDocumentId] = useState(null);
   const [localItems, setLocalItems] = useState(null);
   const fileInputRefs = useRef({});
+  const itemElementsRef = useRef(new Map());
+  const previousPositionsRef = useRef(new Map());
   const { data, isFetching, isError, refetch } = useTripDocumentListQuery(
     { trip_id: tripId },
     { skip: !tripId },
@@ -199,9 +218,50 @@ const TripDocumentList = ({ tripId, onStatsChange }) => {
     useDeleteDocumentItemMutation();
   const [deleteDocumentFileItem, { isLoading: isDeletingFile }] =
     useDeleteDocumentFileItemMutation();
-  const documents = useMemo(() => data?.data, [data]);
-  const visibleItems = localItems || documents;
+  const documents = useMemo(
+    () => byPackedStateAndSortOrder(data?.data || []),
+    [data],
+  );
+  const visibleItems = useMemo(
+    () => byPackedStateAndSortOrder(localItems || documents),
+    [documents, localItems],
+  );
   const isMutating = isCreating || isUpdating || isDeleting || isDeletingFile;
+
+  useLayoutEffect(() => {
+    const currentPositions = new Map();
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    itemElementsRef.current.forEach((element, itemId) => {
+      const currentPosition = element.getBoundingClientRect();
+      currentPositions.set(itemId, currentPosition);
+
+      const previousPosition = previousPositionsRef.current.get(itemId);
+      const offsetX = previousPosition?.left - currentPosition.left;
+      const offsetY = previousPosition?.top - currentPosition.top;
+
+      if (
+        !reduceMotion &&
+        (offsetX || offsetY) &&
+        typeof element.animate === "function"
+      ) {
+        element.animate(
+          [
+            { transform: `translate3d(${offsetX}px, ${offsetY}px, 0)` },
+            { transform: "translate3d(0, 0, 0)" },
+          ],
+          {
+            duration: 420,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          },
+        );
+      }
+    });
+
+    previousPositionsRef.current = currentPositions;
+  }, [visibleItems]);
 
   const updateLocalItem = (documentItemId, patch) => {
     setLocalItems((currentItems) =>
@@ -232,6 +292,7 @@ const TripDocumentList = ({ tripId, onStatsChange }) => {
         onStatsChange?.({
           totalDelta: 1,
           uploadedDelta: hasUploadedDocument(createdItem) ? 1 : 0,
+          packedDelta: createdItem.is_packed ? 1 : 0,
         });
       }
       toast.success(response?.message || "Document created.");
@@ -308,6 +369,30 @@ const TripDocumentList = ({ tripId, onStatsChange }) => {
     }
   };
 
+  const handleTogglePacked = async (documentItem, checked) => {
+    const isPacked = checked === true;
+    const wasPacked = Boolean(documentItem.is_packed);
+    const previousItems = visibleItems;
+
+    updateLocalItem(documentItem.id, { is_packed: isPacked });
+
+    try {
+      await updateTripDocumentItem({
+        trip_id: tripId,
+        document_item_id: documentItem.id,
+        payload: { is_packed: isPacked },
+      }).unwrap();
+      if (wasPacked !== isPacked) {
+        onStatsChange?.({ packedDelta: isPacked ? 1 : -1 });
+      }
+    } catch (error) {
+      setLocalItems(previousItems);
+      toast.error(
+        getApiErrorMessage(error, "Could not update document status."),
+      );
+    }
+  };
+
   const handleDeleteItem = async () => {
     if (!deletingItem) return;
 
@@ -318,6 +403,7 @@ const TripDocumentList = ({ tripId, onStatsChange }) => {
     onStatsChange?.({
       totalDelta: -1,
       uploadedDelta: hasUploadedDocument(deletingItem) ? -1 : 0,
+      packedDelta: deletingItem.is_packed ? -1 : 0,
     });
 
     try {
@@ -332,6 +418,7 @@ const TripDocumentList = ({ tripId, onStatsChange }) => {
       onStatsChange?.({
         totalDelta: 1,
         uploadedDelta: hasUploadedDocument(deletingItem) ? 1 : 0,
+        packedDelta: deletingItem.is_packed ? 1 : 0,
       });
       toast.error(getApiErrorMessage(error, "Could not delete document."));
     }
@@ -412,29 +499,46 @@ const TripDocumentList = ({ tripId, onStatsChange }) => {
           <div className="grid gap-4 md:grid-cols-2">
             {visibleItems.length ? (
               visibleItems.map((documentItem) => (
-                <DocumentItemCard
-                  key={`${documentItem.id}-${
-                    editingItem?.id === documentItem.id ? "edit" : "view"
-                  }`}
-                  item={documentItem}
-                  isEditing={editingItem?.id === documentItem.id}
-                  isUpdating={isUpdating}
-                  isDisabled={isMutating && editingItem?.id !== documentItem.id}
-                  isUploading={uploadingDocumentId === documentItem.id}
-                  fileInputRef={(element) => {
-                    if (element)
-                      fileInputRefs.current[documentItem.id] = element;
+                <div
+                  key={documentItem.id}
+                  ref={(element) => {
+                    if (element) {
+                      itemElementsRef.current.set(documentItem.id, element);
+                    } else {
+                      itemElementsRef.current.delete(documentItem.id);
+                    }
                   }}
-                  onUpload={(event) => handleUpload(documentItem, event)}
-                  onOpenFilePicker={() => openFilePicker(documentItem.id)}
-                  onEdit={() => setEditingItem(documentItem)}
-                  onCancelEdit={() => setEditingItem(null)}
-                  onSave={(payload) =>
-                    handleUpdateItem(documentItem.id, payload)
-                  }
-                  onDelete={() => setDeletingItem(documentItem)}
-                  onDeleteFile={() => setDeletingFileItem(documentItem)}
-                />
+                  className="h-full will-change-transform"
+                >
+                  <DocumentItemCard
+                    key={
+                      editingItem?.id === documentItem.id ? "edit" : "view"
+                    }
+                    item={documentItem}
+                    isEditing={editingItem?.id === documentItem.id}
+                    isUpdating={isUpdating}
+                    isDisabled={
+                      isMutating && editingItem?.id !== documentItem.id
+                    }
+                    isUploading={uploadingDocumentId === documentItem.id}
+                    onTogglePacked={(checked) =>
+                      handleTogglePacked(documentItem, checked)
+                    }
+                    fileInputRef={(element) => {
+                      if (element)
+                        fileInputRefs.current[documentItem.id] = element;
+                    }}
+                    onUpload={(event) => handleUpload(documentItem, event)}
+                    onOpenFilePicker={() => openFilePicker(documentItem.id)}
+                    onEdit={() => setEditingItem(documentItem)}
+                    onCancelEdit={() => setEditingItem(null)}
+                    onSave={(payload) =>
+                      handleUpdateItem(documentItem.id, payload)
+                    }
+                    onDelete={() => setDeletingItem(documentItem)}
+                    onDeleteFile={() => setDeletingFileItem(documentItem)}
+                  />
+                </div>
               ))
             ) : (
               <EmptyState
@@ -483,6 +587,7 @@ const DocumentItemCard = ({
   isUpdating,
   isDisabled,
   isUploading,
+  onTogglePacked,
   fileInputRef,
   onUpload,
   onOpenFilePicker,
@@ -533,68 +638,71 @@ const DocumentItemCard = ({
   };
 
   const cardClass =
-    "rounded-xl bg-white md:bg-slate-50 border border-slate-200 p-4";
+    "h-full rounded-xl bg-white md:bg-slate-50 border border-slate-200 p-4";
 
   if (isEditing) {
     return (
       <form className={cardClass} onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between gap-4">
-            <input
-              ref={nameRef}
-              value={documentName}
-              onChange={(event) => setDocumentName(event.target.value)}
-              disabled={isUpdating}
-              className="w-full border-none bg-transparent p-0 text-sm font-semibold text-slate-900 outline-none disabled:opacity-60"
-              required
-            />
-            <InlinePillSelect
-              value={requiredLevel}
-              onValueChange={setRequiredLevel}
-              disabled={isUpdating}
-              options={requiredLevelOptions}
-              className={"border-slate-200 bg-white text-slate-500"}
-            />
-          </div>
-          <textarea
-            value={additionalNote}
-            onChange={(event) => setAdditionalNote(event.target.value)}
-            disabled={isUpdating}
-            className="resize-none block w-full border-none bg-transparent p-0 text-sm font-normal leading-5 text-slate-500 outline-none disabled:opacity-60"
-            placeholder="Additional note"
-          />
-          {documentFileName ? (
-            <div className="flx gap-2 border rounded-md py-1 px-2 max-w-fit">
-              <Paperclip size={14} />
+        <div className="flex items-start gap-3">
+          <Checkbox checked={Boolean(item.is_packed)} disabled />
+          <div className="flex min-w-0 flex-1 flex-col gap-4">
+            <div className="flex justify-between gap-4">
               <input
-                label="Uploaded document name"
-                value={documentFileName}
-                onChange={(event) => setDocumentFileName(event.target.value)}
+                ref={nameRef}
+                value={documentName}
+                onChange={(event) => setDocumentName(event.target.value)}
                 disabled={isUpdating}
-                className="block w-fit border-none bg-transparent p-0 text-sm font-normal leading-5 text-slate-500 outline-none disabled:opacity-60"
+                className="w-full border-none bg-transparent p-0 text-sm font-semibold text-slate-900 outline-none disabled:opacity-60"
+                required
+              />
+              <InlinePillSelect
+                value={requiredLevel}
+                onValueChange={setRequiredLevel}
+                disabled={isUpdating}
+                options={requiredLevelOptions}
+                className={"border-slate-200 bg-white text-slate-500"}
               />
             </div>
-          ) : null}
+            <textarea
+              value={additionalNote}
+              onChange={(event) => setAdditionalNote(event.target.value)}
+              disabled={isUpdating}
+              className="resize-none block w-full border-none bg-transparent p-0 text-sm font-normal leading-5 text-slate-500 outline-none disabled:opacity-60"
+              placeholder="Additional note"
+            />
+            {documentFileName ? (
+              <div className="flx gap-2 border rounded-md py-1 px-2 max-w-fit">
+                <Paperclip size={14} />
+                <input
+                  label="Uploaded document name"
+                  value={documentFileName}
+                  onChange={(event) => setDocumentFileName(event.target.value)}
+                  disabled={isUpdating}
+                  className="block w-fit border-none bg-transparent p-0 text-sm font-normal leading-5 text-slate-500 outline-none disabled:opacity-60"
+                />
+              </div>
+            ) : null}
 
-          <div className="flex flex-col gap-2 md:flex-row md:justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isUpdating}
-              onClick={onCancelEdit}
-              className="!text-xs rounded-full"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              size="sm"
-              disabled={isUpdating}
-              className="!text-xs rounded-full"
-            >
-              {isUpdating ? "Saving..." : "Save changes"}
-            </Button>
+            <div className="flex flex-col gap-2 md:flex-row md:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isUpdating}
+                onClick={onCancelEdit}
+                className="!text-xs rounded-full"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isUpdating}
+                className="!text-xs rounded-full"
+              >
+                {isUpdating ? "Saving..." : "Save changes"}
+              </Button>
+            </div>
           </div>
         </div>
       </form>
@@ -604,29 +712,46 @@ const DocumentItemCard = ({
   return (
     <article
       className={cn(
-        "border rounded-xl p-4",
-        documentUrl
-          ? "bg-primary/10 border-transparent"
-          : "bg-white border-slate-200",
+        "h-full rounded-xl border p-4 transition-[background-color,border-color] duration-300",
+        item.is_packed
+          ? "border-slate-100 bg-slate-50/80"
+          : documentUrl
+            ? "border-transparent bg-primary/10"
+            : "border-slate-200 bg-white",
       )}
     >
-      <div className="flex flex-col justify-between h-[calc(100%-2.5rem)]">
-        <div className="min-w-0 w-full">
-          <div className="w-full flex gap-2 justify-between">
-            <div className="flex flex-1 flex-wrap items-center gap-2">
-              <p className="font-semibold text-slate-900">
-                {getDocumentName(item)}
-              </p>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                  levelStyles[getDocumentLevel(item)] ||
-                  "bg-slate-100 text-slate-600"
-                }`}
-              >
-                {formatLabel(getDocumentLevel(item))}
-              </span>
-            </div>
-            <PreviewActionsDropdown
+      <div className="flex items-start gap-3">
+        <Checkbox
+          checked={Boolean(item.is_packed)}
+          disabled={isDisabled}
+          onCheckedChange={onTogglePacked}
+          className="mt-[2px]"
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex h-[calc(100%-2.5rem)] flex-col justify-between">
+            <div className="min-w-0 w-full">
+              <div className="w-full flex gap-2 justify-between">
+                <div className="flex flex-1 flex-wrap items-center gap-2">
+                  <p
+                    className={cn(
+                      "font-semibold",
+                      item.is_packed
+                        ? "text-slate-400 line-through"
+                        : "text-slate-900",
+                    )}
+                  >
+                    {getDocumentName(item)}
+                  </p>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                      levelStyles[getDocumentLevel(item)] ||
+                      "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {formatLabel(getDocumentLevel(item))}
+                  </span>
+                </div>
+                <PreviewActionsDropdown
               title="Document actions"
               description="Choose an action for this document."
               contentClassName="w-36"
@@ -657,67 +782,69 @@ const DocumentItemCard = ({
                   onSelect: onDelete,
                 },
               ]}
-            />
-          </div>
-          {getDocumentNote(item) ? (
-            <p className="mt-2 text-sm font-normal leading-6 text-slate-600">
-              {getDocumentNote(item)}
-            </p>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="flbx gap-4 mt-4">
-        {documentUrl ? (
-          <div className="flex min-w-0 items-center rounded-md bg-white px-2 py-1 text-xs max-w-4/5">
-            <div className="flex min-w-0 w-full items-center gap-2">
-              <a
-                href={documentUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex min-w-0 flex-1 items-center gap-2 text-blue-800"
-              >
-                <Paperclip size={12} className="shrink-0" />
-
-                <span className="min-w-0 truncate">
-                  {uploadedDocumentName || "Preview document"}
-                </span>
-              </a>
-
-              <button
-                type="button"
-                className="shrink-0 rounded p-1 text-red-600 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
-                disabled={isDisabled}
-                onClick={onDeleteFile}
-                aria-label="Remove document"
-              >
-                <X size={14} />
-              </button>
+                />
+              </div>
+              {getDocumentNote(item) ? (
+                <p className="mt-2 text-sm font-normal leading-6 text-slate-600">
+                  {getDocumentNote(item)}
+                </p>
+              ) : null}
             </div>
           </div>
-        ) : (
-          <div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={ACCEPTED_DOCUMENT_TYPES}
-              className="hidden"
-              onChange={onUpload}
-            />
-            <button
-              className="py-1 px-2 rounded-md bg-primary/10 text-primary flx gap-1.5"
-              disabled={isDisabled || isUploading}
-              onClick={onOpenFilePicker}
-            >
-              {isUploading ? (
-                <Loader2 className="animate-spin" size={14} />
-              ) : (
-                <Upload size={14} />
-              )}
-              <span className="text-xs font-semibold">Upload</span>
-            </button>
+
+          <div className="flbx gap-4 mt-4">
+            {documentUrl ? (
+              <div className="flex min-w-0 items-center rounded-md bg-white px-2 py-1 text-xs max-w-4/5">
+                <div className="flex min-w-0 w-full items-center gap-2">
+                  <a
+                    href={documentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex min-w-0 flex-1 items-center gap-2 text-blue-800"
+                  >
+                    <Paperclip size={12} className="shrink-0" />
+
+                    <span className="min-w-0 truncate">
+                      {uploadedDocumentName || "Preview document"}
+                    </span>
+                  </a>
+
+                  <button
+                    type="button"
+                    className="shrink-0 rounded p-1 text-red-600 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                    disabled={isDisabled}
+                    onClick={onDeleteFile}
+                    aria-label="Remove document"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ACCEPTED_DOCUMENT_TYPES}
+                  className="hidden"
+                  onChange={onUpload}
+                />
+                <button
+                  className="py-1 px-2 rounded-md bg-primary/10 text-primary flx gap-1.5"
+                  disabled={isDisabled || isUploading}
+                  onClick={onOpenFilePicker}
+                >
+                  {isUploading ? (
+                    <Loader2 className="animate-spin" size={14} />
+                  ) : (
+                    <Upload size={14} />
+                  )}
+                  <span className="text-xs font-semibold">Upload</span>
+                </button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </article>
   );

@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Backpack,
   MoreVertical,
@@ -63,8 +69,15 @@ const formatLabel = (value) =>
     .replace(/_/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
-const bySortOrder = (items = []) =>
-  [...items].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+const byPackedStateAndSortOrder = (items = []) =>
+  [...items].sort((a, b) => {
+    const packedDifference =
+      Number(Boolean(a.is_packed)) - Number(Boolean(b.is_packed));
+
+    if (packedDifference) return packedDifference;
+
+    return (a.sort_order || 0) - (b.sort_order || 0);
+  });
 
 const unwrapPackingItems = (response) => {
   const data = response?.data || response;
@@ -159,6 +172,8 @@ const TripPackingItems = ({ tripId, onStatsChange }) => {
   const [editingItem, setEditingItem] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
   const [localItems, setLocalItems] = useState(null);
+  const itemElementsRef = useRef(new Map());
+  const previousPositionsRef = useRef(new Map());
   const { data, isFetching, isError, refetch } = useTripPackingItemListQuery(
     { trip_id: tripId, page_size: 100 },
     { skip: !tripId },
@@ -170,11 +185,44 @@ const TripPackingItems = ({ tripId, onStatsChange }) => {
   const [deleteTripPackingItem, { isLoading: isDeleting }] =
     useDeleteTripPackingItemMutation();
   const packingItems = useMemo(
-    () => bySortOrder(unwrapPackingItems(data)),
+    () => byPackedStateAndSortOrder(unwrapPackingItems(data)),
     [data],
   );
-  const visibleItems = localItems || packingItems;
+  const visibleItems = useMemo(
+    () => byPackedStateAndSortOrder(localItems || packingItems),
+    [localItems, packingItems],
+  );
   const isMutating = isCreating || isUpdating || isDeleting;
+
+  useLayoutEffect(() => {
+    const currentPositions = new Map();
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    itemElementsRef.current.forEach((element, itemId) => {
+      const currentPosition = element.getBoundingClientRect();
+      currentPositions.set(itemId, currentPosition);
+
+      const previousPosition = previousPositionsRef.current.get(itemId);
+      const offsetY = previousPosition?.top - currentPosition.top;
+
+      if (!reduceMotion && offsetY && typeof element.animate === "function") {
+        element.animate(
+          [
+            { transform: `translate3d(0, ${offsetY}px, 0)` },
+            { transform: "translate3d(0, 0, 0)" },
+          ],
+          {
+            duration: 420,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          },
+        );
+      }
+    });
+
+    previousPositionsRef.current = currentPositions;
+  }, [visibleItems]);
 
   const updateLocalItem = (packingItemId, patch) => {
     setLocalItems((currentItems) =>
@@ -332,24 +380,38 @@ const TripPackingItems = ({ tripId, onStatsChange }) => {
           <div className="space-y-4">
             {visibleItems.length ? (
               visibleItems.map((packingItem) => (
-                <PackingItemCard
-                  key={`${packingItem.id}-${
-                    editingItem?.id === packingItem.id ? "edit" : "view"
-                  }`}
-                  item={packingItem}
-                  isEditing={editingItem?.id === packingItem.id}
-                  isUpdating={isUpdating}
-                  isDisabled={isMutating && editingItem?.id !== packingItem.id}
-                  onTogglePacked={(checked) =>
-                    handleTogglePacked(packingItem, checked)
-                  }
-                  onEdit={() => setEditingItem(packingItem)}
-                  onCancelEdit={() => setEditingItem(null)}
-                  onSave={(payload) =>
-                    handleUpdateItem(packingItem.id, payload)
-                  }
-                  onDelete={() => setDeletingItem(packingItem)}
-                />
+                <div
+                  key={packingItem.id}
+                  ref={(element) => {
+                    if (element) {
+                      itemElementsRef.current.set(packingItem.id, element);
+                    } else {
+                      itemElementsRef.current.delete(packingItem.id);
+                    }
+                  }}
+                  className="will-change-transform"
+                >
+                  <PackingItemCard
+                    key={
+                      editingItem?.id === packingItem.id ? "edit" : "view"
+                    }
+                    item={packingItem}
+                    isEditing={editingItem?.id === packingItem.id}
+                    isUpdating={isUpdating}
+                    isDisabled={
+                      isMutating && editingItem?.id !== packingItem.id
+                    }
+                    onTogglePacked={(checked) =>
+                      handleTogglePacked(packingItem, checked)
+                    }
+                    onEdit={() => setEditingItem(packingItem)}
+                    onCancelEdit={() => setEditingItem(null)}
+                    onSave={(payload) =>
+                      handleUpdateItem(packingItem.id, payload)
+                    }
+                    onDelete={() => setDeletingItem(packingItem)}
+                  />
+                </div>
               ))
             ) : (
               <EmptyState
@@ -509,7 +571,13 @@ const PackingItemCard = ({
   }
 
   return (
-    <article className="rounded-xl border border-slate-200 p-4 bg-white">
+    <article
+      className={`rounded-xl border p-4 transition-[background-color,border-color] duration-300 ${
+        item.is_packed
+          ? "border-slate-100 bg-slate-50/80"
+          : "border-slate-200 bg-white"
+      }`}
+    >
       <div className="flex items-start gap-3">
         <Checkbox
           checked={Boolean(item.is_packed)}
@@ -577,8 +645,8 @@ const PackingItemCard = ({
               ) : null}
             </div>
           </div>
-          <div className="flbx mt-3">
-            <div className="flex gap-2">
+          {!item?.is_packed ? (
+            <div className="flex gap-2 mt-2.5">
               <span className="text-xs font-semibold bg-blue-100 text-blue-800 py-0.5 px-2 rounded-full">
                 {formatLabel(item.category)}
               </span>
@@ -590,7 +658,7 @@ const PackingItemCard = ({
                 {formatLabel(item.priority)}
               </span>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
     </article>

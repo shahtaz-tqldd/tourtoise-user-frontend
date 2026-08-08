@@ -18,10 +18,51 @@ import TripDayWisePlan from "./day-wise-plan";
 const planningTabs = [
   { value: "packing", label: "Packing", icon: Backpack },
   { value: "documents", label: "Documents", icon: FileCheck2 },
+  { value: "heads-up", label: "Heads-up", icon: AlertTriangle },
   { value: "route", label: "Route", icon: Route },
   { value: "days", label: "Day Wise Plan", icon: CalendarDays },
-  { value: "heads-up", label: "Heads-up", icon: AlertTriangle },
 ];
+const beforeTripStatuses = new Set(["draft", "planning", "ready"]);
+const terminalTripStatuses = new Set([
+  "completed",
+  "cancelled",
+  "archived",
+]);
+const inProgressTabOrder = [
+  "days",
+  "route",
+  "heads-up",
+  "documents",
+  "packing",
+];
+
+const sortPlanningTabs = (tabs, status) => {
+  const normalizedStatus = String(status || "").toLowerCase();
+
+  if (normalizedStatus === "in_progress") {
+    const orderByValue = new Map(
+      inProgressTabOrder.map((value, index) => [value, index]),
+    );
+
+    return [...tabs].sort(
+      (a, b) => orderByValue.get(a.value) - orderByValue.get(b.value),
+    );
+  }
+
+  if (terminalTripStatuses.has(normalizedStatus)) return tabs;
+
+  if (beforeTripStatuses.has(normalizedStatus)) {
+    const isCompletedPreparationTab = (tab) =>
+      ["packing", "documents"].includes(tab.value) && tab.isComplete;
+
+    return [
+      ...tabs.filter((tab) => !isCompletedPreparationTab(tab)),
+      ...tabs.filter(isCompletedPreparationTab),
+    ];
+  }
+
+  return tabs;
+};
 
 const buildStatLabel = (completed = 0, total = 0) => {
   if (!total) return null;
@@ -29,9 +70,8 @@ const buildStatLabel = (completed = 0, total = 0) => {
 };
 
 const TripPlanningTabs = ({ trip }) => {
-  const [activeTab, setActiveTab] = useState("packing");
-  const contentRef = useRef(null);
   const [localStats, setLocalStats] = useState(() => trip?.preparation_stats);
+  const [documentStatsOverride, setDocumentStatsOverride] = useState(null);
 
   const updatePackingStats = ({ packedDelta = 0, totalDelta = 0 }) => {
     setLocalStats((currentStats) => {
@@ -59,41 +99,47 @@ const TripPlanningTabs = ({ trip }) => {
     });
   };
 
-  const updateDocumentStats = ({ uploadedDelta = 0, totalDelta = 0 }) => {
-    setLocalStats((currentStats) => {
-      const currentDocumentStats = currentStats?.documents || {};
+  const updateDocumentStats = ({ packedDelta = 0, totalDelta = 0 }) => {
+    setDocumentStatsOverride((currentStats) => {
+      const initialDocumentStats = localStats?.documents || {};
       const totalCount = Math.max(
         0,
-        Number(currentDocumentStats.total_count || 0) + totalDelta,
+        Number(
+          currentStats?.total_count ??
+            initialDocumentStats.total_count ??
+            0,
+        ) + totalDelta,
       );
-      const uploadedCount = Math.min(
+      const packedCount = Math.min(
         totalCount,
         Math.max(
           0,
-          Number(currentDocumentStats.uploaded_count || 0) + uploadedDelta,
+          Number(
+            currentStats?.is_packed_count ??
+              initialDocumentStats.is_packed_count ??
+              0,
+          ) + packedDelta,
         ),
       );
 
       return {
-        ...currentStats,
-        documents: {
-          ...currentDocumentStats,
-          total_count: totalCount,
-          uploaded_count: uploadedCount,
-        },
+        total_count: totalCount,
+        is_packed_count: packedCount,
       };
     });
   };
 
+  const normalizedTripStatus = String(trip?.status || "").toLowerCase();
   const tabs = useMemo(() => {
     const packingStats = localStats?.packing_items || {};
-    const documentStats = localStats?.documents || {};
+    const documentStats =
+      documentStatsOverride || localStats?.documents || {};
     const packedCount = Number(packingStats.is_packed_count || 0);
     const packingTotal = Number(packingStats.total_count || 0);
-    const uploadedCount = Number(documentStats.uploaded_count || 0);
+    const packedDocumentCount = Number(documentStats.is_packed_count || 0);
     const documentTotal = Number(documentStats.total_count || 0);
 
-    return planningTabs.map((tab) => {
+    const tabsWithStats = planningTabs.map((tab) => {
       if (tab.value === "packing") {
         return {
           ...tab,
@@ -105,19 +151,41 @@ const TripPlanningTabs = ({ trip }) => {
       if (tab.value === "documents") {
         return {
           ...tab,
-          count: buildStatLabel(uploadedCount, documentTotal),
-          isComplete: documentTotal > 0 && uploadedCount >= documentTotal,
+          count: buildStatLabel(packedDocumentCount, documentTotal),
+          isComplete: documentTotal > 0 && packedDocumentCount >= documentTotal,
         };
       }
 
       return tab;
     });
-  }, [localStats]);
+
+    return sortPlanningTabs(tabsWithStats, normalizedTripStatus);
+  }, [documentStatsOverride, localStats, normalizedTripStatus]);
+
+  return (
+    <PlanningTabView
+      key={`${trip?.id}-${normalizedTripStatus}`}
+      tabs={tabs}
+      tripId={trip.id}
+      onPackingStatsChange={updatePackingStats}
+      onDocumentStatsChange={updateDocumentStats}
+    />
+  );
+};
+
+const PlanningTabView = ({
+  tabs,
+  tripId,
+  onPackingStatsChange,
+  onDocumentStatsChange,
+}) => {
+  const [activeTab, setActiveTab] = useState(
+    () => tabs[0]?.value || "packing",
+  );
+  const contentRef = useRef(null);
 
   const handleTabChange = (nextTab) => {
-    if (nextTab === activeTab) {
-      return;
-    }
+    if (nextTab === activeTab) return;
 
     setActiveTab(nextTab);
     requestAnimationFrame(() => {
@@ -141,19 +209,19 @@ const TripPlanningTabs = ({ trip }) => {
       <div ref={contentRef} className="scroll-mt-[168px] md:scroll-mt-28">
         {activeTab === "packing" && (
           <TripPackingItems
-            tripId={trip.id}
-            onStatsChange={updatePackingStats}
+            tripId={tripId}
+            onStatsChange={onPackingStatsChange}
           />
         )}
         {activeTab === "documents" && (
           <TripDocumentList
-            tripId={trip.id}
-            onStatsChange={updateDocumentStats}
+            tripId={tripId}
+            onStatsChange={onDocumentStatsChange}
           />
         )}
-        {activeTab === "route" && <TripRoutePlan tripId={trip.id} />}
-        {activeTab === "days" && <TripDayWisePlan tripId={trip.id} />}
-        {activeTab === "heads-up" && <TripHeadsUp tripId={trip.id} />}
+        {activeTab === "route" && <TripRoutePlan tripId={tripId} />}
+        {activeTab === "days" && <TripDayWisePlan tripId={tripId} />}
+        {activeTab === "heads-up" && <TripHeadsUp tripId={tripId} />}
       </div>
     </section>
   );

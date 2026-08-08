@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Globe, Sparkles, User } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
-import { BoxIcon, ImageIcon } from "@/assets/icons/svg-icons";
+import { BoxIcon } from "@/assets/icons/svg-icons";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 
@@ -184,3 +184,24 @@ export const EmptyState = ({ title, description, onClear, className = "" }) => (
     )}
   </div>
 );
+
+export const VisibilityStatus = ({ visibility }) => {
+  const isPrivate = visibility === "private";
+  return (
+    <span
+      className={cn(
+        "flx gap-1 rounded-md bg-slate-100 ring pl-2 pr-2.5 py-1 text-xs font-semibold capitalize",
+        isPrivate
+          ? "bg-amber-100/60 ring-amber-100 text-amber-700"
+          : "bg-cyan-100/60 ring-cyan-100 text-cyan-700",
+      )}
+    >
+      {isPrivate ? (
+        <User size={12} strokeWidth={2.5} />
+      ) : (
+        <Globe size={12} strokeWidth={2} />
+      )}
+      {visibility}
+    </span>
+  );
+};

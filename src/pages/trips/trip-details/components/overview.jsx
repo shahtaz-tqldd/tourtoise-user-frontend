@@ -7,7 +7,9 @@ import {
   ChevronRight,
   Clock3,
   DollarSign,
+  Globe,
   MapPin,
+  User,
   Users,
 } from "lucide-react";
 
@@ -17,6 +19,7 @@ import StatusBadge from "@/components/ui/status";
 import PreviewContent from "@/components/shared/preview-content";
 import { Link, useNavigate } from "react-router-dom";
 import TripActionsDropdown from "../../components/trip-actions-dropdown";
+import { VisibilityStatus } from "@/components/shared/utils";
 
 const formatDate = (value) => {
   if (!value) return "Not set";
@@ -345,12 +348,10 @@ const TripOverview = ({ trip }) => {
       <div className="flex gap-5 items-start justify-between">
         <div className="max-w-3xl min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={trip.status} />
-            <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize text-slate-600">
-              {trip.trip_pace} pace
-            </span>
+            <StatusBadge status={trip?.status} />
+            <VisibilityStatus visibility={trip?.visibility} />
           </div>
-          <h1 className="mt-3 text-3xl font-bold text-slate-950">
+          <h1 className="mt-5 text-2xl md:text-3xl font-bold text-slate-950">
             {trip.title}
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">
