@@ -97,10 +97,11 @@ const ChatInterface = ({
 
   return (
     <Card
-      style={{ left: isMobileChatOpen ? "0" : "100%" }}
       className={cn(
-        "absolute inset-y-0 z-10 flex h-full w-full min-h-0 flex-col rounded-none transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:static lg:z-auto lg:rounded-3xl lg:pointer-events-auto",
-        isMobileChatOpen ? "pointer-events-auto" : "pointer-events-none",
+        "h-full min-h-0 flex-col lg:flex",
+        isMobileChatOpen
+          ? "absolute inset-0 z-10 flex animate-in rounded-none slide-in-from-right duration-300 motion-reduce:animate-none lg:static lg:animate-none lg:rounded-3xl"
+          : "hidden lg:flex",
       )}
     >
       <ChatHeader
