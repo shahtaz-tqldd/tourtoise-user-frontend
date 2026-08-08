@@ -144,7 +144,7 @@ const JourneySection = ({
 );
 
 const DiscoveryVisual = () => (
-  <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 sm:p-7">
+  <div className="relative overflow-hidden md:rounded-3xl -mx-4 md:mx-0 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 sm:p-7">
     <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-white">
         <Bot className="size-4" aria-hidden="true" />
@@ -199,7 +199,7 @@ const DiscoveryVisual = () => (
 );
 
 const PlanningVisual = () => (
-  <div className="overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-100/60 via-amber-50/30 to-emerald-100/60 p-5 sm:p-7">
+  <div className="overflow-hidden md:rounded-3xl -mx-4 md:mx-0 bg-gradient-to-br from-blue-100/60 via-amber-50/30 to-emerald-100/60 p-5 sm:p-7">
     <div className="flex items-center justify-between gap-4">
       <div>
         <p className="text-xs font-semibold text-primary">
@@ -264,7 +264,7 @@ const PlanningVisual = () => (
 const GuidanceVisual = () => (
   <div className="relative mx-auto max-w-lg px-2 py-3 sm:px-6">
     <div
-      className="absolute bottom-8 left-3 md:left-[30px] top-8 w-px bg-gradient-to-b from-amber-300 via-primary to-sky-300 sm:left-12"
+      className="absolute bottom-14 md:bottom-8 left-3 md:left-[30px] top-8 w-px bg-gradient-to-b from-amber-300 via-primary to-sky-300 sm:left-12"
       aria-hidden="true"
     />
     <div className="relative space-y-4">
@@ -319,17 +319,17 @@ const GuidanceVisual = () => (
 );
 
 const BeyondTheTrip = () => (
-  <section className="mt-20 overflow-hidden rounded-[32px] bg-primary/5 lg:mt-28">
+  <section className="mt-20 overflow-hidden md:rounded-3xl -mx-4 md:mx-0 bg-primary/5 lg:mt-28">
     <div className="grid lg:grid-cols-2">
       <div className="p-6 sm:p-9 lg:p-12">
-        <span className="flex size-11 items-center justify-center rounded-2xl bg-white text-primary shadow-sm">
+        <span className="flex size-11 items-center justify-center rounded-2xl bg-white text-primary">
           <BookOpenText className="size-5" aria-hidden="true" />
         </span>
         <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-primary">
           Remember & inspire
         </p>
         <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Turn the journey into a travel journal
+          Turn your journey into a <span className="text-primary">journal</span>
         </h2>
         <p className="mt-3 text-sm leading-7 text-slate-500">
           Capture your experiences, share the story with other travelers, and
@@ -358,7 +358,7 @@ const BeyondTheTrip = () => (
         <h2 className="mt-2 text-2xl font-bold">
           Start free, recharge monthly
         </h2>
-        <p className="mt-3 text-sm leading-7 text-emerald-50/80">
+        <p className="mt-3 text-sm leading-7 text-white/80">
           Every account begins with 100 free credits. You receive 20 more
           credits each month, up to a maximum free-credit balance of 100.
         </p>
@@ -368,9 +368,6 @@ const BeyondTheTrip = () => (
           </span>
           <span className="rounded-full bg-white/10 px-3 py-2 text-xs font-semibold">
             +20 every month
-          </span>
-          <span className="rounded-full bg-white/10 px-3 py-2 text-xs font-semibold">
-            100 free-credit limit
           </span>
         </div>
       </div>
@@ -382,8 +379,7 @@ const Cover = () => {
   return (
     <div
       style={{
-        backgroundImage:
-          'url("https://www.myhemingways.com/images/TwentyTwentyOne/indonesia-bali-tour-detail-banner.jpg")',
+        backgroundImage: 'url("/about_cover.jpg")',
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

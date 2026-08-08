@@ -1,97 +1,14 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
 
 import { Logo } from "../shared/utils";
-import {
-  ChatIcon,
-  JournalIcon,
-  MapIcon,
-  NoteIcon,
-  SaveIcon,
-} from "@/assets/icons/svg-icons";
-import { getCloudinaryPreviewUrl, getInitials } from "@/lib/utils";
-
-const PRIMARY_COLOR = "#009966";
-const DEFAULT_ICON_COLOR = "#1C274C";
+import ProfileBar from "./components/profile-bar";
+import MobileBottomNavbar from "./components/mobile-bottom-navbar";
+import { NAV_ITEMS } from "./constants";
 
 const LeftSideMenu = () => {
   const location = useLocation();
   const pathname = location.pathname;
-  const { user } = useSelector((state) => state.auth);
-  const fullName = user?.name || "Guest User";
-  const username = user?.username;
-  const profileImage = user?.avatar_url;
-  const profilePath = `/profile/${username || "my-profile"}`;
-
-  const navItems = [
-    {
-      id: 1,
-      label: "Tour Destinations",
-      shortLabel: "Explore",
-      link: "/",
-      icon: ({ isActive }) => (
-        <MapIcon
-          size={5}
-          color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
-        />
-      ),
-      isMobile: true,
-    },
-    {
-      id: 2,
-      label: "My Trips",
-      shortLabel: "Trips",
-      link: "/trips",
-      icon: ({ isActive }) => (
-        <NoteIcon
-          size={5}
-          color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
-        />
-      ),
-      isMobile: true,
-    },
-    {
-      id: 3,
-      label: "Ask Turtle",
-      shortLabel: "Agent",
-      link: "/ask-turtle",
-      icon: ({ isActive }) => (
-        <ChatIcon
-          size={5}
-          color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
-        />
-      ),
-      isMobile: true,
-    },
-    {
-      id: 4,
-      label: "Travel Journal",
-      shortLabel: "Journal",
-      link: "/travel-journal",
-      icon: ({ isActive }) => (
-        <JournalIcon
-          size={5}
-          color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
-        />
-      ),
-      isMobile: true,
-    },
-    {
-      id: 5,
-      label: "Saved Items",
-      shortLabel: "Saved",
-      link: "/saved-items",
-      icon: ({ isActive }) => (
-        <SaveIcon
-          size={5}
-          color={isActive ? PRIMARY_COLOR : DEFAULT_ICON_COLOR}
-        />
-      ),
-      isMobile: false,
-    },
-  ];
 
   const isActiveRoute = (link) => {
     if (link === "/") {
@@ -100,8 +17,6 @@ const LeftSideMenu = () => {
 
     return pathname === link || pathname.startsWith(`${link}/`);
   };
-
-  const isPremium = user?.status === "PREMIUM";
 
   return (
     <>
@@ -116,7 +31,7 @@ const LeftSideMenu = () => {
               Menu
             </p>
             <nav className="space-y-1.5">
-              {navItems.map((item) => {
+              {NAV_ITEMS.map((item) => {
                 const isActive = isActiveRoute(item.link);
                 const Icon = item.icon;
 
@@ -149,101 +64,10 @@ const LeftSideMenu = () => {
             </nav>
           </div>
 
-          <Link
-            to={profilePath}
-            className="mt-auto flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 transition hover:border-primary/25 hover:bg-primary/5"
-          >
-            {profileImage ? (
-              <img
-                src={getCloudinaryPreviewUrl(profileImage, 50)}
-                alt=""
-                className="size-11 rounded-full object-cover ring-2 ring-white"
-              />
-            ) : (
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary ring-2 ring-white">
-                {getInitials(fullName)}
-              </span>
-            )}
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold text-slate-950">
-                {fullName}
-              </span>
-              {isPremium ? (
-                <span className="block truncate text-xs text-slate-500">
-                  Premium User
-                </span>
-              ) : (
-                <span className="block truncate text-xs text-slate-500 font-medium">
-                  {user?.credit} Credit Balance
-                </span>
-              )}
-            </span>
-            <ChevronRight className="size-4 shrink-0 text-slate-400" />
-          </Link>
+          <ProfileBar />
         </div>
       </aside>
-
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur md:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-5 items-center gap-1">
-          {navItems
-            .filter((item) => item.isMobile)
-            .map((item) => {
-              const isActive = isActiveRoute(item.link);
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  key={item.id}
-                  to={item.link}
-                  className={`relative flex min-w-0 items-center justify-center rounded-2xl transition ${
-                    isActive
-                      ? ""
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                  }`}
-                  aria-label={item.label}
-                >
-                  <span
-                    className={`flex size-10 items-center justify-center rounded-xl transition ${
-                      isActive ? "bg-white shadow-sm" : "bg-transparent"
-                    }`}
-                  >
-                    <Icon isActive={isActive} />
-                  </span>
-                  <span className="sr-only">{item.shortLabel}</span>
-                </Link>
-              );
-            })}
-          <Link
-            to={profilePath}
-            className={`relative flex items-center justify-center rounded-2xl py-1 transition ${
-              isActiveRoute(profilePath) ? "bg-primary/10" : "hover:bg-slate-50"
-            }`}
-            aria-label="Profile"
-          >
-            {profileImage ? (
-              <img
-                src={getCloudinaryPreviewUrl(profileImage, 36)}
-                alt=""
-                className={`size-7 rounded-full object-cover ring-2 ${
-                  isActiveRoute(profilePath)
-                    ? "ring-primary/30"
-                    : "ring-slate-100"
-                }`}
-              />
-            ) : (
-              <span
-                className={`flex size-7 items-center justify-center rounded-full text-xs font-bold ${
-                  isActiveRoute(profilePath)
-                    ? "bg-primary text-white"
-                    : "bg-primary/15 text-primary"
-                }`}
-              >
-                {getInitials(fullName)}
-              </span>
-            )}
-          </Link>
-        </div>
-      </nav>
+      <MobileBottomNavbar isActiveRoute={isActiveRoute} />
     </>
   );
 };

@@ -44,9 +44,17 @@ export const useCloseOnBack = (open, onClose) => {
       );
     }
 
-    if (!open && activeRef.current) {
+    if (
+      !open &&
+      activeRef.current &&
+      window.history.state?.[OVERLAY_HISTORY_KEY]
+    ) {
       activeRef.current = false;
       window.history.back();
+    }
+
+    if (!open) {
+      activeRef.current = false;
     }
 
     return undefined;
