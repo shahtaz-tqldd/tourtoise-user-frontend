@@ -134,6 +134,15 @@ export const tripApiSlice = apiSlice.injectEndpoints({
       providesTags: ["trip-detail"],
     }),
 
+    publicTripDetails: builder.query({
+      query: ({ tripToken }) => {
+        return {
+          url: `/trips/public/${tripToken}/detail/`,
+          method: "GET",
+        };
+      },
+    }),
+
     tripShortDetails: builder.query({
       query: ({ trip_id }) => {
         return {
@@ -537,6 +546,7 @@ export const {
   useTripListQuery,
   useTripInfiniteListInfiniteQuery,
   useTripDetailQuery,
+  usePublicTripDetailsQuery,
   useTripShortDetailsQuery,
   useTripAgentConversationQuery,
   useCreateTripMutation,

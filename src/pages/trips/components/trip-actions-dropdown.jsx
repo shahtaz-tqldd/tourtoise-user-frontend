@@ -59,6 +59,14 @@ const TripActionsDropdown = ({
     share_url: trip?.share_url || "",
     visibility: trip?.visibility || "",
   }));
+
+  const canReschedule = ["draft", "ready", "planning", "in_progress"].includes(
+    trip?.status,
+  );
+  const canCancel = ["draft", "ready", "planning", "in_progress"].includes(
+    trip?.status,
+  );
+
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [planningOpen, setPlanningOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -182,24 +190,28 @@ const TripActionsDropdown = ({
           </p>
         </div>
         <div className="space-y-1 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-          <ActionButton
-            icon={<CalendarClock size={16} className="shrink-0" />}
-            onClick={() => openAction(setRescheduleOpen)}
-          >
-            Reschedule
-          </ActionButton>
+          {canReschedule ? (
+            <ActionButton
+              icon={<CalendarClock size={16} className="shrink-0" />}
+              onClick={() => openAction(setRescheduleOpen)}
+            >
+              Reschedule
+            </ActionButton>
+          ) : null}
           <ActionButton
             icon={<Share2 size={16} className="shrink-0" />}
             onClick={() => openAction(setShareOpen)}
           >
             Share Trip
           </ActionButton>
-          <ActionButton
-            icon={<Ban size={16} className="shrink-0" />}
-            onClick={() => openAction(setCancelOpen)}
-          >
-            Cancel trip
-          </ActionButton>
+          {canCancel ? (
+            <ActionButton
+              icon={<Ban size={16} className="shrink-0" />}
+              onClick={() => openAction(setCancelOpen)}
+            >
+              Cancel trip
+            </ActionButton>
+          ) : null}
           {showPlanning && (
             <ActionButton
               icon={<Route size={16} className="shrink-0" />}

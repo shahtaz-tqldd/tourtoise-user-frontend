@@ -128,7 +128,7 @@ export const routes = createBrowserRouter([
     element: withSuspense(<ResetPasswordPage />),
   },
   {
-    path: "/trip/public/:tripId",
+    path: "/trip/public/:tripToken",
     element: withSuspense(<PublicTripDetailsPage />),
   },
   {

@@ -18,15 +18,7 @@ import { DeleteDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { PreviewCard } from "@/components/ui/card";
 import { FloatingInput } from "@/components/ui/input";
-import {
-  FloatingSelect,
-  InlinePillSelect,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FloatingSelect, SelectItem } from "@/components/ui/select";
 import { FloatingTextarea } from "@/components/ui/textarea";
 import {
   useCreateTripHeadsUpMutation,
@@ -46,32 +38,16 @@ const categoryOptions = [
   { value: "general", label: "General" },
 ];
 
-const severityOptions = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-];
-
 const formatLabel = (value) =>
   String(value || "")
     .replace(/_/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
-const severityStyles = {
-  high: "border-red-100 bg-red-50 text-red-700",
-  medium: "border-amber-100 bg-amber-50 text-amber-700",
-  low: "border-emerald-100 bg-emerald-50 text-emerald-700",
-};
 
 const bySortOrder = (items = []) =>
   [...items].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 
 const getHeadsUpDetails = (item) =>
   item?.additional_note || item?.details || item?.body || item?.content || "";
-
-const getHeadsUpCategory = (item) => item?.category || item?.type || "general";
-
-const getHeadsUpSeverity = (item) => item?.severity || "medium";
 
 const buildHeadsUpPayload = ({ title, details, category, severity }) => ({
   title: String(title || "").trim(),
@@ -372,8 +348,6 @@ const HeadsUpCard = ({
   const detailsRef = useRef(null);
   const [title, setTitle] = useState(item.title || "");
   const [details, setDetails] = useState(getHeadsUpDetails(item));
-  const [category, setCategory] = useState(getHeadsUpCategory(item));
-  const [severity, setSeverity] = useState(getHeadsUpSeverity(item));
 
   useEffect(() => {
     if (!isEditing) return;
@@ -383,7 +357,7 @@ const HeadsUpCard = ({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const payload = buildHeadsUpPayload({ title, details, category, severity });
+    const payload = buildHeadsUpPayload({ title, details });
 
     if (!payload.title || !payload.additional_note) {
       toast.error("Add title and details.");
@@ -439,25 +413,6 @@ const HeadsUpCard = ({
                   disabled={isUpdating}
                   className="min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400 disabled:opacity-60"
                   required
-                />
-              </div>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <InlinePillSelect
-                  value={category}
-                  onValueChange={setCategory}
-                  disabled={isUpdating}
-                  options={categoryOptions}
-                  className="border-slate-200 bg-white text-slate-500"
-                />
-                <InlinePillSelect
-                  value={severity}
-                  onValueChange={setSeverity}
-                  disabled={isUpdating}
-                  options={severityOptions}
-                  className={
-                    severityStyles[severity] ||
-                    "border-slate-200 bg-white text-slate-500"
-                  }
                 />
               </div>
             </div>
@@ -521,19 +476,6 @@ const HeadsUpCard = ({
                 {item.title}
               </h3>
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
-                {formatLabel(getHeadsUpCategory(item))}
-              </span>
-              <span
-                className={`px-2 py-0.5 text-xs font-semibold ${
-                  severityStyles[getHeadsUpSeverity(item)] ||
-                  "bg-primary/10 text-primary"
-                }`}
-              >
-                {formatLabel(getHeadsUpSeverity(item))}
-              </span>
-            </div>
           </div>
         </div>
         <PreviewActionsDropdown
@@ -569,7 +511,7 @@ const HeadsUpCard = ({
           ]}
         />
       </div>
-      <p className="pl-8 mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-500">
+      <p className="pl-8 md:pr-3 mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-500">
         {getHeadsUpDetails(item)}
       </p>
     </article>

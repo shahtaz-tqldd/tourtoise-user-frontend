@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PreviewContent from "@/components/shared/preview-content";
 import { FloatingInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/date-time";
 
 const addDays = (dateValue, days) => {
   if (!dateValue || !Number.isFinite(days)) return "";
@@ -64,6 +65,7 @@ const RescheduleDialog = ({
             value={form.startDate}
             onChange={(event) => updateField("startDate", event.target.value)}
             required
+            disabled={trip.status === "in_progress"}
           />
           <FloatingInput
             name="reschedule-duration"
@@ -78,7 +80,8 @@ const RescheduleDialog = ({
         </div>
         {endDate && (
           <p className="-mt-2 text-xs text-slate-500">
-            End date will be {endDate}.
+            End date will be{" "}
+            <span className="text-slate-700 font-medium">{formatDate(endDate)}</span>
           </p>
         )}
         <div className="mt-8 flex md:flex-row flex-col w-full md:justify-end gap-3">

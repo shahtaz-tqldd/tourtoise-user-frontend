@@ -1,5 +1,6 @@
 import { setAuthCookie } from "@/hooks/useCookie";
 import { clearTokens, getTokens, setSessionToken } from "@/hooks/useToken";
+import { INITIAL_REDIRECT_SESSION_KEY } from "@/constants/session";
 import { createSlice } from "@reduxjs/toolkit";
 
 const { accessToken, refreshToken } = getTokens();
@@ -48,6 +49,11 @@ export const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
       clearTokens();
+      try {
+        window.sessionStorage.removeItem(INITIAL_REDIRECT_SESSION_KEY);
+      } catch {
+        // Session storage may be unavailable in restricted browsers.
+      }
     },
   },
 });

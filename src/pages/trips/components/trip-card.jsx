@@ -1,3 +1,4 @@
+import { VisibilityStatus } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import StatusBadge from "@/components/ui/status";
@@ -71,10 +72,8 @@ const TripCard = ({ trip, compact = false }) => {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-3">
               <div className="flex flex-wrap items-center gap-1.5">
-                <StatusBadge status={displayedTrip.status || "draft"} />
-                {displayedTrip.visibility && (
-                  <StatusBadge status={displayedTrip.visibility} />
-                )}
+                <StatusBadge status={displayedTrip?.status} />
+                <VisibilityStatus visibility={displayedTrip?.visibility} />
               </div>
 
               <div>
@@ -138,14 +137,7 @@ const TripCard = ({ trip, compact = false }) => {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-wrap gap-1.5">
                   <StatusBadge status={displayedTrip.status || "draft"} />
-                  <span className="flx gap-2 rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-600">
-                    {displayedTrip.visibility === "private" ? (
-                      <User size={12} />
-                    ) : (
-                      <Globe size={12} />
-                    )}
-                    {displayedTrip.visibility}
-                  </span>
+                  <VisibilityStatus visibility={displayedTrip?.visibility} />
                 </div>
               </div>
 

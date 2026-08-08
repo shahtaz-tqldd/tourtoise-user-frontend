@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { PreviewCard } from "@/components/ui/card";
 import {
+  BadgeCheck,
   Bed,
   CalendarDays,
   Car,
+  Check,
   CheckCircle2,
   ChevronDown,
   Clock3,
@@ -61,14 +63,6 @@ const unwrapDayWisePlan = (response) => {
   return [];
 };
 
-const sortDayPlans = (days) =>
-  [...days].sort((a, b) => {
-    const dayCompare = Number(a.day || 0) - Number(b.day || 0);
-    if (dayCompare !== 0) return dayCompare;
-
-    return String(a.date || "").localeCompare(String(b.date || ""));
-  });
-
 const sortDayItems = (items = []) =>
   [...items].sort((a, b) => {
     if (!a.time && b.time) return 1;
@@ -125,7 +119,7 @@ const TripDayWisePlan = ({ tripId }) => {
     { trip_id: tripId },
     { skip: !tripId },
   );
-  const days = useMemo(() => sortDayPlans(unwrapDayWisePlan(data)), [data]);
+  const days = useMemo(() => unwrapDayWisePlan(data), [data]);
 
   return (
     <PreviewCard className="space-y-5 md:rounded-t-none">
@@ -240,23 +234,42 @@ const DayAccordion = ({ days }) => {
               onClick={() => setOpenDay(isOpen ? null : day.day)}
               className={cn(
                 "flex w-full items-start justify-between gap-4 p-4 text-left",
-                isOpen ? "bg-primary/10" : "bg-white",
+                day.is_complete
+                  ? isOpen
+                    ? "bg-green-50"
+                    : "bg-slate-100"
+                  : isOpen
+                    ? "bg-primary/10"
+                    : "bg-white",
               )}
             >
-              <div>
-                <p className="text-xs font-semibold uppercase text-primary">
-                  Day {day.day} - {formatDate(day.date)}
-                </p>
-                <h3 className="mt-1 font-semibold text-slate-950">
-                  {day.title}
-                </h3>
+              <div className="flx gap-2 md:gap-3">
+                {day.is_complete && (
+                  <span className="size-5 center bg-primary rounded-full">
+                    <Check
+                      size={14}
+                      aria-hidden="true"
+                      className="text-white"
+                    />
+                  </span>
+                )}
+                <div>
+                  <p className="text-xs font-semibold uppercase text-primary">
+                    Day {day.day} - {formatDate(day.date)}
+                  </p>
+                  <h3 className="mt-1 font-semibold text-slate-950">
+                    {day.title}
+                  </h3>
+                </div>
               </div>
-              <ChevronDown
-                size={18}
-                className={`mt-1 shrink-0 text-slate-400 transition ${
-                  isOpen ? "rotate-180" : ""
-                }`}
-              />
+              <div className="flex shrink-0 items-center gap-2">
+                <ChevronDown
+                  size={18}
+                  className={`mt-1 shrink-0 text-slate-400 transition ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </div>
             </button>
 
             {isOpen && (
