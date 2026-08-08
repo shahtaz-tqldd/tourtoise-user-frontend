@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import Overview from "./components/overview";
 import ProfileSettings from "./components/settings";
@@ -47,7 +47,13 @@ const mergeProfile = (account) => ({
 
 const ProfilePage = () => {
   const { username } = useParams();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const activeTab = ["overview", "credit_history", "settings"].includes(
+    requestedTab,
+  )
+    ? requestedTab
+    : "overview";
   const currentUser = useSelector((state) => state.auth.user);
 
   const { data, error, isLoading, isFetching, isError, refetch } =
@@ -114,7 +120,12 @@ const ProfilePage = () => {
               { label: "Settings", value: "settings", icon: Settings },
             ]}
             activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            setActiveTab={(tab) => {
+              const nextParams = new URLSearchParams(searchParams);
+              if (tab === "overview") nextParams.delete("tab");
+              else nextParams.set("tab", tab);
+              setSearchParams(nextParams, { replace: true });
+            }}
             className="sticky top-14 lg:top-16 z-20 overflow-hidden md:rounded-t-2xl bg-white pt-2 -mx-4 px-4 md:mx-0"
           />
 
@@ -200,7 +211,7 @@ const ProfileOverview = ({ profile, canEdit = false, onUpdated }) => {
 
   return (
     <aside className="lg:sticky lg:top-[92px]">
-      <Card className="relative">
+      <Card className="relative -mx-4 md:mx-0 rounded-none -mt-5 md:mt-0">
         {canEdit &&
           (isEditing ? (
             <div className="absolute left-4 top-4 z-10 flex items-center gap-2">

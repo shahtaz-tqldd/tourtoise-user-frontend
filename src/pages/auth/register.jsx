@@ -74,12 +74,12 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 flex items-center justify-center px-6 py-10 sm:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-amber-50/25 to-cyan-50 center py-5 md:py-10 px-6 md:px-8">
       <div className="w-full max-w-md">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/60">
+        <div className="md:rounded-3xl md:border border-slate-200 md:bg-white md:p-8 md:shadow-xl shadow-slate-200/60">
           <div className="mb-10">
             <img src="/logo.png" className="h-12 object-contain mb-2" />
-            <h2 className="mt-2 text-3xl font-semibold text-slate-900">
+            <h2 className="mt-2 text-2xl md:text-3xl font-semibold text-slate-900">
               Create account
             </h2>
             <p className="mt-2 text-sm text-slate-500">
