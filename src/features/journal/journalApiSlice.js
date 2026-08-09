@@ -193,6 +193,22 @@ export const journalApiSlice = apiSlice.injectEndpoints({
         ...(parent_id ? [{ type: "journal-replies", id: parent_id }] : []),
       ],
     }),
+
+    reportJournal: builder.mutation({
+      query: ({ journalId, payload }) => ({
+        url: `/journals/${journalId}/report/`,
+        method: "POST",
+        body: payload,
+      }),
+    }),
+
+    reportComment: builder.mutation({
+      query: ({ commentId, payload }) => ({
+        url: `/journals/comments/${commentId}/report/`,
+        method: "POST",
+        body: payload,
+      }),
+    }),
   }),
 });
 
@@ -215,4 +231,6 @@ export const {
   useCreateJournalReplyMutation,
   useUpdateJournalCommentMutation,
   useDeleteJournalCommentMutation,
+  useReportCommentMutation,
+  useReportJournalMutation,
 } = journalApiSlice;

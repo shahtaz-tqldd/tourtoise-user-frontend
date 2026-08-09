@@ -8,6 +8,8 @@ const LoginPage = lazy(() => import("@/pages/auth/login"));
 const RegisterPage = lazy(() => import("@/pages/auth/register"));
 const ForgotPasswordPage = lazy(() => import("@/pages/auth/forgot-password"));
 const ResetPasswordPage = lazy(() => import("@/pages/auth/reset-password"));
+const VerifyOTPPage = lazy(() => import("@/pages/auth/verify-otp"));
+const OnboardingPage = lazy(() => import("@/pages/onboarding"));
 const ProfilePage = lazy(() => import("@/pages/profile"));
 const CreditHistoryPage = lazy(
   () => import("@/pages/profile/components/credit-history"),
@@ -122,6 +124,18 @@ export const routes = createBrowserRouter([
   {
     path: "/register",
     element: withSuspense(<RegisterPage />),
+  },
+  {
+    path: "/verify-otp",
+    element: withSuspense(<VerifyOTPPage />),
+  },
+  {
+    path: "/onboarding",
+    element: withSuspense(
+      <PrivateRoute>
+        <OnboardingPage />
+      </PrivateRoute>,
+    ),
   },
   {
     path: "/forgot-password",

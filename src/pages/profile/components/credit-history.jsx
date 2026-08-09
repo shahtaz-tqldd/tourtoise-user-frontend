@@ -1,22 +1,32 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
+  BadgeCheck,
   CalendarHeart,
   Coins,
   Gift,
+  HandCoins,
   MapPinned,
   MessageCircle,
   MessageSquareDot,
   RotateCcw,
   SlidersHorizontal,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import InfiniteScroll from "@/components/shared/infinite-scroll";
+import PreviewContent from "@/components/shared/preview-content";
 import { EmptyState, SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import { PreviewCard } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
-import { useCreditHistoryInfiniteQuery } from "@/features/auth/authApiSlice";
+import {
+  useCreditHistoryInfiniteQuery,
+  useCreditRequestMutation,
+  useProfileStatesQuery,
+} from "@/features/auth/authApiSlice";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { cn, titleCase } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
@@ -71,6 +81,12 @@ const formatTransactionDate = (value) => {
 
 const CreditHistory = () => {
   const { user } = useSelector((state) => state.auth);
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [requestSubmitted, setRequestSubmitted] = useState(false);
+  const { data: profileStatesData, isLoading: isLoadingProfileStates } =
+    useProfileStatesQuery();
+  const [requestCredit, { isLoading: isRequestingCredit }] =
+    useCreditRequestMutation();
   const {
     data,
     isLoading,
@@ -88,96 +104,234 @@ const CreditHistory = () => {
   );
   const transactionCount = data?.pages?.[0]?.meta?.count;
   const isInitialLoading = isLoading || (isFetching && !data?.pages?.length);
+  const profileStates = profileStatesData?.data ?? profileStatesData;
+  const hasPendingCreditRequest = Boolean(
+    profileStates?.has_pending_credit_request || requestSubmitted,
+  );
 
   const loadMore = useCallback(() => {
     if (!hasNextPage || isFetchingNextPage) return;
     void fetchNextPage();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  return (
-    <PreviewCard className="md:p-8 md:rounded-t-none">
-      <div className="flbx gap-5">
-        <SectionHeader
-          title="Credit History"
-          description={
-            Number.isFinite(transactionCount)
-              ? `${transactionCount} transaction${transactionCount === 1 ? "" : "s"} recorded`
-              : "Review how your credits were earned and used"
-          }
-        />
+  const handleCreditRequest = async (reason) => {
+    try {
+      const response = await requestCredit({ payload: { reason } }).unwrap();
+      toast.success(response?.message || "Credit request submitted.");
+      setRequestSubmitted(true);
+      return true;
+    } catch (error) {
+      toast.error(
+        getApiErrorMessage(error, "Could not submit your credit request."),
+      );
+      return false;
+    }
+  };
 
-        <div className="flex min-w-28 items-center gap-3">
-          <div>
-            <p className="text-xs font-medium text-slate-500">
-              Current balance
-            </p>
-            <p className="mt-0.5 text-xl font-bold text-slate-950">
-              <span className="text-slate-950">{user?.credit ?? 0}</span>
-              <span className="ml-1 text-xs font-semibold text-slate-500">
-                credits
-              </span>
-            </p>
+  return (
+    <>
+      <PreviewCard className="md:rounded-t-none md:p-8">
+        <div>
+          <CreditBalancePanel
+            credit={user?.credit ?? 0}
+            hasPendingRequest={hasPendingCreditRequest}
+            isLoadingRequestState={isLoadingProfileStates}
+            onRequest={() => setRequestOpen(true)}
+          />
+
+          <div className="mt-7 min-w-0">
+            <SectionHeader
+              title="Credit History"
+              description={
+                Number.isFinite(transactionCount)
+                  ? `${transactionCount} transaction${transactionCount === 1 ? "" : "s"} recorded`
+                  : "Review how your credits were earned and used"
+              }
+            />
+
+            <div className="mt-7">
+              {isInitialLoading ? (
+                <CreditSkeleton />
+              ) : isError && !creditHistoryList.length ? (
+                <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-center">
+                  <p className="text-sm font-semibold text-red-700">
+                    Could not load credit history.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4"
+                    onClick={refetch}
+                  >
+                    Try again
+                  </Button>
+                </div>
+              ) : creditHistoryList.length ? (
+                <div>
+                  <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
+                    {creditHistoryList.map((transaction) => (
+                      <CreditCard key={transaction.id} data={transaction} />
+                    ))}
+                  </div>
+
+                  {isError ? (
+                    <div className="mt-4 rounded-xl bg-red-50 p-4 text-center">
+                      <p className="text-sm font-medium text-red-700">
+                        Could not load more transactions.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="mt-1 text-red-700 hover:text-red-800"
+                        onClick={refetch}
+                      >
+                        Try again
+                      </Button>
+                    </div>
+                  ) : (
+                    <InfiniteScroll
+                      hasMore={Boolean(hasNextPage)}
+                      isLoading={isFetchingNextPage}
+                      onLoadMore={loadMore}
+                      loadingLabel="Loading more transactions..."
+                    />
+                  )}
+                </div>
+              ) : (
+                <EmptyState
+                  title="No Credit History"
+                  description="Your credit activity will appear here."
+                  className="min-h-72 py-16 sm:py-20"
+                />
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </PreviewCard>
+      <CreditRequestDialog
+        open={requestOpen}
+        onOpenChange={setRequestOpen}
+        onRequest={handleCreditRequest}
+        isLoading={isRequestingCredit}
+      />
+    </>
+  );
+};
 
-      <div className="mt-8">
-        {isInitialLoading ? (
-          <CreditSkeleton />
-        ) : isError && !creditHistoryList.length ? (
-          <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-center">
-            <p className="text-sm font-semibold text-red-700">
-              Could not load credit history.
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              className="mt-4"
-              onClick={refetch}
-            >
-              Try again
-            </Button>
-          </div>
-        ) : creditHistoryList.length ? (
-          <div>
-            <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
-              {creditHistoryList.map((transaction) => (
-                <CreditCard key={transaction.id} data={transaction} />
-              ))}
-            </div>
-
-            {isError ? (
-              <div className="mt-4 rounded-xl bg-red-50 p-4 text-center">
-                <p className="text-sm font-medium text-red-700">
-                  Could not load more transactions.
-                </p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="mt-1 text-red-700 hover:text-red-800"
-                  onClick={refetch}
-                >
-                  Try again
-                </Button>
-              </div>
-            ) : (
-              <InfiniteScroll
-                hasMore={Boolean(hasNextPage)}
-                isLoading={isFetchingNextPage}
-                onLoadMore={loadMore}
-                loadingLabel="Loading more transactions..."
-              />
-            )}
-          </div>
-        ) : (
-          <EmptyState
-            title="No Credit History"
-            description="Your credit activity will appear here."
-            className="min-h-72 py-16 sm:py-20"
-          />
-        )}
+const CreditBalancePanel = ({
+  credit,
+  hasPendingRequest,
+  isLoadingRequestState,
+  onRequest,
+}) => (
+  <aside className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-3.5 sm:gap-4 sm:p-4">
+    <div className="flex min-w-0 shrink-0 items-center gap-3">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+        <Coins size={20} aria-hidden="true" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 sm:text-xs">
+          Current balance
+        </p>
+        <p className="flex items-baseline gap-1.5 leading-none">
+          <span className="text-2xl font-bold tracking-tight text-slate-950 tabular-nums">
+            {credit}
+          </span>
+          <span className="text-xs font-semibold text-slate-500">credits</span>
+        </p>
       </div>
-    </PreviewCard>
+    </div>
+
+    <div className="hidden h-9 w-px shrink-0 bg-slate-200 sm:block" />
+
+    {hasPendingRequest ? (
+      <div className="ml-auto flex min-w-0 items-center gap-2 rounded-full bg-amber-50 px-3 py-2 text-amber-800 ring-1 ring-amber-200">
+        <BadgeCheck className="size-4 shrink-0" aria-hidden="true" />
+        <p className="text-xs font-medium leading-4">
+          Already requested. An admin will review it.
+        </p>
+      </div>
+    ) : (
+      <>
+        <p className="hidden min-w-0 flex-1 text-xs leading-5 text-slate-500 md:block">
+          Need more for trip planning or travel assistance?
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          className="ml-auto shrink-0 border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+          disabled={isLoadingRequestState}
+          onClick={onRequest}
+        >
+          Request credits
+        </Button>
+      </>
+    )}
+  </aside>
+);
+
+const CreditRequestDialog = ({ open, onOpenChange, onRequest, isLoading }) => {
+  const [reason, setReason] = useState("");
+
+  const handleOpenChange = (nextOpen) => {
+    if (isLoading) return;
+    if (!nextOpen) setReason("");
+    onOpenChange(nextOpen);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const trimmedReason = reason.trim();
+    if (!trimmedReason || isLoading) return;
+
+    const submitted = await onRequest(trimmedReason);
+    if (submitted) {
+      setReason("");
+      onOpenChange(false);
+    }
+  };
+
+  return (
+    <PreviewContent
+      open={open}
+      onOpenChange={handleOpenChange}
+      title="Request credits"
+      description="Tell us why you need additional credits."
+      className="h-fit p-6 md:max-w-lg md:p-8"
+    >
+      <form onSubmit={handleSubmit}>
+        <span className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <HandCoins size={21} aria-hidden="true" />
+        </span>
+        <h2 className="mt-5 text-xl font-bold text-slate-950">
+          Request credits
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          Explain why you need more credits. An admin will review your request.
+        </p>
+        <Textarea
+          value={reason}
+          onChange={(event) => setReason(event.target.value)}
+          placeholder="Why do you need additional credits?"
+          rows={5}
+          autoFocus
+          className="mt-5 resize-none rounded-xl bg-white"
+        />
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isLoading}
+            onClick={() => handleOpenChange(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading || !reason.trim()}>
+            {isLoading ? "Submitting..." : "Submit request"}
+          </Button>
+        </div>
+      </form>
+    </PreviewContent>
   );
 };
 

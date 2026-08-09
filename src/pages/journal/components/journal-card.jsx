@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
 import PreviewActionsDropdown from "@/components/shared/preview-actions-dropdown";
 import { Button } from "@/components/ui/button";
 import {
   Bookmark,
   Forward,
+  EyeOff,
+  Flag,
   Heart,
   MessageCircle,
   MessageCircleMore,
@@ -20,9 +23,13 @@ import "swiper/css/pagination";
 import JournalComments from "./comments";
 import Card from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useReactJournalMutation } from "@/features/journal/journalApiSlice";
+import {
+  useReactJournalMutation,
+  useReportJournalMutation,
+} from "@/features/journal/journalApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { Image } from "@/components/shared/utils";
+import ReportDialog from "./report-dialog";
 
 const getInitialReactionCount = (journal) =>
   journal.likes_count ??
@@ -52,6 +59,9 @@ const JournalCard = ({
   showRepliesByDefault = false,
   className = "",
 }) => {
+  const currentUser = useSelector((state) => state.auth.user);
+  const [isHidden, setIsHidden] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [isStoryExpanded, setIsStoryExpanded] = useState(false);
   const [showComments, setShowComments] = useState(defaultShowComments);
   const [isReacted, setIsReacted] = useState(
@@ -61,6 +71,15 @@ const JournalCard = ({
     getInitialReactionCount(journal),
   );
   const [reactJournal, { isLoading: isReacting }] = useReactJournalMutation();
+  const [reportJournal, { isLoading: isReporting }] =
+    useReportJournalMutation();
+  const isOwnJournal = Boolean(
+    journal.is_mine ||
+      journal.is_owner ||
+      (currentUser?.id &&
+        journal.author?.id &&
+        String(currentUser.id) === String(journal.author.id)),
+  );
   const authorName = journal.author?.name || "Unknown traveler";
   const authorAvatar = journal.author?.avatar_url;
   const galleryImages = journal.images?.length
@@ -108,94 +127,122 @@ const JournalCard = ({
     }
   };
 
-  return (
-    <Card
-      id={`journal-${journal.id}`}
-      className={cn(
-        "p-0 bg-transparent md:bg-white md:p-6 rounded-none md:rounded-3xl border-transparent md:border md:border-slate-200",
-        className,
-      )}
-    >
-      <div>
-        <div>
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <AuthorAvatar src={authorAvatar} name={authorName} size="md" />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-950">
-                  {authorName}
-                </p>
-                {journal.date && (
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    {journal.date}
-                  </p>
-                )}
-              </div>
-            </div>
-            <JournalOwnerActions
-              onEdit={onEdit ? () => onEdit(journal) : undefined}
-              onDelete={onDelete ? () => onDelete(journal) : undefined}
-            />
-          </div>
-          {galleryImages.length > 0 && (
-            <Swiper
-              modules={[Pagination]}
-              pagination={
-                galleryImages.length > 1
-                  ? { clickable: true, dynamicBullets: true }
-                  : false
-              }
-              className="mt-4 mb-2 journal-image-slider aspect-[5/3] w-full overflow-hidden rounded-2xl"
-            >
-              {galleryImages.map((image, index) => (
-                <SwiperSlide key={`${image}-${index}`}>
-                  <Image src={image} width={600} />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          )}
-          <div className="flex items-end justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <JournalStory
-                content={journal.body}
-                expanded={fullStory || isStoryExpanded}
-                fullStory={fullStory}
-                onExpandedChange={setIsStoryExpanded}
-              />
-              <JournalPostActions
-                isReacted={isReacted}
-                reactionCount={reactionCount}
-                commentsCount={journal.comments_count}
-                showComments={forceShowComments || showComments}
-                onReact={handleReaction}
-                isReacting={isReacting}
-                onShare={handleShare}
-                onToggleComments={
-                  forceShowComments
-                    ? undefined
-                    : () => setShowComments((show) => !show)
-                }
-              />
-            </div>
-            <JournalSaveButton
-              journal={journal}
-              isSaved={isSaved}
-              onSaveToggle={onSaveToggle}
-              className=""
-            />
-          </div>
+  const handleReport = async (reason) => {
+    try {
+      const response = await reportJournal({
+        journalId: journal.id,
+        payload: { reason },
+      }).unwrap();
+      toast.success(response?.message || "Journal reported.");
+      setIsHidden(true);
+      return true;
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not report this journal."));
+      return false;
+    }
+  };
 
-          {(forceShowComments || showComments) && (
-            <div className="mt-5">
-              <JournalComments
-                journalId={journal.id}
-                showRepliesByDefault={showRepliesByDefault}
+  if (isHidden) return null;
+
+  return (
+    <>
+      <Card
+        id={`journal-${journal.id}`}
+        className={cn(
+          "p-0 bg-transparent md:bg-white md:p-6 rounded-none md:rounded-3xl border-transparent md:border md:border-slate-200",
+          className,
+        )}
+      >
+        <div>
+          <div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <AuthorAvatar src={authorAvatar} name={authorName} size="md" />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-950">
+                    {authorName}
+                  </p>
+                  {journal.date && (
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {journal.date}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <JournalOwnerActions
+                onEdit={onEdit ? () => onEdit(journal) : undefined}
+                onDelete={onDelete ? () => onDelete(journal) : undefined}
+                onHide={!isOwnJournal ? () => setIsHidden(true) : undefined}
+                onReport={!isOwnJournal ? () => setReportOpen(true) : undefined}
               />
             </div>
-          )}
+            {galleryImages.length > 0 && (
+              <Swiper
+                modules={[Pagination]}
+                pagination={
+                  galleryImages.length > 1
+                    ? { clickable: true, dynamicBullets: true }
+                    : false
+                }
+                className="mt-4 mb-2 journal-image-slider aspect-[5/3] w-full overflow-hidden rounded-2xl"
+              >
+                {galleryImages.map((image, index) => (
+                  <SwiperSlide key={`${image}-${index}`}>
+                    <Image src={image} width={600} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            )}
+            <div className="flex items-end justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <JournalStory
+                  content={journal.body}
+                  expanded={fullStory || isStoryExpanded}
+                  fullStory={fullStory}
+                  onExpandedChange={setIsStoryExpanded}
+                />
+                <JournalPostActions
+                  isReacted={isReacted}
+                  reactionCount={reactionCount}
+                  commentsCount={journal.comments_count}
+                  showComments={forceShowComments || showComments}
+                  onReact={handleReaction}
+                  isReacting={isReacting}
+                  onShare={handleShare}
+                  onToggleComments={
+                    forceShowComments
+                      ? undefined
+                      : () => setShowComments((show) => !show)
+                  }
+                />
+              </div>
+              <JournalSaveButton
+                journal={journal}
+                isSaved={isSaved}
+                onSaveToggle={onSaveToggle}
+                className=""
+              />
+            </div>
+
+            {(forceShowComments || showComments) && (
+              <div className="mt-5">
+                <JournalComments
+                  journalId={journal.id}
+                  showRepliesByDefault={showRepliesByDefault}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        subject="journal"
+        onReport={handleReport}
+        isLoading={isReporting}
+      />
+    </>
   );
 };
 
@@ -295,10 +342,17 @@ const JournalSaveButton = ({
   );
 };
 
-const JournalOwnerActions = ({ onEdit, onDelete }) => {
-  if (!onEdit && !onDelete) return null;
+const JournalOwnerActions = ({ onEdit, onDelete, onHide, onReport }) => {
+  if (!onEdit && !onDelete && !onHide && !onReport) return null;
 
-  return <JournalActions onEdit={onEdit} onDelete={onDelete} />;
+  return (
+    <JournalActions
+      onEdit={onEdit}
+      onDelete={onDelete}
+      onHide={onHide}
+      onReport={onReport}
+    />
+  );
 };
 
 const STORY_PREVIEW_LENGTH = 350;
@@ -354,7 +408,7 @@ const JournalStory = ({
   );
 };
 
-const JournalActions = ({ onEdit, onDelete }) => (
+const JournalActions = ({ onEdit, onDelete, onHide, onReport }) => (
   <PreviewActionsDropdown
     title="Journal actions"
     description="Choose an action for this journal."
@@ -383,6 +437,19 @@ const JournalActions = ({ onEdit, onDelete }) => (
         icon: <Trash2 size={15} className="shrink-0" />,
         destructive: true,
         onSelect: onDelete,
+      },
+      onHide && {
+        value: "hide",
+        label: "Hide",
+        icon: <EyeOff size={15} className="shrink-0" />,
+        onSelect: onHide,
+      },
+      onReport && {
+        value: "report",
+        label: "Report",
+        icon: <Flag size={15} className="shrink-0" />,
+        destructive: true,
+        onSelect: onReport,
       },
     ].filter(Boolean)}
   />
