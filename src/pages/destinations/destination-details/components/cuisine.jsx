@@ -1,7 +1,7 @@
 import React from "react";
 import CardSlider from "@/components/shared/card-slider";
-import { DetailPill, SectionHeader } from "@/components/shared/utils";
-import { formatLabel, getCloudinaryPreviewUrl } from "@/lib/utils";
+import { DetailPill, Image, SectionHeader } from "@/components/shared/utils";
+import { formatLabel } from "@/lib/utils";
 import { Activity, Star, Utensils, WalletCards } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -81,17 +81,12 @@ export const CuisineCard = ({ item, metaItems, onSelect }) => {
       className="group h-full w-full overflow-hidden rounded-[24px] bg-white p-4 text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
     >
       <div className="relative aspect-[7/6] overflow-hidden bg-slate-100 rounded-xl">
-        {item.cover_image ? (
-          <img
-            src={getCloudinaryPreviewUrl(item.cover_image, 360)}
-            alt={item.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-            <Utensils size={30} />
-          </div>
-        )}
+        <Image
+          src={item?.cover_image}
+          alt={item?.name}
+          className="transition duration-500 group-hover:scale-105"
+        />
+
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/20" />
         <div className="absolute left-3 top-3">
           {item.is_must_try && (

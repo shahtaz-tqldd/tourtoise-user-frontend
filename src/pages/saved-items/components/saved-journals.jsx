@@ -1,18 +1,18 @@
 import { useCallback, useMemo, useState } from "react";
-import { Bookmark, BookmarkX, Image as ImageIcon } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import ConfirmDialog from "@/components/shared/confirm-dialog";
 import InfiniteScroll from "@/components/shared/infinite-scroll";
-import { EmptyState } from "@/components/shared/utils";
+import { EmptyState, Image } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
   useSavedJournalInfiniteListInfiniteQuery,
   useSaveJournalMutation,
 } from "@/features/journal/journalApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
-import { cn, getCloudinaryPreviewUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { normalizeJournals } from "@/pages/journal/journal-utils";
 
 const PAGE_SIZE = 12;
@@ -140,13 +140,8 @@ const JournalItem = ({ journal, isRemoving, onRemove }) => {
         className="flex min-w-0 flex-1 items-center gap-3 p-3 pr-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset sm:gap-4 sm:p-4 sm:pr-14"
       >
         {coverImage ? (
-          <div className="size-20 shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:size-24">
-            <img
-              src={getCloudinaryPreviewUrl(coverImage, 360)}
-              alt=""
-              className="h-full w-full object-cover"
-              loading="lazy"
-            />
+          <div className="size-20 shrink-0 overflow-hidden rounded-xl sm:size-24">
+            <Image src={coverImage} alt="" loading="lazy" />
           </div>
         ) : null}
 
@@ -156,10 +151,11 @@ const JournalItem = ({ journal, isRemoving, onRemove }) => {
           </p>
 
           <div className="mt-4 flex items-center gap-2">
-            <img
-              src={getCloudinaryPreviewUrl(authorImage, 60)}
-              className="size-7 rounded-full object-cover"
+            <Image
+              src={authorImage}
               alt={authorName}
+              width={60}
+              className="size-7 rounded-full"
             />
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold text-slate-900">

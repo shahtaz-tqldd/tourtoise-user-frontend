@@ -1,5 +1,6 @@
-import { cn, getCloudinaryPreviewUrl, getInitials } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { useSelector } from "react-redux";
+import { Image } from "./utils";
 
 export const UserAvatar = ({ className = "size-7" }) => {
   const { user } = useSelector((state) => state.auth);
@@ -9,9 +10,10 @@ export const UserAvatar = ({ className = "size-7" }) => {
   return (
     <div className="relative center" aria-label="Profile">
       {profileImage ? (
-        <img
-          src={getCloudinaryPreviewUrl(profileImage, 36)}
-          className={cn("rounded-full object-cover", className)}
+        <Image
+          src={profileImage}
+          width={40}
+          className={cn("rounded-full", className)}
           alt={fullName}
         />
       ) : (

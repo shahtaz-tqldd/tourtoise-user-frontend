@@ -5,14 +5,14 @@ import { toast } from "sonner";
 
 import ConfirmDialog from "@/components/shared/confirm-dialog";
 import InfiniteScroll from "@/components/shared/infinite-scroll";
-import { DetailPill, EmptyState } from "@/components/shared/utils";
+import { DetailPill, EmptyState, Image } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
   useSaveDestinationInfiniteListInfiniteQuery,
   useSaveDestinationMutation,
 } from "@/features/destination/destinationApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
-import { cn, getCloudinaryPreviewUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 12;
 
@@ -141,23 +141,15 @@ const DestinationItem = ({ destination, isRemoving, onRemove }) => {
         to={`/destinations/${destination.slug}`}
         className="flex min-w-0 flex-1 items-center gap-3 p-3 pr-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset sm:gap-4 sm:p-4 sm:pr-14"
       >
-        {destination.cover_image ? (
-          <div className="size-20 shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:size-24">
-            <img
-              src={getCloudinaryPreviewUrl(destination.cover_image, 360)}
-              alt={destination.name || "Saved destination"}
-              className="h-full w-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        ) : (
-          <div
-            className="center h-full w-full text-slate-300"
-            aria-hidden="true"
-          >
-            <MapPin size={32} />
-          </div>
-        )}
+        <div className="size-20 shrink-0 overflow-hidden rounded-xl sm:size-24">
+          <Image
+            src={destination?.cover_image}
+            alt={destination?.name}
+            width={220}
+            loading="lazy"
+          />
+        </div>
+
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-base font-bold text-slate-950">
             {destination.name || "Unnamed destination"}

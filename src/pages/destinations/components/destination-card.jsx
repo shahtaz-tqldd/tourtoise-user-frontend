@@ -1,9 +1,9 @@
 import React from "react";
-import { Bookmark, Clock, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
-import { getCloudinaryPreviewUrl } from "@/lib/utils";
+import { Bookmark, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DESTINATION_TYPE_OPTIONS } from "../constants";
+import { Image } from "@/components/shared/utils";
 
 const formatLabel = (value) => value?.replaceAll("_", " ") || "Destination";
 
@@ -13,18 +13,17 @@ const DestinationCard = ({ destination, onSavedClick, savedActionLabel }) => {
     (option) => option.value === destination.destination_type,
   );
 
-  console.log(typeGroup);
-
   return (
-    <article className="overflow-hidden rounded-[28px] bg-white relative group">
+    <article className="overflow-hidden rounded-3xl bg-white relative group">
       <Link to={destinationUrl} className="block">
-        <div className="relative aspect-[1/1] overflow-hidden bg-slate-100">
-          <img
-            src={getCloudinaryPreviewUrl(destination.cover_image)}
+        <div className="relative aspect-[1/1] overflow-hidden bg-gradient-to-br from-emerald-100 via-slate-100 to-cyan-100">
+          <Image
+            src={destination.cover_image}
             alt={destination.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            width={600}
+            className="transition duration-500 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-transparent" />
+          <div className="absolute inset-0 top-[65%] bg-gradient-to-t from-black/75 via-black/50 to-transparent" />
 
           <div className="absolute left-4 right-4 top-4 flx gap-2">
             <span className="flx gap-1 rounded-full bg-white/90 px-2.5 py-1.5 text-xs font-semibold capitalize text-slate-900 shadow-sm backdrop-blur">
@@ -40,10 +39,10 @@ const DestinationCard = ({ destination, onSavedClick, savedActionLabel }) => {
           </div>
 
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <h2 className="text-2xl font-bold leading-tight truncate">
+            <h2 className="text-2xl font-bold text-shadow leading-tight truncate">
               {destination.name}
             </h2>
-            <p className="mt-2 flex items-center gap-1.5 text-sm text-white/85">
+            <p className="mt-2 flex items-center font-medium gap-1.5 text-sm text-white/85">
               <MapPin size={15} />
               <span className="truncate">
                 {destination.region}, {destination.country}

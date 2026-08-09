@@ -1,7 +1,7 @@
 import React from "react";
 import CardSlider from "@/components/shared/card-slider";
-import { DetailPill, SectionHeader } from "@/components/shared/utils";
-import { formatLabel, getCloudinaryPreviewUrl } from "@/lib/utils";
+import { DetailPill, Image, SectionHeader } from "@/components/shared/utils";
+import { formatLabel } from "@/lib/utils";
 import { Activity, Clock, Mountain, WalletCards } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -85,17 +85,12 @@ const ActivityCard = ({ item, onSelect }) => {
       className="group h-full w-full overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
     >
       <div className="relative aspect-[5/3] overflow-hidden bg-slate-100">
-        {coverImage ? (
-          <img
-            src={getCloudinaryPreviewUrl(coverImage, 360)}
-            alt={item.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-            <Activity size={30} />
-          </div>
-        )}
+        <Image
+          src={coverImage}
+          alt={item?.name}
+          className="transition duration-500 group-hover:scale-105"
+        />
+
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/20" />
         <div className="absolute left-3 right-3 top-3 flex items-start justify-between gap-2">
           {item.difficulty_level && (

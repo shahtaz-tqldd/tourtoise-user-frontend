@@ -205,3 +205,50 @@ export const VisibilityStatus = ({ visibility }) => {
     </span>
   );
 };
+
+export const Image = ({ src, alt = "", width = 360, className, ...props }) => {
+  const fallbackImage = "/fallback_image_preview.webp";
+
+  const getPreviewURL = (url, width) => {
+    if (!url) {
+      return fallbackImage;
+    }
+
+    if (!url.includes("res.cloudinary.com")) {
+      return url;
+    }
+
+    const uploadPath = "/image/upload/";
+    const [baseUrl, imagePath] = url.split(uploadPath);
+
+    if (!baseUrl || !imagePath) {
+      return url;
+    }
+
+    // Avoid applying the transformation multiple times
+    if (imagePath.startsWith("c_scale,")) {
+      return url;
+    }
+
+    return `${baseUrl}${uploadPath}c_scale,w_${width}/${imagePath}`;
+  };
+
+  const handleImageError = (event) => {
+    // Prevent infinite onError loop if fallback also fails
+    if (event.currentTarget.src.endsWith(fallbackImage)) {
+      return;
+    }
+
+    event.currentTarget.src = fallbackImage;
+  };
+
+  return (
+    <img
+      src={getPreviewURL(src, width)}
+      alt={alt}
+      onError={handleImageError}
+      className={cn("h-full w-full object-cover", className)}
+      {...props}
+    />
+  );
+};

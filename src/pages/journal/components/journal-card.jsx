@@ -21,6 +21,7 @@ import Card from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useReactJournalMutation } from "@/features/journal/journalApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
+import { Image } from "@/components/shared/utils";
 
 const getInitialReactionCount = (journal) =>
   journal.likes_count ??
@@ -147,11 +148,7 @@ const JournalCard = ({
             >
               {galleryImages.map((image, index) => (
                 <SwiperSlide key={`${image}-${index}`}>
-                  <img
-                    src={image}
-                    alt={`Journal photo ${index + 1}`}
-                    className="h-full w-full object-cover"
-                  />
+                  <Image src={image} width={600} />
                 </SwiperSlide>
               ))}
             </Swiper>
@@ -204,11 +201,11 @@ const JournalCard = ({
 const AuthorAvatar = ({ src, name, size = "sm" }) => (
   <div
     className={`shrink-0 overflow-hidden rounded-full bg-primary/10 text-primary ${
-      size === "md" ? "h-9 w-9" : "h-8 w-8"
+      size === "md" ? "size-9" : "size-8"
     }`}
   >
     {src ? (
-      <img src={src} alt={name} className="h-full w-full object-cover" />
+      <Image src={src} alt={name} width={40} />
     ) : (
       <span className="center h-full text-xs font-bold">
         {name?.charAt(0).toUpperCase() || "T"}

@@ -11,15 +11,14 @@ import { Link, useParams } from "react-router-dom";
 
 import InfiniteScroll from "@/components/shared/infinite-scroll";
 import SearchBar from "@/components/shared/search-bar";
-import { Button } from "@/components/ui/button";
 import useDebounce from "@/hooks/useDebounce";
 import FeatureDetails from "@/pages/destinations/destination-details/components/feature-details";
 import {
   useDestinationFeatureInfiniteListInfiniteQuery,
   useDestinationShortDetailQuery,
 } from "@/features/destination/destinationApiSlice";
-import { formatLabel, getCloudinaryPreviewUrl } from "@/lib/utils";
-import { EmptyState } from "@/components/shared/utils";
+import { formatLabel } from "@/lib/utils";
+import { EmptyState, Image } from "@/components/shared/utils";
 
 const PAGE_SIZE = 12;
 
@@ -81,7 +80,6 @@ const getDestinationName = (response) =>
 
 const FeatureCard = ({ item, config, onSelect }) => {
   const coverImage = item.cover_image || item.images?.[0]?.image_url;
-  const FallbackIcon = config.fallbackIcon;
   const metaItems = config
     .getMeta(item)
     .filter((value) => value && value !== "N/A");
@@ -93,17 +91,12 @@ const FeatureCard = ({ item, config, onSelect }) => {
       className="group h-full w-full overflow-hidden rounded-3xl bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-        {coverImage ? (
-          <img
-            src={getCloudinaryPreviewUrl(coverImage, 560)}
-            alt={item.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-slate-400">
-            <FallbackIcon size={30} />
-          </div>
-        )}
+        <Image
+          src={coverImage}
+          alt={item.name}
+          width={600}
+          className="transition duration-500 group-hover:scale-105"
+        />
         {item.is_featured || item.is_must_try ? (
           <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-slate-800 shadow-sm backdrop-blur">
             {item.is_must_try ? "Must try" : "Featured"}

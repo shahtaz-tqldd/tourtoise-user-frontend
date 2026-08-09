@@ -95,9 +95,9 @@ const TripsPage = () => {
   };
 
   return (
-    <section className="relative space-y-6 pt-5 pb-20 md:pb-5">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="space-y-6">
+    <section className="relative flex min-h-[calc(100svh-4rem)] flex-col pt-5 pb-20 md:pb-5">
+      <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="flex min-h-0 flex-col gap-6">
           <TripsPageHeader
             activeSearch={activeSearch}
             onActiveSearchChange={updateActiveSearch}
@@ -110,13 +110,15 @@ const TripsPage = () => {
             isHistoryError={isHistoryError}
           />
 
-          <TripsFeed
-            trips={trips}
-            isFetching={isFetching}
-            isError={isError}
-            hasActiveFilters={hasActiveFilters}
-            onClearFilters={clearActiveFilters}
-          />
+          <div className="min-h-0 flex-1">
+            <TripsFeed
+              trips={trips}
+              isFetching={isFetching}
+              isError={isError}
+              hasActiveFilters={hasActiveFilters}
+              onClearFilters={clearActiveFilters}
+            />
+          </div>
         </div>
 
         <TripHistory

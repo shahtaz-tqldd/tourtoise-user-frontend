@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { Text, Title } from "./typography";
+import { Image } from "../shared/utils";
 
 function Table({ className, ...props }) {
   return (
@@ -111,12 +112,13 @@ function TableProfile({
     <div className={cn("flx gap-2.5", className)}>
       {profile_img_url ? (
         <div>
-          <img
+          <Image
             src={profile_img_url}
+            width={80}
             alt={name}
             className={cn(
-              " mr-2",
-              non_rounded ? "rounded-xl h-12 w-12" : "rounded-full w-10 h-10",
+              "mr-2",
+              non_rounded ? "rounded-xl size-12" : "rounded-full size-10",
             )}
           />
         </div>

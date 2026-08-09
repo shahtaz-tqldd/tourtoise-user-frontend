@@ -240,7 +240,7 @@ const TripActionsDropdown = ({
       {showPlanning && (
         <TripPlanningDrawer
           trip={displayedTrip}
-          destination={destination || displayedTrip.primary_destination}
+          destination={destination || displayedTrip?.primary_destination}
           open={planningOpen}
           onOpenChange={setPlanningOpen}
         />

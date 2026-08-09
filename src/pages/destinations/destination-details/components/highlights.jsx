@@ -1,15 +1,15 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 // components
 import CardSlider from "@/components/shared/card-slider";
-import { DetailPill, SectionHeader } from "@/components/shared/utils";
+import { DetailPill, Image, SectionHeader } from "@/components/shared/utils";
 
 // lib
-import { formatLabel, getCloudinaryPreviewUrl } from "@/lib/utils";
+import { formatLabel } from "@/lib/utils";
 
 // icons
 import { Clock, MapPin, Star, Ticket, TreePalm } from "lucide-react";
-import { Link } from "react-router-dom";
 
 const DestinationHighlights = ({ destination, setActiveFeature }) => {
   const attractions = destination.attractions || [];
@@ -81,25 +81,17 @@ const DestinationHighlights = ({ destination, setActiveFeature }) => {
 };
 
 const HighlightItemCard = ({ item, onSelect }) => {
-  const fallbackIcon = <MapPin size={34} />;
-
   return (
     <button
       type="button"
       onClick={() => onSelect(item)}
       className="relative h-full w-full aspect-[1] group overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:shadow-md focus-visible:ring-2"
     >
-      {item.cover_image ? (
-        <img
-          src={getCloudinaryPreviewUrl(item.cover_image, 360)}
-          alt={item.name}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
-          {fallbackIcon}
-        </div>
-      )}
+      <Image
+        src={item.cover_image}
+        alt={item.name}
+        className="transition duration-500 group-hover:scale-105"
+      />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
       <div className="absolute left-3 top-3">
         {item.is_featured && (

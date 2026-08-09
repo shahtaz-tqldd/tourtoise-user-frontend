@@ -1,5 +1,7 @@
 import React from "react";
+import { PlaneTakeoff } from "lucide-react";
 
+import EmptyPage from "@/components/shared/empty-page";
 import { EmptyState } from "@/components/shared/utils";
 
 import TripCard from "./trip-card";
@@ -12,7 +14,7 @@ const TripsFeed = ({
   hasActiveFilters,
   onClearFilters,
 }) => (
-  <>
+  <div className="h-full">
     {isFetching && <TripListLoader />}
 
     {isError && !isFetching && (
@@ -23,25 +25,33 @@ const TripsFeed = ({
     )}
 
     {!isFetching && !isError && trips.length > 0 && (
-      <div className="flex flex-col gap-4">
-        {trips.map((trip) => (
-          <TripCard key={trip.id || trip.slug} trip={trip} />
+      <div className="flex flex-col gap-5">
+        {trips.map((trip, idx) => (
+          <TripCard key={trip?.id || idx} trip={trip} />
         ))}
       </div>
     )}
 
     {!isFetching && !isError && !trips.length && (
-      <EmptyState
+      <EmptyPage
+        icon={PlaneTakeoff}
         title="No active trips"
         description={
           hasActiveFilters
             ? "No current trips match the search and status filter."
             : "Start planning from a destination page and active trips or drafts will appear here."
         }
-        onClear={hasActiveFilters ? onClearFilters : undefined}
+        eyebrow={
+          hasActiveFilters ? "No matching journeys" : "Ready when you are"
+        }
+        actionLabel={
+          hasActiveFilters ? "Clear filters" : "Explore destinations"
+        }
+        actionTo={hasActiveFilters ? undefined : "/"}
+        onAction={hasActiveFilters ? onClearFilters : undefined}
       />
     )}
-  </>
+  </div>
 );
 
 export default TripsFeed;
