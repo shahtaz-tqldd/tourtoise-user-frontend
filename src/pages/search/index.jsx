@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo } from "react";
-import { CalendarDays, MapPin, Newspaper, Plane, PlaneTakeoff, Search, X } from "lucide-react";
+import { CalendarDays, MapPin, Newspaper, PlaneTakeoff, Search, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import EmptyPage from "@/components/shared/empty-page";
 import InfiniteScroll from "@/components/shared/infinite-scroll";
-import { EmptyState } from "@/components/shared/utils";
 import TabMenu from "@/components/ui/tab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -125,6 +125,7 @@ const SearchPage = () => {
       fetchNextPage: fetchNextDestinationPage,
       loadingLabel: "Loading more destinations...",
       emptyTitle: "No destinations found",
+      emptyIcon: MapPin,
     },
     trips: {
       items: hasSearchQuery ? trips : [],
@@ -138,6 +139,7 @@ const SearchPage = () => {
       fetchNextPage: fetchNextTripPage,
       loadingLabel: "Loading more trips...",
       emptyTitle: "No trips found",
+      emptyIcon: PlaneTakeoff,
     },
     journals: {
       items: hasSearchQuery ? journals : [],
@@ -151,6 +153,7 @@ const SearchPage = () => {
       fetchNextPage: fetchNextJournalPage,
       loadingLabel: "Loading more journals...",
       emptyTitle: "No journals found",
+      emptyIcon: Newspaper,
     },
   }[activeTab];
 
@@ -195,8 +198,8 @@ const SearchPage = () => {
   }, [activeState]);
 
   return (
-    <section className="space-y-6 pt-5 pb-20 md:pb-5">
-      <div className="space-y-4">
+    <section className="flex min-h-[calc(100svh-4.5rem)] flex-col gap-6 pt-5 pb-20 md:pb-5">
+      <div className="shrink-0 space-y-4">
         <div>
           <div>
             <h1 className="text-xl font-bold text-slate-950 md:text-2xl">
@@ -249,13 +252,16 @@ const SearchPage = () => {
         />
       </div>
 
-      <SearchResults
-        activeTab={activeTab}
-        state={activeState}
-        onLoadMore={loadMore}
-        debouncedSearchQuery={debouncedSearchQuery}
-        hasSearchQuery={hasSearchQuery}
-      />
+      <div className="flex min-h-0 flex-1 flex-col">
+        <SearchResults
+          activeTab={activeTab}
+          state={activeState}
+          onLoadMore={loadMore}
+          onClearSearch={() => updateSearch("")}
+          debouncedSearchQuery={debouncedSearchQuery}
+          hasSearchQuery={hasSearchQuery}
+        />
+      </div>
     </section>
   );
 };
@@ -264,14 +270,18 @@ const SearchResults = ({
   activeTab,
   state,
   onLoadMore,
+  onClearSearch,
   debouncedSearchQuery,
   hasSearchQuery,
 }) => {
   if (!hasSearchQuery) {
     return (
-      <EmptyState
+      <EmptyPage
+        icon={Search}
+        eyebrow="Search across tourtoise"
         title="Start a search"
         description="Enter a search term to find matching destinations, trips, or journals."
+        className="min-h-0 flex-1 sm:min-h-0"
       />
     );
   }
@@ -280,22 +290,30 @@ const SearchResults = ({
 
   if (state.isError) {
     return (
-      <EmptyState
+      <EmptyPage
+        icon={Search}
+        eyebrow="Search unavailable"
         title="Could not load results"
         description="Check the search endpoint and try again."
+        className="min-h-0 flex-1 sm:min-h-0"
       />
     );
   }
 
   if (!state.items.length) {
     return (
-      <EmptyState
+      <EmptyPage
+        icon={state.emptyIcon}
+        eyebrow="No matching results"
         title={state.emptyTitle}
         description={
           debouncedSearchQuery
             ? "Try a different search term or switch tabs."
             : "Start typing to narrow the results."
         }
+        actionLabel="Clear search"
+        onAction={onClearSearch}
+        className="min-h-0 flex-1 sm:min-h-0"
       />
     );
   }

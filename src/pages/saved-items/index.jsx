@@ -34,14 +34,11 @@ const SavedItemsPage = () => {
   };
 
   return (
-    <section className="min-w-0 space-y-5 pt-5 pb-20 sm:space-y-6 md:pb-8">
+    <section className="flex min-h-[calc(100svh-4.5rem)] min-w-0 flex-col gap-5 pt-5 pb-20 sm:gap-6 md:pb-8">
       <div>
         <h1 className="text-xl font-bold text-slate-950 md:text-2xl">
           Saved Items
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Your saved destinations and journal posts are listed here
-        </p>
       </div>
       <TabMenu
         tabs={SAVED_ITEMS}
@@ -50,7 +47,11 @@ const SavedItemsPage = () => {
         scrollable
         className="bg-transparent"
       />
-      <div role="tabpanel" aria-label={`Saved ${activeTab}`}>
+      <div
+        className="flex min-h-0 flex-1 flex-col"
+        role="tabpanel"
+        aria-label={`Saved ${activeTab}`}
+      >
         {activeTab === "destinations" ? (
           <SavedDestinations />
         ) : (

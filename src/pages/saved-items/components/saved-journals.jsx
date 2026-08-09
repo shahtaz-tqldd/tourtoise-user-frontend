@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
-import { Bookmark } from "lucide-react";
+import { Bookmark, Newspaper } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import ConfirmDialog from "@/components/shared/confirm-dialog";
+import EmptyPage from "@/components/shared/empty-page";
 import InfiniteScroll from "@/components/shared/infinite-scroll";
-import { EmptyState, Image } from "@/components/shared/utils";
+import { Image } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
   useSavedJournalInfiniteListInfiniteQuery,
@@ -75,10 +76,14 @@ const SavedJournal = ({ className = "" }) => {
 
   if (!journals.length) {
     return (
-      <EmptyState
+      <EmptyPage
+        icon={Newspaper}
+        eyebrow="Stories worth returning to"
         title="No saved journals"
-        description="Travel stories you bookmark will appear here."
-        className="min-h-72 py-16 sm:py-20"
+        description="Travel stories you bookmark will collect here for easy reading later."
+        actionLabel="Explore journals"
+        actionTo="/travel-journal"
+        className="min-h-0 flex-1 sm:min-h-0"
       />
     );
   }

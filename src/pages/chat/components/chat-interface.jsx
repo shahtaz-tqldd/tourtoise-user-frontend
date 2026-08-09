@@ -1,7 +1,17 @@
 import React from "react";
-import { ChevronRight, Loader2, Search, Send, Sparkles, X } from "lucide-react";
+import {
+  ArrowUpRight,
+  Loader2,
+  Mountain,
+  Search,
+  Sparkles,
+  Utensils,
+  Waves,
+  X,
+} from "lucide-react";
 
-import { AuthorMessage, EmptyState } from "@/components/shared/utils";
+import EmptyPage from "@/components/shared/empty-page";
+import { AuthorMessage } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -13,11 +23,80 @@ import MessageMetadata from "./message-metadata";
 import { UserAvatar } from "@/components/shared/user-profile";
 
 const suggestedPrompts = [
-  "Recommend a 5 day beach trip under $900",
-  "Where should I go for mountain views in autumn?",
-  "Plan a relaxed food-focused weekend in Bangkok",
-  "What should I know before visiting Kyoto?",
+  {
+    prompt: "Recommend a 5 day beach trip under $900",
+    label: "Find a beach escape",
+    icon: Waves,
+  },
+  {
+    prompt: "Where should I go for mountain views in autumn?",
+    label: "Explore the mountains",
+    icon: Mountain,
+  },
+  {
+    prompt: "Plan a relaxed food-focused weekend in Bangkok",
+    label: "Plan a food weekend",
+    icon: Utensils,
+  },
 ];
+
+const ChatWelcome = ({ isSendingMessage, onPromptClick }) => (
+  <section className="hidden-scrollbar absolute inset-y-0 -left-4 -right-4 isolate flex items-center justify-center overflow-x-hidden overflow-y-auto bg-gradient-to-br from-primary/10 via-white to-cyan-50 px-4 py-8 sm:px-8 md:-left-6 md:-right-6">
+    <div
+      className="absolute -left-16 top-10 size-48 rounded-full bg-cyan-600/10 blur-3xl"
+      aria-hidden="true"
+    />
+    <div
+      className="absolute -right-20 bottom-4 size-56 rounded-full bg-rose-200/30 blur-3xl"
+      aria-hidden="true"
+    />
+
+    <div className="relative z-10 mx-auto w-full max-w-2xl text-center">
+      <img
+        src="/logo.png"
+        alt=""
+        className="mx-auto size-12 object-contain sm:size-14"
+      />
+
+      <h2 className="mt-5 text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
+        Where should we go next?
+      </h2>
+      <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500 sm:text-base">
+        Tell me what kind of trip you are imagining. I can compare places, shape
+        an itinerary, or help with the practical details.
+      </p>
+
+      <div className="mt-7 grid gap-2 text-left sm:grid-cols-3">
+        {suggestedPrompts.map(({ prompt, label, icon: PromptIcon }) => (
+          <button
+            key={prompt}
+            type="button"
+            onClick={() => onPromptClick(prompt)}
+            disabled={isSendingMessage}
+            className="group flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/90 p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 disabled:pointer-events-none disabled:opacity-50 sm:flex-col sm:items-start sm:p-4"
+          >
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-white">
+              {React.createElement(PromptIcon, {
+                className: "size-4",
+                "aria-hidden": true,
+              })}
+            </span>
+            <span className="flex min-w-0 flex-1 items-center justify-between gap-2 sm:w-full">
+              <span className="text-xs font-semibold leading-5 text-slate-700">
+                {label}
+              </span>
+              <ArrowUpRight className="size-4 shrink-0 text-slate-300 transition group-hover:text-primary" />
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <p className="mt-5 text-xs font-medium text-slate-400">
+        Or type your own question below.
+      </p>
+    </div>
+  </section>
+);
 
 const highlightMessageMatch = (message, query) => {
   if (!query) return message;
@@ -153,11 +232,18 @@ const ChatInterface = ({
               </Button>
             </div>
           </div>
-          <hr className="border-t border-slate-200 -mx-6" />
+          <hr className="-mx-6 border-t border-slate-200" />
         </>
       )}
 
-      <div className="hidden-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto py-4 pr-1 lg:space-y-5 lg:pr-2">
+      <div
+        className={cn(
+          "relative min-h-0 flex-1",
+          !isFetchingMessages && !isMessageListError && !messages.length
+            ? "overflow-visible"
+            : "hidden-scrollbar space-y-4 overflow-y-auto py-4 lg:space-y-5",
+        )}
+      >
         {isFetchingMessages && selectedSessionId && !messages.length ? (
           <MessageListSkeleton />
         ) : isMessageListError ? (
@@ -200,38 +286,21 @@ const ChatInterface = ({
             );
           })
         ) : debouncedMessageSearch ? (
-          <EmptyState
+          <EmptyPage
+            icon={Search}
+            eyebrow="No matching messages"
             title="No matching messages"
-            description="Try a different search term"
-            className="border-none"
+            description="Try a different search term or return to the full conversation."
+            actionLabel="Clear search"
+            onAction={onCloseMessageSearch}
+            size="sm"
+            className="hidden-scrollbar absolute inset-y-0 -left-4 -right-4 h-auto min-h-0 w-auto overflow-y-auto rounded-none py-8 sm:min-h-0 md:-left-6 md:-right-6"
           />
         ) : (
-          <div className="flex h-[calc(100%-20px)] flex-col items-center justify-center text-center">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Sparkles size={24} />
-            </div>
-            <h3 className="mt-5 text-lg font-semibold text-slate-950">
-              Start Conversation
-            </h3>
-            <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-              Ask for destination recommendations, route comparisons, weather
-              notes, local etiquette, budgets, or a day-by-day plan.
-            </p>
-            <div className="mt-5 flex flex-col items-start gap-2">
-              {suggestedPrompts.slice(0, 3).map((prompt) => (
-                <button
-                  key={prompt}
-                  type="button"
-                  onClick={() => handlePromptClick(prompt)}
-                  disabled={isSendingMessage}
-                  className="flex gap-2 rounded-md border border-slate-200 bg-white py-2.5 pl-2 pr-3 text-xs font-semibold text-slate-600 transition hover:border-primary/30 hover:bg-primary/5 hover:text-primary disabled:pointer-events-none disabled:opacity-50"
-                >
-                  <ChevronRight size={14} />
-                  {prompt}
-                </button>
-              ))}
-            </div>
-          </div>
+          <ChatWelcome
+            isSendingMessage={isSendingMessage}
+            onPromptClick={handlePromptClick}
+          />
         )}
         {isSendingMessage && (
           <div className="flex items-center gap-2 pl-11 text-xs font-semibold text-slate-400">
@@ -241,8 +310,8 @@ const ChatInterface = ({
         )}
         <div ref={messagesEndRef} />
       </div>
-      <hr className="border-t border-slate-200 -mx-6" />
-      <div className="bg-white pt-2.5 lg:pt-3.5 -mb-1.5">
+      <hr className="-mx-6 border-t border-slate-200" />
+      <div className="-mb-1.5 bg-white pt-2.5 lg:pt-3.5">
         <ChatInputForm
           composerRef={composerRef}
           message={message}

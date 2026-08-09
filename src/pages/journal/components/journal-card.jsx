@@ -6,6 +6,7 @@ import {
   Bookmark,
   Forward,
   Heart,
+  MessageCircle,
   MessageCircleMore,
   MoreVertical,
   Pencil,
@@ -261,12 +262,12 @@ const JournalPostActions = ({
 const CommentToggle = ({ showComments, commentsCount, onToggle }) => (
   <button
     type="button"
-    className="flx h-9 gap-2 rounded-full bg-white px-3 text-sm font-semibold text-slate-600 transition hover:bg-primary/10 md:bg-slate-100"
+    className="flx h-9 gap-2 rounded-full bg-white px-3 text-sm font-semibold text-slate-600 transition hover:bg-primary/10 hover:text-primary md:bg-slate-100"
     onClick={onToggle}
     aria-expanded={showComments}
     aria-label={showComments ? "Hide comments" : "Show comments"}
   >
-    <MessageCircleMore size={15} className="text-primary" />
+    <MessageCircle size={15} />
     {commentsCount > 0 && `${commentsCount}`}
   </button>
 );

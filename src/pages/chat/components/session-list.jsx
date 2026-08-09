@@ -1,9 +1,9 @@
 import React from "react";
 import { Loader2, MessageSquareDot, Plus, Search, X } from "lucide-react";
 
+import EmptyPage from "@/components/shared/empty-page";
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
-import { EmptyState } from "@/components/shared/utils";
 import { cn } from "@/lib/utils";
 
 import { SessionErrorState, SessionListSkeleton } from "./fallback";
@@ -56,7 +56,7 @@ const ChatSessionList = ({
 }) => (
   <Card
     className={cn(
-      "rounded-none h-full min-h-0 flex-col lg:flex",
+      "h-full min-h-0 flex-col rounded-none lg:flex",
       isMobileChatOpen ? "hidden lg:flex" : "flex",
     )}
   >
@@ -121,9 +121,16 @@ const ChatSessionList = ({
       )}
     </div>
 
-    <hr className="border-t border-slate-200 -mx-6" />
+    <hr className="-mx-6 border-t border-slate-200" />
 
-    <div className="hidden-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto py-3 pr-1">
+    <div
+      className={cn(
+        "relative min-h-0 flex-1",
+        !isFetchingSessions && !isSessionListError && !sessions.length
+          ? "overflow-visible"
+          : "hidden-scrollbar space-y-2 overflow-y-auto py-3",
+      )}
+    >
       {isFetchingSessions && !sessions.length ? (
         <SessionListSkeleton />
       ) : isSessionListError ? (
@@ -169,10 +176,25 @@ const ChatSessionList = ({
           );
         })
       ) : (
-        <EmptyState
-          title="No sessions found"
-          description="Start a new session and adjust search"
-          className="border-none"
+        <EmptyPage
+          icon={MessageSquareDot}
+          eyebrow={sessionSearch ? "No matching chats" : "Your travel chats"}
+          title={sessionSearch ? "No sessions found" : "No chat sessions yet"}
+          description={
+            sessionSearch
+              ? "Try another search term or return to all chat sessions."
+              : "Start a conversation with Turtle and it will appear here."
+          }
+          actionLabel={sessionSearch ? "Clear search" : "Start a new chat"}
+          onAction={
+            sessionSearch
+              ? onCloseSessionSearch
+              : isCreatingSession
+                ? undefined
+                : onCreateSession
+          }
+          size="sm"
+          className="hidden-scrollbar absolute inset-y-0 -left-4 -right-4 h-auto min-h-0 w-auto overflow-y-auto rounded-none py-8 sm:min-h-0 md:-left-6 md:-right-6"
         />
       )}
     </div>

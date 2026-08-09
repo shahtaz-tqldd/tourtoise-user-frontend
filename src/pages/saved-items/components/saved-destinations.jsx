@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
-import { Bookmark, BookmarkX, MapPin } from "lucide-react";
+import { Bookmark, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import ConfirmDialog from "@/components/shared/confirm-dialog";
+import EmptyPage from "@/components/shared/empty-page";
 import InfiniteScroll from "@/components/shared/infinite-scroll";
-import { DetailPill, EmptyState, Image } from "@/components/shared/utils";
+import { DetailPill, Image } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
   useSaveDestinationInfiniteListInfiniteQuery,
@@ -75,10 +76,14 @@ const SavedDestinations = ({ className = "" }) => {
 
   if (!destinations.length) {
     return (
-      <EmptyState
+      <EmptyPage
+        icon={MapPin}
+        eyebrow="Your saved places"
         title="No saved destinations"
-        description="Destinations you save will appear here."
-        className="min-h-72 py-16 sm:py-20"
+        description="Destinations you save will appear here, ready for whenever inspiration strikes."
+        actionLabel="Explore destinations"
+        actionTo="/"
+        className="min-h-0 flex-1 sm:min-h-0"
       />
     );
   }

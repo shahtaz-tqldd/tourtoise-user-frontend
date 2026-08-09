@@ -143,6 +143,8 @@ button {
 
 .hidden-scrollbar {
   overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 .hidden-scrollbar::-webkit-scrollbar {
   width: 0px;

@@ -109,6 +109,10 @@ export const routes = createBrowserRouter([
         path: "/profile/settings",
         element: withSuspense(<SettingsPage />),
       },
+      {
+        path: "/app-features",
+        element: withSuspense(<AppFeaturesPage />),
+      },
     ],
   },
   {
@@ -130,9 +134,5 @@ export const routes = createBrowserRouter([
   {
     path: "/trip/public/:tripToken",
     element: withSuspense(<PublicTripDetailsPage />),
-  },
-  {
-    path: "/app-features",
-    element: withSuspense(<AppFeaturesPage />),
   },
 ]);

@@ -87,7 +87,7 @@ const ChatHeader = ({
         ]}
       />
     </div>
-    <hr className="border-t border-slate-200 -mx-6" />
+    <hr className="-mx-6 border-t border-slate-200" />
   </>
 );
 

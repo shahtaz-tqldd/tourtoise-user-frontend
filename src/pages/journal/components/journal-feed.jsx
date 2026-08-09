@@ -1,10 +1,11 @@
 import React from "react";
+import { Newspaper } from "lucide-react";
 
+import EmptyPage from "@/components/shared/empty-page";
 import InfiniteScroll from "@/components/shared/infinite-scroll";
 import { Button } from "@/components/ui/button";
 
 import JournalCard from "./journal-card";
-import { EmptyState } from "@/components/shared/utils";
 
 const JournalListSkeleton = () => (
   <div className="space-y-4">
@@ -30,8 +31,10 @@ const JournalFeed = ({
   onDeleteJournal,
   canManageJournal,
   emptyDescription,
+  scope,
+  onCreate,
 }) => (
-  <>
+  <div className="flex h-full min-h-0 flex-col">
     {isLoading ? (
       <JournalListSkeleton />
     ) : isError ? (
@@ -69,12 +72,19 @@ const JournalFeed = ({
         />
       </div>
     ) : (
-      <EmptyState
-        title="No journals found"
+      <EmptyPage
+        icon={Newspaper}
+        eyebrow={
+          scope === "mine" ? "Your travel stories" : "Community stories"
+        }
+        title={scope === "mine" ? "No journals yet" : "No public journals yet"}
         description={emptyDescription}
+        actionLabel="Write a journal"
+        onAction={onCreate}
+        className="min-h-0 flex-1 sm:min-h-0"
       />
     )}
-  </>
+  </div>
 );
 
 export default JournalFeed;
