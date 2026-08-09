@@ -101,6 +101,16 @@ export const authApiSlice = apiSlice.injectEndpoints({
       },
     }),
 
+    creditRequest: builder.mutation({
+      query: ({ payload }) => {
+        return {
+          url: `/accounts/credit-requests/`,
+          method: "POST",
+          body: payload,
+        };
+      },
+    }),
+
     updateAccount: builder.mutation({
       query: (payload) => {
         return {
@@ -169,4 +179,5 @@ export const {
   useDeleteAccountMutation,
   useRequestResetPasswordMutation,
   useResetPasswordMutation,
+  useCreditRequestMutation,
 } = authApiSlice;
