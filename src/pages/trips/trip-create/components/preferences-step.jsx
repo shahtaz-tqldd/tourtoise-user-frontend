@@ -1,4 +1,4 @@
-import { AuthorMessage } from "@/components/shared/utils";
+import { AuthorMessage, Image } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import { FloatingInput } from "@/components/ui/input";
 import {
@@ -80,8 +80,7 @@ const unwrapAgentMessages = (response) => {
 const getMessageKey = (message) =>
   message.id || `${message.role}-${message.content}`;
 
-const getMessageContentKey = (message) =>
-  `${message.role}-${message.content}`;
+const getMessageContentKey = (message) => `${message.role}-${message.content}`;
 
 const mergeConversationMessages = (serverMessages, localMessages) => {
   const seenServerMessages = new Set();
@@ -147,7 +146,7 @@ const OptionGroup = ({ title, children }) => {
 const AgentThinkingMessage = () => (
   <div className="flex w-full justify-start">
     <div className="flex max-w-[88%] flex-row items-start gap-2">
-      <div className="mt-1 flex h-8 w-8 shrink-0">
+      <div className="mt-1 flex size-8 shrink-0">
         <img src="/logo.png" className="h-full object-contain" />
       </div>
       <div className="w-fit rounded-xl rounded-tl-md bg-primary/10 px-4 py-3 text-sm text-slate-700">
@@ -329,8 +328,7 @@ const PreferencesStep = ({
 
   const isAgentThinking = isActivatingAgent || isSendingMessage;
 
-  const recommendationButtonLabel = planningPayload
-    ?.is_recommendation_complete
+  const recommendationButtonLabel = planningPayload?.is_recommendation_complete
     ? "Recommendations"
     : "Start recommendation";
 
@@ -697,18 +695,15 @@ const PreferencesStep = ({
                     }`}
                   >
                     {!isUser ? (
-                      <div className="mt-1 flex h-8 w-8 shrink-0">
+                      <div className="mt-1 flex size-8 shrink-0">
                         <img
                           src="/logo.png"
                           className="h-full object-contain"
                         />
                       </div>
                     ) : (
-                      <div className="flex h-8 w-8 shrink-0">
-                        <img
-                          src={profileImage}
-                          className="h-full w-full rounded-full object-cover"
-                        />
+                      <div className="flex size-8 rounded-full overflow-hidden shrink-0">
+                        <Image src={profileImage} width={60} />
                       </div>
                     )}
 

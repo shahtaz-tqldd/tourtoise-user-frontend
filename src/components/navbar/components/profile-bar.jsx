@@ -1,8 +1,9 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { cn, getCloudinaryPreviewUrl, getInitials } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
+import { Image } from "@/components/shared/utils";
 
 const ProfileBar = ({ className, ...props }) => {
   const { user } = useSelector((state) => state.auth);
@@ -11,6 +12,7 @@ const ProfileBar = ({ className, ...props }) => {
   const profileImage = user?.avatar_url;
   const profilePath = `/profile/${username || "my-profile"}`;
   const isPremium = user?.status === "PREMIUM";
+
   return (
     <Link
       to={profilePath}
@@ -21,10 +23,10 @@ const ProfileBar = ({ className, ...props }) => {
       {...props}
     >
       {profileImage ? (
-        <img
-          src={getCloudinaryPreviewUrl(profileImage, 60)}
-          alt=""
-          className="size-11 rounded-full object-cover ring-2 ring-white"
+        <Image
+          src={profileImage}
+          width={80}
+          className="size-11 rounded-full ring-2 ring-white"
         />
       ) : (
         <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary ring-2 ring-white">

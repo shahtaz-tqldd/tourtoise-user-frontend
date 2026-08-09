@@ -43,9 +43,9 @@ export const TripHistory = ({
     )}
 
     {!isFetching && !isError && trips.length > 0 && (
-      <div className="space-y-3">
-        {trips.map((trip) => (
-          <TripCard key={trip.id || trip.slug} trip={trip} compact />
+      <div className="flex flex-col gap-5">
+        {trips.map((trip, idx) => (
+          <TripCard key={trip?.id || idx} trip={trip} compact />
         ))}
       </div>
     )}

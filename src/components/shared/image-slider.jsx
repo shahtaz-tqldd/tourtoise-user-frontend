@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import { cn } from "@/lib/utils";
+import { Image } from "./utils";
 
 const ImagePreview = ({
   images,
@@ -24,10 +25,10 @@ const ImagePreview = ({
         >
           {images.map((image, index) => (
             <SwiperSlide key={`${image}-${index}`}>
-              <img
+              <Image
                 src={image}
                 alt={`${altPrefix} ${index + 1}`}
-                className="h-full w-full object-cover"
+                width={600}
               />
             </SwiperSlide>
           ))}

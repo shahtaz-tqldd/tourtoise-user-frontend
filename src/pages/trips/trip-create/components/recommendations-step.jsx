@@ -1,7 +1,10 @@
-import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
+import {
+  AuthorMessage,
+  Image,
+  NotificationCard,
+} from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import TabMenu from "@/components/ui/tab";
-import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import { Clock3, MapPin, Sparkles, Star, Utensils, Wallet } from "lucide-react";
 import React, { useState } from "react";
 import {
@@ -142,18 +145,7 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
       style={{ animationDelay: `${index * 70}ms` }}
     >
       <div className="relative h-36 bg-slate-100">
-        {image ? (
-          <img
-            src={getCloudinaryPreviewUrl(image, 360)}
-            alt={item.name}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="center h-full text-slate-400">
-            <Sparkles size={22} />
-          </div>
-        )}
+        <Image src={image} alt={item.name} loading="lazy" />
         {item.is_featured || item.is_must_try ? (
           <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-primary shadow-sm">
             <Star size={13} />

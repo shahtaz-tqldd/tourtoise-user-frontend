@@ -23,6 +23,7 @@ import {
 } from "@/features/journal/journalApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { DeleteDialog } from "@/components/shared/confirm-dialog";
+import { Image } from "@/components/shared/utils";
 
 const commentDateFormatter = new Intl.DateTimeFormat(undefined, {
   month: "short",
@@ -295,10 +296,10 @@ const CommentBody = ({
     <div className="flex items-start gap-3">
       <div className="size-8 shrink-0 overflow-hidden rounded-full bg-primary/10">
         {comment.author?.avatar_url ? (
-          <img
-            src={comment.author.avatar_url}
+          <Image
+            src={comment?.author?.avatar_url}
             alt={comment.author.name}
-            className="h-full w-full object-cover"
+            width={40}
           />
         ) : (
           <span className="center h-full text-xs font-bold text-primary">
@@ -385,10 +386,10 @@ const CommentBody = ({
           </button>
         )}
         {comment.image_url && (
-          <img
-            src={comment.image_url}
+          <Image
+            src={comment?.image_url}
             alt="Comment attachment"
-            className="mt-2 max-h-52 rounded-xl object-cover"
+            className="mt-2 max-h-52 rounded-xl"
           />
         )}
       </div>

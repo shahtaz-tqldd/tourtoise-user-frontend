@@ -13,7 +13,7 @@ import Card from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 // lib
-import { getCloudinaryPreviewUrl } from "@/lib/utils";
+import { Image } from "@/components/shared/utils";
 
 const Gallery = ({ destination }) => {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -21,7 +21,6 @@ const Gallery = ({ destination }) => {
     const galleryImages =
       destination.images?.map((image) => ({
         url: image.image_url,
-        previewUrl: getCloudinaryPreviewUrl(image.image_url),
         caption: image.caption,
         sortOrder: image.sort_order,
       })) || [];
@@ -29,7 +28,6 @@ const Gallery = ({ destination }) => {
     return [
       destination.cover_image && {
         url: destination.cover_image,
-        previewUrl: getCloudinaryPreviewUrl(destination.cover_image),
         caption: `${destination.name} cover`,
         sortOrder: 0,
       },
@@ -74,12 +72,11 @@ const Gallery = ({ destination }) => {
               onClick={() => setActiveIndex(index)}
               className="group relative aspect-[1] overflow-hidden rounded-xl bg-slate-100 text-left outline-none ring-primary/30 focus-visible:ring-2"
             >
-              <img
-                src={getCloudinaryPreviewUrl(image.previewUrl, 96)}
-                alt={
-                  image.caption || `${destination.name} gallery ${index + 1}`
-                }
-                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              <Image
+                src={image?.url}
+                width={100}
+                alt={image.caption}
+                className="transition duration-500 group-hover:scale-105"
               />
             </button>
           ))}
@@ -103,15 +100,12 @@ const Gallery = ({ destination }) => {
 
           {activeImage && (
             <div className="relative flex h-full w-full items-center justify-center sm:h-auto sm:w-fit">
-              <img
+              <Image
                 src={activeImage.url}
-                alt={
-                  activeImage.caption ||
-                  `${destination.name} gallery ${activeIndex + 1}`
-                }
+                alt={activeImage.caption}
+                width={1200}
                 className="block h-auto w-auto max-h-[100dvh] max-w-full object-contain sm:max-h-[calc(100dvh-4rem)] sm:max-w-[calc(100vw-4rem)]"
               />
-
               <div className="absolute left-0 right-0 top-0 flex items-center justify-between gap-3 bg-gradient-to-b from-slate-950/80 to-transparent p-4">
                 <p className="text-sm font-semibold">
                   {activeIndex + 1} / {images.length}

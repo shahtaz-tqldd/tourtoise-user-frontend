@@ -7,9 +7,7 @@ import {
   ChevronRight,
   Clock3,
   DollarSign,
-  Globe,
   MapPin,
-  User,
   Users,
 } from "lucide-react";
 
@@ -19,7 +17,7 @@ import StatusBadge from "@/components/ui/status";
 import PreviewContent from "@/components/shared/preview-content";
 import { Link, useNavigate } from "react-router-dom";
 import TripActionsDropdown from "../../components/trip-actions-dropdown";
-import { VisibilityStatus } from "@/components/shared/utils";
+import { Image, VisibilityStatus } from "@/components/shared/utils";
 
 const formatDate = (value) => {
   if (!value) return "Not set";
@@ -226,18 +224,11 @@ const DestinationSlider = ({
         onTouchEnd={handleTouchEnd}
       >
         <div className="grid gap-0 md:grid-cols-[320px_minmax(0,1fr)]">
-          <div className="h-56 p-4">
-            {activeDestination.image_url ? (
-              <img
-                src={activeDestination.image_url}
-                alt={activeDestination.name}
-                className="h-full w-full rounded-lg object-cover"
-              />
-            ) : (
-              <div className="center h-full w-full rounded-lg bg-primary/10 text-primary">
-                <MapPin size={28} />
-              </div>
-            )}
+          <div className="h-56 p-4 rounded-lg overflow-hidden">
+            <Image
+              src={activeDestination.image_url}
+              alt={activeDestination.name}
+            />
           </div>
 
           <div className="flex flex-col justify-between gap-5 bg-white p-4 md:pl-2">

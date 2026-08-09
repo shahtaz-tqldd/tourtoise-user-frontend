@@ -10,7 +10,7 @@ const PublicTripDetailsPage = () => {
     tripToken,
   });
   const trip = useMemo(() => data?.data, [data]);
-  console.log(trip);
+
   return (
     <div>
       Public Trip Details

@@ -1,17 +1,14 @@
-import { VisibilityStatus } from "@/components/shared/utils";
+import { Image, VisibilityStatus } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import StatusBadge from "@/components/ui/status";
 import { formatDateRange, formatUpdatedAt } from "@/lib/date-time";
-import { getCloudinaryPreviewUrl } from "@/lib/utils";
 import {
   Bell,
   CalendarDays,
   Dot,
-  Globe,
   MapPin,
   MessageCircle,
-  User,
   Users,
 } from "lucide-react";
 
@@ -19,10 +16,10 @@ import { Link } from "react-router-dom";
 
 const getTripUrl = (trip) => `/trips/${trip.id}`;
 const getDestinationLabel = (trip) => {
-  if (trip.primary_destination?.name) return trip.primary_destination.name;
-  if (trip.destinations_count) {
-    return `${trip.destinations_count} destination${
-      trip.destinations_count === 1 ? "" : "s"
+  if (trip?.primary_destination?.name) return trip?.primary_destination?.name;
+  if (trip?.destinations_count) {
+    return `${trip?.destinations_count} destination${
+      trip?.destinations_count === 1 ? "" : "s"
     }`;
   }
 
@@ -115,115 +112,106 @@ const TripCard = ({ trip, compact = false }) => {
 
   return (
     <Link to={getTripUrl(displayedTrip)}>
-      <Card className="group relative md:p-5">
-        <div className="grid gap-6 lg:flex">
-          {/* Cover image — full-width hero strip */}
-          {coverImage ? (
-            <img
-              src={getCloudinaryPreviewUrl(coverImage, 360)}
-              alt={`${getDestinationLabel(displayedTrip)} cover`}
-              className="rounded-2xl h-60 w-full md:w-80 object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <div className="rounded-2xl h-60 w-80 center bg-slate-100 text-slate-400">
-              <MapPin size={28} />
+      <div className="group flex md:flex-row flex-col bg-white rounded-3xl overflow-hidden">
+        {/* Cover image — full-width hero strip */}
+        <div className="h-56 w-full shrink-0 overflow-hidden md:h-auto md:w-92 md:self-stretch">
+          <Image
+            src={coverImage}
+            alt={`${getDestinationLabel(displayedTrip)} cover`}
+          />
+        </div>
+
+        {/* Card body */}
+        <div className="flex flex-col gap-6 justify-between flex-1 w-full p-4 md:p-5">
+          {/* Badges */}
+          <div className="space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-wrap gap-1.5">
+                <StatusBadge status={displayedTrip.status || "draft"} />
+                <VisibilityStatus visibility={displayedTrip?.visibility} />
+              </div>
             </div>
-          )}
-          {/* Card body */}
-          <div className="flex flex-col gap-6 justify-between flex-1 w-full">
-            {/* Badges */}
-            <div className="space-y-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex flex-wrap gap-1.5">
-                  <StatusBadge status={displayedTrip.status || "draft"} />
-                  <VisibilityStatus visibility={displayedTrip?.visibility} />
-                </div>
-              </div>
 
-              {/* Title + destination */}
-              <div>
-                <h2
-                  className={`line-clamp-2 font-semibold text-slate-950 ${
-                    compact ? "text-base" : "text-[17px]"
-                  }`}
-                >
-                  {displayedTrip.title || "Untitled trip"}
-                </h2>
-                <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-slate-500">
-                  <MapPin size={14} className="shrink-0 text-primary" />
-                  <span className="truncate">
-                    {destinationMeta || getDestinationLabel(displayedTrip)}
-                  </span>
-                </p>
-              </div>
-
-              {/* Date */}
-              <div className="flex items-center gap-1.5 text-sm text-slate-500">
-                <CalendarDays size={15} className="shrink-0 text-slate-400" />
-                {formatDateRange(
-                  displayedTrip.start_date,
-                  displayedTrip.end_date,
-                )}
-                <Dot />
+            {/* Title + destination */}
+            <div>
+              <h2
+                className={`line-clamp-2 font-semibold text-slate-950 ${
+                  compact ? "text-base" : "text-[17px]"
+                }`}
+              >
+                {displayedTrip.title || "Untitled trip"}
+              </h2>
+              <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-slate-500">
+                <MapPin size={14} className="shrink-0 text-primary" />
                 <span className="truncate">
-                  {formatDuration(displayedTrip)}
+                  {destinationMeta || getDestinationLabel(displayedTrip)}
                 </span>
-              </div>
+              </p>
             </div>
 
-            {/* Pills */}
-            <div className="flex flex-wrap gap-2">
-              <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
-                <Users size={14} className="shrink-0 text-slate-400" />
-                <span className="truncate capitalize">
-                  {formatTravelers(displayedTrip)}
-                </span>
-              </span>
-              <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
-                <MapPin size={14} className="shrink-0 text-slate-400" />
-                <span className="truncate capitalize">
-                  {displayedTrip.updated_at
-                    ? `Updated ${formatUpdatedAt(displayedTrip.updated_at)}`
-                    : `${displayedTrip.destinations_count || 1} destination${
-                        Number(displayedTrip.destinations_count || 1) === 1
-                          ? ""
-                          : "s"
-                      }`}
-                </span>
-              </span>
+            {/* Date */}
+            <div className="flex items-center gap-1.5 text-sm text-slate-500">
+              <CalendarDays size={15} className="shrink-0 text-slate-400" />
+              {formatDateRange(
+                displayedTrip.start_date,
+                displayedTrip.end_date,
+              )}
+              <Dot />
+              <span className="truncate">{formatDuration(displayedTrip)}</span>
             </div>
-            <div className="flbx">
-              <div className="flx gap-6">
-                {notificationUnreadCount ? (
-                  <div className="flx gap-1.5">
-                    <Bell size={16} className="text-red-600" />
-                    <span className="text-xs font-medium text-red-600">
-                      {notificationUnreadCount} Alert
-                    </span>
-                  </div>
-                ) : null}
-                {messageUnreadCount ? (
-                  <div className="flx gap-1.5">
-                    <MessageCircle size={16} className="text-red-600" />
-                    <span className="text-xs font-medium text-red-600">
-                      {messageUnreadCount} Message
-                    </span>
-                  </div>
-                ) : null}
-              </div>
-              <div className="flx gap-2">
-                <Button
-                  size="sm"
-                  className="rounded-full px-4 text-xs font-semibold"
-                >
-                  View Details
-                </Button>
-              </div>
+          </div>
+
+          {/* Pills */}
+          <div className="flex flex-wrap gap-2">
+            <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
+              <Users size={14} className="shrink-0 text-slate-400" />
+              <span className="truncate capitalize">
+                {formatTravelers(displayedTrip)}
+              </span>
+            </span>
+            <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
+              <MapPin size={14} className="shrink-0 text-slate-400" />
+              <span className="truncate capitalize">
+                {displayedTrip.updated_at
+                  ? `Updated ${formatUpdatedAt(displayedTrip.updated_at)}`
+                  : `${displayedTrip.destinations_count || 1} destination${
+                      Number(displayedTrip.destinations_count || 1) === 1
+                        ? ""
+                        : "s"
+                    }`}
+              </span>
+            </span>
+          </div>
+          <div className="flbx">
+            <div className="flx gap-6">
+              {notificationUnreadCount ? (
+                <div className="flx gap-1.5">
+                  <Bell size={16} className="text-red-600" />
+                  <span className="text-xs font-medium text-red-600">
+                    {notificationUnreadCount} Alert
+                  </span>
+                </div>
+              ) : null}
+              {messageUnreadCount ? (
+                <div className="flx gap-1.5">
+                  <MessageCircle size={16} className="text-red-600" />
+                  <span className="text-xs font-medium text-red-600">
+                    {messageUnreadCount} Message
+                  </span>
+                </div>
+              ) : null}
+            </div>
+            <div className="flx gap-2">
+              <Button
+                size="sm"
+                className="rounded-full px-4 text-xs font-semibold"
+              >
+                View Details
+              </Button>
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     </Link>
   );
 };

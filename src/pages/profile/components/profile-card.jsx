@@ -7,9 +7,10 @@ import { FloatingSelect, SelectItem } from "@/components/ui/select";
 import { FloatingTextarea } from "@/components/ui/textarea";
 
 import { COUNTRY_LIST } from "@/lib/countries";
-import { getCloudinaryPreviewUrl, getInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
 import { Camera, MapPin } from "lucide-react";
 import ProfileEditActions from "./profile-edit-actions";
+import { Image } from "@/components/shared/utils";
 
 const BIO_WORD_LIMIT = 60;
 
@@ -67,16 +68,17 @@ const ProfileCard = ({
         <div className="-mt-16 flex flex-col items-center text-center">
           <div className="relative size-28 shrink-0">
             {avatarPreview || profile.avatar ? (
-              <img
-                src={
-                  avatarPreview || getCloudinaryPreviewUrl(profile.avatar, 240)
-                }
+              <Image
+                src={avatarPreview || profile.avatar}
                 alt={profile.name}
-                className="h-full w-full object-cover rounded-3xl"
+                className="rounded-3xl"
+                width={240}
               />
             ) : (
               <div className="h-full w-full center bg-gradient-to-br from-cyan-100 border-3 border-white to-amber-100 rounded-3xl">
-                <h2 className="font-semibold text-primary text-2xl">{getInitials(profile.name)}</h2>
+                <h2 className="font-semibold text-primary text-2xl">
+                  {getInitials(profile.name)}
+                </h2>
               </div>
             )}
             {isEditing && (
@@ -170,7 +172,9 @@ const ProfileCard = ({
                   {displayLocation ? (
                     <span className="truncate">{displayLocation}</span>
                   ) : (
-                    <span className="text-slate-400">Address was not added</span>
+                    <span className="text-slate-400">
+                      Address was not added
+                    </span>
                   )}
                 </span>
               </div>

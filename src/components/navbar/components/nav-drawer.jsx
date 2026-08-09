@@ -15,9 +15,10 @@ import { resetApiState } from "@/features/api/apiSlice";
 import { userLoggedOut } from "@/features/auth/authSlice";
 import ProfileBar from "./profile-bar";
 
-import { getCloudinaryPreviewUrl, getInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
 import { Title } from "@/components/ui/typography";
 import { DRAWER_MENU_ITEMS } from "../constants";
+import { Image } from "@/components/shared/utils";
 
 const NavDrawer = () => {
   const [open, setOpen] = React.useState(false);
@@ -51,10 +52,11 @@ const NavDrawer = () => {
           aria-current={isProfileActive ? "page" : undefined}
         >
           {profileImage ? (
-            <img
-              src={getCloudinaryPreviewUrl(profileImage, 36)}
-              alt=""
-              className={`size-8 rounded-full object-cover ring-2 transition-transform group-active:scale-90 ${
+            <Image
+              src={profileImage}
+              width={40}
+              alt={fullName}
+              className={`size-8 rounded-full ring-2 transition-transform group-active:scale-90 ${
                 isProfileActive ? "ring-primary/30" : "ring-slate-100"
               }`}
             />
