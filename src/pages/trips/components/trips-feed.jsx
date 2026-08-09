@@ -2,7 +2,6 @@ import React from "react";
 import { PlaneTakeoff } from "lucide-react";
 
 import EmptyPage from "@/components/shared/empty-page";
-import { EmptyState } from "@/components/shared/utils";
 
 import TripCard from "./trip-card";
 import TripListLoader from "./trip-list-loader";
@@ -18,7 +17,9 @@ const TripsFeed = ({
     {isFetching && <TripListLoader />}
 
     {isError && !isFetching && (
-      <EmptyState
+      <EmptyPage
+        icon={PlaneTakeoff}
+        eyebrow="Unable to load trips"
         title="Could not load active trips"
         description="Check the trips endpoint and try again."
       />

@@ -1,7 +1,8 @@
 import React from "react";
 import { ArrowLeft, History, Luggage } from "lucide-react";
 
-import { EmptyState, SectionHeader } from "@/components/shared/utils";
+import EmptyPage from "@/components/shared/empty-page";
+import { SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -24,7 +25,9 @@ export const TripHistory = ({
   isFetching,
   isError,
 }) => (
-  <aside className={`${className} space-y-5 lg:sticky lg:top-24 lg:self-start`}>
+  <aside
+    className={`${className} min-h-0 flex-col gap-5 lg:sticky lg:top-24 lg:h-full lg:self-start`}
+  >
     <SectionHeader
       icon={Luggage}
       title="Trip History"
@@ -35,10 +38,12 @@ export const TripHistory = ({
     {isFetching && <TripListLoader compact />}
 
     {isError && !isFetching && (
-      <EmptyState
+      <EmptyPage
+        icon={Luggage}
+        eyebrow="Unable to load history"
         title="Could not load history"
         description="Check the trips endpoint and try again."
-        compact
+        className="min-h-0 flex-1 py-8 sm:min-h-0"
       />
     )}
 
@@ -51,15 +56,19 @@ export const TripHistory = ({
     )}
 
     {!isFetching && !isError && !trips.length && (
-      <EmptyState
+      <EmptyPage
+        icon={History}
+        size="sm"
+        eyebrow={search ? "No matching journeys" : "Your travel archive"}
         title="No past trips"
         description={
           search
             ? "No past trips match the current search."
             : "Completed, archived, cancelled, or ended trips will collect here."
         }
-        onClear={search ? () => onSearchChange("") : undefined}
-        compact
+        actionLabel={search ? "Clear search" : undefined}
+        onAction={search ? () => onSearchChange("") : undefined}
+        className="min-h-0 flex-1 py-8 sm:min-h-0"
       />
     )}
   </aside>
@@ -85,7 +94,7 @@ export const TripHistoryDrawer = ({
     </SheetTrigger>
     <SheetContent
       side="right"
-      className="w-screen gap-0 overflow-y-auto p-0"
+      className="w-screen gap-0 overflow-hidden p-0"
       showCloseButton={false}
     >
       <SheetHeader className="border-b border-slate-100 pr-12 text-left">
@@ -106,8 +115,9 @@ export const TripHistoryDrawer = ({
         </div>
       </SheetHeader>
 
-      <div className="p-4">
+      <div className="min-h-0 flex-1 overflow-y-auto p-4">
         <TripHistory
+          className="flex h-full"
           trips={trips}
           search={search}
           onSearchChange={onSearchChange}

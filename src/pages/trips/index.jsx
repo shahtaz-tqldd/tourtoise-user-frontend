@@ -95,7 +95,7 @@ const TripsPage = () => {
   };
 
   return (
-    <section className="relative flex min-h-[calc(100svh-4rem)] flex-col pt-5 pb-20 md:pb-5">
+    <section className="relative flex min-h-[calc(100svh-4.5rem)] flex-col pt-5 pb-20 md:pb-5">
       <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="flex min-h-0 flex-col gap-6">
           <TripsPageHeader
@@ -122,7 +122,7 @@ const TripsPage = () => {
         </div>
 
         <TripHistory
-          className="hidden lg:block"
+          className="hidden lg:flex"
           trips={pastTrips}
           search={historySearch}
           onSearchChange={setHistorySearch}

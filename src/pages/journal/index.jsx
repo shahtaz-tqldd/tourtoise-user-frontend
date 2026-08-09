@@ -17,6 +17,7 @@ import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { normalizeJournals } from "./journal-utils";
 import useTitle from "@/hooks/useTitle";
 import JournalFormDialog from "./components/journal-form-dialog";
+import { Globe, User } from "lucide-react";
 
 const TravelJournalPage = () => {
   useTitle("tourtoise - travel journal");
@@ -63,7 +64,9 @@ const TravelJournalPage = () => {
       }).unwrap();
       toast.success(
         response?.message ||
-          (journal.is_saved ? "Journal removed from saved items." : "Journal saved."),
+          (journal.is_saved
+            ? "Journal removed from saved items."
+            : "Journal saved."),
       );
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Could not update this journal."));
@@ -100,32 +103,47 @@ const TravelJournalPage = () => {
   };
 
   return (
-    <section className="mx-auto max-w-3xl pt-5 pb-20 md:pb-5">
-      <div className="min-w-0 space-y-5">
+    <section className="mx-auto flex min-h-[calc(100svh-4.5rem)] max-w-3xl flex-col pt-5 pb-20 md:pb-5">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-5">
         <JournalPageHeader
           onCreate={openCreate}
           journalScope={journalScope}
           onJournalScopeChange={setJournalScope}
         />
+        {journalScope === "mine" ? (
+          <div className="rounded-full w-fit text-xs font-semibold flx gap-1 pl-2 pr-3 py-1.5 ring ring-primary/30 bg-primary/10 text-primary">
+            <User size={12} />
+            <span>My journals</span>
+          </div>
+        ) : (
+          <div className="rounded-full w-fit text-xs font-semibold flx gap-1 pl-2 pr-3 py-1.5 ring ring-primary/30 bg-primary/10 text-primary">
+            <Globe size={12} />
+            <span>Public journals</span>
+          </div>
+        )}
 
-        <JournalFeed
-          journals={journals}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
-          hasMore={hasNextPage}
-          isFetchingMore={isFetchingNextPage}
-          onLoadMore={fetchNextPage}
-          onSaveToggle={toggleSavedJournal}
-          onEditJournal={openEdit}
-          onDeleteJournal={setDeletingJournal}
-          canManageJournal={isOwnJournal}
-          emptyDescription={
-            journalScope === "mine"
-              ? "Create your first travel journal to see it here."
-              : "No public travel journals are available yet."
-          }
-        />
+        <div className="flex min-h-0 flex-1 flex-col">
+          <JournalFeed
+            journals={journals}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            hasMore={hasNextPage}
+            isFetchingMore={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            onSaveToggle={toggleSavedJournal}
+            onEditJournal={openEdit}
+            onDeleteJournal={setDeletingJournal}
+            canManageJournal={isOwnJournal}
+            scope={journalScope}
+            onCreate={openCreate}
+            emptyDescription={
+              journalScope === "mine"
+                ? "Create your first travel journal to see it here."
+                : "No public travel journals are available yet."
+            }
+          />
+        </div>
       </div>
       {formOpen && (
         <JournalFormDialog

@@ -13,6 +13,7 @@ const EmptyPage = ({
   actionLabel,
   actionTo,
   onAction,
+  size = "md",
   className = "",
 }) => {
   const titleId = useId();
@@ -55,12 +56,21 @@ const EmptyPage = ({
         </p>
         <h2
           id={titleId}
-          className="mt-3 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl"
+          className={cn(
+            "mt-3 text-2xl font-bold tracking-tight text-slate-950 sm:text-2xl",
+          )}
         >
           {title}
         </h2>
         {description ? (
-          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500 sm:text-base">
+          <p
+            className={cn(
+              "mx-auto mt-3 text-slate-500 text-sm",
+              size === "sm"
+                ? "md:text-md max-w-[260px]"
+                : "md:text-base max-w-md",
+            )}
+          >
             {description}
           </p>
         ) : null}

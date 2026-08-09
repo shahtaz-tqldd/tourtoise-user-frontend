@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
+import { MapPinOff } from "lucide-react";
 
+import EmptyPage from "@/components/shared/empty-page";
 import InfiniteScroll from "@/components/shared/infinite-scroll";
 import ListingHeader from "@/components/shared/listing-header";
 import DestinationCard from "./components/destination-card";
@@ -9,7 +11,6 @@ import {
   DestinationFetchError,
   LoadingDestinationList,
 } from "./components/fallback";
-import { EmptyState } from "@/components/shared/utils";
 import useTitle from "@/hooks/useTitle";
 
 const DestinationPage = () => {
@@ -54,6 +55,13 @@ const DestinationPage = () => {
   );
   const isInitialDestinationLoading =
     isLoading || (isFetching && !data?.pages?.length);
+  const hasActiveFilters = Boolean(
+    searchQuery ||
+    countries.length ||
+    destinationTypes.length ||
+    budgetTiers.length ||
+    difficulties.length,
+  );
 
   const handleLoadMoreDestinations = useCallback(() => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -61,8 +69,8 @@ const DestinationPage = () => {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return (
-    <section className="pt-5 pb-20 md:pb-5">
-      <div className="space-y-8">
+    <section className="flex min-h-[calc(100svh-4.5rem)] flex-col pt-5 pb-20 md:pb-5">
+      <div className="flex min-h-0 flex-1 flex-col gap-8">
         <ListingHeader
           title="Where's Next?"
           filters={
@@ -82,11 +90,16 @@ const DestinationPage = () => {
           }
         />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {destinations.map((destination) => (
-            <DestinationCard key={destination.slug} destination={destination} />
-          ))}
-        </div>
+        {destinations.length > 0 && (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {destinations.map((destination) => (
+              <DestinationCard
+                key={destination.slug}
+                destination={destination}
+              />
+            ))}
+          </div>
+        )}
 
         {isInitialDestinationLoading && <LoadingDestinationList />}
 
@@ -102,13 +115,27 @@ const DestinationPage = () => {
         {isError && !isInitialDestinationLoading && <DestinationFetchError />}
 
         {!isInitialDestinationLoading && !isError && !destinations.length && (
-          <EmptyState
-            title="No destinations found"
-            description="Adjust the search, country, or destination type filters."
+          <EmptyPage
+            icon={MapPinOff}
+            eyebrow={
+              hasActiveFilters ? "No matching places" : "More places coming soon"
+            }
+            title={
+              hasActiveFilters
+                ? "No destinations found"
+                : "No destinations available"
+            }
+            description={
+              hasActiveFilters
+                ? "No destinations match your current search or filters. Try broadening your choices."
+                : "New destinations will appear here as soon as they are ready to explore."
+            }
+            actionLabel={hasActiveFilters ? "Clear filters" : undefined}
+            onAction={hasActiveFilters ? clearFilters : undefined}
+            className="min-h-0 flex-1 sm:min-h-0"
           />
         )}
       </div>
-
     </section>
   );
 };

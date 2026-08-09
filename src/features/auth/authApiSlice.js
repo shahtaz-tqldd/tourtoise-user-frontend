@@ -26,6 +26,16 @@ export const authApiSlice = apiSlice.injectEndpoints({
       },
     }),
 
+    verifyOTP: builder.mutation({
+      query: (payload) => {
+        return {
+          url: `/accounts/verify-otp/`,
+          method: "POST",
+          body: payload,
+        };
+      },
+    }),
+
     googleAuth: builder.mutation({
       query: (payload) => {
         return {
@@ -147,6 +157,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
 export const {
   useLoginMutation,
   useRegisterMutation,
+  useVerifyOTPMutation,
   useGoogleAuthMutation,
   useRefreshMutation,
   usePublicAccountQuery,
