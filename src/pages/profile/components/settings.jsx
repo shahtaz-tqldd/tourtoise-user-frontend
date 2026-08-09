@@ -213,7 +213,7 @@ const ProfileSettings = () => {
           ))}
         </div>
 
-        <div className="grid md:grid-cols-2 grid-cols-1 gap-x-6 gap-y-10">
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-x-6 gap-y-10 pb-16 md:pb-0">
           <SwitchRow
             icon={MapPin}
             title="Location sharing"
@@ -472,7 +472,7 @@ const ActionRow = ({
         type="button"
         variant={destructive ? "destructive" : "outline"}
         onClick={onClick}
-        className="sm:w-28"
+        className="sm:w-28 ml-12 md:ml-0"
       >
         {actionLabel}
       </Button>
