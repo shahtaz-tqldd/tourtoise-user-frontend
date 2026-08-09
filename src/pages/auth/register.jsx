@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import { FloatingInput } from "@/components/ui/input";
+import { PENDING_VERIFICATION_EMAIL_KEY } from "@/constants/session";
 import { useRegisterMutation } from "@/features/auth/authApiSlice";
 import { userLoggedIn } from "@/features/auth/authSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
@@ -38,23 +39,20 @@ const RegisterPage = () => {
         Object.entries(data).filter(([, value]) => String(value).trim() !== ""),
       );
       const res = await registerAccount(payload).unwrap();
-      const accountData = res?.data || {};
+      const verificationEmail = res?.data?.email || payload.email;
 
-      if (accountData.access_token && accountData.refresh_token) {
-        dispatch(
-          userLoggedIn({
-            accessToken: accountData.access_token,
-            refreshToken: accountData.refresh_token,
-            rememberMe: false,
-          }),
+      try {
+        window.sessionStorage.setItem(
+          PENDING_VERIFICATION_EMAIL_KEY,
+          verificationEmail,
         );
-        navigate("/", { replace: true });
-        return;
+      } catch {
+        // Navigation state still carries the email when storage is unavailable.
       }
 
-      navigate("/login", {
+      navigate("/verify-otp", {
         replace: true,
-        state: { message: "Account created. Sign in to continue." },
+        state: { email: verificationEmail },
       });
     } catch (error) {
       console.error("Registration failed:", error);
