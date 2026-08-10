@@ -42,7 +42,7 @@ const TripPlan = ({ destination, handlePlanningOpenChange }) => {
     }
   };
   return (
-    <Card className="flex flex-col items-center bg-gradient-to-r from-red-500/5 to-purple-500/10">
+    <Card className="flex flex-col items-center bg-gradient-to-br from-cyan-100 via-amber-100/20 to-emerald-100 border border-primary/20">
       <h2 className="text-lg font-bold text-primary text-center pt-2">
         Ready to make your {destination?.name} Trip?
       </h2>
@@ -52,7 +52,7 @@ const TripPlan = ({ destination, handlePlanningOpenChange }) => {
       </p>
       <div className="space-y-3 w-full">
         <Button
-          className="md:h-12 h-11 w-full rounded-full"
+          className="md:h-12 h-11 w-full rounded-full font-semibold"
           onClick={() => handlePlanningOpenChange(true)}
         >
           <Sparkles size={18} />

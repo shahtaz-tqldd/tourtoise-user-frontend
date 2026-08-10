@@ -4,6 +4,7 @@ import { DetailPill, Image, SectionHeader } from "@/components/shared/utils";
 import { formatLabel } from "@/lib/utils";
 import { Activity, Clock, Mountain, WalletCards } from "lucide-react";
 import { Link } from "react-router-dom";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 const getActivityMetaItems = (activity) => [
   {
@@ -89,6 +90,7 @@ const ActivityCard = ({ item, onSelect }) => {
           src={coverImage}
           alt={item?.name}
           className="transition duration-500 group-hover:scale-105"
+          content_type={MEDIA_CONTENT_TYPE.ACTIVITY}
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/20" />

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { cn, getInitials } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import { Image } from "@/components/shared/utils";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 const ProfileBar = ({ className, ...props }) => {
   const { user } = useSelector((state) => state.auth);
@@ -27,6 +28,7 @@ const ProfileBar = ({ className, ...props }) => {
           src={profileImage}
           width={80}
           className="size-11 rounded-full ring-2 ring-white"
+          content_type={MEDIA_CONTENT_TYPE.USER}
         />
       ) : (
         <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary ring-2 ring-white">

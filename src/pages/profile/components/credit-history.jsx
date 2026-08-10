@@ -224,13 +224,13 @@ const CreditBalancePanel = ({
   isLoadingRequestState,
   onRequest,
 }) => (
-  <aside className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-3.5 sm:gap-4 sm:p-4">
+  <aside className="flex items-center gap-3 rounded-2xl border border-primary/30 p-3.5 sm:gap-4 sm:p-4">
     <div className="flex min-w-0 shrink-0 items-center gap-3">
       <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
         <Coins size={20} aria-hidden="true" />
       </span>
       <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 sm:text-xs">
+        <p className="text-[10px] font-semibold uppercase text-slate-500 sm:text-xs">
           Current balance
         </p>
         <p className="flex items-baseline gap-1.5 leading-none">
@@ -244,16 +244,18 @@ const CreditBalancePanel = ({
 
     <div className="hidden h-9 w-px shrink-0 bg-slate-200 sm:block" />
 
-    {hasPendingRequest ? (
-      <div className="ml-auto flex min-w-0 items-center gap-2 rounded-full bg-amber-50 px-3 py-2 text-amber-800 ring-1 ring-amber-200">
+    {!hasPendingRequest ? (
+      <div className="ml-auto flex min-w-0 items-center gap-2 text-slate-600">
         <BadgeCheck className="size-4 shrink-0" aria-hidden="true" />
         <p className="text-xs font-medium leading-4">
-          Already requested. An admin will review it.
+          You've requested for credits, an admin will review it shortly.
         </p>
       </div>
     ) : (
       <>
-        <p className="hidden min-w-0 flex-1 text-xs leading-5 text-slate-500 md:block">
+        <p className="hidden min-w-0 flex-1 text-xs leading-5 text-slate-600 md:block">
+          Credits are used for planning trip, trip assistance and turtle chat
+          <br />
           Need more for trip planning or travel assistance?
         </p>
         <Button

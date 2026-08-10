@@ -30,6 +30,7 @@ import {
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { Image } from "@/components/shared/utils";
 import ReportDialog from "./report-dialog";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 const getInitialReactionCount = (journal) =>
   journal.likes_count ??
@@ -75,10 +76,10 @@ const JournalCard = ({
     useReportJournalMutation();
   const isOwnJournal = Boolean(
     journal.is_mine ||
-      journal.is_owner ||
-      (currentUser?.id &&
-        journal.author?.id &&
-        String(currentUser.id) === String(journal.author.id)),
+    journal.is_owner ||
+    (currentUser?.id &&
+      journal.author?.id &&
+      String(currentUser.id) === String(journal.author.id)),
   );
   const authorName = journal.author?.name || "Unknown traveler";
   const authorAvatar = journal.author?.avatar_url;
@@ -253,7 +254,12 @@ const AuthorAvatar = ({ src, name, size = "sm" }) => (
     }`}
   >
     {src ? (
-      <Image src={src} alt={name} width={40} />
+      <Image
+        src={src}
+        alt={name}
+        width={60}
+        content_type={MEDIA_CONTENT_TYPE.USER}
+      />
     ) : (
       <span className="center h-full text-xs font-bold">
         {name?.charAt(0).toUpperCase() || "T"}

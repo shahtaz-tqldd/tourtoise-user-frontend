@@ -4,6 +4,7 @@ import { DetailPill, Image, SectionHeader } from "@/components/shared/utils";
 import { formatLabel } from "@/lib/utils";
 import { Activity, Star, Utensils, WalletCards } from "lucide-react";
 import { Link } from "react-router-dom";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 const getCuisineMetaItems = (cuisine) => [
   {
@@ -85,6 +86,7 @@ export const CuisineCard = ({ item, metaItems, onSelect }) => {
           src={item?.cover_image}
           alt={item?.name}
           className="transition duration-500 group-hover:scale-105"
+          content_type={MEDIA_CONTENT_TYPE.CUISINE}
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/20" />
