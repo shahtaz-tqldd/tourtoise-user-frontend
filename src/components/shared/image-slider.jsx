@@ -5,11 +5,14 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { cn } from "@/lib/utils";
 import { Image } from "./utils";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 const ImagePreview = ({
   images,
   className = "",
   altPrefix = "Gallery photo",
+  imageWidth = 900,
+  content_type = MEDIA_CONTENT_TYPE.ATTRACTION,
 }) => {
   return (
     <div className={cn("overflow-hidden", className)}>
@@ -28,7 +31,8 @@ const ImagePreview = ({
               <Image
                 src={image}
                 alt={`${altPrefix} ${index + 1}`}
-                width={600}
+                width={imageWidth}
+                content_type={content_type}
               />
             </SwiperSlide>
           ))}

@@ -36,6 +36,7 @@ const DestinationCover = ({ destination }) => {
         <ImagePreview
           images={images}
           altPrefix={destination.name || "Destination"}
+          imageWidth={1200}
         />
       </div>
       <div className="mt-3">

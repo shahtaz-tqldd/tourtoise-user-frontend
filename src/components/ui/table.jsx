@@ -3,6 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Text, Title } from "./typography";
 import { Image } from "../shared/utils";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 function Table({ className, ...props }) {
   return (
@@ -120,6 +121,7 @@ function TableProfile({
               "mr-2",
               non_rounded ? "rounded-xl size-12" : "rounded-full size-10",
             )}
+            content_type={MEDIA_CONTENT_TYPE.USER}
           />
         </div>
       ) : (

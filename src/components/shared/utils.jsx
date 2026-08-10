@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { BoxIcon } from "@/assets/icons/svg-icons";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 const renderRichMessage = (message) => {
   const normalizedMarkdown = String(message ?? "").replace(
@@ -206,35 +207,78 @@ export const VisibilityStatus = ({ visibility }) => {
   );
 };
 
-export const Image = ({ src, alt = "", width = 360, className, ...props }) => {
-  const fallbackImage = "/fallback_image_preview.webp";
+const getFallbackImage = (type = MEDIA_CONTENT_TYPE.ATTRACTION) => {
+  switch (type) {
+    case MEDIA_CONTENT_TYPE.ATTRACTION:
+      return "/fallback_attraction.webp";
 
-  const getPreviewURL = (url, width) => {
-    if (!url) {
-      return fallbackImage;
-    }
+    case MEDIA_CONTENT_TYPE.CUISINE:
+      return "/fallback_cuisine.webp";
 
-    if (!url.includes("res.cloudinary.com")) {
-      return url;
-    }
+    case MEDIA_CONTENT_TYPE.ACTIVITY:
+      return "/fallback_activity.webp";
 
-    const uploadPath = "/image/upload/";
-    const [baseUrl, imagePath] = url.split(uploadPath);
+    case MEDIA_CONTENT_TYPE.USER:
+      return "/fallback_user.webp";
 
-    if (!baseUrl || !imagePath) {
-      return url;
-    }
+    default:
+      return "/fallback_attraction.webp";
+  }
+};
 
-    // Avoid applying the transformation multiple times
-    if (imagePath.startsWith("c_scale,")) {
-      return url;
-    }
+const getPreviewURL = (
+  url,
+  width,
+  content_type = MEDIA_CONTENT_TYPE.ATTRACTION,
+) => {
+  if (!url) {
+    return getFallbackImage(content_type);
+  }
 
-    return `${baseUrl}${uploadPath}c_scale,w_${width}/${imagePath}`;
+  if (!url.includes("res.cloudinary.com")) {
+    return url;
+  }
+
+  const uploadPath = "/image/upload/";
+  const [baseUrl, imagePath] = url.split(uploadPath);
+
+  if (!baseUrl || !imagePath) {
+    return url;
+  }
+
+  // Avoid applying the transformation multiple times
+  if (imagePath.startsWith("c_scale,")) {
+    return url;
+  }
+
+  return `${baseUrl}${uploadPath}c_scale,w_${width}/${imagePath}`;
+};
+
+export const Image = ({
+  src,
+  alt = "",
+  width = 360,
+  className,
+  onLoad,
+  onError,
+  decoding = "async",
+  content_type = MEDIA_CONTENT_TYPE.ATTRACTION,
+  ...props
+}) => {
+  const fallbackImage = getFallbackImage(content_type);
+  const previewUrl = getPreviewURL(src, width, content_type);
+  const [loadedUrl, setLoadedUrl] = React.useState(null);
+  const isLoaded = loadedUrl === previewUrl;
+
+  const handleImageLoad = (event) => {
+    setLoadedUrl(previewUrl);
+    onLoad?.(event);
   };
 
   const handleImageError = (event) => {
-    // Prevent infinite onError loop if fallback also fails
+    onError?.(event);
+
+    // Prevent an infinite onError loop if the fallback also fails.
     if (event.currentTarget.src.endsWith(fallbackImage)) {
       return;
     }
@@ -244,10 +288,16 @@ export const Image = ({ src, alt = "", width = 360, className, ...props }) => {
 
   return (
     <img
-      src={getPreviewURL(src, width)}
+      src={previewUrl}
       alt={alt}
+      decoding={decoding}
+      onLoad={handleImageLoad}
       onError={handleImageError}
-      className={cn("h-full w-full object-cover", className)}
+      className={cn(
+        "h-full w-full object-cover",
+        !isLoaded && "bg-slate-200 text-transparent motion-safe:animate-pulse",
+        className,
+      )}
       {...props}
     />
   );

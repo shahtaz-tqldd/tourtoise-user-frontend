@@ -1,6 +1,7 @@
 import { cn, getInitials } from "@/lib/utils";
 import { useSelector } from "react-redux";
 import { Image } from "./utils";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 export const UserAvatar = ({ className = "size-7" }) => {
   const { user } = useSelector((state) => state.auth);
@@ -15,6 +16,7 @@ export const UserAvatar = ({ className = "size-7" }) => {
           width={40}
           className={cn("rounded-full", className)}
           alt={fullName}
+          content_type={MEDIA_CONTENT_TYPE.USER}
         />
       ) : (
         <span

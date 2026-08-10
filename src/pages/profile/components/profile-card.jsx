@@ -11,6 +11,7 @@ import { getInitials } from "@/lib/utils";
 import { Camera, MapPin } from "lucide-react";
 import ProfileEditActions from "./profile-edit-actions";
 import { Image } from "@/components/shared/utils";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 const BIO_WORD_LIMIT = 60;
 
@@ -73,6 +74,7 @@ const ProfileCard = ({
                 alt={profile.name}
                 className="rounded-3xl"
                 width={240}
+                content_type={MEDIA_CONTENT_TYPE.USER}
               />
             ) : (
               <div className="h-full w-full center bg-gradient-to-br from-cyan-100 border-3 border-white to-amber-100 rounded-3xl">

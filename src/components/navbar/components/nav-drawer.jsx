@@ -19,6 +19,7 @@ import { getInitials } from "@/lib/utils";
 import { Title } from "@/components/ui/typography";
 import { DRAWER_MENU_ITEMS } from "../constants";
 import { Image } from "@/components/shared/utils";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 const NavDrawer = () => {
   const [open, setOpen] = React.useState(false);
@@ -59,6 +60,7 @@ const NavDrawer = () => {
               className={`size-8 rounded-full ring-2 transition-transform group-active:scale-90 ${
                 isProfileActive ? "ring-primary/30" : "ring-slate-100"
               }`}
+              content_type={MEDIA_CONTENT_TYPE.USER}
             />
           ) : (
             <span

@@ -20,6 +20,7 @@ import ImagePreview from "@/components/shared/image-slider";
 import SnapshotCard from "@/components/shared/snapshot-card";
 import PreviewContent from "@/components/shared/preview-content";
 import { formatMonths } from "@/lib/date-time";
+import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 const getFeatureType = (item) =>
   formatLabel(
@@ -190,9 +191,16 @@ function FeatureDetailContent({ feature }) {
   const tags = item.tags || [];
   const leadLine = item.address || type;
 
+  let content_type = MEDIA_CONTENT_TYPE.ATTRACTION;
+  if (category === "cuisine") {
+    content_type = MEDIA_CONTENT_TYPE.CUISINE;
+  } else if (category === "activity") {
+    content_type = MEDIA_CONTENT_TYPE.ACTIVITY;
+  }
+
   return (
-    <div className="overflow-hidden bg-white">
-      <ImagePreview images={images} />
+    <div className="overflow-hidden bg-white pt-3 md:pt-0">
+      <ImagePreview images={images} content_type={content_type} />
       <div className="md:p-6 p-4">
         <div className="">
           <DetailPill variant="alert">{feature.title || type}</DetailPill>

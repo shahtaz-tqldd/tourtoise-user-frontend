@@ -74,7 +74,7 @@ const Gallery = ({ destination }) => {
             >
               <Image
                 src={image?.url}
-                width={100}
+                width={200}
                 alt={image.caption}
                 className="transition duration-500 group-hover:scale-105"
               />

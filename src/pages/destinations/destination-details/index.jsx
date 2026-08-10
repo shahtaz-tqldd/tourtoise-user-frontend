@@ -20,6 +20,8 @@ import {
   DestinationLoader,
   EmptyDestination,
 } from "./components/fallback-component";
+import { MapPinned } from "lucide-react";
+import BrokenPage from "@/components/shared/broken-page";
 
 const DestinationDetailsPage = () => {
   const { destination_id } = useParams();
@@ -27,8 +29,8 @@ const DestinationDetailsPage = () => {
   const [activeFeature, setActiveFeature] = useState(null);
   const planningHistoryEntryRef = useRef(false);
 
-  const { data, isFetching } = useDestinationDetailQuery(destination_id);
-  const destination = data?.data || [];
+  const { data, isFetching, error } = useDestinationDetailQuery(destination_id);
+  const destination = data?.data || {};
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -86,6 +88,17 @@ const DestinationDetailsPage = () => {
     return <EmptyDestination />;
   }
 
+  if (error?.status === 404 || !destination) {
+    return (
+      <BrokenPage
+        title="Destination not found"
+        description={`We couldn't find any destination with the ${destination_id}, Check the destination slug or explore somewhere else.`}
+        icon={MapPinned}
+        actionLabel="Explore destinations"
+      />
+    );
+  }
+
   return (
     <>
       <section className="pt-5 pb-16 md:pb-5">
@@ -124,7 +137,7 @@ const DestinationDetailsPage = () => {
             <TripEssentials destination={destination} />
           </div>
 
-          <aside className="min-w-0 space-y-5 md:space-y-6 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7rem)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1">
+          <aside className="min-w-0 space-y-5 md:space-y-6 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7rem)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1 custom-scrollbar">
             <div className="hidden xl:block space-y-4">
               <TripSnapshot
                 destination={destination}

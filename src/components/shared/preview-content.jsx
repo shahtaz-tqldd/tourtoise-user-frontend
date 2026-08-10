@@ -41,7 +41,7 @@ const PreviewContent = ({
         <SheetContent
           side="bottom"
           className={cn(
-            "max-h-[85dvh] gap-0 overflow-hidden rounded-t-3xl border-x-0 border-b-0 bg-white p-0 pt-4",
+            "max-h-[90dvh] gap-0 overflow-hidden rounded-t-3xl border-x-0 border-b-0 bg-white p-0 pt-4",
             className,
             mobileClassName,
           )}
@@ -62,7 +62,7 @@ const PreviewContent = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "max-h-[92dvh] overflow-hidden rounded-3xl border-none bg-white p-0 shadow-xl sm:max-w-2xl",
+          "flex h-[92dvh] max-h-[92dvh] flex-col gap-0 overflow-hidden rounded-3xl border-none bg-white p-0 shadow-xl sm:max-w-2xl",
           className,
           desktopClassName,
         )}
@@ -71,7 +71,7 @@ const PreviewContent = ({
         <DialogDescription className="sr-only">
           {description || title}
         </DialogDescription>
-        <div className="hidden-scrollbar min-h-0 overflow-y-auto overscroll-contain">
+        <div className="hidden-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {children}
         </div>
       </DialogContent>
