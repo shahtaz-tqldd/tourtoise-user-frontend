@@ -37,6 +37,7 @@ const DestinationCover = ({ destination }) => {
           images={images}
           altPrefix={destination.name || "Destination"}
           imageWidth={1200}
+          className="md:[&_.swiper-slide]:rounded-[28px]"
         />
       </div>
       <div className="mt-3">
