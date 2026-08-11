@@ -26,7 +26,7 @@ const DestinationCover = ({ destination }) => {
     [];
   return (
     <>
-      <div className="relative -mx-4 overflow-hidden md:mx-0 md:rounded-[28px] -mt-5 md:mt-0">
+      <div className="relative -mx-4 overflow-hidden md:mx-0 md:rounded-3xl -mt-5 md:mt-0">
         <Link
           to="/"
           className="hidden md:flex md:items-center md:justify-center absolute left-4 top-4 z-20 h-10 w-10 rounded-full bg-white/50 text-sm font-medium backdrop-blur-sm transition hover:bg-white/70"

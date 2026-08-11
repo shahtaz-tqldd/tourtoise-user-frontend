@@ -24,10 +24,17 @@ const ImagePreview = ({
               ? { clickable: true, dynamicBullets: true }
               : false
           }
-          className="aspect-[16/9] image-slider w-full"
+          className={cn(
+            "image-slider w-full",
+            images.length > 1 &&
+              "!pb-7 [&_.swiper-pagination]:!bottom-0 [&_.swiper-pagination-bullet]:!bg-[#009966] [&_.swiper-pagination-bullet]:!opacity-30 [&_.swiper-pagination-bullet-active]:!opacity-100",
+          )}
         >
           {images.map((image, index) => (
-            <SwiperSlide key={`${image}-${index}`}>
+            <SwiperSlide
+              key={`${image}-${index}`}
+              className="!h-auto aspect-[16/9] overflow-hidden"
+            >
               <Image
                 src={image}
                 alt={`${altPrefix} ${index + 1}`}
