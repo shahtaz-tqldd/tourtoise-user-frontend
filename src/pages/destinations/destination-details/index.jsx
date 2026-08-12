@@ -105,18 +105,15 @@ const DestinationDetailsPage = () => {
         <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="min-w-0 space-y-5 md:space-y-8">
             <DestinationCover destination={destination} />
-            <div className="space-y-4 xl:hidden">
+
+            <DestinationOverview destination={destination} />
+
+            <div className="xl:hidden">
               <TripSnapshot
                 destination={destination}
                 setPlanningOpen={setPlanningOpen}
               />
-              <TripPlan
-                destination={destination}
-                handlePlanningOpenChange={handlePlanningOpenChange}
-              />
             </div>
-
-            <DestinationOverview destination={destination} />
 
             <div className="xl:hidden">
               <Gallery destination={destination} />
@@ -135,6 +132,13 @@ const DestinationDetailsPage = () => {
             />
 
             <TripEssentials destination={destination} />
+
+            <div className="xl:hidden">
+              <TripPlan
+                destination={destination}
+                handlePlanningOpenChange={handlePlanningOpenChange}
+              />
+            </div>
           </div>
 
           <aside className="min-w-0 space-y-5 md:space-y-6 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7rem)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1 custom-scrollbar">
@@ -162,6 +166,7 @@ const DestinationDetailsPage = () => {
       />
       <FeatureDetails
         feature={activeFeature}
+        destinationSlug={destination.slug || destination_id}
         open={Boolean(activeFeature)}
         onOpenChange={(open) => {
           if (!open) setActiveFeature(null);

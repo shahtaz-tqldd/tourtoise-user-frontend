@@ -72,6 +72,23 @@ export const destinationApiSlice = apiSlice.injectEndpoints({
       ],
     }),
 
+    destinationFeatureDetail: builder.query({
+      query: ({ destination_slug, feature_type, feature_slug }) => ({
+        url: `/destinations/${destination_slug}/${feature_type}/${feature_slug}/`,
+        method: "GET",
+      }),
+      providesTags: (
+        result,
+        error,
+        { destination_slug, feature_type, feature_slug },
+      ) => [
+        {
+          type: "destination-feature-list",
+          id: `${destination_slug}-${feature_type}-${feature_slug}`,
+        },
+      ],
+    }),
+
     destinationFeatureList: builder.query({
       query: ({
         destination_slug,
@@ -194,6 +211,7 @@ export const {
   useDestinationInfiniteListInfiniteQuery,
   useDestinationDetailQuery,
   useDestinationShortDetailQuery,
+  useDestinationFeatureDetailQuery,
   useDestinationFeatureListQuery,
   useDestinationFeatureInfiniteListInfiniteQuery,
   useSaveDestinationListQuery,

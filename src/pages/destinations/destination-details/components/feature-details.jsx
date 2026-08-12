@@ -6,6 +6,7 @@ import {
   Clock,
   Currency,
   Flame,
+  LoaderCircle,
   MapPin,
   Sun,
   TreePalm,
@@ -21,6 +22,7 @@ import SnapshotCard from "@/components/shared/snapshot-card";
 import PreviewContent from "@/components/shared/preview-content";
 import { formatMonths } from "@/lib/date-time";
 import { MEDIA_CONTENT_TYPE } from "@/constants/content";
+import { useDestinationFeatureDetailQuery } from "@/features/destination/destinationApiSlice";
 
 const getFeatureType = (item) =>
   formatLabel(
@@ -167,10 +169,68 @@ const getExtraSections = (item) => {
   ].filter((section) => section.body);
 };
 
-const FeatureDetails = ({ feature, open, onOpenChange }) => {
+const getFeatureEndpoint = (feature) => {
+  if (feature?.featureType) return feature.featureType;
+
+  const category = getFeatureCategory(feature?.item);
+  if (category === "cuisine") return "cuisines";
+  if (category === "activity") return "activities";
+  if (category === "attraction") return "attractions";
+  return null;
+};
+
+const FeatureDetails = ({ feature, destinationSlug, open, onOpenChange }) => {
+  const featureType = getFeatureEndpoint(feature);
+  const featureSlug = feature?.item?.slug;
+  const { data, isLoading, isError, refetch } =
+    useDestinationFeatureDetailQuery(
+      {
+        destination_slug: destinationSlug,
+        feature_type: featureType,
+        feature_slug: featureSlug,
+      },
+      {
+        skip: !open || !destinationSlug || !featureType || !featureSlug,
+      },
+    );
+
+  const detail = data?.data || data;
+  const detailedFeature = feature
+    ? {
+        ...feature,
+        item: {
+          ...feature.item,
+          ...(detail || {}),
+        },
+      }
+    : null;
+
   return (
     <PreviewContent open={open} onOpenChange={onOpenChange}>
-      <FeatureDetailContent feature={feature} />
+      {isLoading ? (
+        <div className="center min-h-80 flex-col gap-3 text-slate-500">
+          <LoaderCircle className="animate-spin text-primary" size={28} />
+          <p className="text-sm font-medium">Loading details...</p>
+        </div>
+      ) : isError ? (
+        <div className="center min-h-80 flex-col px-6 text-center">
+          <h2 className="font-semibold text-slate-900">
+            Could not load these details
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Please check your connection and try again.
+          </p>
+          <button
+            type="button"
+            onClick={refetch}
+            className="mt-4 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
+          >
+            Try again
+          </button>
+        </div>
+      ) : (
+        <FeatureDetailContent feature={detailedFeature} />
+      )}
     </PreviewContent>
   );
 };
@@ -188,7 +248,7 @@ function FeatureDetailContent({ feature }) {
   ].filter(Boolean);
   const features = getSnapshotFeatures(item).filter((feature) => feature.value);
   const extraSections = getExtraSections(item);
-  const tags = item.tags || [];
+  const tags = (item.tags || []).filter(Boolean);
   const leadLine = item.address || type;
 
   let content_type = MEDIA_CONTENT_TYPE.ATTRACTION;
@@ -237,8 +297,10 @@ function FeatureDetailContent({ feature }) {
           {tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <DetailPill key={tag.slug || tag.name}>
-                  {tag.name || formatLabel(tag.slug)}
+                <DetailPill key={tag.slug || tag.name || tag}>
+                  {typeof tag === "string"
+                    ? formatLabel(tag)
+                    : tag.name || formatLabel(tag.slug)}
                 </DetailPill>
               ))}
             </div>

@@ -183,10 +183,11 @@ const DestinationFeatureListPage = () => {
       setActiveFeature({
         title: formatLabel(config.singular),
         icon: config.icon,
+        featureType,
         item,
       });
     },
-    [config],
+    [config, featureType],
   );
 
   if (!config) {
@@ -293,6 +294,7 @@ const DestinationFeatureListPage = () => {
       </section>
       <FeatureDetails
         feature={activeFeature}
+        destinationSlug={destinationSlug}
         open={Boolean(activeFeature)}
         onOpenChange={(open) => {
           if (!open) setActiveFeature(null);
