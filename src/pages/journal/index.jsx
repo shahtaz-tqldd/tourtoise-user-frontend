@@ -5,7 +5,9 @@ import { toast } from "sonner";
 
 // components
 import JournalFeed from "./components/journal-feed";
-import JournalPageHeader from "./components/journal-page-header";
+import JournalPageHeader, {
+  JournalScopeFilter,
+} from "./components/journal-page-header";
 import ConfirmDialog from "@/components/shared/confirm-dialog";
 
 import {
@@ -17,7 +19,6 @@ import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { normalizeJournals } from "./journal-utils";
 import useTitle from "@/hooks/useTitle";
 import JournalFormDialog from "./components/journal-form-dialog";
-import { Globe, User } from "lucide-react";
 
 const TravelJournalPage = () => {
   useTitle("tourtoise - travel journal");
@@ -105,22 +106,13 @@ const TravelJournalPage = () => {
   return (
     <section className="mx-auto flex min-h-[calc(100svh-4.5rem)] max-w-3xl flex-col pt-5 pb-20 md:pb-5">
       <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-5">
-        <JournalPageHeader
-          onCreate={openCreate}
-          journalScope={journalScope}
-          onJournalScopeChange={setJournalScope}
-        />
-        {journalScope === "mine" ? (
-          <div className="rounded-full w-fit text-xs font-semibold flx gap-1 pl-2 pr-3 py-1.5 ring ring-primary/30 bg-primary/10 text-primary">
-            <User size={12} />
-            <span>My journals</span>
-          </div>
-        ) : (
-          <div className="rounded-full w-fit text-xs font-semibold flx gap-1 pl-2 pr-3 py-1.5 ring ring-primary/30 bg-primary/10 text-primary">
-            <Globe size={12} />
-            <span>Public journals</span>
-          </div>
-        )}
+        <JournalPageHeader onCreate={openCreate} />
+        <div className="flex items-center">
+          <JournalScopeFilter
+            value={journalScope}
+            onValueChange={setJournalScope}
+          />
+        </div>
 
         <div className="flex min-h-0 flex-1 flex-col">
           <JournalFeed

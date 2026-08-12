@@ -194,14 +194,14 @@ const JournalCard = ({
                 ))}
               </Swiper>
             )}
+            <JournalStory
+              content={journal.body}
+              expanded={fullStory || isStoryExpanded}
+              fullStory={fullStory}
+              onExpandedChange={setIsStoryExpanded}
+            />
             <div className="flex items-end justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <JournalStory
-                  content={journal.body}
-                  expanded={fullStory || isStoryExpanded}
-                  fullStory={fullStory}
-                  onExpandedChange={setIsStoryExpanded}
-                />
                 <JournalPostActions
                   isReacted={isReacted}
                   reactionCount={reactionCount}
@@ -379,31 +379,17 @@ const JournalStory = ({
     <div className="mt-3">
       <p
         className={`whitespace-pre-line leading-7 text-slate-600 ${
-          shouldTruncate && !expanded ? "cursor-pointer" : ""
+          shouldTruncate ? "cursor-pointer" : ""
         }`}
         onClick={() => {
-          if (shouldTruncate && !expanded) onExpandedChange(true);
+          if (shouldTruncate) onExpandedChange(!expanded);
         }}
       >
         {visibleContent}
-        {shouldTruncate && expanded && (
-          <button
-            type="button"
-            className="ml-1 inline text-sm font-semibold text-primary"
-            onClick={(event) => {
-              event.stopPropagation();
-              onExpandedChange(false);
-            }}
-            aria-expanded={expanded}
-          >
-            ...Show less
-          </button>
-        )}
         {shouldTruncate && !expanded && (
           <button
             type="button"
             className="ml-2 mt-1 inline text-sm font-semibold text-primary"
-            onClick={() => onExpandedChange(true)}
             aria-expanded={expanded}
           >
             Read more
