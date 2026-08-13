@@ -410,7 +410,7 @@ const JournalActions = ({ onEdit, onDelete, onHide, onReport }) => (
         type="button"
         variant="ghost"
         size="icon-sm"
-        className="-mr-2 shrink-0 rounded-full text-slate-500"
+        className="md:-mr-2 shrink-0 rounded-full text-slate-500"
         aria-label="Open journal actions"
       >
         <MoreVertical size={16} />

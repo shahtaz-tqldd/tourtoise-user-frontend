@@ -10,7 +10,13 @@ import TripOverview from "./components/overview";
 import TripPlanningTabs from "./components/planning-tabs";
 
 //icons
-import { Bell, Loader2, MessageSquareDot, Sparkles } from "lucide-react";
+import {
+  Backpack,
+  Bell,
+  Loader2,
+  MessageSquareDot,
+  Sparkles,
+} from "lucide-react";
 
 // lib
 import {
@@ -21,6 +27,8 @@ import { useNotificationListQuery } from "@/features/notification/notificationAp
 import useNotificationSocket from "@/features/notification/useNotificationSocket";
 import useTitle from "@/hooks/useTitle";
 import TripNotes from "./components/notes";
+import { Container } from "@/components/ui/container";
+import BrokenPage from "@/components/shared/broken-page";
 
 const mobileTabs = [
   { value: "overview", label: "Overview", icon: Sparkles },
@@ -352,21 +360,28 @@ const TripDetailPage = () => {
 
   if (isError || !trip) {
     return (
-      <Card className="text-center min-h-60">
-        <h1 className="text-xl font-bold text-slate-950">
-          Trip details unavailable
-        </h1>
-        <p className="mt-2 text-sm text-slate-500">
-          Could not load this trip from the API.
-        </p>
-      </Card>
+      <BrokenPage
+        title="Trip not found"
+        description={`We couldn't find your trip on this with this record! Check your trip id.`}
+        icon={Backpack}
+        actionLabel="Create new Trip"
+      />
+
+      // <Card className="text-center min-h-60">
+      //   <h1 className="text-xl font-bold text-slate-950">
+      //     Trip details unavailable
+      //   </h1>
+      //   <p className="mt-2 text-sm text-slate-500">
+      //     Could not load this trip from the API.
+      //   </p>
+      // </Card>
     );
   }
 
   return (
-    <>
-      <section className="hidden gap-6 py-5 xl:grid xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="space-y-5">
+    <Container className="py-0 md:py-5">
+      <section className="hidden gap-6 xl:grid xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="flex flex-col gap-5">
           <TripOverview trip={trip} />
           <TripPlanningTabs key={trip.id} trip={trip} />
           <TripNotes tripId={trip.id} />
@@ -397,7 +412,7 @@ const TripDetailPage = () => {
           activeTab={activeMobileTab}
           setActiveTab={setActiveMobileTab}
           className={cn(
-            "z-[30] -mx-4 bg-white px-4 pt-1.5",
+            "z-[30] -mx-2.5 bg-white px-4 pt-1.5",
             activeMobileTab === "overview" ? "sticky top-14" : "shrink-0",
           )}
         />
@@ -443,7 +458,7 @@ const TripDetailPage = () => {
           )}
         </div>
       </section>
-    </>
+    </Container>
   );
 };
 

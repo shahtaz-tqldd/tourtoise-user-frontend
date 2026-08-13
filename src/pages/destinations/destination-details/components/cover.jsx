@@ -26,7 +26,7 @@ const DestinationCover = ({ destination }) => {
     [];
   return (
     <>
-      <div className="relative -mx-4 overflow-hidden md:mx-0 md:rounded-3xl -mt-5 md:mt-0">
+      <div className="relative overflow-hidden md:mx-0 -mx-2.5 -mt-5 md:mt-0 md:rounded-3xl">
         <Link
           to="/"
           className="hidden md:flex md:items-center md:justify-center absolute left-4 top-4 z-20 h-10 w-10 rounded-full bg-white/50 text-sm font-medium backdrop-blur-sm transition hover:bg-white/70"
@@ -40,11 +40,11 @@ const DestinationCover = ({ destination }) => {
           className="md:[&_.swiper-slide]:rounded-[28px]"
         />
       </div>
-      <div className="mt-3">
+      <div className="-mt-2">
         <PageTitle title={destination.name} text={destination.tagline} />
       </div>
       {!!tags.length && (
-        <div className="flex flex-wrap gap-2 -mt-4">
+        <div className="flex flex-wrap gap-2 mt-2">
           {tags.map((tag) => (
             <DetailPill key={tag}>{tag}</DetailPill>
           ))}

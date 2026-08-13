@@ -42,6 +42,7 @@ export const JournalScopeFilter = ({ value, onValueChange }) => {
         title="Filter journals"
         description="Choose public journals or journals you created."
         desktopClassName="w-[min(calc(100vw-2rem),320px)]"
+        align="start"
         trigger={
           <button
             type="button"
@@ -83,7 +84,7 @@ export const JournalScopeFilter = ({ value, onValueChange }) => {
                   key={option.value}
                   onClick={() => selectScope(option.value)}
                   className={cn(
-                    "flex flex-1 justify-center cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition",
+                    "flex flex-1 md:flex-none justify-center cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition",
                     value === option.value
                       ? "bg-primary text-white"
                       : "bg-slate-100 text-slate-700 hover:bg-primary/10",

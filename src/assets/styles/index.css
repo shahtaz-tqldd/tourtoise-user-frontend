@@ -127,6 +127,21 @@ button {
   cursor: pointer;
 }
 
+.app-page-background {
+  background-color: #fcfdfc;
+  background-image:
+    radial-gradient(
+      circle at 0% 10%,
+      rgb(0 153 102 / 7%) 0,
+      transparent 32rem
+    ),
+    radial-gradient(
+      circle at 100% 90%,
+      rgb(254 243 199 / 60%) 0,
+      transparent 34rem
+    );
+}
+
 .custom-scrollbar {
   overflow-y: auto;
 }

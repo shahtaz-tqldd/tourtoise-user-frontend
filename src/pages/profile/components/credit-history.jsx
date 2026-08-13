@@ -130,7 +130,7 @@ const CreditHistory = () => {
 
   return (
     <>
-      <PreviewCard className="md:rounded-t-none md:p-8">
+      <PreviewCard className="md:rounded-t-none px-2.5 md:px-0 md:p-8">
         <div>
           <CreditBalancePanel
             credit={user?.credit ?? 0}

@@ -22,6 +22,7 @@ import {
 } from "./components/fallback-component";
 import { MapPinned } from "lucide-react";
 import BrokenPage from "@/components/shared/broken-page";
+import { Container } from "@/components/ui/container";
 
 const DestinationDetailsPage = () => {
   const { destination_id } = useParams();
@@ -100,64 +101,61 @@ const DestinationDetailsPage = () => {
   }
 
   return (
-    <>
-      <section className="pt-5 pb-16 md:pb-5">
-        <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-          <div className="min-w-0 space-y-5 md:space-y-8">
-            <DestinationCover destination={destination} />
+    <Container>
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="min-w-0 flex flex-col gap-6">
+          <DestinationCover destination={destination} />
+          <DestinationOverview destination={destination} />
 
-            <DestinationOverview destination={destination} />
-
-            <div className="xl:hidden">
-              <TripSnapshot
-                destination={destination}
-                setPlanningOpen={setPlanningOpen}
-              />
-            </div>
-
-            <div className="xl:hidden">
-              <Gallery destination={destination} />
-            </div>
-            <DestinationHighlights
+          <div className="xl:hidden">
+            <TripSnapshot
               destination={destination}
-              setActiveFeature={setActiveFeature}
+              setPlanningOpen={setPlanningOpen}
             />
-            <DestinationFeatures
-              destination={destination}
-              setActiveFeature={setActiveFeature}
-            />
-            <DestinationCuisine
-              destination={destination}
-              setActiveFeature={setActiveFeature}
-            />
-
-            <TripEssentials destination={destination} />
-
-            <div className="xl:hidden">
-              <TripPlan
-                destination={destination}
-                handlePlanningOpenChange={handlePlanningOpenChange}
-              />
-            </div>
           </div>
 
-          <aside className="min-w-0 space-y-5 md:space-y-6 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7rem)] xl:self-start xl:overflow-y-auto xl:overscroll-contain xl:pr-1 custom-scrollbar">
-            <div className="hidden xl:block space-y-4">
-              <TripSnapshot
-                destination={destination}
-                setPlanningOpen={setPlanningOpen}
-              />
-              <TripPlan
-                destination={destination}
-                handlePlanningOpenChange={handlePlanningOpenChange}
-              />
-            </div>
-            <div className="hidden xl:block">
-              <Gallery destination={destination} />
-            </div>
-          </aside>
+          <div className="xl:hidden">
+            <Gallery destination={destination} />
+          </div>
+          <DestinationHighlights
+            destination={destination}
+            setActiveFeature={setActiveFeature}
+          />
+          <DestinationFeatures
+            destination={destination}
+            setActiveFeature={setActiveFeature}
+          />
+          <DestinationCuisine
+            destination={destination}
+            setActiveFeature={setActiveFeature}
+          />
+
+          <TripEssentials destination={destination} />
+
+          <div className="xl:hidden">
+            <TripPlan
+              destination={destination}
+              handlePlanningOpenChange={handlePlanningOpenChange}
+            />
+          </div>
         </div>
-      </section>
+
+        <aside className="min-w-0 flex flex-col gap-6 md:sticky md:top-[90px] md:h-[calc(100vh-110px)] md:pr-1.5 md:overscroll-contain custom-scrollbar">
+          <div className="hidden xl:block space-y-4">
+            <TripSnapshot
+              destination={destination}
+              setPlanningOpen={setPlanningOpen}
+            />
+            <TripPlan
+              destination={destination}
+              handlePlanningOpenChange={handlePlanningOpenChange}
+            />
+          </div>
+          <div className="hidden xl:block">
+            <Gallery destination={destination} />
+          </div>
+        </aside>
+      </div>
 
       <TripPlanningDrawer
         destination={destination}
@@ -172,7 +170,7 @@ const DestinationDetailsPage = () => {
           if (!open) setActiveFeature(null);
         }}
       />
-    </>
+    </Container>
   );
 };
 

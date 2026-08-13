@@ -144,9 +144,9 @@ const DestinationItem = ({ destination, isRemoving, onRemove }) => {
     <article className="relative flex min-w-0 w-full overflow-hidden rounded-2xl bg-white transition hover:shadow-md">
       <Link
         to={`/destinations/${destination.slug}`}
-        className="flex min-w-0 flex-1 items-center gap-3 p-3 pr-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset sm:gap-4 sm:p-4 sm:pr-14"
+        className="flex min-w-0 flex-1 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
       >
-        <div className="size-20 shrink-0 overflow-hidden rounded-xl sm:size-24">
+        <div className="size-32 shrink-0 overflow-hidden md:h-32 md:w-40">
           <Image
             src={destination?.cover_image}
             alt={destination?.name}
@@ -155,7 +155,7 @@ const DestinationItem = ({ destination, isRemoving, onRemove }) => {
           />
         </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 p-4">
           <h2 className="truncate text-base font-bold text-slate-950">
             {destination.name || "Unnamed destination"}
           </h2>

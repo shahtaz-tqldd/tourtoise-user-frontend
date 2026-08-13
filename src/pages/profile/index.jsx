@@ -15,6 +15,7 @@ import ProfileCard from "./components/profile-card";
 import ProfileEditActions from "./components/profile-edit-actions";
 import useProfileEditor from "./hooks/use-profile-editor";
 import { useMediaQuery } from "@/lib/mobile-visible";
+import { Container } from "@/components/ui/container";
 
 const mergeProfile = (account) => ({
   ...account,
@@ -85,82 +86,84 @@ const ProfilePage = () => {
   }
 
   return (
-    <section className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start pt-5 pb-20 md:pb-5">
-      <ProfileCard
-        profile={profile}
-        canEdit={isSelfProfile}
-        isEditing={editor.isEditing}
-        onStartEditing={editor.startEditing}
-        avatarFile={editor.avatarFile}
-        onAvatarFileChange={editor.setAvatarFile}
-        formState={editor.profileCardFormState}
-        onFormStateChange={editor.setProfileCardFormState}
-        hasChanges={editor.hasChanges}
-        isUpdating={editor.isUpdating}
-        onSaveChanges={editor.saveChanges}
-        onCancelEditing={editor.cancelEditing}
-      />
-      {!isMobile ? (
-        <div className="min-w-0">
-          <TabMenu
-            tabs={[
-              {
-                label: "Overview",
-                value: "overview",
-                icon: GalleryVerticalEnd,
-              },
-              {
-                label: "Credit History",
-                value: "credit_history",
-                icon: Gift,
-              },
-              { label: "Settings", value: "settings", icon: Settings },
-            ]}
-            activeTab={activeTab}
-            setActiveTab={(tab) => {
-              const nextParams = new URLSearchParams(searchParams);
-              if (tab === "overview") nextParams.delete("tab");
-              else nextParams.set("tab", tab);
-              setSearchParams(nextParams, { replace: true });
-            }}
-            className="sticky top-14 lg:top-16 z-20 overflow-hidden md:rounded-t-2xl bg-white pt-2 -mx-4 px-4 md:mx-0"
-          />
-
-          <div>
-            {activeTab === "overview" && (
-              <Overview
-                profile={profile}
-                isEditing={editor.isEditing}
-                formState={editor.overviewFormState}
-                onFormStateChange={editor.setOverviewFormState}
-              />
-            )}
-            {activeTab === "credit_history" && (
-              <CreditHistory userId={account?.id} isOwner={isOwner} />
-            )}
-            {activeTab === "settings" && <ProfileSettings />}
-          </div>
-        </div>
-      ) : (
-        <div className="-mb-4">
-          <Overview
-            profile={profile}
-            isEditing={editor.isEditing}
-            formState={editor.overviewFormState}
-            onFormStateChange={editor.setOverviewFormState}
-          />
-          {isSelfProfile && editor.isEditing ? (
-            <ProfileEditActions
-              className="mt-10"
-              canSave={editor.hasChanges}
-              isSaving={editor.isUpdating}
-              onSave={editor.saveChanges}
-              onCancel={editor.cancelEditing}
+    <Container>
+      <section className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <ProfileCard
+          profile={profile}
+          canEdit={isSelfProfile}
+          isEditing={editor.isEditing}
+          onStartEditing={editor.startEditing}
+          avatarFile={editor.avatarFile}
+          onAvatarFileChange={editor.setAvatarFile}
+          formState={editor.profileCardFormState}
+          onFormStateChange={editor.setProfileCardFormState}
+          hasChanges={editor.hasChanges}
+          isUpdating={editor.isUpdating}
+          onSaveChanges={editor.saveChanges}
+          onCancelEditing={editor.cancelEditing}
+        />
+        {!isMobile ? (
+          <div className="min-w-0">
+            <TabMenu
+              tabs={[
+                {
+                  label: "Overview",
+                  value: "overview",
+                  icon: GalleryVerticalEnd,
+                },
+                {
+                  label: "Credit History",
+                  value: "credit_history",
+                  icon: Gift,
+                },
+                { label: "Settings", value: "settings", icon: Settings },
+              ]}
+              activeTab={activeTab}
+              setActiveTab={(tab) => {
+                const nextParams = new URLSearchParams(searchParams);
+                if (tab === "overview") nextParams.delete("tab");
+                else nextParams.set("tab", tab);
+                setSearchParams(nextParams, { replace: true });
+              }}
+              className="sticky top-14 lg:top-16 z-20 overflow-hidden md:rounded-t-2xl bg-white pt-2 -mx-4 px-4 md:mx-0"
             />
-          ) : null}
-        </div>
-      )}
-    </section>
+
+            <div>
+              {activeTab === "overview" && (
+                <Overview
+                  profile={profile}
+                  isEditing={editor.isEditing}
+                  formState={editor.overviewFormState}
+                  onFormStateChange={editor.setOverviewFormState}
+                />
+              )}
+              {activeTab === "credit_history" && (
+                <CreditHistory userId={account?.id} isOwner={isOwner} />
+              )}
+              {activeTab === "settings" && <ProfileSettings />}
+            </div>
+          </div>
+        ) : (
+          <div className="-mb-4">
+            <Overview
+              profile={profile}
+              isEditing={editor.isEditing}
+              formState={editor.overviewFormState}
+              onFormStateChange={editor.setOverviewFormState}
+            />
+            {isSelfProfile && editor.isEditing ? (
+              <ProfileEditActions
+                className="mt-10"
+                canSave={editor.hasChanges}
+                isSaving={editor.isUpdating}
+                onSave={editor.saveChanges}
+                onCancel={editor.cancelEditing}
+              />
+            ) : null}
+          </div>
+        )}
+      </section>
+    </Container>
   );
 };
 

@@ -202,7 +202,7 @@ const ProfileSettings = () => {
 
   return (
     <>
-      <PreviewCard className="space-y-10 md:p-8 md:rounded-t-none">
+      <PreviewCard className="space-y-10 md:rounded-t-none px-2.5 md:px-0 md:p-8">
         <SectionHeader
           title="Profile Settings"
           description="Manage account preferences, password, and account access."

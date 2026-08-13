@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 
 // trips
+import { Container } from "@/components/ui/container";
 import { TripHistory } from "./components/trip-history";
 import TripsFeed from "./components/trips-feed";
 import TripsPageHeader from "./components/trips-page-header";
@@ -95,9 +96,9 @@ const TripsPage = () => {
   };
 
   return (
-    <section className="relative flex min-h-[calc(100svh-4.5rem)] flex-col pt-5 pb-20 md:pb-5">
-      <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="flex min-h-0 flex-col gap-6">
+    <Container>
+      <div className="h-full grid gap-6 md:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="flex flex-col gap-6 h-full">
           <TripsPageHeader
             activeSearch={activeSearch}
             onActiveSearchChange={updateActiveSearch}
@@ -130,7 +131,7 @@ const TripsPage = () => {
           isError={isHistoryError}
         />
       </div>
-    </section>
+    </Container>
   );
 };
 

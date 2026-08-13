@@ -20,8 +20,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { Button } from "@/components/ui/button";
 import useTitle from "@/hooks/useTitle";
+import { Container } from "@/components/ui/container";
 
 const planningFeatures = [
   { label: "Recommended spots", icon: MapPinned },
@@ -62,10 +62,10 @@ const AppFeaturesPage = () => {
   useTitle("Tourtoise Features");
 
   return (
-    <section className="pb-20 pt-5 md:pb-10">
+    <Container className="pb-0 md:pb-5" childClassName="md:px-6">
       <Cover />
 
-      <div className="mt-16 space-y-20 lg:mt-24 lg:space-y-28">
+      <div className="mt-8 lg:mt-16 space-y-12 lg:space-y-24">
         <JourneySection
           id="discover"
           step={journeySteps[0]}
@@ -96,7 +96,7 @@ const AppFeaturesPage = () => {
       </div>
 
       <BeyondTheTrip />
-    </section>
+    </Container>
   );
 };
 
@@ -144,7 +144,7 @@ const JourneySection = ({
 );
 
 const DiscoveryVisual = () => (
-  <div className="relative overflow-hidden md:rounded-3xl -mx-4 md:mx-0 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 sm:p-7">
+  <div className="relative overflow-hidden md:rounded-3xl -mx-2.5 md:mx-0 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 sm:p-7">
     <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-white">
         <Bot className="size-4" aria-hidden="true" />
@@ -199,7 +199,7 @@ const DiscoveryVisual = () => (
 );
 
 const PlanningVisual = () => (
-  <div className="overflow-hidden md:rounded-3xl -mx-4 md:mx-0 bg-gradient-to-br from-blue-100/60 via-amber-50/30 to-emerald-100/60 p-5 sm:p-7">
+  <div className="overflow-hidden md:rounded-3xl -mx-2.5 md:mx-0 bg-gradient-to-br from-blue-100/60 via-amber-50/30 to-emerald-100/60 p-5 sm:p-7">
     <div className="flex items-center justify-between gap-4">
       <div>
         <p className="text-xs font-semibold text-primary">
@@ -319,7 +319,7 @@ const GuidanceVisual = () => (
 );
 
 const BeyondTheTrip = () => (
-  <section className="mt-20 overflow-hidden md:rounded-3xl -mx-4 md:mx-0 bg-primary/5 lg:mt-28">
+  <section className="mt-20 overflow-hidden md:rounded-3xl -mx-2.5 md:mx-0 bg-primary/5 lg:mt-28">
     <div className="grid lg:grid-cols-2">
       <div className="p-6 sm:p-9 lg:p-12">
         <span className="flex size-11 items-center justify-center rounded-2xl bg-white text-primary">
@@ -383,7 +383,7 @@ const Cover = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
-      className="relative isolate overflow-hidden -mx-4 md:mx-0 -mt-5 md:mt-0 md:rounded-3xl px-6 py-12 sm:px-10 sm:py-16 lg:px-16 lg:py-20"
+      className="relative isolate overflow-hidden -mx-2.5 md:mx-0 -mt-5 md:mt-0 md:rounded-3xl px-6 py-12 sm:px-10 sm:py-16 lg:px-16 lg:py-20"
     >
       {/* White readability gradient */}
       <div

@@ -1,11 +1,12 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 import Card from "@/components/ui/card";
 import { Check } from "lucide-react";
 
-const DestinationOverview = ({ destination }) => {
+const DestinationOverview = ({ destination, className }) => {
   const picking_reasons = destination.picking_reasons || [];
   return (
-    <div className="grid md:grid-cols-2 gap-4">
+    <div className={cn("grid md:grid-cols-2 gap-4", className)}>
       <Card>
         <h3 className="font-bold text-slate-900">
           Why {destination.name} is a great choice

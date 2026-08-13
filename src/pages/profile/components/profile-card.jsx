@@ -61,7 +61,7 @@ const ProfileCard = ({
   };
 
   return (
-    <aside className="lg:sticky lg:top-[92px]">
+    <aside className="lg:sticky lg:top-[90px] h-fit">
       <Card className="relative -mx-4 md:mx-0 rounded-none -mt-5 md:mt-0">
         <div className="bg-primary/10 h-28 -mx-6 -mt-6 overflow-hidden">
           <img src="/profile_bg.jpg" className="h-full w-full object-cover" />

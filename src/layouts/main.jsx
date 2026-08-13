@@ -10,15 +10,13 @@ const MainLayout = () => {
 
   return (
     <MobileBottomNavbarProvider>
-      <main className="bg-primary/5 min-h-screen flex">
+      <section className="flex">
         <LeftSideMenu />
-        <div className="w-full">
+        <div className="w-full flex flex-col min-h-screen">
           <MainHeader />
-          <div className="mx-auto w-full max-w-7xl px-4 md:pb-0">
-            <Outlet />
-          </div>
+          <Outlet />
         </div>
-      </main>
+      </section>
     </MobileBottomNavbarProvider>
   );
 };

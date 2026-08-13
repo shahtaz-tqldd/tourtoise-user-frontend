@@ -2,16 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ImagePlus, X } from "lucide-react";
 
+import PreviewContent from "@/components/shared/preview-content";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { FloatingTextarea } from "@/components/ui/textarea";
 import {
@@ -69,18 +61,21 @@ const JournalFormDialog = ({ open, onOpenChange, journal }) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="custom-scrollbar max-h-screen h-screen md:h-fit overflow-x-hidden p-4 max-w-screen sm:max-w-xl sm:p-6 rounded-none md:rounded-3xl">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Update travel journal" : "Create travel journal"}
-          </DialogTitle>
-          <DialogDescription>
-            Add the story and photos you want to remember.
-          </DialogDescription>
-        </DialogHeader>
+    <PreviewContent
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isEditing ? "Update travel journal" : "Create travel journal"}
+      description="Add the story and photos you want to remember."
+      className="h-fit p-6 !max-w-xl md:p-8"
+    >
+      <h2 className="mt-2 text-lg font-bold md:mt-0">
+        {isEditing ? "Update travel journal" : "Create travel journal"}
+      </h2>
+      <p className="mt-1 text-sm text-slate-500">
+        Add the story and photos you want to remember.
+      </p>
 
-        <form className="space-y-5 pt-2" onSubmit={handleSubmit}>
+      <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
           <fieldset className="space-y-2">
             <div className="flex gap-6">
               {[
@@ -180,23 +175,30 @@ const JournalFormDialog = ({ open, onOpenChange, journal }) => {
             />
           </div>
 
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isSubmitting}>
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button type="submit" disabled={isSubmitting}>
+          <div className="mt-8 flex w-full flex-col gap-3 md:flex-row md:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isSubmitting}
+              onClick={() => onOpenChange(false)}
+              className="w-full md:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full md:w-auto"
+            >
               {isSubmitting
                 ? "Saving..."
                 : isEditing
                   ? "Update Journal"
                   : "Save Journal"}
             </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </div>
+      </form>
+    </PreviewContent>
   );
 };
 

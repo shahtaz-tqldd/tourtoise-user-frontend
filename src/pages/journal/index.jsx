@@ -19,6 +19,7 @@ import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { normalizeJournals } from "./journal-utils";
 import useTitle from "@/hooks/useTitle";
 import JournalFormDialog from "./components/journal-form-dialog";
+import { Container } from "@/components/ui/container";
 
 const TravelJournalPage = () => {
   useTitle("tourtoise - travel journal");
@@ -104,39 +105,32 @@ const TravelJournalPage = () => {
   };
 
   return (
-    <section className="mx-auto flex min-h-[calc(100svh-4.5rem)] max-w-3xl flex-col pt-5 pb-20 md:pb-5">
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-5">
-        <JournalPageHeader onCreate={openCreate} />
-        <div className="flex items-center">
-          <JournalScopeFilter
-            value={journalScope}
-            onValueChange={setJournalScope}
-          />
-        </div>
-
-        <div className="flex min-h-0 flex-1 flex-col">
-          <JournalFeed
-            journals={journals}
-            isLoading={isLoading}
-            isError={isError}
-            onRetry={refetch}
-            hasMore={hasNextPage}
-            isFetchingMore={isFetchingNextPage}
-            onLoadMore={fetchNextPage}
-            onSaveToggle={toggleSavedJournal}
-            onEditJournal={openEdit}
-            onDeleteJournal={setDeletingJournal}
-            canManageJournal={isOwnJournal}
-            scope={journalScope}
-            onCreate={openCreate}
-            emptyDescription={
-              journalScope === "mine"
-                ? "Create your first travel journal to see it here."
-                : "No public travel journals are available yet."
-            }
-          />
-        </div>
-      </div>
+    <Container childClassName="max-w-3xl">
+      <JournalPageHeader onCreate={openCreate} />
+      <JournalScopeFilter
+        value={journalScope}
+        onValueChange={setJournalScope}
+      />
+      <JournalFeed
+        journals={journals}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={refetch}
+        hasMore={hasNextPage}
+        isFetchingMore={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
+        onSaveToggle={toggleSavedJournal}
+        onEditJournal={openEdit}
+        onDeleteJournal={setDeletingJournal}
+        canManageJournal={isOwnJournal}
+        scope={journalScope}
+        onCreate={openCreate}
+        emptyDescription={
+          journalScope === "mine"
+            ? "Create your first travel journal to see it here."
+            : "No public travel journals are available yet."
+        }
+      />
       {formOpen && (
         <JournalFormDialog
           key={editingJournal?.id || "new-journal"}
@@ -155,7 +149,7 @@ const TravelJournalPage = () => {
         isLoading={isDeleting}
         onConfirm={handleDeleteJournal}
       />
-    </section>
+    </Container>
   );
 };
 

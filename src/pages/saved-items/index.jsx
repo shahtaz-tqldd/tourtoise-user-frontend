@@ -8,6 +8,8 @@ import SavedJournal from "./components/saved-journals";
 // icons
 import { MapPin, Newspaper } from "lucide-react";
 import useTitle from "@/hooks/useTitle";
+import { Container } from "@/components/ui/container";
+import ListingHeader from "@/components/shared/listing-header";
 
 const SAVED_ITEMS = [
   { value: "destinations", label: "Destinations", icon: MapPin },
@@ -34,12 +36,9 @@ const SavedItemsPage = () => {
   };
 
   return (
-    <section className="flex min-h-[calc(100svh-4.5rem)] min-w-0 flex-col gap-5 pt-5 pb-20 sm:gap-6 md:pb-8">
-      <div>
-        <h1 className="text-xl font-bold text-slate-950 md:text-2xl">
-          Saved Items
-        </h1>
-      </div>
+    <Container>
+      <ListingHeader title="  Saved Items" />
+
       <TabMenu
         tabs={SAVED_ITEMS}
         activeTab={activeTab}
@@ -47,18 +46,8 @@ const SavedItemsPage = () => {
         scrollable
         className="bg-transparent"
       />
-      <div
-        className="flex min-h-0 flex-1 flex-col"
-        role="tabpanel"
-        aria-label={`Saved ${activeTab}`}
-      >
-        {activeTab === "destinations" ? (
-          <SavedDestinations />
-        ) : (
-          <SavedJournal />
-        )}
-      </div>
-    </section>
+      {activeTab === "destinations" ? <SavedDestinations /> : <SavedJournal />}
+    </Container>
   );
 };
 

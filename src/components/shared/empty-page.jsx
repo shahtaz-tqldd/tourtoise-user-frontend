@@ -21,7 +21,7 @@ const EmptyPage = ({
   return (
     <section
       className={cn(
-        "relative isolate flex h-full min-h-80 items-center justify-center overflow-hidden rounded-3xl bg-white px-5 py-12 sm:min-h-96 sm:px-8",
+        "relative isolate h-full center overflow-hidden rounded-3xl bg-white py-8 smpy-12 px-5 sm:px-8",
         className,
       )}
       aria-labelledby={titleId}

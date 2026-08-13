@@ -5,9 +5,9 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import useDebounce from "@/hooks/useDebounce";
 import useMobileBottomNavbar from "@/hooks/useMobileBottomNavbar";
@@ -22,6 +22,7 @@ import {
 } from "@/features/chat/chatApiSlice";
 import ChatInterface from "./components/chat-interface";
 import ChatSessionList from "./components/session-list";
+import { Container } from "@/components/ui/container";
 
 const toDisplayMessage = (message) => ({
   id: message.id,
@@ -318,71 +319,75 @@ const AgentChatPage = () => {
   }, [isChatBusy]);
 
   return (
-    <section
-      className={`relative -mx-4 mt-0 min-h-0 overflow-hidden transition-[height] duration-300 ease-out md:mx-0 md:mt-3 md:h-[calc(100dvh-81px)] lg:mt-4 lg:grid lg:h-[calc(100vh-100px)] lg:min-h-[560px] lg:grid-cols-[420px_minmax(0,1fr)] lg:gap-5 lg:overflow-visible ${
-        isMobileConversationOpen
-          ? "h-[calc(100dvh-57px)]"
-          : "h-[calc(100dvh-112px)]"
-      }`}
-    >
-      <ChatSessionList
-        isMobileChatOpen={isMobileConversationOpen}
-        isCreatingSession={isCreatingSession}
-        isFetchingSessions={isFetchingSessions}
-        isSessionListError={isSessionListError}
-        isSessionSearchOpen={isSessionSearchOpen}
-        onCloseSessionSearch={closeSessionSearch}
-        onOpenSessionSearch={() => setIsSessionSearchOpen(!isSessionSearchOpen)}
-        sessionSearch={sessionSearch}
-        sessions={sessions}
-        selectedSessionId={selectedSessionId}
-        onSessionSearchChange={setSessionSearch}
-        onCreateSession={createNewSession}
-        onSelectSession={(sessionId) => {
-          setActiveSessionSnapshot(
-            sessions.find((session) => session.id === sessionId) || null,
-          );
-          setActiveSessionId(sessionId);
-          setIsMobileChatOpen(true);
-          setMessage("");
-          setMessageSearch("");
-        }}
-        onRetry={refetchSessions}
-      />
+    <Container className="px-0 py-0 md:py-5 md:px-4">
+      <section
+        className={`relative overflow-hidden md:grid md:h-[calc(100vh-109px)] md:grid-cols-[420px_minmax(0,1fr)] md:gap-5 md:overflow-visible ${
+          isMobileConversationOpen
+            ? "h-[calc(100dvh-57px)]"
+            : "h-[calc(100dvh-112px)]"
+        }`}
+      >
+        <ChatSessionList
+          isMobileChatOpen={isMobileConversationOpen}
+          isCreatingSession={isCreatingSession}
+          isFetchingSessions={isFetchingSessions}
+          isSessionListError={isSessionListError}
+          isSessionSearchOpen={isSessionSearchOpen}
+          onCloseSessionSearch={closeSessionSearch}
+          onOpenSessionSearch={() =>
+            setIsSessionSearchOpen(!isSessionSearchOpen)
+          }
+          sessionSearch={sessionSearch}
+          sessions={sessions}
+          selectedSessionId={selectedSessionId}
+          onSessionSearchChange={setSessionSearch}
+          onCreateSession={createNewSession}
+          onSelectSession={(sessionId) => {
+            setActiveSessionSnapshot(
+              sessions.find((session) => session.id === sessionId) || null,
+            );
+            setActiveSessionId(sessionId);
+            setIsMobileChatOpen(true);
+            setMessage("");
+            setMessageSearch("");
+          }}
+          onRetry={refetchSessions}
+        />
 
-      <ChatInterface
-        activeSession={activeSession}
-        composerRef={composerRef}
-        debouncedMessageSearch={debouncedMessageSearch}
-        hasMessages={Boolean(messages.length)}
-        isDeletingSession={isDeletingSession}
-        isFetchingMessages={isFetchingMessages}
-        isMessageListError={isMessageListError}
-        isMessageSearchOpen={isMessageSearchOpen}
-        isMobileChatOpen={isMobileConversationOpen}
-        isSendingMessage={isChatBusy}
-        message={message}
-        messageResultCount={messageResultCount}
-        messageSearch={messageSearch}
-        messageSearchInputRef={messageSearchInputRef}
-        messages={messages}
-        messagesEndRef={messagesEndRef}
-        selectedSessionId={selectedSessionId}
-        trimmedMessageSearch={trimmedMessageSearch}
-        onBack={() => {
-          setIsMobileChatOpen(false);
-          closeMessageSearch();
-        }}
-        onCloseMessageSearch={closeMessageSearch}
-        onDeleteSession={deleteActiveSession}
-        onDownloadSession={downloadActiveSession}
-        onMessageChange={setMessage}
-        onMessageSearchChange={setMessageSearch}
-        onOpenMessageSearch={openMessageSearch}
-        onRefetchMessages={refetchMessages}
-        onSubmitMessage={submitMessage}
-      />
-    </section>
+        <ChatInterface
+          activeSession={activeSession}
+          composerRef={composerRef}
+          debouncedMessageSearch={debouncedMessageSearch}
+          hasMessages={Boolean(messages.length)}
+          isDeletingSession={isDeletingSession}
+          isFetchingMessages={isFetchingMessages}
+          isMessageListError={isMessageListError}
+          isMessageSearchOpen={isMessageSearchOpen}
+          isMobileChatOpen={isMobileConversationOpen}
+          isSendingMessage={isChatBusy}
+          message={message}
+          messageResultCount={messageResultCount}
+          messageSearch={messageSearch}
+          messageSearchInputRef={messageSearchInputRef}
+          messages={messages}
+          messagesEndRef={messagesEndRef}
+          selectedSessionId={selectedSessionId}
+          trimmedMessageSearch={trimmedMessageSearch}
+          onBack={() => {
+            setIsMobileChatOpen(false);
+            closeMessageSearch();
+          }}
+          onCloseMessageSearch={closeMessageSearch}
+          onDeleteSession={deleteActiveSession}
+          onDownloadSession={downloadActiveSession}
+          onMessageChange={setMessage}
+          onMessageSearchChange={setMessageSearch}
+          onOpenMessageSearch={openMessageSearch}
+          onRefetchMessages={refetchMessages}
+          onSubmitMessage={submitMessage}
+        />
+      </section>
+    </Container>
   );
 };
 
