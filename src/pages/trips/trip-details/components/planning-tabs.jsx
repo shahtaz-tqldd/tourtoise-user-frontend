@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   Backpack,
@@ -23,11 +23,7 @@ const planningTabs = [
   { value: "days", label: "Day Wise Plan", icon: CalendarDays },
 ];
 const beforeTripStatuses = new Set(["draft", "planning", "ready"]);
-const terminalTripStatuses = new Set([
-  "completed",
-  "cancelled",
-  "archived",
-]);
+const terminalTripStatuses = new Set(["completed", "cancelled", "archived"]);
 const inProgressTabOrder = [
   "days",
   "route",
@@ -35,6 +31,10 @@ const inProgressTabOrder = [
   "documents",
   "packing",
 ];
+const nextPreparationTab = {
+  packing: "documents",
+  documents: "heads-up",
+};
 
 const sortPlanningTabs = (tabs, status) => {
   const normalizedStatus = String(status || "").toLowerCase();
@@ -105,9 +105,7 @@ const TripPlanningTabs = ({ trip }) => {
       const totalCount = Math.max(
         0,
         Number(
-          currentStats?.total_count ??
-            initialDocumentStats.total_count ??
-            0,
+          currentStats?.total_count ?? initialDocumentStats.total_count ?? 0,
         ) + totalDelta,
       );
       const packedCount = Math.min(
@@ -132,8 +130,7 @@ const TripPlanningTabs = ({ trip }) => {
   const normalizedTripStatus = String(trip?.status || "").toLowerCase();
   const tabs = useMemo(() => {
     const packingStats = localStats?.packing_items || {};
-    const documentStats =
-      documentStatsOverride || localStats?.documents || {};
+    const documentStats = documentStatsOverride || localStats?.documents || {};
     const packedCount = Number(packingStats.is_packed_count || 0);
     const packingTotal = Number(packingStats.total_count || 0);
     const packedDocumentCount = Number(documentStats.is_packed_count || 0);
@@ -179,21 +176,46 @@ const PlanningTabView = ({
   onPackingStatsChange,
   onDocumentStatsChange,
 }) => {
-  const [activeTab, setActiveTab] = useState(
-    () => tabs[0]?.value || "packing",
-  );
+  const [activeTab, setActiveTab] = useState(() => tabs[0]?.value || "packing");
+  const [previousTabs, setPreviousTabs] = useState(tabs);
   const contentRef = useRef(null);
+  const previousActiveTabRef = useRef(activeTab);
 
-  const handleTabChange = (nextTab) => {
-    if (nextTab === activeTab) return;
+  if (previousTabs !== tabs) {
+    const previousActiveTab = previousTabs.find(
+      (tab) => tab.value === activeTab,
+    );
+    const currentActiveTab = tabs.find((tab) => tab.value === activeTab);
+    const activeTabJustCompleted =
+      !previousActiveTab?.isComplete && currentActiveTab?.isComplete;
+    const nextTab = nextPreparationTab[activeTab];
 
-    setActiveTab(nextTab);
-    requestAnimationFrame(() => {
+    setPreviousTabs(tabs);
+    if (
+      activeTabJustCompleted &&
+      nextTab &&
+      tabs.some((tab) => tab.value === nextTab)
+    ) {
+      setActiveTab(nextTab);
+    }
+  }
+
+  useEffect(() => {
+    if (previousActiveTabRef.current === activeTab) return;
+
+    previousActiveTabRef.current = activeTab;
+    const frame = requestAnimationFrame(() => {
       contentRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     });
+
+    return () => cancelAnimationFrame(frame);
+  }, [activeTab]);
+
+  const handleTabChange = (nextTab) => {
+    if (nextTab !== activeTab) setActiveTab(nextTab);
   };
 
   return (
@@ -203,7 +225,7 @@ const PlanningTabView = ({
         activeTab={activeTab}
         setActiveTab={handleTabChange}
         scrollable
-        className="sticky top-[106px] z-20 -mx-4 bg-white/90 px-4 pt-2 backdrop-blur-xl md:top-16 md:mx-0 md:px-0"
+        className="sticky top-[106px] z-20 -mx-2.5 bg-white/90 px-4 pt-2 backdrop-blur-xl md:top-16 md:mx-0 md:px-0"
       />
 
       <div ref={contentRef} className="scroll-mt-[168px] md:scroll-mt-28">

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
-  GripVertical,
   MoreVertical,
   PencilLine,
   Plus,
@@ -28,6 +27,7 @@ import {
 } from "@/features/trips/tripApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { moveItem } from "@/lib/reorder";
+import { cn } from "@/lib/utils";
 
 const categoryOptions = [
   { value: "safety", label: "Safety" },
@@ -251,13 +251,12 @@ const TripHeadsUp = ({ tripId }) => {
             description="Important information to consider for this trip."
           />
           <Button
-            className="!pl-2 !pr-3.5 rounded-full"
+            className="size-9 rounded-full"
             size="sm"
             onClick={() => setIsCreateOpen(true)}
             disabled={!tripId}
           >
             <Plus size={14} />
-            Add New
           </Button>
         </div>
 
@@ -289,14 +288,12 @@ const TripHeadsUp = ({ tripId }) => {
                 disabled={isMutating || Boolean(editingHeadsUp)}
                 onMove={handleMoveHeadsUp}
                 onDropEnd={handleDropHeadsUp}
-                renderItem={({ item, isDragging, disabled }) => (
+                renderItem={({ item }) => (
                   <HeadsUpCard
                     key={`${item.id}-${editingHeadsUp?.id === item.id ? "edit" : "view"}`}
                     item={item}
                     isEditing={editingHeadsUp?.id === item.id}
                     isUpdating={isUpdating}
-                    isDragging={isDragging}
-                    isDragDisabled={disabled}
                     onEdit={() => setEditingHeadsUp(item)}
                     onCancelEdit={() => setEditingHeadsUp(null)}
                     onSave={handleUpdateHeadsUp}
@@ -342,8 +339,6 @@ const HeadsUpCard = ({
   onCancelEdit,
   onSave,
   onDelete,
-  isDragging,
-  isDragDisabled,
 }) => {
   const detailsRef = useRef(null);
   const [title, setTitle] = useState(item.title || "");
@@ -387,57 +382,17 @@ const HeadsUpCard = ({
   if (isEditing) {
     return (
       <form
-        className={`rounded-xl border border-slate-200 bg-slate-50 p-4 transition ${
-          isDragging ? "border-primary/40 bg-primary/5 opacity-70" : ""
-        }`}
+        className="rounded-xl bg-white border border-primary/50 p-4 text-sm font-medium text-slate-700"
         onSubmit={handleSubmit}
       >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-            <span
-              className={`text-slate-400 ${
-                isDragDisabled
-                  ? "cursor-not-allowed opacity-50"
-                  : "cursor-grab hover:bg-white hover:text-slate-600 active:cursor-grabbing"
-              }`}
-              aria-label="Drag heads-up"
-            >
-              <GripVertical size={20} />
-            </span>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <input
-                  name={`headsup-title-${item.id}`}
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  disabled={isUpdating}
-                  className="min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400 disabled:opacity-60"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isUpdating}
-              size="sm"
-              onClick={onCancelEdit}
-              className="!text-xs rounded-full"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isUpdating}
-              size="sm"
-              className="!text-xs rounded-full"
-            >
-              {isUpdating ? "Saving..." : "Save changes"}
-            </Button>
-          </div>
-        </div>
+        <input
+          name={`headsup-title-${item.id}`}
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          disabled={isUpdating}
+          className="min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400 disabled:opacity-60"
+          required
+        />
         <textarea
           ref={detailsRef}
           name={`headsup-details-${item.id}`}
@@ -446,38 +401,38 @@ const HeadsUpCard = ({
           disabled={isUpdating}
           required
           rows={1}
-          className="mt-2 block w-full resize-none overflow-hidden border-none bg-transparent pl-8 text-sm leading-6 text-slate-500 outline-none placeholder:text-slate-400 disabled:opacity-60"
+          className="mt-2 block w-full resize-none overflow-hidden border-none bg-transparent text-sm leading-6 text-slate-500 outline-none placeholder:text-slate-400 disabled:opacity-60"
         />
+        <div className="gap-2 border-t border-slate-200/80 mt-4 pt-3 -mx-4 px-4 flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isUpdating}
+            size="sm"
+            onClick={onCancelEdit}
+            className="!text-xs rounded-full"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={isUpdating}
+            size="sm"
+            className="!text-xs rounded-full"
+          >
+            {isUpdating ? "Saving..." : "Save changes"}
+          </Button>
+        </div>
       </form>
     );
   }
 
   return (
     <article
-      className={`rounded-xl border border-slate-200 p-4 transition ${
-        isDragging ? "border-primary/40 bg-primary/5 opacity-70" : ""
-      }`}
+      className={cn("h-full rounded-xl border p-4 border-slate-200 bg-white")}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <span
-            className={`text-slate-400 ${
-              isDragDisabled
-                ? "cursor-not-allowed opacity-50"
-                : "cursor-grab hover:bg-white hover:text-slate-600 active:cursor-grabbing"
-            }`}
-            aria-label="Drag heads-up"
-          >
-            <GripVertical size={20} />
-          </span>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-sm font-semibold text-slate-900">
-                {item.title}
-              </h3>
-            </div>
-          </div>
-        </div>
+        <h3 className="text-sm font-semibold text-slate-900">{item.title}</h3>
         <PreviewActionsDropdown
           title="Heads-up actions"
           description="Choose an action for this heads-up."
@@ -489,7 +444,6 @@ const HeadsUpCard = ({
               size="icon-sm"
               aria-label="Heads-up actions"
               className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 -mt-2 -mr-2"
-              disabled={isDragDisabled}
             >
               <MoreVertical size={16} />
             </Button>
@@ -511,7 +465,7 @@ const HeadsUpCard = ({
           ]}
         />
       </div>
-      <p className="pl-8 md:pr-3 mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-500">
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-500">
         {getHeadsUpDetails(item)}
       </p>
     </article>

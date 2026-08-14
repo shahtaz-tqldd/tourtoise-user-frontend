@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { FloatingInput } from "@/components/ui/input";
-import { FloatingSelect, SelectItem } from "@/components/ui/select";
+import { SingleItemSelectGroup } from "@/components/shared/form-input";
 import LocationInput from "@/components/shared/location-input";
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -14,9 +15,34 @@ import {
 import {
   ACCOMMODATION_OPTIONS,
   BUDGET_TIER_OPTIONS,
-  CURRENCY_OPTIONS,
   TRAVELLER_TYPE_OPTIONS,
 } from "../../constants";
+
+const normalizeCurrency = (currency) =>
+  typeof currency === "string" ? currency.trim().toUpperCase() : "";
+
+const getCurrencyOptions = (preferredCurrency, destinationCurrency) => {
+  const options = [
+    {
+      value: "USD",
+      label: "USD",
+    },
+    {
+      value: normalizeCurrency(preferredCurrency),
+      label: `${normalizeCurrency(preferredCurrency)}`,
+    },
+    {
+      value: normalizeCurrency(destinationCurrency),
+      label: `${normalizeCurrency(destinationCurrency)}`,
+    },
+  ];
+
+  return options.filter(
+    (option, index) =>
+      option.value &&
+      options.findIndex(({ value }) => value === option.value) === index,
+  );
+};
 
 const getTravelerCountForType = (travelerType, currentCount) => {
   if (travelerType === "solo") return "1";
@@ -35,7 +61,7 @@ const getAccommodationPreference = (trip) =>
 
 const getInitialInfoForm = (trip = {}) => ({
   budget_tier: trip?.budget_tier || "comfort",
-  budget_currency: trip?.budget_currency || "",
+  budget_currency: normalizeCurrency(trip?.budget_currency) || "USD",
   start_date: trip?.start_date || "",
   days: trip?.duration_days ? String(trip.duration_days) : "",
   travelers_count: trip?.travelers_count ? String(trip.travelers_count) : "1",
@@ -64,6 +90,7 @@ const TripPlanInitialInput = ({
   onClose,
   onStepSelect,
 }) => {
+  const user = useSelector((state) => state.auth.user);
   const [internalForm, setInternalForm] = useState(() =>
     getInitialInfoForm(trip),
   );
@@ -80,6 +107,12 @@ const TripPlanInitialInput = ({
   const showTravelerCount =
     form.traveler_type === "family" || form.traveler_type === "group";
   const destinationName = destination?.name || "";
+  const destinationCurrency =
+    destination?.currency || destination?.currency_code || "";
+  const currencyOptions = useMemo(
+    () => getCurrencyOptions(user?.preferred_currency, destinationCurrency),
+    [destinationCurrency, user?.preferred_currency],
+  );
 
   const updateField = (field, value) => {
     if (onControlledFieldChange) {
@@ -216,123 +249,67 @@ const TripPlanInitialInput = ({
             </p>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <FloatingSelect
-              label="Currency"
-              placeholder="Optional"
-              value={form.budget_currency}
-              onValueChange={(value) => updateField("budget_currency", value)}
-            >
-              {CURRENCY_OPTIONS.map((currency) => (
-                <SelectItem key={currency.value} value={currency.value}>
-                  {currency.label}
-                </SelectItem>
-              ))}
-            </FloatingSelect>
+          <SingleItemSelectGroup
+            title="Traveller type"
+            options={TRAVELLER_TYPE_OPTIONS}
+            value={form.traveler_type}
+            onValueChange={updateTravelerType}
+          />
 
-            <FloatingSelect
-              label="Accommodation"
-              placeholder="Optional"
-              value={form.accommodation_preference}
-              onValueChange={(value) =>
-                updateField("accommodation_preference", value)
+          {showTravelerCount ? (
+            <FloatingInput
+              name="trip-travelers"
+              type="number"
+              label="Travellers"
+              min="2"
+              placeholder="4"
+              className="max-w-32"
+              value={form.travelers_count}
+              onChange={(event) =>
+                updateField("travelers_count", event.target.value)
               }
-            >
-              {ACCOMMODATION_OPTIONS.map((preference) => (
-                <SelectItem key={preference.value} value={preference.value}>
-                  {preference.label}
-                </SelectItem>
-              ))}
-            </FloatingSelect>
-          </div>
+            />
+          ) : null}
 
-          <div className="space-y-4">
-            <p className="text-sm font-medium text-slate-800">Traveller type</p>
-            <div className="flex flex-wrap gap-x-8 gap-y-4">
-              {TRAVELLER_TYPE_OPTIONS.map((type) => (
-                <label
-                  key={type.value}
-                  className={`flex cursor-pointer items-center gap-2 text-sm transition ${
-                    form.traveler_type === type.value
-                      ? "text-primary"
-                      : "text-slate-700"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="traveler-type"
-                    value={type.value}
-                    checked={form.traveler_type === type.value}
-                    onChange={() => updateTravelerType(type.value)}
-                    className="size-4 accent-primary"
-                  />
-                  <span className="font-medium">{type.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+          <SingleItemSelectGroup
+            title="Budget tier"
+            options={BUDGET_TIER_OPTIONS}
+            value={form.budget_tier}
+            onValueChange={(value) => updateField("budget_tier", value)}
+          />
 
-          <div className="grid grid-cols-2 gap-3">
-            {showTravelerCount ? (
-              <FloatingInput
-                name="trip-travelers"
-                type="number"
-                label="Travellers"
-                min="3"
-                placeholder="4"
-                value={form.travelers_count}
-                onChange={(event) =>
-                  updateField("travelers_count", event.target.value)
-                }
-              />
-            ) : null}
-          </div>
+          <SingleItemSelectGroup
+            title="Currency"
+            options={currencyOptions}
+            value={form.budget_currency}
+            onValueChange={(value) => updateField("budget_currency", value)}
+          />
 
-          <div className="space-y-4 -mt-2">
-            <p className="text-sm font-medium text-slate-800">Budget tier</p>
-            <div className="flex flex-wrap gap-x-8 gap-y-4">
-              {BUDGET_TIER_OPTIONS.map((tier) => (
-                <label
-                  key={tier.value}
-                  className={`flex cursor-pointer items-center gap-2 text-sm transition ${
-                    form.budget_tier === tier.value
-                      ? "text-primary"
-                      : "border-slate-200"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="budget-tier"
-                    value={tier.value}
-                    checked={form.budget_tier === tier.value}
-                    onChange={() => updateField("budget_tier", tier.value)}
-                    className="size-4 accent-primary"
-                  />
-                  <span className="font-medium">{tier.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+          <SingleItemSelectGroup
+            title="Accommodation"
+            options={ACCOMMODATION_OPTIONS}
+            value={form.accommodation_preference}
+            onValueChange={(value) =>
+              updateField("accommodation_preference", value)
+            }
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
+      <div className="grid md:grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
         {onClose && (
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
             disabled={isSubmitting}
+            className="rounded-full"
           >
             Cancel
           </Button>
         )}
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <Loader2 className="animate-spin" size={17} />
-          ) : (
-            <Sparkles size={17} />
-          )}
+        <Button type="submit" disabled={isSubmitting} className="rounded-full">
+          {isSubmitting ? <Loader2 className="animate-spin" size={17} /> : null}
           {resolvedSubmitLabel}
         </Button>
       </div>

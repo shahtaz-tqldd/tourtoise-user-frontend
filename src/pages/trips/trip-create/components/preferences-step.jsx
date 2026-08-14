@@ -475,21 +475,25 @@ const PreferencesStep = ({
   };
 
   const footer = !isAgentActive ? (
-    <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4 shadow-[0_-10px_24px_rgba(15,23,42,0.08)]">
-      <Button type="button" variant="outline" onClick={() => onStepSelect?.(0)}>
+    <div className="grid md:grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => onStepSelect?.(0)}
+        className="rounded-full"
+      >
         Intial Info
       </Button>
       <Button
         type="button"
         onClick={() => handleActivateAgent()}
         disabled={isActivatingAgent || isStepComplete}
+        className="rounded-full"
       >
         {isActivatingAgent ? (
           <Loader2 className="animate-spin" size={17} />
-        ) : (
-          <Send size={17} />
-        )}
-        Proceed
+        ) : null}
+        Start Planning
       </Button>
     </div>
   ) : (
@@ -520,21 +524,7 @@ const PreferencesStep = ({
             )}
           </Button>
         </form>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onStepSelect?.(0)}
-          >
-            Intial Info
-          </Button>
-          <Button type="button" onClick={() => onStepComplete?.()}>
-            <Sparkles size={17} />
-            {recommendationButtonLabel}
-          </Button>
-        </div>
-      )}
+      ) : null}
     </>
   );
 
@@ -732,6 +722,26 @@ const PreferencesStep = ({
             <div ref={conversationEndRef} />
           </div>
         )}
+
+        {isStepComplete ? (
+          <div className="grid md:grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4 pb-0 -mx-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onStepSelect?.(0)}
+              className="rounded-full"
+            >
+              Intial Info
+            </Button>
+            <Button
+              type="button"
+              onClick={() => onStepComplete?.()}
+              className="rounded-full"
+            >
+              {recommendationButtonLabel}
+            </Button>
+          </div>
+        ) : null}
       </div>
 
       {footer}

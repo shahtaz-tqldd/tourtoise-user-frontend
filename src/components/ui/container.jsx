@@ -2,12 +2,7 @@ import { cn } from "@/lib/utils";
 
 const Container = ({ children, className = "", childClassName = "" }) => {
   return (
-    <main
-      className={cn(
-        "flex-1  px-2.5 py-5 md:px-4 bg-emerald-50/50",
-        className,
-      )}
-    >
+    <main className={cn("flex-1 px-2.5 py-5 md:px-4", className)}>
       <div
         className={cn(
           "mx-auto w-full h-full max-w-7xl flex flex-col gap-6",

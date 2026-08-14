@@ -18,6 +18,7 @@ import PreviewContent from "@/components/shared/preview-content";
 import { Link, useNavigate } from "react-router-dom";
 import TripActionsDropdown from "../../components/trip-actions-dropdown";
 import { Image, VisibilityStatus } from "@/components/shared/utils";
+import { formatDateRange } from "@/lib/date-time";
 
 const formatDate = (value) => {
   if (!value) return "Not set";
@@ -27,24 +28,6 @@ const formatDate = (value) => {
     day: "numeric",
     year: "numeric",
   }).format(new Date(`${value}T00:00:00`));
-};
-
-const formatShortDate = (value) => {
-  if (!value) return "";
-
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(`${value}T00:00:00`));
-};
-
-const formatDateRange = (startDate, endDate) => {
-  if (startDate && endDate) {
-    return `${formatShortDate(startDate)} - ${formatShortDate(endDate)}`;
-  }
-
-  return formatShortDate(startDate || endDate) || "Dates not set";
 };
 
 const formatMoney = (amount, currency) => {
@@ -224,14 +207,14 @@ const DestinationSlider = ({
         onTouchEnd={handleTouchEnd}
       >
         <div className="grid gap-0 md:grid-cols-[320px_minmax(0,1fr)]">
-          <div className="h-56 p-4 rounded-lg overflow-hidden">
+          <div className="h-56 overflow-hidden">
             <Image
               src={activeDestination.image_url}
               alt={activeDestination.name}
             />
           </div>
 
-          <div className="flex flex-col justify-between gap-5 bg-white p-4 md:pl-2">
+          <div className="flex flex-col justify-between gap-5 bg-white p-4 ">
             <div>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -417,7 +400,7 @@ const TripOverview = ({ trip }) => {
           </div>
         </div>
       )}
-      <hr className="my-6" />
+      <hr className="border-t border-slate-200/80 my-6 -mx-6" />
 
       <DestinationSlider
         destinations={trip.destinations}

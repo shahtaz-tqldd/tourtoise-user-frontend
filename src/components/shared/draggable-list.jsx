@@ -88,7 +88,7 @@ const DraggableList = ({
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className={cn("space-y-4", className)}>
+      <div className={cn("md:space-y-4 space-y-3", className)}>
         {items.map((item, index) => (
           <DraggableListRow
             key={getItemId(item)}

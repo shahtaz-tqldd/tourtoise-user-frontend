@@ -204,7 +204,7 @@ const InlinePillSelect = ({
 }) => (
   <Select value={value} onValueChange={onValueChange} disabled={disabled}>
     <SelectTrigger
-      className={`!h-auto min-h-0 w-fit gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold shadow-none focus-visible:ring-2 [&_svg]:size-3 ${className}`}
+      className={`!h-7 min-h-0 w-fit gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold shadow-none focus-visible:ring-2 [&_svg]:size-3 ${className}`}
     >
       <SelectValue />
     </SelectTrigger>

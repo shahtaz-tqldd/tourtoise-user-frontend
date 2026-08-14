@@ -129,13 +129,12 @@ const TripNotes = ({ tripId }) => {
             description="Keep important staff in here"
           />
           <Button
-            className="!pl-2 !pr-3.5 rounded-full"
+            className="size-9 rounded-full"
             size="sm"
             onClick={openCreateNote}
             disabled={!tripId}
           >
             <Plus size={14} />
-            Add Note
           </Button>
         </div>
 

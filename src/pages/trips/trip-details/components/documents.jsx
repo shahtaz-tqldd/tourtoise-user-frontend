@@ -465,13 +465,12 @@ const TripDocumentList = ({ tripId, onStatsChange }) => {
             description="Manage required documents and personal uploads from one place."
           />
           <Button
-            className="!pl-2 !pr-3.5 rounded-full"
+            className="size-9 rounded-full"
             size="sm"
             onClick={() => setIsCreateOpen(true)}
             disabled={!tripId}
           >
             <Plus size={14} />
-            Add New
           </Button>
         </div>
 
@@ -496,7 +495,7 @@ const TripDocumentList = ({ tripId, onStatsChange }) => {
         ) : null}
 
         {!isFetching && !isError ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 md:gap-4 md:grid-cols-2">
             {visibleItems.length ? (
               visibleItems.map((documentItem) => (
                 <div
@@ -511,9 +510,7 @@ const TripDocumentList = ({ tripId, onStatsChange }) => {
                   className="h-full will-change-transform"
                 >
                   <DocumentItemCard
-                    key={
-                      editingItem?.id === documentItem.id ? "edit" : "view"
-                    }
+                    key={editingItem?.id === documentItem.id ? "edit" : "view"}
                     item={documentItem}
                     isEditing={editingItem?.id === documentItem.id}
                     isUpdating={isUpdating}
@@ -638,13 +635,12 @@ const DocumentItemCard = ({
   };
 
   const cardClass =
-    "h-full rounded-xl bg-white md:bg-slate-50 border border-slate-200 p-4";
+    "rounded-xl bg-white border border-primary/50 p-4 text-sm font-medium text-slate-700";
 
   if (isEditing) {
     return (
       <form className={cardClass} onSubmit={handleSubmit}>
         <div className="flex items-start gap-3">
-          <Checkbox checked={Boolean(item.is_packed)} disabled />
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             <div className="flex justify-between gap-4">
               <input
@@ -683,7 +679,7 @@ const DocumentItemCard = ({
               </div>
             ) : null}
 
-            <div className="flex flex-col gap-2 md:flex-row md:justify-end">
+            <div className="gap-2 border-t border-slate-200/80 mt-4 pt-3 -mx-4 px-4 flex justify-end">
               <Button
                 type="button"
                 variant="outline"
@@ -712,12 +708,10 @@ const DocumentItemCard = ({
   return (
     <article
       className={cn(
-        "h-full rounded-xl border p-4 transition-[background-color,border-color] duration-300",
+        "h-full rounded-xl border p-4",
         item.is_packed
-          ? "border-slate-100 bg-slate-50/80"
-          : documentUrl
-            ? "border-transparent bg-primary/10"
-            : "border-slate-200 bg-white",
+          ? "border-primary/15 bg-primary/[0.02]"
+          : "border-slate-200 bg-white",
       )}
     >
       <div className="flex items-start gap-3">
@@ -752,36 +746,36 @@ const DocumentItemCard = ({
                   </span>
                 </div>
                 <PreviewActionsDropdown
-              title="Document actions"
-              description="Choose an action for this document."
-              contentClassName="w-36"
-              trigger={
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="Document actions"
-                  className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 -mt-1 -mr-2"
-                  disabled={isDisabled}
-                >
-                  <MoreVertical size={16} />
-                </Button>
-              }
-              actions={[
-                {
-                  value: "update",
-                  label: "Update",
-                  icon: <PencilLine size={15} className="shrink-0" />,
-                  onSelect: onEdit,
-                },
-                {
-                  value: "delete",
-                  label: "Delete",
-                  icon: <Trash2 size={15} className="shrink-0" />,
-                  destructive: true,
-                  onSelect: onDelete,
-                },
-              ]}
+                  title="Document actions"
+                  description="Choose an action for this document."
+                  contentClassName="w-36"
+                  trigger={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Document actions"
+                      className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 -mt-1 -mr-2"
+                      disabled={isDisabled}
+                    >
+                      <MoreVertical size={16} />
+                    </Button>
+                  }
+                  actions={[
+                    {
+                      value: "update",
+                      label: "Update",
+                      icon: <PencilLine size={15} className="shrink-0" />,
+                      onSelect: onEdit,
+                    },
+                    {
+                      value: "delete",
+                      label: "Delete",
+                      icon: <Trash2 size={15} className="shrink-0" />,
+                      destructive: true,
+                      onSelect: onDelete,
+                    },
+                  ]}
                 />
               </div>
               {getDocumentNote(item) ? (

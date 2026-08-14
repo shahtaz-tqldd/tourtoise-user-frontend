@@ -58,6 +58,8 @@ const NotificationList = ({
   showHeader = true,
   compact = false,
   onAction,
+  onNotificationRead,
+  onAllNotificationsRead,
 }) => {
   const scopeKey = JSON.stringify(scopeParams);
   const scopedParams = useMemo(() => JSON.parse(scopeKey), [scopeKey]);
@@ -100,11 +102,12 @@ const NotificationList = ({
           notification_id: notification.id,
           trip_id: scopedParams.trip_id,
         }).unwrap();
+        onNotificationRead?.(notification);
       } catch {
         toast.error("Could not mark notification as read.");
       }
     },
-    [isReading, readNotification, scopedParams.trip_id],
+    [isReading, onNotificationRead, readNotification, scopedParams.trip_id],
   );
 
   const markAllRead = useCallback(async () => {
@@ -112,10 +115,17 @@ const NotificationList = ({
 
     try {
       await readAllNotifications(scopedParams).unwrap();
+      onAllNotificationsRead?.();
     } catch {
       toast.error("Could not mark notifications as read.");
     }
-  }, [isReadingAll, readAllNotifications, scopedParams, unreadCount]);
+  }, [
+    isReadingAll,
+    onAllNotificationsRead,
+    readAllNotifications,
+    scopedParams,
+    unreadCount,
+  ]);
 
   return (
     <div className={cn("min-h-0", className)}>

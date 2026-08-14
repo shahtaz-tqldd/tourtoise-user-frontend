@@ -3,11 +3,13 @@ import { useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 // components
-import Card from "@/components/ui/card";
+import { Container } from "@/components/ui/container";
+import BrokenPage from "@/components/shared/broken-page";
 import TabMenu from "@/components/ui/tab";
 import TripAgentChat from "./components/chat";
 import TripOverview from "./components/overview";
 import TripPlanningTabs from "./components/planning-tabs";
+import TripNotes from "./components/notes";
 
 //icons
 import {
@@ -19,16 +21,10 @@ import {
 } from "lucide-react";
 
 // lib
-import {
-  useTripDetailQuery,
-  useTripMessageListQuery,
-} from "@/features/trips/tripApiSlice";
-import { useNotificationListQuery } from "@/features/notification/notificationApiSlice";
-import useNotificationSocket from "@/features/notification/useNotificationSocket";
 import useTitle from "@/hooks/useTitle";
-import TripNotes from "./components/notes";
-import { Container } from "@/components/ui/container";
-import BrokenPage from "@/components/shared/broken-page";
+import useMobileBottomNavbar from "@/hooks/useMobileBottomNavbar";
+import { useTripDetailQuery } from "@/features/trips/tripApiSlice";
+import useNotificationSocket from "@/features/notification/useNotificationSocket";
 
 const mobileTabs = [
   { value: "overview", label: "Overview", icon: Sparkles },
@@ -248,38 +244,34 @@ const normalizeTripDetail = (sourceTrip) => {
 };
 
 const TripDetailPage = () => {
-  useTitle("Trip Details");
   const { trip_id } = useParams();
   const [activeMobileTab, setActiveMobileTab] = useState("overview");
   const [incomingMessages, setIncomingMessages] = useState([]);
   const [unreadCountOverrides, setUnreadCountOverrides] = useState({});
+  const [notificationUnreadCountOverrides, setNotificationUnreadCountOverrides] =
+    useState({});
   const receivedSocketMessageIdsRef = useRef(new Set());
+  const isMobileTripChatOpen = activeMobileTab !== "overview";
+  useMobileBottomNavbar({ hidden: isMobileTripChatOpen });
 
   const { data, isFetching, isError } = useTripDetailQuery(trip_id);
-  const { data: notificationData, refetch: refetchNotifications } =
-    useNotificationListQuery({
-      trip_id,
-      page: 1,
-      page_size: 1,
-    });
+
   const trip = useMemo(
     () => normalizeTripDetail(unwrapTripDetail(data)),
     [data],
   );
+  useTitle(`tourtoise - ${trip?.title}`);
+
   const chatSessionId = trip?.is_chat_available
     ? trip.conversation_session_id
     : null;
-  const { data: messageData } = useTripMessageListQuery(
-    {
-      trip_id,
-      session_id: chatSessionId,
-      page: 1,
-      page_size: 1,
-    },
-    { skip: !trip_id || !chatSessionId },
+  const serverNotificationUnreadCount = Number(
+    trip?.unread_notification_count || 0,
   );
-  const notificationUnreadCount = notificationData?.meta?.unread_count || 0;
-  const serverMessageUnreadCount = Number(messageData?.meta?.unread_count || 0);
+  const notificationUnreadCount =
+    notificationUnreadCountOverrides[trip_id] ??
+    serverNotificationUnreadCount;
+  const serverMessageUnreadCount = Number(trip?.unread_message_count || 0);
   const messageUnreadCount =
     unreadCountOverrides[chatSessionId] ?? serverMessageUnreadCount;
   const tabs = useMemo(
@@ -299,10 +291,14 @@ const TripDetailPage = () => {
   const handleSocketNotification = useCallback(
     (notification) => {
       if (notification?.trip_id === trip_id) {
-        refetchNotifications();
+        setNotificationUnreadCountOverrides((currentCounts) => ({
+          ...currentCounts,
+          [trip_id]:
+            (currentCounts[trip_id] ?? serverNotificationUnreadCount) + 1,
+        }));
       }
     },
-    [refetchNotifications, trip_id],
+    [serverNotificationUnreadCount, trip_id],
   );
 
   const handleSocketTripMessage = useCallback(
@@ -343,6 +339,23 @@ const TripDetailPage = () => {
     }));
   }, [chatSessionId]);
 
+  const handleNotificationRead = useCallback(() => {
+    setNotificationUnreadCountOverrides((currentCounts) => ({
+      ...currentCounts,
+      [trip_id]: Math.max(
+        (currentCounts[trip_id] ?? serverNotificationUnreadCount) - 1,
+        0,
+      ),
+    }));
+  }, [serverNotificationUnreadCount, trip_id]);
+
+  const handleAllNotificationsRead = useCallback(() => {
+    setNotificationUnreadCountOverrides((currentCounts) => ({
+      ...currentCounts,
+      [trip_id]: 0,
+    }));
+  }, [trip_id]);
+
   useNotificationSocket({
     enabled: Boolean(trip_id),
     onNotification: handleSocketNotification,
@@ -366,15 +379,6 @@ const TripDetailPage = () => {
         icon={Backpack}
         actionLabel="Create new Trip"
       />
-
-      // <Card className="text-center min-h-60">
-      //   <h1 className="text-xl font-bold text-slate-950">
-      //     Trip details unavailable
-      //   </h1>
-      //   <p className="mt-2 text-sm text-slate-500">
-      //     Could not load this trip from the API.
-      //   </p>
-      // </Card>
     );
   }
 
@@ -395,6 +399,8 @@ const TripDetailPage = () => {
           messageUnreadCount={messageUnreadCount}
           onMessagesRead={handleMessagesRead}
           notificationUnreadCount={notificationUnreadCount}
+          onNotificationRead={handleNotificationRead}
+          onAllNotificationsRead={handleAllNotificationsRead}
           className="sticky top-[92px]"
         />
       </section>
@@ -404,13 +410,14 @@ const TripDetailPage = () => {
           "xl:hidden",
           activeMobileTab === "overview"
             ? "pt-0 pb-18 md:pt-5 md:pb-5"
-            : "flex h-[calc(100dvh-3rem)] min-h-0 flex-col overflow-hidden pb-[calc(env(safe-area-inset-bottom)+4.5rem)]",
+            : "flex h-[calc(100dvh-57px)] min-h-0 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)] md:h-[calc(100dvh-109px)]",
         )}
       >
         <TabMenu
           tabs={tabs}
           activeTab={activeMobileTab}
           setActiveTab={setActiveMobileTab}
+          scrollable
           className={cn(
             "z-[30] -mx-2.5 bg-white px-4 pt-1.5",
             activeMobileTab === "overview" ? "sticky top-14" : "shrink-0",
@@ -439,6 +446,8 @@ const TripDetailPage = () => {
               messageUnreadCount={messageUnreadCount}
               onMessagesRead={handleMessagesRead}
               notificationUnreadCount={notificationUnreadCount}
+              onNotificationRead={handleNotificationRead}
+              onAllNotificationsRead={handleAllNotificationsRead}
               showTabs={false}
               activeSection="chat"
               className="h-full min-h-0 rounded-none md:rounded-3xl"
@@ -451,6 +460,8 @@ const TripDetailPage = () => {
               sessionId={chatSessionId}
               messageUnreadCount={messageUnreadCount}
               notificationUnreadCount={notificationUnreadCount}
+              onNotificationRead={handleNotificationRead}
+              onAllNotificationsRead={handleAllNotificationsRead}
               showTabs={false}
               activeSection="notifications"
               className="h-full min-h-0 rounded-none md:rounded-3xl"

@@ -11,7 +11,7 @@ export const getDestinationSlug = (destination) =>
 
 export const createInitialTripForm = () => ({
   budget_tier: "comfort",
-  budget_currency: "",
+  budget_currency: "USD",
   start_date: "",
   days: "",
   travelers_count: "1",

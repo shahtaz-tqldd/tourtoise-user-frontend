@@ -244,7 +244,7 @@ const CreditBalancePanel = ({
 
     <div className="hidden h-9 w-px shrink-0 bg-slate-200 sm:block" />
 
-    {!hasPendingRequest ? (
+    {hasPendingRequest ? (
       <div className="ml-auto flex min-w-0 items-center gap-2 text-slate-600">
         <BadgeCheck className="size-4 shrink-0" aria-hidden="true" />
         <p className="text-xs font-medium leading-4">

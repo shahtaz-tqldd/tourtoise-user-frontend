@@ -40,6 +40,7 @@ import {
   useUpdateTripPackingItemMutation,
 } from "@/features/trips/tripApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
+import { cn } from "@/lib/utils";
 
 const categoryOptions = [
   { value: "clothing", label: "Clothing" },
@@ -153,7 +154,7 @@ const InlinePillSelect = ({
 }) => (
   <Select value={value} onValueChange={onValueChange} disabled={disabled}>
     <SelectTrigger
-      className={`!h-auto min-h-0 w-fit gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold shadow-none focus-visible:ring-2 [&_svg]:size-3 ${className}`}
+      className={`!h-7 min-h-0 w-fit gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold shadow-none focus-visible:ring-2 [&_svg]:size-3 ${className}`}
     >
       <SelectValue />
     </SelectTrigger>
@@ -346,13 +347,12 @@ const TripPackingItems = ({ tripId, onStatsChange }) => {
             description="Track essentials before the trip is locked."
           />
           <Button
-            className="!pl-2 !pr-3.5 rounded-full"
+            className="size-9 rounded-full"
             size="sm"
             onClick={() => setIsCreateOpen(true)}
             disabled={!tripId}
           >
             <Plus size={14} />
-            Add New
           </Button>
         </div>
 
@@ -377,7 +377,7 @@ const TripPackingItems = ({ tripId, onStatsChange }) => {
         ) : null}
 
         {!isFetching && !isError ? (
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {visibleItems.length ? (
               visibleItems.map((packingItem) => (
                 <div
@@ -392,9 +392,7 @@ const TripPackingItems = ({ tripId, onStatsChange }) => {
                   className="will-change-transform"
                 >
                   <PackingItemCard
-                    key={
-                      editingItem?.id === packingItem.id ? "edit" : "view"
-                    }
+                    key={editingItem?.id === packingItem.id ? "edit" : "view"}
                     item={packingItem}
                     isEditing={editingItem?.id === packingItem.id}
                     isUpdating={isUpdating}
@@ -487,13 +485,12 @@ const PackingItemCard = ({
   };
 
   const cardClass =
-    "rounded-xl bg-white md:bg-slate-50 border border-slate-200 px-3 py-3 text-sm font-medium text-slate-700";
+    "rounded-xl bg-white border border-primary/50 p-4 text-sm font-medium text-slate-700";
 
   if (isEditing) {
     return (
       <form className={cardClass} onSubmit={handleSubmit}>
         <div className="flex items-start gap-3">
-          <Checkbox checked={Boolean(item.is_packed)} disabled />
           <div className="min-w-0 flex-1">
             <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div className="min-w-0 flex-1">
@@ -522,7 +519,7 @@ const PackingItemCard = ({
                   value={quantity}
                   onChange={(event) => setQuantity(event.target.value)}
                   disabled={isUpdating}
-                  className="h-8 w-16 rounded-full border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
+                  className="h-7 w-16 rounded-full border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
                   aria-label="Quantity"
                 />
                 <InlinePillSelect
@@ -543,28 +540,28 @@ const PackingItemCard = ({
                   }
                 />
               </div>
-              <div className="flx gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={isUpdating}
-                  onClick={onCancelEdit}
-                  className="!text-xs rounded-full"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  disabled={isUpdating}
-                  className="!text-xs rounded-full"
-                >
-                  {isUpdating ? "Saving..." : "Save changes"}
-                </Button>
-              </div>
             </div>
           </div>
+        </div>
+        <div className="flx gap-2 border-t border-slate-200/80 mt-4 pt-3 -mx-4 px-4 flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isUpdating}
+            onClick={onCancelEdit}
+            className="!text-xs rounded-full"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={isUpdating}
+            className="!text-xs rounded-full"
+          >
+            {isUpdating ? "Saving..." : "Save changes"}
+          </Button>
         </div>
       </form>
     );
@@ -572,11 +569,12 @@ const PackingItemCard = ({
 
   return (
     <article
-      className={`rounded-xl border p-4 transition-[background-color,border-color] duration-300 ${
+      className={cn(
+        "h-full rounded-xl border p-4",
         item.is_packed
-          ? "border-slate-100 bg-slate-50/80"
-          : "border-slate-200 bg-white"
-      }`}
+          ? "border-primary/15 bg-primary/[0.02]"
+          : "border-slate-200 bg-white",
+      )}
     >
       <div className="flex items-start gap-3">
         <Checkbox

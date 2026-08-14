@@ -126,6 +126,8 @@ const TripAgentChat = ({
   messageUnreadCount = 0,
   onMessagesRead,
   notificationUnreadCount = 0,
+  onNotificationRead,
+  onAllNotificationsRead,
   showTabs = true,
   activeSection = "chat",
   className = "",
@@ -172,7 +174,11 @@ const TripAgentChat = ({
         />
       )}
       {selectedSection === "notifications" && (
-        <NotificationSection tripId={tripId} />
+        <NotificationSection
+          tripId={tripId}
+          onNotificationRead={onNotificationRead}
+          onAllNotificationsRead={onAllNotificationsRead}
+        />
       )}
     </Card>
   );
@@ -435,7 +441,7 @@ const ChatSection = ({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="shrink-0 border-t border-slate-200 bg-white pt-3">
+      <div className="shrink-0 border-t border-slate-200 bg-white px-2.5 pb-2 pt-3 md:px-0 md:pb-0">
         <ChatInputForm
           composerRef={composerRef}
           message={message}
@@ -449,7 +455,11 @@ const ChatSection = ({
   );
 };
 
-const NotificationSection = ({ tripId }) => {
+const NotificationSection = ({
+  tripId,
+  onNotificationRead,
+  onAllNotificationsRead,
+}) => {
   return (
     <NotificationList
       scopeParams={{ trip_id: tripId }}
@@ -457,6 +467,8 @@ const NotificationSection = ({ tripId }) => {
       className="flex min-h-0 flex-1 flex-col py-4 pr-1"
       itemClassName="bg-slate-50"
       emptyMessage="No trip notifications available yet."
+      onNotificationRead={onNotificationRead}
+      onAllNotificationsRead={onAllNotificationsRead}
     />
   );
 };

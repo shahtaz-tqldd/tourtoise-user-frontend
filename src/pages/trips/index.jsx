@@ -28,7 +28,7 @@ const isPastTrip = (trip) => {
 };
 
 const TripsPage = () => {
-  useTitle("Trips");
+  useTitle("tourtoise - my trips");
   const [page, setPage] = useState(1);
   const [activeSearch, setActiveSearch] = useState("");
   const [activeStatus, setActiveStatus] = useState(["active"]);

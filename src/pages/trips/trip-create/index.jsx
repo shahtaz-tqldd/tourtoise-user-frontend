@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -16,11 +17,11 @@ import {
 import {
   Ellipsis,
   List,
-  Pencil,
   Loader2,
   Sparkles,
   Plus,
   Trash2,
+  ArrowLeft,
 } from "lucide-react";
 import {
   useCreateTripMutation,
@@ -288,7 +289,11 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
   const handleStepSelect = (stepIndex) => {
     const step = planningSteps[stepIndex];
     const isAvailable = planningState?.flow?.length
-      ? canOpenStep({ trip: activeTrip, payload: planningState, stepKey: step.key })
+      ? canOpenStep({
+          trip: activeTrip,
+          payload: planningState,
+          stepKey: step.key,
+        })
       : stepIndex <= unlockedStep;
 
     if (!isAvailable) return;
@@ -386,19 +391,34 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
       >
         <div className="flex h-full flex-col max-w-xl w-full mx-auto bg-white">
           <SheetHeader className="border-b border-slate-200 pr-12 text-left">
-            <SheetTitle className="flex items-center gap-2">
-              <Pencil
-                aria-hidden="true"
-                className="shrink-0 text-slate-400"
-                size={16}
-              />
-              <input
-                type="text"
-                aria-label="Trip title"
-                value={currentTripTitle}
-                onChange={(event) => setTripTitle(event.target.value)}
-                className="min-w-0 flex-1 bg-transparent p-0 text-xl font-semibold text-slate-950 outline-none"
-              />
+            <section className="flex justify-between items-start">
+              <div className="flx gap-3">
+                <SheetClose asChild>
+                  <button
+                    type="button"
+                    className="-ml-2 flex size-10 shrink-0 items-center justify-center rounded-full text-slate-700 transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+                    aria-label="Close profile menu"
+                  >
+                    <ArrowLeft />
+                  </button>
+                </SheetClose>
+                <div>
+                  <SheetTitle>
+                    <input
+                      type="text"
+                      aria-label="Trip title"
+                      value={currentTripTitle}
+                      onChange={(event) => setTripTitle(event.target.value)}
+                      className="min-w-0 flex-1 bg-transparent p-0 text-xl font-semibold text-slate-950 outline-none"
+                    />
+                  </SheetTitle>
+                  <SheetDescription className="mt-2">
+                    {[resolvedDestination?.region, resolvedDestination?.country]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </SheetDescription>
+                </div>
+              </div>
               {!shouldSkipTripList && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -449,14 +469,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
-            </SheetTitle>
-            <div className="flbx pl-6">
-              <SheetDescription>
-                {[resolvedDestination?.region, resolvedDestination?.country]
-                  .filter(Boolean)
-                  .join(", ")}
-              </SheetDescription>
-            </div>
+            </section>
           </SheetHeader>
 
           {showAgent && (

@@ -1,39 +1,45 @@
+import {
+  Armchair,
+  Backpack,
+  BedSingle,
+  Building2,
+  Crown,
+  Gem,
+  Heart,
+  Hotel,
+  House,
+  Shuffle,
+  Sparkles,
+  UserRound,
+  Users,
+  UsersRound,
+  WalletCards,
+} from "lucide-react";
+
 export const TRAVELLER_TYPE_OPTIONS = [
-  { value: "solo", label: "Solo" },
-  { value: "couple", label: "Couple" },
-  { value: "family", label: "Family" },
-  { value: "group", label: "Group" },
+  { value: "solo", label: "Solo", icon: UserRound },
+  { value: "couple", label: "Couple", icon: Heart },
+  { value: "family", label: "Family", icon: UsersRound },
+  { value: "group", label: "Group", icon: Users },
 ];
 
 export const BUDGET_TIER_OPTIONS = [
-  { value: "backpacker", label: "Backpacker" },
-  { value: "budget", label: "Budget" },
-  { value: "comfort", label: "Comfort" },
-  { value: "premium", label: "Premium" },
-  { value: "luxury", label: "Luxury" },
-];
-
-export const CURRENCY_OPTIONS = [
-  { value: "USD", label: "USD" },
-  { value: "BDT", label: "BDT" },
-  { value: "EUR", label: "EUR" },
-  { value: "GBP", label: "GBP" },
-  { value: "INR", label: "INR" },
-  { value: "THB", label: "THB" },
-  { value: "AED", label: "AED" },
+  { value: "backpacker", label: "Backpacker", icon: Backpack },
+  { value: "budget", label: "Budget", icon: WalletCards },
+  { value: "comfort", label: "Comfort", icon: Armchair },
+  { value: "premium", label: "Premium", icon: Sparkles },
+  { value: "luxury", label: "Luxury", icon: Gem },
 ];
 
 export const ACCOMMODATION_OPTIONS = [
-  { value: "budget", label: "Budget stays" },
-  { value: "mid_range", label: "Mid Range" },
-  { value: "boutique", label: "Boutique stays" },
-  { value: "luxury", label: "Luxury hotels" },
-  { value: "apartment", label: "Apartment / villa" },
-  { value: "hostel", label: "Hostel" },
-  { value: "any", label: "Flexible" },
+  { value: "budget", label: "Budget stays", icon: BedSingle },
+  { value: "mid_range", label: "Mid Range", icon: Hotel },
+  { value: "boutique", label: "Boutique stays", icon: Building2 },
+  { value: "luxury", label: "Luxury hotels", icon: Crown },
+  { value: "apartment", label: "Apartment / villa", icon: House },
+  { value: "hostel", label: "Hostel", icon: Backpack },
+  { value: "any", label: "Flexible", icon: Shuffle },
 ];
-
-
 
 export const TRAVEL_PACE_OPTIONS = [
   {

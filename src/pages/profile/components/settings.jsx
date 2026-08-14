@@ -15,17 +15,10 @@ import {
 } from "lucide-react";
 
 import ConfirmDialog from "@/components/shared/confirm-dialog";
+import PreviewContent from "@/components/shared/preview-content";
 import { SectionHeader } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import { PreviewCard } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { FloatingInput } from "@/components/ui/input";
 import {
   useChangePasswordMutation,
@@ -166,6 +159,11 @@ const ProfileSettings = () => {
     }
   };
 
+  const handlePasswordDialogOpenChange = (open) => {
+    setPasswordDialogOpen(open);
+    if (!open) reset();
+  };
+
   const handleLogout = () => {
     dispatch(userLoggedOut());
     dispatch(resetApiState());
@@ -281,23 +279,25 @@ const ProfileSettings = () => {
         </div>
       </PreviewCard>
 
-      <Dialog
+      <PreviewContent
         open={passwordDialogOpen}
-        onOpenChange={(open) => {
-          setPasswordDialogOpen(open);
-          if (!open) reset();
-        }}
+        onOpenChange={handlePasswordDialogOpenChange}
+        title="Update Password"
+        description="Use a strong password that you do not reuse elsewhere."
+        className="h-fit p-6 !max-w-xl md:p-8"
       >
-        <DialogContent className="sm:max-w-[520px]">
-          <DialogHeader>
-            <DialogTitle>Update Password</DialogTitle>
-            <DialogDescription className="leading-6">
-              Use a strong password that you do not reuse elsewhere.
-            </DialogDescription>
-          </DialogHeader>
+        <h2 className="mt-2 text-lg font-bold text-slate-950 md:mt-0">
+          Update Password
+        </h2>
+        <p className="mt-1 text-sm leading-6 text-slate-500">
+          Use a strong password that you do not reuse elsewhere.
+        </p>
 
-          <form onSubmit={handleSubmit(onPasswordSubmit)} className="space-y-4">
-            <Controller
+        <form
+          onSubmit={handleSubmit(onPasswordSubmit)}
+          className="mt-6 space-y-4"
+        >
+          <Controller
               name="current_password"
               control={control}
               rules={{ required: "Current password is required" }}
@@ -309,8 +309,8 @@ const ProfileSettings = () => {
                   error={errors.current_password?.message}
                 />
               )}
-            />
-            <Controller
+          />
+          <Controller
               name="new_password"
               control={control}
               rules={{
@@ -328,8 +328,8 @@ const ProfileSettings = () => {
                   error={errors.new_password?.message}
                 />
               )}
-            />
-            <Controller
+          />
+          <Controller
               name="confirm_password"
               control={control}
               rules={{
@@ -345,25 +345,29 @@ const ProfileSettings = () => {
                   error={errors.confirm_password?.message}
                 />
               )}
-            />
+          />
 
-            <DialogFooter className="pt-2">
+          <div className="flex w-full flex-col gap-3 pt-4 md:flex-row md:justify-end">
               <Button
                 type="button"
                 variant="outline"
                 disabled={isChangingPassword}
-                onClick={() => setPasswordDialogOpen(false)}
+                onClick={() => handlePasswordDialogOpenChange(false)}
+                className="w-full md:w-auto"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isChangingPassword}>
+              <Button
+                type="submit"
+                disabled={isChangingPassword}
+                className="w-full md:w-auto"
+              >
                 <KeyRound />
                 {isChangingPassword ? "Updating..." : "Update Password"}
               </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </form>
+      </PreviewContent>
 
       <ConfirmDialog
         open={Boolean(confirmState)}
