@@ -5,7 +5,7 @@ import {
 } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import TabMenu from "@/components/ui/tab";
-import { Clock3, MapPin, Sparkles, Star, Utensils, Wallet } from "lucide-react";
+import { Clock3, MapPin, Star, Utensils, Wallet } from "lucide-react";
 import React, { useState } from "react";
 import {
   isPlanningStepAfter,
@@ -17,7 +17,7 @@ const categories = [
   {
     key: "attractions",
     messageKey: "attractions",
-    label: "Spots",
+    label: "Attractions",
     title: "Recommended spots",
     empty: "No spots recommended yet.",
   },
@@ -141,10 +141,10 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
 
   return (
     <article
-      className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm animate-in fade-in slide-in-from-bottom-2"
+      className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-in fade-in slide-in-from-bottom-2"
       style={{ animationDelay: `${index * 70}ms` }}
     >
-      <div className="relative h-36 bg-slate-100">
+      <div className="relative aspect-[5/3] bg-slate-100">
         <Image src={image} alt={item.name} loading="lazy" />
         {item.is_featured || item.is_must_try ? (
           <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-primary shadow-sm">
@@ -214,7 +214,7 @@ const RecommendationTabContent = ({ category, items, message }) => (
     <h3 className="text-sm font-semibold text-slate-950">{category.title}</h3>
 
     {items.length ? (
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid md:grid-cols-2 gap-3">
         {items.map((item, index) => (
           <RecommendationCard
             key={item.id || item.slug || item.name}
@@ -282,8 +282,8 @@ const RecommendationsStep = ({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+    <div className="flex min-h-0 flex-col md:h-full">
+      <div className="custom-scrollbar space-y-4 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:[scrollbar-gutter:stable]">
         <AuthorMessage message="I have recommended you tour spots, activities and local cuisines based on your interests. Feel free to remove items and tell me what I can do more!" />
 
         <div className="sticky -top-4 z-10 bg-white pt-1">
@@ -307,16 +307,20 @@ const RecommendationsStep = ({
           </div>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
+      <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
         <Button
           type="button"
           variant="outline"
           onClick={() => onStepSelect?.(1)}
+          className="rounded-full order-2 md:order-1"
         >
           View Preferences
         </Button>
-        <Button type="button" onClick={() => onStepComplete?.()}>
-          <Sparkles size={17} />
+        <Button
+          type="button"
+          onClick={() => onStepComplete?.()}
+          className="rounded-full order-1 md:order-2"
+        >
           {itineraryButtonLabel}
         </Button>
       </div>

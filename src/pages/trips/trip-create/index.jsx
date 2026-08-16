@@ -30,7 +30,7 @@ import {
   useTripShortDetailsQuery,
 } from "@/features/trips/tripApiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 // components
@@ -74,6 +74,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
   const [activeStep, setActiveStep] = useState(null);
   const [furthestStep, setFurthestStep] = useState(0);
   const [planningState, setPlanningState] = useState(null);
+  const activeStepContainerRef = useRef(null);
   const generatedTripTitle = useMemo(
     () => getGeneratedTripTitle(destinationName),
     [destinationName],
@@ -144,6 +145,12 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
   const displayedStepConfig = planningSteps[displayedStep];
   const ActiveStepComponent = displayedStepConfig.component;
   const activeTripId = getTripId(activeTrip);
+
+  useEffect(() => {
+    if (!activeStepContainerRef.current) return;
+    activeStepContainerRef.current.scrollTop = 0;
+  }, [activeTripId, displayedStep]);
+
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
@@ -582,7 +589,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
           )}
 
           {showSetupForm && !tripDetailError && (
-            <div className="flex min-h-0 flex-1 flex-col">
+            <div className="custom-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto md:overflow-hidden">
               <TripPlanInitialInput
                 destination={resolvedDestination}
                 form={form}
@@ -597,6 +604,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
 
           {showAgent && !tripDetailError && (
             <div
+              ref={activeStepContainerRef}
               className={
                 [
                   "get_started",
@@ -606,7 +614,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
                   planningStepValues.preparation,
                   planningStepValues.overview,
                 ].includes(displayedStepConfig.key)
-                  ? "min-h-0 flex-1"
+                  ? "custom-scrollbar min-h-0 flex-1 overflow-y-auto md:overflow-hidden"
                   : "custom-scrollbar flex-1 space-y-3 overflow-y-auto p-4"
               }
             >

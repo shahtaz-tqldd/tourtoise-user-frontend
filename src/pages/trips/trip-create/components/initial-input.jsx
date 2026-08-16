@@ -128,7 +128,7 @@ const TripPlanInitialInput = ({
   const form = controlledForm || internalForm;
   const isExistingTrip = !!trip && !controlledForm;
   const isSubmitting = isControlledSubmitting || isUpdatingTrip;
-  const formClassName = className || "flex h-full min-h-0 flex-col";
+  const formClassName = className || "flex min-h-0 flex-col md:h-full";
   const nextStepExists =
     isExistingTrip &&
     isPlanningStepAfter(trip?.current_step, planningStepValues.getStarted);
@@ -267,7 +267,7 @@ const TripPlanInitialInput = ({
 
   return (
     <form onSubmit={handleSubmit} className={formClassName}>
-      <div className="custom-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto p-4">
+      <div className="custom-scrollbar space-y-5 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:[scrollbar-gutter:stable]">
         <AuthorMessage
           message={`Hi! I am tutle, your trip planning assistant. I will help you plan a trip at ${
             destinationName
@@ -367,19 +367,19 @@ const TripPlanInitialInput = ({
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
+      <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
         {onClose && (
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-full"
+            className="rounded-full order-2 md:order-1"
           >
             Cancel
           </Button>
         )}
-        <Button type="submit" disabled={isSubmitting} className="rounded-full">
+        <Button type="submit" disabled={isSubmitting} className="rounded-full order-1 md:order-2">
           {isSubmitting ? <Loader2 className="animate-spin" size={17} /> : null}
           {resolvedSubmitLabel}
         </Button>

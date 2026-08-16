@@ -23,6 +23,7 @@ import {
 import { MapPinned } from "lucide-react";
 import BrokenPage from "@/components/shared/broken-page";
 import { Container } from "@/components/ui/container";
+import useTitle from "@/hooks/useTitle";
 
 const DestinationDetailsPage = () => {
   const { destination_id } = useParams();
@@ -32,6 +33,8 @@ const DestinationDetailsPage = () => {
 
   const { data, isFetching, error } = useDestinationDetailQuery(destination_id);
   const destination = data?.data || {};
+
+  useTitle(`tourtoise - ${destination?.name}`);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;

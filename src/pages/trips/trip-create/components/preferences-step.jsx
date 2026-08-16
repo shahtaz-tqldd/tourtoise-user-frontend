@@ -283,15 +283,7 @@ const PreferencesStep = ({
       ),
     [agentMessages, serverMessages, trip],
   );
-  const conversationSignature = useMemo(
-    () =>
-      conversationMessages
-        .map(
-          (item, index) => item.id || `${item.role}-${index}-${item.content}`,
-        )
-        .join("|"),
-    [conversationMessages],
-  );
+  const conversationMessageCount = conversationMessages.length;
   const [agentFailureMessage, setAgentFailureMessage] = useState(
     trip?.agent_active === false ? trip?.agent_active_failed_message || "" : "",
   );
@@ -300,6 +292,8 @@ const PreferencesStep = ({
 
   const [message, setMessage] = useState("");
   const conversationEndRef = useRef(null);
+  const previousConversationMessageCountRef = useRef(0);
+  const hasInitializedConversationScrollRef = useRef(false);
 
   const [activateAgent, { isLoading: isActivatingAgent }] =
     useTripAgentActiveMutation();
@@ -334,29 +328,32 @@ const PreferencesStep = ({
 
   const isAgentThinking = isActivatingAgent || isSendingMessage;
 
-  const recommendationButtonLabel = planningPayload?.is_recommendation_complete
-    ? "Recommendations"
-    : "Start recommendation";
-
   useEffect(() => {
     if (hasEditedPreferencesRef.current) return;
     setDraftPreferences(preferenceSource);
   }, [preferenceSource]);
 
   useEffect(() => {
-    if (!isAgentActive) return;
+    if (isPreferenceFetching) return;
+
+    if (!hasInitializedConversationScrollRef.current) {
+      hasInitializedConversationScrollRef.current = true;
+      previousConversationMessageCountRef.current = conversationMessageCount;
+      return;
+    }
+
+    const hasNewMessage =
+      conversationMessageCount > previousConversationMessageCountRef.current;
+
+    previousConversationMessageCountRef.current = conversationMessageCount;
+
+    if (!hasNewMessage) return;
 
     conversationEndRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
     });
-  }, [
-    conversationSignature,
-    isAgentActive,
-    isPreferenceFetching,
-    isSendingMessage,
-    isStepComplete,
-  ]);
+  }, [conversationMessageCount, isPreferenceFetching]);
 
   const toggleListValue = (list, value) =>
     list.includes(value)
@@ -425,7 +422,6 @@ const PreferencesStep = ({
 
     if (data?.is_step_complete || data?.is_qna_complete) {
       setIsLocallyStepComplete(true);
-      onStepComplete?.();
     }
   };
 
@@ -480,63 +476,9 @@ const PreferencesStep = ({
     }
   };
 
-  const footer = !isAgentActive ? (
-    <div className="grid md:grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => onStepSelect?.(0)}
-        className="rounded-full"
-      >
-        Intial Info
-      </Button>
-      <Button
-        type="button"
-        onClick={() => handleActivateAgent()}
-        disabled={isActivatingAgent || isStepComplete}
-        className="rounded-full"
-      >
-        {isActivatingAgent ? (
-          <Loader2 className="animate-spin" size={17} />
-        ) : null}
-        Start Planning
-      </Button>
-    </div>
-  ) : (
-    <>
-      {!isStepComplete ? (
-        <form
-          onSubmit={handleSendMessage}
-          className="flex gap-2 border-t border-slate-200 bg-white p-4"
-        >
-          <input
-            type="text"
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-            placeholder="Reply to the trip agent..."
-            disabled={isSendingMessage}
-            className="h-11 min-w-0 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
-          />
-          <Button
-            type="submit"
-            size="icon"
-            className="rounded-full"
-            disabled={isSendingMessage}
-          >
-            {isSendingMessage ? (
-              <Loader2 className="animate-spin" size={17} />
-            ) : (
-              <Send size={17} />
-            )}
-          </Button>
-        </form>
-      ) : null}
-    </>
-  );
-
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-4 [scrollbar-gutter:stable]">
+    <div className="flex min-h-0 flex-col md:h-full">
+      <div className="custom-scrollbar space-y-4 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:[scrollbar-gutter:stable]">
         <AuthorMessage message="Great. I have your basic trip details. Now I'll understand what kind of trip experience you want so I can recommend the right places, food, activities, and pace." />
 
         <div className="space-y-5 rounded-xl border border-slate-200 bg-white p-4">
@@ -728,29 +670,75 @@ const PreferencesStep = ({
             <div ref={conversationEndRef} />
           </div>
         )}
-
-        {isStepComplete ? (
-          <div className="grid md:grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4 pb-0 -mx-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onStepSelect?.(0)}
-              className="rounded-full"
-            >
-              Intial Info
-            </Button>
-            <Button
-              type="button"
-              onClick={() => onStepComplete?.()}
-              className="rounded-full"
-            >
-              {recommendationButtonLabel}
-            </Button>
-          </div>
-        ) : null}
       </div>
 
-      {footer}
+      {!isAgentActive ? (
+        <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onStepSelect?.(0)}
+            className="rounded-full order-2 md:order-1"
+          >
+            Initial Info
+          </Button>
+          <Button
+            type="button"
+            onClick={handleActivateAgent}
+            disabled={isActivatingAgent || isStepComplete}
+            className="rounded-full order-1 md:order-2"
+          >
+            {isActivatingAgent ? (
+              <Loader2 className="animate-spin" size={17} />
+            ) : null}
+            Start Planning
+          </Button>
+        </div>
+      ) : isStepComplete ? (
+        <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onStepSelect?.(0)}
+            className="rounded-full order-2 md:order-1"
+          >
+            Initial Info
+          </Button>
+          <Button
+            type="button"
+            onClick={() => onStepComplete?.()}
+            className="rounded-full order-1 md:order-2"
+          >
+            See recommendation
+          </Button>
+        </div>
+      ) : (
+        <form
+          onSubmit={handleSendMessage}
+          className="flex gap-2 border-t border-slate-200 bg-white p-4"
+        >
+          <input
+            type="text"
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
+            placeholder="Reply to the trip agent..."
+            disabled={isSendingMessage}
+            className="h-11 min-w-0 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+          />
+          <Button
+            type="submit"
+            size="icon"
+            className="rounded-full"
+            disabled={isSendingMessage}
+          >
+            {isSendingMessage ? (
+              <Loader2 className="animate-spin" size={17} />
+            ) : (
+              <Send size={17} />
+            )}
+          </Button>
+        </form>
+      )}
     </div>
   );
 };

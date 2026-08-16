@@ -106,8 +106,8 @@ const DayTabs = ({ days, activeDay, onChange }) => (
 );
 
 const TimelineItem = ({ item, isLast }) => (
-  <div className="relative flex gap-3">
-    <div className="flex w-16 shrink-0 justify-end pt-1 text-xs font-medium text-slate-500">
+  <div className="relative flex gap-2 md:gap-3">
+    <div className="hidden w-16 shrink-0 justify-end pt-1 text-xs font-medium text-slate-500 md:flex">
       {formatTime(item.time)}
     </div>
     <div className="relative flex flex-col items-center">
@@ -116,13 +116,16 @@ const TimelineItem = ({ item, isLast }) => (
     </div>
     <div className="min-w-0 flex-1 pb-4">
       <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-        <div className="mb-2 flex items-start justify-between gap-3">
-          <h4 className="text-sm font-semibold leading-5 text-slate-950">
+        <div className="mb-2 flex flex-wrap items-center gap-2 md:flex-nowrap md:items-start md:gap-3">
+          <h4 className="order-last w-full text-sm font-semibold leading-5 text-slate-950 md:order-none md:w-auto md:flex-1">
             {item.title}
           </h4>
+          <span className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary md:hidden">
+            {formatTime(item.time)}
+          </span>
           {item.item_type && (
             <span
-              className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold ${
+              className={`ml-auto shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold ${
                 itemTypeStyles[item.item_type] || "bg-slate-100 text-slate-600"
               }`}
             >
@@ -258,8 +261,8 @@ const ItineraryStep = ({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+    <div className="flex min-h-0 flex-col md:h-full">
+      <div className="custom-scrollbar space-y-4 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:[scrollbar-gutter:stable]">
         <AuthorMessage
           title={itinerary.title || "Day wise itinerary"}
           message={itinerary.summary || itinerary.message}
@@ -280,7 +283,7 @@ const ItineraryStep = ({
               activeDay={activeDayPlan.day}
               onChange={setActiveDay}
             />
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 md:p-4">
               <div className="mb-4">
                 <p className="text-xs font-medium uppercase text-slate-500">
                   Day {activeDayPlan.day} · {formatDate(activeDayPlan.date)}
@@ -369,16 +372,21 @@ const ItineraryStep = ({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
+      <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
         <Button
           type="button"
           variant="outline"
           onClick={() => onStepSelect?.(2)}
+          className="rounded-full order-2 md:order-1"
         >
           Recommendations
         </Button>
 
-        <Button type="button" onClick={() => onStepComplete?.()}>
+        <Button
+          type="button"
+          onClick={() => onStepComplete?.()}
+          className="rounded-full order-1 md:order-2"
+        >
           <Sparkles size={17} />
           {preparationButtonLabel}
         </Button>

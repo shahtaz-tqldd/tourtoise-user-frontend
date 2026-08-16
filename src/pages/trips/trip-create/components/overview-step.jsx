@@ -158,8 +158,8 @@ const OverviewStep = ({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+    <div className="flex min-h-0 flex-col md:h-full">
+      <div className="custom-scrollbar space-y-4 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:[scrollbar-gutter:stable]">
         {resolvedTripStatus === "draft" && (
           <NotificationCard
             title="This trip is saved as draft"
@@ -262,12 +262,13 @@ const OverviewStep = ({
         </SectionCard>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
+      <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
         <Button
           type="button"
           variant="outline"
           disabled={isActivating}
           onClick={onStartNewPlan}
+          className="rounded-full order-2 md:order-1"
         >
           <Plus size={17} />
           Start a New Plan
@@ -277,6 +278,7 @@ const OverviewStep = ({
             type="button"
             onClick={handleActivateTrip}
             disabled={isActivating || activation.can_activate === false}
+            className="rounded-full order-1 md:order-2"
           >
             {isActivating ? (
               <Loader2 className="animate-spin" size={17} />
@@ -286,7 +288,10 @@ const OverviewStep = ({
             Complete Trip Planning
           </Button>
         ) : (
-          <Button onClick={() => handleTripRedirect(tripOverview.id || tripId)}>
+          <Button
+            onClick={() => handleTripRedirect(tripOverview.id || tripId)}
+            className="rounded-full order-1 md:order-2"
+          >
             <ArrowUpRight size={17} />
             View Your Trip
           </Button>

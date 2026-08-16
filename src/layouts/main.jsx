@@ -18,7 +18,7 @@ const MainLayout = () => {
     <MobileBottomNavbarProvider>
       <section className="flex">
         <LeftSideMenu />
-        <div className="w-full flex flex-col min-h-screen bg-emerald-50/50">
+        <div className="w-full flex flex-col min-h-screen bg-primary/[0.07]">
           <MainHeader />
           <Outlet />
         </div>

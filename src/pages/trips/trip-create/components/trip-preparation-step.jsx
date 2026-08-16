@@ -269,8 +269,8 @@ const TripPreparationStep = ({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+    <div className="flex min-h-0 flex-col md:h-full">
+      <div className="custom-scrollbar space-y-4 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:[scrollbar-gutter:stable]">
         <AuthorMessage
           title={preparation.title || "Documents and packup"}
           message={preparation.summary || preparation.message}
@@ -317,15 +317,20 @@ const TripPreparationStep = ({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4">
+      <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
         <Button
           type="button"
           variant="outline"
           onClick={() => onStepSelect?.(3)}
+          className="rounded-full order-2 md:order-1"
         >
           View Itenaries
         </Button>
-        <Button type="button" onClick={() => onStepComplete?.()}>
+        <Button
+          type="button"
+          onClick={() => onStepComplete?.()}
+          className="rounded-full order-1 md:order-2ß"
+        >
           <Sparkles size={17} />
           See Overview
         </Button>
