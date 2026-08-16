@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { FloatingInput } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import LocationInput from "@/components/shared/location-input";
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useUpdateTripMutation } from "@/features/trips/tripApiSlice";
+import { useUserProfileQuery } from "@/features/auth/authApiSlice";
 import { AuthorMessage } from "@/components/shared/utils";
 import {
   isPlanningStepAfter,
@@ -59,6 +60,30 @@ const getAccommodationPreference = (trip) =>
   trip?.preferences?.accommotation_preference ||
   "";
 
+const getTrackedLocation = (lastTrackedAddress) => {
+  if (typeof lastTrackedAddress === "string") {
+    return {
+      address: lastTrackedAddress,
+      latitude: "",
+      longitude: "",
+    };
+  }
+
+  return {
+    address:
+      lastTrackedAddress?.address ||
+      lastTrackedAddress?.formatted_address ||
+      lastTrackedAddress?.name ||
+      "",
+    latitude: lastTrackedAddress?.latitude ?? lastTrackedAddress?.lat ?? "",
+    longitude:
+      lastTrackedAddress?.longitude ??
+      lastTrackedAddress?.lng ??
+      lastTrackedAddress?.lon ??
+      "",
+  };
+};
+
 const getInitialInfoForm = (trip = {}) => ({
   budget_tier: trip?.budget_tier || "comfort",
   budget_currency: normalizeCurrency(trip?.budget_currency) || "USD",
@@ -90,7 +115,12 @@ const TripPlanInitialInput = ({
   onClose,
   onStepSelect,
 }) => {
-  const user = useSelector((state) => state.auth.user);
+  const authenticatedUser = useSelector((state) => state.auth.user);
+  const { data: userProfileResponse } = useUserProfileQuery({
+    username: authenticatedUser?.username,
+  });
+
+  const userProfile = userProfileResponse?.data || userProfileResponse;
   const [internalForm, setInternalForm] = useState(() =>
     getInitialInfoForm(trip),
   );
@@ -110,18 +140,59 @@ const TripPlanInitialInput = ({
   const destinationCurrency =
     destination?.currency || destination?.currency_code || "";
   const currencyOptions = useMemo(
-    () => getCurrencyOptions(user?.preferred_currency, destinationCurrency),
-    [destinationCurrency, user?.preferred_currency],
+    () =>
+      getCurrencyOptions(userProfile?.preferred_currency, destinationCurrency),
+    [destinationCurrency, userProfile?.preferred_currency],
   );
 
-  const updateField = (field, value) => {
-    if (onControlledFieldChange) {
-      onControlledFieldChange(field, value);
-      return;
-    }
+  const updateField = useCallback(
+    (field, value) => {
+      if (onControlledFieldChange) {
+        onControlledFieldChange(field, value);
+        return;
+      }
 
-    setInternalForm((current) => ({ ...current, [field]: value }));
-  };
+      setInternalForm((current) => ({ ...current, [field]: value }));
+    },
+    [onControlledFieldChange],
+  );
+
+  /* The remote profile supplies defaults after the form's initial render. */
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (!userProfile) return;
+
+    const trackedLocation = getTrackedLocation(
+      userProfile.last_tracked_address,
+    );
+
+    if (!form.start_location_address && trackedLocation.address) {
+      updateField("start_location_address", String(trackedLocation.address));
+    }
+    if (!form.start_location_latitude && trackedLocation.latitude !== "") {
+      updateField("start_location_latitude", String(trackedLocation.latitude));
+    }
+    if (!form.start_location_longitude && trackedLocation.longitude !== "") {
+      updateField(
+        "start_location_longitude",
+        String(trackedLocation.longitude),
+      );
+    }
+    if (!form.accommodation_preference && userProfile.preferred_accommodation) {
+      updateField(
+        "accommodation_preference",
+        userProfile.preferred_accommodation,
+      );
+    }
+  }, [
+    form.accommodation_preference,
+    form.start_location_address,
+    form.start_location_latitude,
+    form.start_location_longitude,
+    updateField,
+    userProfile,
+  ]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const updateTravelerType = (value) => {
     updateField("traveler_type", value);

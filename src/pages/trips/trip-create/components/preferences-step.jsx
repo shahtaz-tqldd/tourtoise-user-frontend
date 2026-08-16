@@ -5,6 +5,7 @@ import {
   useTripAgentActiveMutation,
   useTripAgentCreateMessageMutation,
 } from "@/features/trips/tripApiSlice";
+import { useUserProfileQuery } from "@/features/auth/authApiSlice";
 import { Loader2, Send, Sparkles } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -168,7 +169,12 @@ const PreferencesStep = ({
   onStepSelect,
   onPlanningStateChange,
 }) => {
-  const user = useSelector((state) => state.auth.user);
+  const authenticatedUser = useSelector((state) => state.auth.user);
+  const { data: userProfileResponse } = useUserProfileQuery(
+    { username: authenticatedUser?.username },
+    { skip: !authenticatedUser?.username },
+  );
+  const user = userProfileResponse?.data || userProfileResponse;
 
   // user specific
   const profileImage = user?.avatar_url;

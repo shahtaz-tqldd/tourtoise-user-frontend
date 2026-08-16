@@ -66,6 +66,15 @@ export const authApiSlice = apiSlice.injectEndpoints({
       },
     }),
 
+    userProfile: builder.query({
+      query: ({ username }) => {
+        return {
+          url: `/accounts/${username}/`,
+          method: "GET",
+        };
+      },
+    }),
+
     selfDetails: builder.query({
       query: () => {
         return {
@@ -166,6 +175,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useLoginMutation,
+  useUserProfileQuery,
   useRegisterMutation,
   useVerifyOTPMutation,
   useGoogleAuthMutation,
