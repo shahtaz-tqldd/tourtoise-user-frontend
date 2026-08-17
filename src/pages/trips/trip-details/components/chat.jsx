@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import ChatInputForm from "@/pages/chat/components/chat-input-form";
 import { AuthorMessage } from "@/components/shared/utils";
+import EmptyItems from "@/components/shared/empty-items";
 import { cn } from "@/lib/utils";
 import NotificationList from "@/features/notification/notification-list";
 import {
@@ -132,7 +133,7 @@ const TripAgentChat = ({
   activeSection = "chat",
   className = "",
 }) => {
-  const [activeTab, setActiveTab] = useState("chat");
+  const [activeTab, setActiveTab] = useState(activeSection);
   const selectedSection = showTabs ? activeTab : activeSection;
   const tabs = useMemo(
     () =>
@@ -265,7 +266,8 @@ const ChatSection = ({
     const container = scrollContainerRef.current;
     const previous = preserveScrollRef.current;
     const nextScrollHeight = container.scrollHeight;
-    container.scrollTop = nextScrollHeight - previous.scrollHeight + previous.top;
+    container.scrollTop =
+      nextScrollHeight - previous.scrollHeight + previous.top;
     preserveScrollRef.current = null;
   }, [messages.length]);
 
@@ -364,12 +366,7 @@ const ChatSection = ({
   );
 
   const markMessagesRead = useCallback(async () => {
-    if (
-      !messageUnreadCount ||
-      isReadingMessages ||
-      !tripId ||
-      !sessionId
-    ) {
+    if (!messageUnreadCount || isReadingMessages || !tripId || !sessionId) {
       return;
     }
 
@@ -380,7 +377,9 @@ const ChatSection = ({
       }).unwrap();
       onMessagesRead?.();
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Could not mark messages as read."));
+      toast.error(
+        getApiErrorMessage(error, "Could not mark messages as read."),
+      );
     }
   }, [
     isReadingMessages,
@@ -394,10 +393,12 @@ const ChatSection = ({
   if (!sessionId) {
     return (
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="center min-h-0 flex-1 px-4 text-center">
-          <p className="rounded-2xl bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-600">
-            Trip chat session is not available yet.
-          </p>
+        <div className="center min-h-0 flex-1 px-2 py-4">
+          <EmptyItems
+            icon={MessageSquareDot}
+            title="Trip chat is not ready yet"
+            description="Your conversation with the trip assistant will appear here when your trip plan is ready!"
+          />
         </div>
       </div>
     );
@@ -429,9 +430,11 @@ const ChatSection = ({
             );
           })
         ) : (
-          <p className="rounded-2xl bg-slate-100 px-4 py-3 text-sm leading-6 break-words text-slate-600">
-            No agent messages available yet.
-          </p>
+          <EmptyItems
+            icon={MessageSquareDot}
+            title="No messages yet"
+            description="Send a message to start planning with your trip assistant."
+          />
         )}
         {isSendingMessage && (
           <p className="px-1 text-xs font-semibold text-slate-400">

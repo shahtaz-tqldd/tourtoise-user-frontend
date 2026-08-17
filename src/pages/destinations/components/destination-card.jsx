@@ -4,6 +4,8 @@ import { Bookmark, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DESTINATION_TYPE_OPTIONS } from "../constants";
 import { Image } from "@/components/shared/utils";
+import Badge from "@/components/ui/badge";
+import { Text, Title } from "@/components/ui/typography";
 
 const formatLabel = (value) => value?.replaceAll("_", " ") || "Destination";
 
@@ -16,51 +18,41 @@ const DestinationCard = ({ destination, onSavedClick, savedActionLabel }) => {
   return (
     <article className="overflow-hidden rounded-3xl bg-white relative group">
       <Link to={destinationUrl} className="block">
-        <div className="relative aspect-[1/1] overflow-hidden bg-gradient-to-br from-emerald-100 via-slate-100 to-cyan-100">
+        <div className="relative aspect-[5/3] overflow-hidden bg-gradient-to-br from-emerald-100 via-slate-100 to-cyan-100">
           <Image
             src={destination.cover_image}
             alt={destination.name}
             width={600}
             className="transition duration-500 group-hover:scale-105"
           />
-          <div className="absolute inset-0 top-[65%] bg-gradient-to-t from-black/75 via-black/50 to-transparent" />
-
           <div className="absolute left-4 right-4 top-4 flx gap-2">
-            <span className="flx gap-1 rounded-full bg-white/90 px-2.5 py-1.5 text-xs font-semibold capitalize text-slate-900 shadow-sm backdrop-blur">
-              {typeGroup?.icon && <typeGroup.icon size={12} />}
-              {formatLabel(destination.destination_type)}
-            </span>
             {destination?.is_now_best_time && (
-              <span className="flx gap-1 rounded-full bg-primary text-white px-2.5 py-1.5 text-xs font-semibold capitalize text-slate-900 shadow-sm backdrop-blur">
-                <Clock size={12} />
+              <Badge variant="secondary" icon={Clock}>
                 best time
-              </span>
+              </Badge>
             )}
           </div>
-
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <h2 className="text-2xl font-bold text-shadow leading-tight truncate">
-              {destination.name}
-            </h2>
-            <p className="mt-2 flex items-center font-medium gap-1.5 text-sm text-white/85">
-              <MapPin size={15} />
-              <span className="truncate">
-                {destination.region}, {destination.country}
-              </span>
-            </p>
-            {!!destination?.tags?.length && (
-              <div className="flex flex-wrap gap-1 mt-3">
-                {destination?.tags?.slice(0, 3).map((tag, index) => (
-                  <span
-                    key={index}
-                    className="rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+        </div>
+        <div className="p-5">
+          <div className="flex gap-4">
+            <Title className="truncate">{destination.name}</Title>
           </div>
+          <Text variant="sm" className="mt-2 flex items-center gap-1.5">
+            <MapPin size={14} />
+            <span className="truncate">
+              {destination.region}, {destination.country}
+            </span>
+          </Text>
+          {!!destination?.tags?.length && (
+            <div className="flex flex-wrap gap-1 mt-3">
+              <Badge variant="primary" icon={typeGroup.icon}>
+                {formatLabel(destination.destination_type)}
+              </Badge>
+              {destination?.tags?.slice(0, 3).map((tag, index) => (
+                <Badge key={index}>{tag}</Badge>
+              ))}
+            </div>
+          )}
         </div>
       </Link>
       {onSavedClick && (

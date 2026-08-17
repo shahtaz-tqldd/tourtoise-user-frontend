@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 // components
 import CardSlider from "@/components/shared/card-slider";
-import { DetailPill, Image, SectionHeader } from "@/components/shared/utils";
+import { Image, SectionHeader } from "@/components/shared/utils";
 
 // lib
 import { formatLabel } from "@/lib/utils";
@@ -17,6 +17,7 @@ import {
   Star,
   Tags,
 } from "lucide-react";
+import Badge from "@/components/ui/badge";
 
 const DestinationHighlights = ({ destination, setActiveFeature }) => {
   const attractions = destination.attractions || [];
@@ -102,13 +103,9 @@ const HighlightItemCard = ({ item, onSelect }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-slate-950/20" />
         {item.is_featured && (
           <div className="absolute left-3 top-3">
-            <DetailPill variant="accent">
-              <Star
-                size={12}
-                className="mr-1 -translate-y-[1px] inline-block fill-current"
-              />
+            <Badge variant="secondary" icon={Star}>
               Featured
-            </DetailPill>
+            </Badge>
           </div>
         )}
       </div>
@@ -130,20 +127,13 @@ const HighlightItemCard = ({ item, onSelect }) => {
 
         {tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5 border-t border-slate-100 pt-3">
-            {tags.map((tag) => {
+            {tags.map((tag, index) => {
               const label =
                 typeof tag === "string"
                   ? formatLabel(tag)
                   : tag.name || formatLabel(tag.slug);
 
-              return (
-                <span
-                  key={tag.slug || tag.name || tag}
-                  className="max-w-full truncate rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary"
-                >
-                  {label}
-                </span>
-              );
+              return <Badge key={index}>{label}</Badge>;
             })}
           </div>
         )}

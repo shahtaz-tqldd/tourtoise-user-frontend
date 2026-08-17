@@ -6,6 +6,7 @@ import {
   Clock,
   Currency,
   Flame,
+  Info,
   LoaderCircle,
   MapPin,
   Sun,
@@ -16,13 +17,14 @@ import {
 import { formatLabel } from "@/lib/utils";
 
 // comonents
-import { DetailPill } from "@/components/shared/utils";
 import ImagePreview from "@/components/shared/image-slider";
 import SnapshotCard from "@/components/shared/snapshot-card";
 import PreviewContent from "@/components/shared/preview-content";
 import { formatMonths } from "@/lib/date-time";
 import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 import { useDestinationFeatureDetailQuery } from "@/features/destination/destinationApiSlice";
+import Badge from "@/components/ui/badge";
+import { Title } from "@/components/ui/typography";
 
 const getFeatureType = (item) =>
   formatLabel(
@@ -159,6 +161,21 @@ const getExtraSections = (item) => {
       title: "How to Reach",
       body: item.how_to_reach,
     },
+  ];
+};
+
+const getNotes = (item) => {
+  const category = getFeatureCategory(item);
+
+  if (category === "activity") {
+    return [];
+  }
+
+  if (category === "cuisine") {
+    return [];
+  }
+
+  return [
     {
       title: "Approximate Entrance Fee",
       body:
@@ -166,7 +183,7 @@ const getExtraSections = (item) => {
           ? "Free"
           : item.approx_entrance_fee,
     },
-  ].filter((section) => section.body);
+  ];
 };
 
 const getFeatureEndpoint = (feature) => {
@@ -248,6 +265,7 @@ function FeatureDetailContent({ feature }) {
   ].filter(Boolean);
   const features = getSnapshotFeatures(item).filter((feature) => feature.value);
   const extraSections = getExtraSections(item);
+  const notes = getNotes(item);
   const tags = (item.tags || []).filter(Boolean);
   const leadLine = item.address || type;
 
@@ -261,10 +279,12 @@ function FeatureDetailContent({ feature }) {
   return (
     <div className="overflow-hidden bg-white pt-3 md:pt-0">
       <ImagePreview images={images} content_type={content_type} />
-      <div className="md:p-6 p-4">
-        <div className="">
-          <DetailPill variant="alert">{feature.title || type}</DetailPill>
-          <h2 className="mt-2 text-xl font-bold leading-tight">{item.name}</h2>
+      <div className="md:p-6 p-4 -mt-4 space-y-5">
+        <div>
+          <Badge variant="alert">{feature.title || type}</Badge>
+          <Title variant="md" className="mt-2">
+            {item.name}
+          </Title>
           {leadLine && (
             <p className="mt-2 flex items-start gap-2 text-sm text-slate-500">
               {category === "cuisine" ? (
@@ -296,32 +316,35 @@ function FeatureDetailContent({ feature }) {
           </p>
           {tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <DetailPill key={tag.slug || tag.name || tag}>
+              {tags.map((tag, index) => (
+                <Badge key={index}>
                   {typeof tag === "string"
                     ? formatLabel(tag)
                     : tag.name || formatLabel(tag.slug)}
-                </DetailPill>
+                </Badge>
               ))}
             </div>
           )}
         </div>
 
-        <h2 className="text-sm font-semibold mb-2 mt-4">Quick Snapshot</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {features.map((item, index) => (
-            <SnapshotCard
-              className="border border-slate-200 rounded-xl p-4"
-              key={index}
-              {...item}
-            />
-          ))}
+        <div>
+          <Title variant="xs" className="text-sm">
+            Quick Snapshot
+          </Title>
+          <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {features.map((item, index) => (
+              <SnapshotCard
+                className="border border-slate-200 rounded-xl p-4"
+                key={index}
+                {...item}
+              />
+            ))}
+          </div>
         </div>
-        <div className="grid md:grid-cols-2 gap-4 mt-4">
+
+        <div className="grid md:grid-cols-2 gap-4">
           <div className="border border-slate-200 rounded-xl p-4">
-            <h3 className="font-bold text-slate-900">
-              Reasons to add {item.name} to your list
-            </h3>
+            <Title variant="xs">Reasons to add {item.name} to your list</Title>
             <div className="mt-4 text-slate-600">
               {item.picking_reasons?.length ? (
                 <ul className="list-disc space-y-2">
@@ -338,9 +361,7 @@ function FeatureDetailContent({ feature }) {
             </div>
           </div>
           <div className="border border-slate-200 rounded-xl p-4 overflow-hidden">
-            <h3 className="font-bold text-slate-900">
-              Consider this before choosing {item.name}
-            </h3>
+            <Title variant="xs">Consider this before going {item.name}</Title>
             <div className="mt-4 text-slate-600">
               {item.notes?.length ? (
                 <ul className="list-disc space-y-2">
@@ -357,14 +378,31 @@ function FeatureDetailContent({ feature }) {
             </div>
           </div>
         </div>
-        {extraSections.map((section) => (
-          <div key={section.title} className="p-4 bg-slate-100 rounded-xl mt-4">
-            <h3 className="text-sm font-bold">{section.title}</h3>
-            <p className="mt-2 leading-7 text-slate-500 text-sm">
-              {section.body}
-            </p>
+
+        {extraSections.length > 0
+          ? extraSections.map((section) => (
+              <div key={section.title} className="p-4 bg-slate-100 rounded-xl">
+                <h3 className="text-sm font-bold">{section.title}</h3>
+                <p className="mt-2 leading-7 text-slate-500 text-sm">
+                  {section.body}
+                </p>
+              </div>
+            ))
+          : null}
+
+        {notes.length > 0 ? (
+          <div className="p-4 bg-primary/10 rounded-xl">
+            {notes.map((section, index) => (
+              <article className="flx gap-2 text-emerald-900" key={index}>
+                <Info size={14} />
+                <p className="leading-7 text-sm">
+                  <b>{section.title}: </b>
+                  {section.body}
+                </p>
+              </article>
+            ))}
           </div>
-        ))}
+        ) : null}
       </div>
     </div>
   );

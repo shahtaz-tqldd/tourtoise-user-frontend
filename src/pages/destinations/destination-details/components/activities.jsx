@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import CardSlider from "@/components/shared/card-slider";
-import { DetailPill, Image, SectionHeader } from "@/components/shared/utils";
+import { Image, SectionHeader } from "@/components/shared/utils";
 import { formatLabel } from "@/lib/utils";
 import {
   Activity,
@@ -11,6 +11,7 @@ import {
   Star,
 } from "lucide-react";
 import { MEDIA_CONTENT_TYPE } from "@/constants/content";
+import Badge from "@/components/ui/badge";
 
 const getActivityMetaItems = (activity) => [
   {
@@ -96,17 +97,13 @@ const ActivityCard = ({ item, onSelect }) => {
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/20" />
-        <div className="absolute left-3 right-3 top-3 flex items-start justify-between gap-2">
-          {item.is_featured && (
-            <DetailPill variant="accent">
-              <Star
-                size={12}
-                className="mr-1 -translate-y-[1px] inline-block fill-current"
-              />
+        {item.is_featured && (
+          <div className="absolute left-3 top-3">
+            <Badge variant="secondary" icon={Star}>
               Featured
-            </DetailPill>
-          )}
-        </div>
+            </Badge>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-4">

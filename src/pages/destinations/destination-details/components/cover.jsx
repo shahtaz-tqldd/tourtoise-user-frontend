@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { DetailPill, PageTitle } from "@/components/shared/utils";
 import ImagePreview from "@/components/shared/image-slider";
 import { ArrowLeft } from "lucide-react";
+import Badge from "@/components/ui/badge";
+import { Text, Title } from "@/components/ui/typography";
 
 const DestinationCover = ({ destination }) => {
   const images = [
@@ -41,12 +42,15 @@ const DestinationCover = ({ destination }) => {
         />
       </div>
       <div className="-mt-2">
-        <PageTitle title={destination.name} text={destination.tagline} />
+        <Title variant="xl">{destination.name}</Title>
+        <Text variant="lg" className="mt-2">
+          {destination.tagline}
+        </Text>
       </div>
       {!!tags.length && (
         <div className="flex flex-wrap gap-2 mt-2">
-          {tags.map((tag) => (
-            <DetailPill key={tag}>{tag}</DetailPill>
+          {tags.map((tag, index) => (
+            <Badge key={index}>{tag}</Badge>
           ))}
         </div>
       )}

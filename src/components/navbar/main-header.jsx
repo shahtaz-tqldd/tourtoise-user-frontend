@@ -93,15 +93,15 @@ const MainHeader = () => {
               {tripUnreadNotificationCount > 0 && (
                 <span className="absolute -right-1 -top-1 inline-flex min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[9px] font-bold leading-4 text-white ring-2 ring-white md:static md:h-7 md:min-w-0 md:gap-1 md:bg-amber-50 md:px-2 md:text-[11px] md:leading-none md:text-amber-700 md:ring-0">
                   <Bell className="hidden size-3 md:block" />
-                  {formatUnreadCount(tripUnreadNotificationCount)}
+                  <span>{formatUnreadCount(tripUnreadNotificationCount)}</span>
                   <span className="sr-only"> trip notifications</span>
                 </span>
               )}
 
               {tripUnreadMessageCount > 0 && (
-                <span className="absolute -bottom-1 -right-1 inline-flex min-w-4 items-center justify-center rounded-full bg-sky-600 px-1 text-[9px] font-bold leading-4 text-white ring-2 ring-white md:static md:h-7 md:min-w-0 md:gap-1 md:bg-sky-50 md:px-2 md:text-[11px] md:leading-none md:text-sky-700 md:ring-0">
+                <span className="absolute -bottom-1 -right-1 inline-flex min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-bold leading-4 text-white ring-2 ring-white md:static md:h-7 md:min-w-0 md:gap-1 md:bg-red-50 md:px-2 md:text-[11px] md:leading-none md:text-red-700 md:ring-0">
                   <MessageCircle className="hidden size-3 md:block" />
-                  {formatUnreadCount(tripUnreadMessageCount)}
+                  <span>{formatUnreadCount(tripUnreadMessageCount)}</span>
                   <span className="sr-only"> trip messages</span>
                 </span>
               )}

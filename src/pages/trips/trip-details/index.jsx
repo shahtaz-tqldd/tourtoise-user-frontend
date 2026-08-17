@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 // components
@@ -245,7 +245,13 @@ const normalizeTripDetail = (sourceTrip) => {
 
 const TripDetailPage = () => {
   const { trip_id } = useParams();
-  const [activeMobileTab, setActiveMobileTab] = useState("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isNotificationTabRequested =
+    searchParams.get("tab") === "notification";
+  const [selectedMobileTab, setSelectedMobileTab] = useState("overview");
+  const activeMobileTab = isNotificationTabRequested
+    ? "notifications"
+    : selectedMobileTab;
   const [incomingMessages, setIncomingMessages] = useState([]);
   const [unreadCountOverrides, setUnreadCountOverrides] = useState({});
   const [notificationUnreadCountOverrides, setNotificationUnreadCountOverrides] =
@@ -253,6 +259,19 @@ const TripDetailPage = () => {
   const receivedSocketMessageIdsRef = useRef(new Set());
   const isMobileTripChatOpen = activeMobileTab !== "overview";
   useMobileBottomNavbar({ hidden: isMobileTripChatOpen });
+
+  const handleMobileTabChange = useCallback(
+    (nextTab) => {
+      setSelectedMobileTab(nextTab);
+
+      if (isNotificationTabRequested && nextTab !== "notifications") {
+        const nextSearchParams = new URLSearchParams(searchParams);
+        nextSearchParams.delete("tab");
+        setSearchParams(nextSearchParams, { replace: true });
+      }
+    },
+    [isNotificationTabRequested, searchParams, setSearchParams],
+  );
 
   const { data, isFetching, isError } = useTripDetailQuery(trip_id);
 
@@ -392,6 +411,7 @@ const TripDetailPage = () => {
         </div>
 
         <TripAgentChat
+          key={isNotificationTabRequested ? "notifications" : "chat"}
           messages={trip.chat}
           tripId={trip.id}
           sessionId={chatSessionId}
@@ -401,6 +421,9 @@ const TripDetailPage = () => {
           notificationUnreadCount={notificationUnreadCount}
           onNotificationRead={handleNotificationRead}
           onAllNotificationsRead={handleAllNotificationsRead}
+          activeSection={
+            isNotificationTabRequested ? "notifications" : "chat"
+          }
           className="sticky top-[92px]"
         />
       </section>
@@ -416,7 +439,7 @@ const TripDetailPage = () => {
         <TabMenu
           tabs={tabs}
           activeTab={activeMobileTab}
-          setActiveTab={setActiveMobileTab}
+          setActiveTab={handleMobileTabChange}
           scrollable
           className={cn(
             "z-[30] -mx-2.5 bg-white px-4 pt-1.5",

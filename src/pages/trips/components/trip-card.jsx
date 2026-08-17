@@ -1,4 +1,5 @@
 import { Image, VisibilityStatus } from "@/components/shared/utils";
+import Badge from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import StatusBadge from "@/components/ui/status";
@@ -67,10 +68,24 @@ const TripCard = ({ trip, compact = false }) => {
       <Link to={getTripUrl(displayedTrip)}>
         <Card className="relative border md:border-none">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 space-y-3">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <StatusBadge status={displayedTrip?.status} />
-                <VisibilityStatus visibility={displayedTrip?.visibility} />
+            <div className="space-y-3 w-full">
+              <div className="flex justify-between w-full">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <StatusBadge status={displayedTrip?.status} />
+                  <VisibilityStatus visibility={displayedTrip?.visibility} />
+                </div>
+                <div className="flx gap-1.5">
+                  {notificationUnreadCount ? (
+                    <Badge icon={Bell} variant="accent">
+                      {notificationUnreadCount}
+                    </Badge>
+                  ) : null}
+                  {messageUnreadCount ? (
+                    <Badge icon={MessageCircle} variant="danger">
+                      {messageUnreadCount}
+                    </Badge>
+                  ) : null}
+                </div>
               </div>
 
               <div>
@@ -183,22 +198,16 @@ const TripCard = ({ trip, compact = false }) => {
             </span>
           </div>
           <div className="flbx">
-            <div className="flx gap-6">
+            <div className="flx gap-1.5">
               {notificationUnreadCount ? (
-                <div className="flx gap-1.5">
-                  <Bell size={16} className="text-red-600" />
-                  <span className="text-xs font-medium text-red-600">
-                    {notificationUnreadCount} Alert
-                  </span>
-                </div>
+                <Badge icon={Bell} variant="accent">
+                  {notificationUnreadCount} Alert
+                </Badge>
               ) : null}
               {messageUnreadCount ? (
-                <div className="flx gap-1.5">
-                  <MessageCircle size={16} className="text-red-600" />
-                  <span className="text-xs font-medium text-red-600">
-                    {messageUnreadCount} Message
-                  </span>
-                </div>
+                <Badge icon={MessageCircle} variant="danger">
+                  {messageUnreadCount} Message
+                </Badge>
               ) : null}
             </div>
             <div className="flx gap-2">

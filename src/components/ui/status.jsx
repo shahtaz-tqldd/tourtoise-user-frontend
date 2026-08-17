@@ -7,7 +7,7 @@ const StatusBadge = ({ status }) => {
   const styles = {
     ready: "bg-primary text-white",
     completed: "bg-primary text-white",
-    draft: "bg-slate-100 text-slate-700",
+    draft: "bg-blue-100 text-blue-800",
     cancelled: "bg-red-100 text-red-700",
     active: "bg-green-100 text-emerald-700",
     inactive: "bg-gray-100 text-gray-700",

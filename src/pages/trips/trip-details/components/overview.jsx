@@ -19,6 +19,8 @@ import { Link, useNavigate } from "react-router-dom";
 import TripActionsDropdown from "../../components/trip-actions-dropdown";
 import { Image, VisibilityStatus } from "@/components/shared/utils";
 import { formatDateRange } from "@/lib/date-time";
+import Badge from "@/components/ui/badge";
+import { Text } from "@/components/ui/typography";
 
 const formatDate = (value) => {
   if (!value) return "Not set";
@@ -207,7 +209,7 @@ const DestinationSlider = ({
         onTouchEnd={handleTouchEnd}
       >
         <div className="grid gap-0 md:grid-cols-[320px_minmax(0,1fr)]">
-          <div className="h-56 overflow-hidden">
+          <div className="h-60 overflow-hidden">
             <Image
               src={activeDestination.image_url}
               alt={activeDestination.name}
@@ -228,26 +230,19 @@ const DestinationSlider = ({
                     </p>
                   )}
                 </div>
-                <span className="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-                  {activeDestination.stay}
-                </span>
+                <Badge>{activeDestination.stay}</Badge>
               </div>
 
               {destinationDescription && (
-                <p className="mt-4 text-sm leading-6 text-slate-600">
+                <Text className="mt-4 leading-6 line-clamp-2" variant="sm">
                   {destinationDescription}
-                </p>
+                </Text>
               )}
 
               {!!destinationTags.length && (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {destinationTags.slice(0, 5).map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
-                    >
-                      {tag}
-                    </span>
+                    <Badge key={tag}>{tag}</Badge>
                   ))}
                 </div>
               )}

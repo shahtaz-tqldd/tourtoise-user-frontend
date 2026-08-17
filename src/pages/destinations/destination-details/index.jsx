@@ -109,7 +109,6 @@ const DestinationDetailsPage = () => {
         <div className="min-w-0 flex flex-col gap-6">
           <DestinationCover destination={destination} />
           <DestinationOverview destination={destination} />
-
           <div className="xl:hidden">
             <TripSnapshot
               destination={destination}

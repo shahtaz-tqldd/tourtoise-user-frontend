@@ -129,7 +129,7 @@ const RoutePlanSkeleton = () => (
     {Array.from({ length: 2 }).map((_, groupIndex) => (
       <section
         key={groupIndex}
-        className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+        className="rounded-lg border border-slate-200 bg-slate-50 p-3 md:p-4"
       >
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
@@ -137,12 +137,12 @@ const RoutePlanSkeleton = () => (
         </div>
         <div className="relative space-y-4">
           {Array.from({ length: 2 }).map((_, itemIndex) => (
-            <div key={itemIndex} className="relative flex gap-4">
+            <div key={itemIndex} className="relative flex gap-2 md:gap-4">
               {itemIndex === 0 ? (
-                <span className="absolute left-5 top-11 h-[calc(100%+1rem)] w-px bg-slate-200" />
+                <span className="absolute left-4 top-9 h-[calc(100%+1rem)] w-px bg-slate-200 md:left-5 md:top-11" />
               ) : null}
-              <div className="z-10 size-10 shrink-0 animate-pulse rounded-full bg-white ring-1 ring-slate-200" />
-              <div className="min-w-0 flex-1 rounded-lg bg-white p-4 ring-1 ring-slate-200">
+              <div className="z-10 size-8 shrink-0 animate-pulse rounded-full bg-white ring-1 ring-slate-200 md:size-10" />
+              <div className="min-w-0 flex-1 rounded-lg bg-white p-3 ring-1 ring-slate-200 md:p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0 flex-1 space-y-3">
                     <div className="h-4 w-48 animate-pulse rounded-full bg-slate-200" />
@@ -168,14 +168,14 @@ const RouteSegmentCard = ({ segment, isLast }) => {
   const cost = formatMoney(segment.estimated_cost);
 
   return (
-    <div className="relative flex gap-4">
+    <div className="relative flex gap-2 md:gap-4">
       {!isLast && (
-        <span className="absolute left-5 top-11 h-[calc(100%+1rem)] w-px bg-slate-300" />
+        <span className="absolute left-4 top-9 h-[calc(100%+1rem)] w-px bg-slate-300 md:left-5 md:top-11" />
       )}
-      <div className="z-10 flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-primary ring-1 ring-slate-200">
+      <div className="z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-primary ring-1 ring-slate-200 md:size-10">
         <RouteIcon mode={segment.transport_mode} />
       </div>
-      <div className="min-w-0 flex-1 rounded-lg bg-white p-4 ring-1 ring-slate-200">
+      <div className="min-w-0 flex-1 rounded-lg bg-white p-3 ring-1 ring-slate-200 md:p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
             <p className="text-sm font-semibold text-slate-950">
@@ -259,7 +259,7 @@ const TripRoutePlan = ({ tripId }) => {
             {routeGroups.map(([date, routes]) => (
               <section
                 key={date}
-                className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+                className="rounded-lg border border-slate-200 bg-slate-50 p-3 md:p-4"
               >
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h3 className="text-sm font-semibold text-slate-950">

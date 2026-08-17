@@ -17,24 +17,6 @@ const renderRichMessage = (message) => {
   return DOMPurify.sanitize(marked.parse(normalizedMarkdown));
 };
 
-export const DetailPill = ({ children, className, variant = "primary" }) => {
-  if (!children) return null;
-
-  return (
-    <span
-      className={cn(
-        "rounded-full px-2.5 py-1 text-xs font-semibold capitalize",
-        className,
-        variant === "primary" ? "bg-primary/10 text-primary" : "",
-        variant === "accent" ? "bg-white text-slate-800" : "",
-        variant === "alert" ? "bg-orange-600/10 text-orange-600" : "",
-      )}
-    >
-      {children}
-    </span>
-  );
-};
-
 export const AuthorMessage = ({
   message,
   title = null,
@@ -193,8 +175,8 @@ export const VisibilityStatus = ({ visibility }) => {
       className={cn(
         "flx gap-1 rounded-md bg-slate-100 ring pl-2 pr-2.5 py-1 text-xs font-semibold capitalize",
         isPrivate
-          ? "bg-amber-100/60 ring-amber-100 text-amber-700"
-          : "bg-cyan-100/60 ring-cyan-100 text-cyan-700",
+          ? "bg-slate-100 ring-slate-200 text-slate-700"
+          : "bg-green-100 ring-green-200 text-green-700",
       )}
     >
       {isPrivate ? (

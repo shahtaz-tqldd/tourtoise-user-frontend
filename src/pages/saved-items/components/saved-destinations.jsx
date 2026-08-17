@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import ConfirmDialog from "@/components/shared/confirm-dialog";
 import EmptyPage from "@/components/shared/empty-page";
 import InfiniteScroll from "@/components/shared/infinite-scroll";
-import { DetailPill, Image } from "@/components/shared/utils";
+import { Image } from "@/components/shared/utils";
 import { Button } from "@/components/ui/button";
 import {
   useSaveDestinationInfiniteListInfiniteQuery,
@@ -14,6 +14,7 @@ import {
 } from "@/features/destination/destinationApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { cn } from "@/lib/utils";
+import Badge from "@/components/ui/badge";
 
 const PAGE_SIZE = 12;
 
@@ -159,13 +160,11 @@ const DestinationItem = ({ destination, isRemoving, onRemove }) => {
           <h2 className="truncate text-base font-bold text-slate-950">
             {destination.name || "Unnamed destination"}
           </h2>
-          <p className="mt-1.5 flex min-w-0 items-center gap-1 text-sm text-slate-500">
+          <p className="mt-1.5 mb-4 flex min-w-0 items-center gap-1 text-sm text-slate-500">
             <MapPin size={14} className="shrink-0" />
             <span className="truncate">{location || "Destination"}</span>
           </p>
-          <DetailPill className="mt-3 block w-fit max-w-full truncate">
-            {destination.destination_type}
-          </DetailPill>
+          <Badge>{destination.destination_type}</Badge>
         </div>
       </Link>
       <Button

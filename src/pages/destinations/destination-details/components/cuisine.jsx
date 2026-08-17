@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import CardSlider from "@/components/shared/card-slider";
-import { DetailPill, Image, SectionHeader } from "@/components/shared/utils";
+import { Image, SectionHeader } from "@/components/shared/utils";
 import { formatLabel } from "@/lib/utils";
 import {
   ChevronDown,
@@ -11,6 +11,7 @@ import {
   Utensils,
 } from "lucide-react";
 import { MEDIA_CONTENT_TYPE } from "@/constants/content";
+import Badge from "@/components/ui/badge";
 
 const getCuisineMetaItems = (cuisine) => [
   {
@@ -102,17 +103,13 @@ export const CuisineCard = ({ item, metaItems, onSelect }) => {
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/20" />
-        <div className="absolute left-3 top-3">
-          {item.is_featured && (
-            <DetailPill variant="accent">
-              <Star
-                size={12}
-                className="mr-1 -translate-y-[1px] inline-block fill-current"
-              />
+        {item.is_featured && (
+          <div className="absolute left-3 top-3">
+            <Badge variant="secondary" icon={Star}>
               Featured
-            </DetailPill>
-          )}
-        </div>
+            </Badge>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-4">
@@ -125,14 +122,10 @@ export const CuisineCard = ({ item, metaItems, onSelect }) => {
 
         <div className="-mx-4 mt-auto border-t border-slate-100" />
         <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5 text-xs font-semibold text-slate-600">
-          {visibleMetaItems.map((meta) => (
-            <DetailPill key={meta.label} className="flx gap-1">
-              {React.createElement(meta.icon, {
-                size: 12,
-                className: "shrink-0 text-primary",
-              })}
-              <span className="truncate capitalize">{meta.value}</span>
-            </DetailPill>
+          {visibleMetaItems.map((meta, index) => (
+            <Badge icon={meta.icon} key={index}>
+              {meta.value}
+            </Badge>
           ))}
         </div>
       </div>

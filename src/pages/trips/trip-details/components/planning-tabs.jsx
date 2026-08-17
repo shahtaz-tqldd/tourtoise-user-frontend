@@ -225,7 +225,7 @@ const PlanningTabView = ({
         activeTab={activeTab}
         setActiveTab={handleTabChange}
         scrollable
-        className="sticky top-[106px] z-20 -mx-2.5 bg-white/90 px-4 pt-2 backdrop-blur-xl md:top-16 md:mx-0 md:px-0"
+        className="sticky top-[106px] z-20 -mx-2.5 bg-white/90 px-4 pt-2 backdrop-blur-xl md:top-16 md:mx-0 md:px-0 rounded-t-2xl"
       />
 
       <div ref={contentRef} className="scroll-mt-[168px] md:scroll-mt-28">
