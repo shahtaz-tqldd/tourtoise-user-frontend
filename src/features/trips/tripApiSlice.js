@@ -10,6 +10,18 @@ const updateCreditBalance = async (queryFulfilled, dispatch) => {
   }
 };
 
+const updateTripDetailCache = (dispatch, tripId, updates) => {
+  dispatch(
+    apiSlice.util.updateQueryData("tripDetail", tripId, (draft) => {
+      const trip = draft?.data || draft;
+
+      if (trip && typeof trip === "object") {
+        Object.assign(trip, updates);
+      }
+    }),
+  );
+};
+
 const nextTripPage = (lastPage, allPages, lastPageParam) =>
   lastPage?.meta?.next ||
   lastPage?.data?.meta?.next ||
@@ -100,7 +112,20 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           method: "POST",
         };
       },
-      invalidatesTags: ["trip-detail"],
+      async onQueryStarted({ trip_id }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: response } = await queryFulfilled;
+          const payload = response?.data || response || {};
+
+          if (payload.share_url) {
+            updateTripDetailCache(dispatch, trip_id, {
+              share_url: payload.share_url,
+            });
+          }
+        } catch {
+          // Leave the existing cache unchanged when the mutation fails.
+        }
+      },
     }),
 
     updateTripVisibility: builder.mutation({
@@ -111,7 +136,24 @@ export const tripApiSlice = apiSlice.injectEndpoints({
           body: { visibility },
         };
       },
-      invalidatesTags: ["trip-detail"],
+      async onQueryStarted(
+        { trip_id, visibility },
+        { dispatch, queryFulfilled },
+      ) {
+        try {
+          const { data: response } = await queryFulfilled;
+          const payload = response?.data || response || {};
+
+          updateTripDetailCache(dispatch, trip_id, {
+            visibility: payload.visibility || visibility,
+            ...(payload.share_url !== undefined
+              ? { share_url: payload.share_url }
+              : {}),
+          });
+        } catch {
+          // Leave the existing cache unchanged when the mutation fails.
+        }
+      },
     }),
 
     deleteTrip: builder.mutation({

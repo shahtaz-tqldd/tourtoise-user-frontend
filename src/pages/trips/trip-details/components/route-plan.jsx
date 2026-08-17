@@ -213,12 +213,17 @@ const RouteSegmentCard = ({ segment, isLast }) => {
   );
 };
 
-const TripRoutePlan = ({ tripId }) => {
+const TripRoutePlan = ({ tripId, routes: providedRoutes }) => {
   const { data, isFetching, isError, refetch } = useTripRouteListQuery(
     { trip_id: tripId },
-    { skip: !tripId },
+    { skip: Boolean(providedRoutes) || !tripId },
   );
-  const routeList = useMemo(() => sortRoutes(unwrapRouteList(data)), [data]);
+  const routeList = useMemo(
+    () => sortRoutes(providedRoutes || unwrapRouteList(data)),
+    [data, providedRoutes],
+  );
+  const isLoadingRoutes = !providedRoutes && isFetching;
+  const hasRouteError = !providedRoutes && isError;
   const groupedRoutes = useMemo(
     () => groupRoutesByDate(routeList),
     [routeList],
@@ -233,9 +238,9 @@ const TripRoutePlan = ({ tripId }) => {
         description="Visual movement plan showing origin, destination, vehicle, and timing."
       />
 
-      {isFetching ? <RoutePlanSkeleton /> : null}
+      {isLoadingRoutes ? <RoutePlanSkeleton /> : null}
 
-      {!isFetching && isError ? (
+      {!isLoadingRoutes && hasRouteError ? (
         <div className="rounded-xl border border-red-100 bg-red-50 p-4">
           <p className="text-sm font-semibold text-red-700">
             Could not load route plan.
@@ -253,13 +258,13 @@ const TripRoutePlan = ({ tripId }) => {
         </div>
       ) : null}
 
-      {!isFetching && !isError ? (
+      {!isLoadingRoutes && !hasRouteError ? (
         routeGroups.length ? (
           <div className="space-y-4">
             {routeGroups.map(([date, routes]) => (
               <section
                 key={date}
-                className="rounded-lg border border-slate-200 bg-slate-50 p-3 md:p-4"
+                className="rounded-xl border border-slate-200 bg-slate-50 p-3 md:p-4"
               >
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h3 className="text-sm font-semibold text-slate-950">

@@ -101,7 +101,6 @@ const ShareTripDialogContent = ({ trip, onOpenChange, onTripChange }) => {
       setShareUrl("");
       onTripChange?.({ share_url: "", visibility: nextVisibility });
       toast.success("Trip is private.");
-      onOpenChange(false);
     } catch (error) {
       toast.error(error?.data?.message || "Could not update visibility.");
     }

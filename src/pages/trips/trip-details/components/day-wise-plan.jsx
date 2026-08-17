@@ -114,24 +114,37 @@ const DayWisePlanSkeleton = () => (
   </div>
 );
 
-const TripDayWisePlan = ({ tripId }) => {
+const TripDayWisePlan = ({
+  tripId,
+  days: providedDays,
+  description,
+  showCompletion = true,
+}) => {
   const { data, isFetching, isError, refetch } = useDaywisePlanListQuery(
     { trip_id: tripId },
-    { skip: !tripId },
+    { skip: Boolean(providedDays) || !tripId },
   );
-  const days = useMemo(() => unwrapDayWisePlan(data), [data]);
+  const days = useMemo(
+    () => providedDays || unwrapDayWisePlan(data),
+    [data, providedDays],
+  );
+  const isLoadingDays = !providedDays && isFetching;
+  const hasDaysError = !providedDays && isError;
 
   return (
     <PreviewCard className="space-y-5 md:rounded-t-none">
       <SectionHeader
         icon={CalendarDays}
         title="Day wise plan"
-        description="A readable daily structure that the agent can continue refining."
+        description={
+          description ||
+          "A readable daily structure that the agent can continue refining."
+        }
       />
 
-      {isFetching ? <DayWisePlanSkeleton /> : null}
+      {isLoadingDays ? <DayWisePlanSkeleton /> : null}
 
-      {!isFetching && isError ? (
+      {!isLoadingDays && hasDaysError ? (
         <div className="rounded-xl border border-red-100 bg-red-50 p-4">
           <p className="text-sm font-semibold text-red-700">
             Could not load day-wise plan.
@@ -149,9 +162,9 @@ const TripDayWisePlan = ({ tripId }) => {
         </div>
       ) : null}
 
-      {!isFetching && !isError ? (
+      {!isLoadingDays && !hasDaysError ? (
         days.length ? (
-          <DayAccordion days={days} />
+          <DayAccordion days={days} showCompletion={showCompletion} />
         ) : (
           <EmptyState
             title="No day-wise plans"
@@ -208,7 +221,7 @@ const DayPlanItem = ({ item }) => {
   );
 };
 
-const DayAccordion = ({ days }) => {
+const DayAccordion = ({ days, showCompletion = true }) => {
   const [openDay, setOpenDay] = useState(days[0]?.day);
   const activeOpenDay =
     openDay === null || days.some((day) => day.day === openDay)
@@ -234,7 +247,7 @@ const DayAccordion = ({ days }) => {
               onClick={() => setOpenDay(isOpen ? null : day.day)}
               className={cn(
                 "flex w-full items-start justify-between gap-4 p-4 text-left",
-                day.is_complete
+                showCompletion && day.is_complete
                   ? isOpen
                     ? "bg-green-50"
                     : "bg-slate-100"
@@ -244,7 +257,7 @@ const DayAccordion = ({ days }) => {
               )}
             >
               <div className="flx gap-2 md:gap-3">
-                {day.is_complete && (
+                {showCompletion && day.is_complete && (
                   <span className="size-5 center bg-primary rounded-full">
                     <Check
                       size={14}

@@ -115,6 +115,7 @@ const DestinationSlider = ({
   destinations = [],
   tripStartDate,
   tripEndDate,
+  readOnly = false,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
@@ -279,7 +280,7 @@ const DestinationSlider = ({
                 )}
               </div>
 
-              {activeDestination.slug && (
+              {activeDestination.slug && !readOnly && (
                 <Link
                   to={`/destinations/${activeDestination.slug}`}
                   className="flex items-center gap-1 text-sm font-bold text-primary group"
@@ -299,7 +300,7 @@ const DestinationSlider = ({
   );
 };
 
-const TripOverview = ({ trip }) => {
+const TripOverview = ({ trip, readOnly = false }) => {
   const navigate = useNavigate();
   const [isBudgetOpen, setIsBudgetOpen] = useState(false);
   const budget = trip?.budget || {};
@@ -316,23 +317,31 @@ const TripOverview = ({ trip }) => {
     <Card className="p-0 md:p-6 bg-transparent md:bg-white rounded-none md:rounded-2xl pt-4 md:pt-6">
       <div className="flex gap-5 items-start justify-between">
         <div className="max-w-3xl min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={trip?.status} />
-            <VisibilityStatus visibility={trip?.visibility} />
-          </div>
-          <h1 className="mt-5 text-2xl md:text-3xl font-bold text-slate-950">
+          {!readOnly && (
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge status={trip?.status} />
+              <VisibilityStatus visibility={trip?.visibility} />
+            </div>
+          )}
+          <h1
+            className={`${readOnly ? "mt-0" : "mt-5"} text-2xl md:text-3xl font-bold text-slate-950`}
+          >
             {trip.title}
           </h1>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            {trip.overview}
-          </p>
+          {trip.overview && (
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              {trip.overview}
+            </p>
+          )}
         </div>
-        <TripActionsDropdown
-          trip={trip}
-          destination={trip.primary_destination || trip.destinations?.[0]}
-          onDeleted={() => navigate("/trips")}
-          triggerClassName="self-start border border-slate-200 bg-white shadow-sm"
-        />
+        {!readOnly && (
+          <TripActionsDropdown
+            trip={trip}
+            destination={trip.primary_destination || trip.destinations?.[0]}
+            onDeleted={() => navigate("/trips")}
+            triggerClassName="self-start border border-slate-200 bg-white shadow-sm"
+          />
+        )}
       </div>
 
       <div className="mt-6 grid gap-3 grid-cols-2 md:grid-cols-4">
@@ -377,12 +386,14 @@ const TripOverview = ({ trip }) => {
           label="Budget"
           value={formatMoney(totalBudget, trip.budget_currency)}
           component={
-            <button
-              onClick={() => setIsBudgetOpen(true)}
-              className="text-xs text-primary font-semibold underline w-fit"
-            >
-              View breakdown
-            </button>
+            !readOnly || Object.keys(budget).length > 1 ? (
+              <button
+                onClick={() => setIsBudgetOpen(true)}
+                className="text-xs text-primary font-semibold underline w-fit"
+              >
+                View breakdown
+              </button>
+            ) : null
           }
         />
       </div>
@@ -401,6 +412,7 @@ const TripOverview = ({ trip }) => {
         destinations={trip.destinations}
         tripStartDate={trip.start_date}
         tripEndDate={trip.end_date}
+        readOnly={readOnly}
       />
 
       <BudgetBreakdownDialog
