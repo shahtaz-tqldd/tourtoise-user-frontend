@@ -84,6 +84,36 @@ const getTrackedLocation = (lastTrackedAddress) => {
   };
 };
 
+const getProfileLocation = (userProfile) => {
+  const trackedLocation = getTrackedLocation(userProfile?.last_tracked_address);
+
+  if (trackedLocation.address) return trackedLocation;
+
+  return {
+    ...trackedLocation,
+    address: [
+      userProfile?.city,
+      userProfile?.country_of_residence || userProfile?.country,
+    ]
+      .filter(Boolean)
+      .join(", "),
+  };
+};
+
+const hasHandoffDeparture = (handoff) => {
+  const departureLocation = handoff?.departure_location;
+
+  if (typeof departureLocation === "string") {
+    return Boolean(departureLocation.trim());
+  }
+
+  return Boolean(
+    departureLocation?.address ||
+      departureLocation?.formatted_address ||
+      departureLocation?.name,
+  );
+};
+
 const getInitialInfoForm = (trip = {}) => ({
   budget_tier: trip?.budget_tier || "comfort",
   budget_currency: normalizeCurrency(trip?.budget_currency) || "USD",
@@ -104,6 +134,7 @@ const getInitialInfoForm = (trip = {}) => ({
 const TripPlanInitialInput = ({
   trip,
   destination,
+  planningHandoff,
   form: controlledForm,
   onFieldChange: onControlledFieldChange,
   onSubmit,
@@ -162,17 +193,30 @@ const TripPlanInitialInput = ({
   useEffect(() => {
     if (!userProfile) return;
 
-    const trackedLocation = getTrackedLocation(
-      userProfile.last_tracked_address,
-    );
+    const trackedLocation = planningHandoff
+      ? getProfileLocation(userProfile)
+      : getTrackedLocation(userProfile.last_tracked_address);
+    const shouldUseProfileLocation = !hasHandoffDeparture(planningHandoff);
 
-    if (!form.start_location_address && trackedLocation.address) {
+    if (
+      shouldUseProfileLocation &&
+      !form.start_location_address &&
+      trackedLocation.address
+    ) {
       updateField("start_location_address", String(trackedLocation.address));
     }
-    if (!form.start_location_latitude && trackedLocation.latitude !== "") {
+    if (
+      shouldUseProfileLocation &&
+      !form.start_location_latitude &&
+      trackedLocation.latitude !== ""
+    ) {
       updateField("start_location_latitude", String(trackedLocation.latitude));
     }
-    if (!form.start_location_longitude && trackedLocation.longitude !== "") {
+    if (
+      shouldUseProfileLocation &&
+      !form.start_location_longitude &&
+      trackedLocation.longitude !== ""
+    ) {
       updateField(
         "start_location_longitude",
         String(trackedLocation.longitude),
@@ -184,11 +228,56 @@ const TripPlanInitialInput = ({
         userProfile.preferred_accommodation,
       );
     }
+
+    if (!planningHandoff) return;
+
+    const profileBudgetTier =
+      userProfile.preferred_budget_tier || userProfile.budget_tier;
+    const profileTravelerType =
+      userProfile.preferred_traveler_type ||
+      userProfile.preferred_traveller_type ||
+      userProfile.traveler_type ||
+      userProfile.traveller_type;
+    const profileTravelerCount =
+      userProfile.preferred_travelers_count ||
+      userProfile.preferred_traveller_count ||
+      userProfile.travelers_count ||
+      userProfile.traveller_count;
+
+    if (!form.budget_tier && profileBudgetTier) {
+      updateField("budget_tier", String(profileBudgetTier).toLowerCase());
+    }
+    if (!form.budget_currency && userProfile.preferred_currency) {
+      updateField(
+        "budget_currency",
+        normalizeCurrency(userProfile.preferred_currency),
+      );
+    }
+    if (!form.traveler_type && profileTravelerType) {
+      updateField("traveler_type", String(profileTravelerType).toLowerCase());
+    }
+    if (!form.travelers_count) {
+      const resolvedTravelerType = form.traveler_type || profileTravelerType;
+      const resolvedTravelerCount =
+        profileTravelerCount ||
+        (resolvedTravelerType
+          ? getTravelerCountForType(resolvedTravelerType, "")
+          : "");
+
+      if (resolvedTravelerCount) {
+        updateField("travelers_count", String(resolvedTravelerCount));
+      }
+    }
   }, [
     form.accommodation_preference,
     form.start_location_address,
     form.start_location_latitude,
     form.start_location_longitude,
+    form.budget_currency,
+    form.budget_tier,
+    form.traveler_type,
+    form.travelers_count,
+    planningHandoff,
     updateField,
     userProfile,
   ]);

@@ -9,7 +9,7 @@ export const getTripDetailId = (trip) =>
 export const getDestinationSlug = (destination) =>
   destination?.slug || destination?.destination_slug || destination?.id;
 
-export const createInitialTripForm = () => ({
+const createDefaultTripForm = () => ({
   budget_tier: "comfort",
   budget_currency: "USD",
   start_date: "",
@@ -22,6 +22,97 @@ export const createInitialTripForm = () => ({
   start_location_longitude: "",
   start_location_accuracy: "",
 });
+
+const getHandoffValue = (...values) =>
+  values.find(
+    (value) =>
+      value !== undefined && value !== null && String(value).trim() !== "",
+  );
+
+const normalizeHandoffDate = (value) => {
+  if (typeof value !== "string") return "";
+
+  const normalizedDate = value.trim().slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalizedDate) ? normalizedDate : "";
+};
+
+const normalizeHandoffChoice = (value) =>
+  value
+    ? String(value).trim().toLowerCase().replaceAll("-", "_").replaceAll(" ", "_")
+    : "";
+
+const getHandoffLocation = (handoff) => {
+  const departureLocation = handoff?.departure_location;
+
+  if (!departureLocation || typeof departureLocation === "string") {
+    return {
+      address: departureLocation || "",
+      latitude: getHandoffValue(handoff?.departure_latitude, handoff?.latitude),
+      longitude: getHandoffValue(
+        handoff?.departure_longitude,
+        handoff?.longitude,
+      ),
+      accuracy: getHandoffValue(
+        handoff?.departure_accuracy,
+        handoff?.location_accuracy,
+      ),
+    };
+  }
+
+  return {
+    address:
+      departureLocation.address ||
+      departureLocation.formatted_address ||
+      departureLocation.name ||
+      "",
+    latitude: getHandoffValue(
+      departureLocation.latitude,
+      departureLocation.lat,
+    ),
+    longitude: getHandoffValue(
+      departureLocation.longitude,
+      departureLocation.lng,
+      departureLocation.lon,
+    ),
+    accuracy: getHandoffValue(departureLocation.accuracy),
+  };
+};
+
+export const createInitialTripForm = (handoff) => {
+  if (!handoff) return createDefaultTripForm();
+
+  const travelerType = normalizeHandoffChoice(
+    getHandoffValue(handoff.traveller_type, handoff.traveler_type),
+  );
+  const travelerCount = getHandoffValue(
+    handoff.traveller_count,
+    handoff.travelers_count,
+  );
+  const resolvedTravelerType = travelerType || "solo";
+  const location = getHandoffLocation(handoff);
+
+  return {
+    budget_tier: normalizeHandoffChoice(handoff.budget_tier) || "budget",
+    budget_currency: String(handoff.budget_currency || "").toUpperCase(),
+    start_date: normalizeHandoffDate(handoff.start_date),
+    days: getHandoffValue(handoff.duration_days, handoff.days)?.toString() || "",
+    travelers_count:
+      travelerCount?.toString() ||
+      (resolvedTravelerType === "solo"
+        ? "1"
+        : resolvedTravelerType === "couple"
+          ? "2"
+          : ""),
+    traveler_type: resolvedTravelerType,
+    accommodation_preference: normalizeHandoffChoice(
+      handoff.accommodation_preference,
+    ),
+    start_location_address: String(location.address || ""),
+    start_location_latitude: location.latitude?.toString() || "",
+    start_location_longitude: location.longitude?.toString() || "",
+    start_location_accuracy: location.accuracy?.toString() || "",
+  };
+};
 
 const titleTemplates = [
   "{destination} travel plan",

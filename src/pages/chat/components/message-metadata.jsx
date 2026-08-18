@@ -1,10 +1,12 @@
 import React from "react";
 import {
   ArrowRight,
+  ArrowUpRight,
   CalendarDays,
   Check,
   Clock3,
   Compass,
+  Loader2,
   MapPin,
   Route,
   Sparkles,
@@ -15,6 +17,8 @@ import {
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
+import Badge from "@/components/ui/badge";
+import { formatDate } from "@/lib/date-time";
 
 const formatLabel = (value) =>
   String(value || "")
@@ -41,9 +45,7 @@ const DestinationCard = ({ destination }) => {
           )}
         </div>
         {destination.budget_tier && (
-          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold capitalize text-primary">
-            {formatLabel(destination.budget_tier)} budget
-          </span>
+          <Badge>{formatLabel(destination.budget_tier)} budget</Badge>
         )}
       </div>
 
@@ -88,15 +90,14 @@ const DestinationCard = ({ destination }) => {
         </div>
       )}
 
-      {destination.destination_id && (
+      {destination.destination_slug && (
         <Button
           asChild
           variant="outline"
-          size="sm"
-          className="mt-3 border-primary/20 text-primary hover:bg-primary/5 hover:text-primary"
+          className="mt-4 border-primary/20 text-primary hover:bg-primary/5 hover:text-primary rounded-full !pl-5"
         >
-          <Link to={`/destinations/${destination.destination_id}`}>
-            View destination <ArrowRight size={14} />
+          <Link to={`/destinations/${destination.destination_slug}`}>
+            View destination <ArrowUpRight size={14} />
           </Link>
         </Button>
       )}
@@ -125,7 +126,9 @@ const SummaryItem = ({ icon: Icon, label, value }) => {
   );
 };
 
-const HandoffCard = ({ destinationName, handoff }) => {
+const HandoffCard = ({ destination, handoff, onStartPlanning }) => {
+  const [isOpeningPlanner, setIsOpeningPlanner] = React.useState(false);
+  const destinationName = destination?.name;
   const travelDate = handoff.start_date || handoff.preferred_month;
   const duration = handoff.duration_days
     ? `${handoff.duration_days} day${handoff.duration_days === 1 ? "" : "s"}`
@@ -133,6 +136,17 @@ const HandoffCard = ({ destinationName, handoff }) => {
   const travellers = handoff.traveller_count
     ? `${handoff.traveller_count} traveller${handoff.traveller_count === 1 ? "" : "s"}`
     : handoff.traveller_type;
+
+  const handleStartPlanning = async () => {
+    if (!onStartPlanning || isOpeningPlanner) return;
+
+    setIsOpeningPlanner(true);
+    try {
+      await onStartPlanning({ destination, handoff });
+    } finally {
+      setIsOpeningPlanner(false);
+    }
+  };
 
   return (
     <section className="rounded-xl border border-primary/20 bg-white p-3.5 sm:p-4">
@@ -159,7 +173,11 @@ const HandoffCard = ({ destinationName, handoff }) => {
           label="Leaving from"
           value={handoff.departure_location}
         />
-        <SummaryItem icon={CalendarDays} label="Travel date" value={travelDate} />
+        <SummaryItem
+          icon={CalendarDays}
+          label="Travel date"
+          value={formatDate(travelDate)}
+        />
         <SummaryItem icon={Clock3} label="Duration" value={duration} />
         <SummaryItem icon={Users} label="Travellers" value={travellers} />
         <SummaryItem
@@ -184,14 +202,27 @@ const HandoffCard = ({ destinationName, handoff }) => {
         />
       </div>
 
-      <Button type="button" className="mt-4 w-full">
-        Start planning <ArrowRight size={16} />
+      <Button
+        type="button"
+        className="mt-4 rounded-full !pr-4"
+        disabled={
+          isOpeningPlanner ||
+          (!handoff.destination_slug && !handoff.destination_id)
+        }
+        onClick={handleStartPlanning}
+      >
+        {isOpeningPlanner ? (
+          <Loader2 className="animate-spin" size={16} />
+        ) : (
+          <ArrowRight size={16} />
+        )}
+        {isOpeningPlanner ? "Opening planner..." : "Start planning"}
       </Button>
     </section>
   );
 };
 
-const MessageMetadata = ({ handoffDestinationName, metadata }) => {
+const MessageMetadata = ({ handoffDestination, metadata, onStartPlanning }) => {
   const destinations = Array.isArray(metadata?.destinations)
     ? metadata.destinations
     : [];
@@ -203,14 +234,15 @@ const MessageMetadata = ({ handoffDestinationName, metadata }) => {
     <div className="mt-3 space-y-3 ml-11 md:max-w-[82%]">
       {destinations.map((destination, index) => (
         <DestinationCard
-          key={destination.destination_id || `${destination.name}-${index}`}
+          key={`${destination.name}-${index}`}
           destination={destination}
         />
       ))}
       {handoff && (
         <HandoffCard
-          destinationName={handoffDestinationName}
+          destination={handoffDestination}
           handoff={handoff}
+          onStartPlanning={onStartPlanning}
         />
       )}
     </div>

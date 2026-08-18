@@ -58,17 +58,27 @@ import {
 const getCurrentStepIndex = (trip) =>
   getCurrentPlanningStepIndex(trip?.current_step);
 
-const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
+const TripPlanningDrawer = ({
+  destination,
+  trip,
+  planningHandoff,
+  open,
+  onOpenChange,
+}) => {
   const resolvedDestination =
     destination || trip?.primary_destination || trip?.destination || null;
   const destinationSlug = getDestinationSlug(resolvedDestination);
   const destinationName = resolvedDestination?.name || "";
   const directTripId = getTripDetailId(trip);
-  const shouldSkipTripList = Boolean(trip);
-  const [form, setForm] = useState(createInitialTripForm);
+  const shouldSkipTripList = Boolean(trip || planningHandoff);
+  const [form, setForm] = useState(() =>
+    createInitialTripForm(planningHandoff),
+  );
   const [createdTrip, setCreatedTrip] = useState(null);
   const [selectedTrip, setSelectedTrip] = useState(null);
-  const [isStartingNewPlan, setIsStartingNewPlan] = useState(false);
+  const [isStartingNewPlan, setIsStartingNewPlan] = useState(() =>
+    Boolean(planningHandoff),
+  );
   const [isViewingPlanList, setIsViewingPlanList] = useState(false);
   const [tripTitle, setTripTitle] = useState(null);
   const [activeStep, setActiveStep] = useState(null);
@@ -234,7 +244,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
     setIsStartingNewPlan(true);
     setIsViewingPlanList(false);
     setTripTitle(null);
-    setForm(createInitialTripForm());
+    setForm(createInitialTripForm(planningHandoff));
     setActiveStep(null);
     setFurthestStep(0);
     setPlanningState(null);
@@ -379,9 +389,9 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
     if (!nextOpen) {
       setCreatedTrip(null);
       setSelectedTrip(null);
-      setIsStartingNewPlan(false);
+      setIsStartingNewPlan(Boolean(planningHandoff));
       setIsViewingPlanList(false);
-      setForm(createInitialTripForm());
+      setForm(createInitialTripForm(planningHandoff));
       setTripTitle(null);
       setActiveStep(null);
       setFurthestStep(0);
@@ -592,6 +602,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
             <div className="custom-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto md:overflow-hidden">
               <TripPlanInitialInput
                 destination={resolvedDestination}
+                planningHandoff={planningHandoff}
                 form={form}
                 onFieldChange={updateField}
                 onSubmit={handleCreateTrip}
@@ -622,6 +633,7 @@ const TripPlanningDrawer = ({ destination, trip, open, onOpenChange }) => {
                 key={`${activeTripId}-${displayedStepConfig.key}`}
                 trip={activeTrip}
                 destination={resolvedDestination}
+                planningHandoff={planningHandoff}
                 getEndDate={getEndDate}
                 onTripUpdated={handleTripUpdated}
                 onStepComplete={handleStepComplete}

@@ -160,13 +160,21 @@ const ChatInterface = ({
   onMessageSearchChange,
   onOpenMessageSearch,
   onRefetchMessages,
+  onStartPlanning,
   onSubmitMessage,
 }) => {
-  const destinationNamesById = new Map(
+  const destinationsByReference = new Map(
     messages.flatMap((item) =>
       (item.metadata?.destinations || [])
-        .filter((destination) => destination.destination_id)
-        .map((destination) => [destination.destination_id, destination.name]),
+        .flatMap((destination) =>
+          [
+            destination.destination_id,
+            destination.destination_slug,
+            destination.slug,
+          ]
+            .filter(Boolean)
+            .map((destinationKey) => [destinationKey, destination]),
+        ),
     ),
   );
 
@@ -269,9 +277,11 @@ const ChatInterface = ({
                     <AuthorMessage message={messageContent} />
                     <MessageMetadata
                       metadata={item.metadata}
-                      handoffDestinationName={destinationNamesById.get(
-                        item.metadata?.handoff?.destination_id,
+                      handoffDestination={destinationsByReference.get(
+                        item.metadata?.handoff?.destination_slug ||
+                          item.metadata?.handoff?.destination_id,
                       )}
+                      onStartPlanning={onStartPlanning}
                     />
                   </div>
                 ) : (

@@ -23,14 +23,35 @@ const EMPTY_LIST = [];
 
 const unwrapAgentResponse = (response) => response?.data || response || {};
 
-const normalizeListToOptions = (values, options) => {
+const normalizeListToOptions = (
+  values,
+  options,
+  { preserveUnknown = false } = {},
+) => {
   const optionMap = new Map(
     options.map((option) => [option.toLowerCase(), option]),
   );
 
   return (Array.isArray(values) ? values : [])
-    .map((value) => optionMap.get(String(value).toLowerCase()))
+    .map((value) => {
+      const normalizedValue = String(value || "").trim();
+      return (
+        optionMap.get(normalizedValue.toLowerCase()) ||
+        (preserveUnknown ? normalizedValue : null)
+      );
+    })
     .filter(Boolean);
+};
+
+const mergeOptions = (defaultOptions, additionalOptions) => {
+  const seen = new Set();
+
+  return [...defaultOptions, ...additionalOptions].filter((option) => {
+    const key = option.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 };
 
 const normalizeTravelPace = (value) => {
@@ -41,6 +62,20 @@ const normalizeTravelPace = (value) => {
   if (pace === "balanced") return "moderate";
 
   return pace;
+};
+
+const getHandoffTravelPace = (handoff) => {
+  const explicitPace = handoff?.travel_pace || handoff?.trip_pace;
+  const interestPace = (Array.isArray(handoff?.interests)
+    ? handoff.interests
+    : []
+  ).find((interest) =>
+    ["relaxed", "slow", "moderate", "balanced", "packed", "fast"].includes(
+      String(interest).toLowerCase(),
+    ),
+  );
+
+  return normalizeTravelPace(explicitPace || interestPace);
 };
 
 const getInitialAgentMessages = (trip) =>
@@ -165,6 +200,7 @@ const AgentThinkingMessage = () => (
 
 const PreferencesStep = ({
   trip,
+  planningHandoff,
   onStepComplete,
   onStepSelect,
   onPlanningStateChange,
@@ -184,6 +220,45 @@ const PreferencesStep = ({
   const userTravelPace = user?.travel_pace
     ? String(user.travel_pace).toLowerCase()
     : "";
+  const handoffTravelInterests = useMemo(
+    () =>
+      normalizeListToOptions(
+        planningHandoff?.interests,
+        TRAVEL_INTEREST_OPTIONS,
+        { preserveUnknown: true },
+      ),
+    [planningHandoff?.interests],
+  );
+  const handoffDietaryPreferences = useMemo(
+    () =>
+      normalizeListToOptions(
+        planningHandoff?.dietary_preferences,
+        DIETARY_OPTIONS,
+        { preserveUnknown: true },
+      ),
+    [planningHandoff?.dietary_preferences],
+  );
+  const handoffMobilityConstraints = useMemo(
+    () =>
+      normalizeListToOptions(
+        planningHandoff?.mobility_constraints,
+        MOBILITY_OPTIONS,
+        { preserveUnknown: true },
+      ),
+    [planningHandoff?.mobility_constraints],
+  );
+  const availableTravelInterestOptions = useMemo(
+    () => mergeOptions(TRAVEL_INTEREST_OPTIONS, handoffTravelInterests),
+    [handoffTravelInterests],
+  );
+  const availableDietaryOptions = useMemo(
+    () => mergeOptions(DIETARY_OPTIONS, handoffDietaryPreferences),
+    [handoffDietaryPreferences],
+  );
+  const availableMobilityOptions = useMemo(
+    () => mergeOptions(MOBILITY_OPTIONS, handoffMobilityConstraints),
+    [handoffMobilityConstraints],
+  );
 
   // trip specific
   const tripId = trip?.id;
@@ -213,24 +288,57 @@ const PreferencesStep = ({
     Array.isArray(tripDietaryPreferences) ||
     Array.isArray(tripMobilityConstraints),
   );
+  const hasSavedPlanningPreferences = Boolean(
+    tripTravelPace ||
+    tripTravelInterests?.length ||
+    tripDietaryPreferences?.length ||
+    tripMobilityConstraints?.length ||
+    savedPreferences.dietary_other ||
+    savedPreferences.mobility_other,
+  );
   const preferenceSource = useMemo(() => {
-    if (hasTripPreferences) {
+    if (hasTripPreferences && (!planningHandoff || hasSavedPlanningPreferences)) {
       return {
         travel_pace: normalizeTravelPace(tripTravelPace),
         interest_tags: normalizeListToOptions(
           tripTravelInterests,
           TRAVEL_INTEREST_OPTIONS,
+          { preserveUnknown: Boolean(planningHandoff) },
         ),
         dietary_needs: normalizeListToOptions(
           tripDietaryPreferences,
           DIETARY_OPTIONS,
+          { preserveUnknown: Boolean(planningHandoff) },
         ),
         dietary_other: savedPreferences.dietary_other || "",
         mobility_constraints: normalizeListToOptions(
           tripMobilityConstraints,
           MOBILITY_OPTIONS,
+          { preserveUnknown: Boolean(planningHandoff) },
         ),
         mobility_other: savedPreferences.mobility_other || "",
+      };
+    }
+
+    if (planningHandoff) {
+      return {
+        travel_pace:
+          getHandoffTravelPace(planningHandoff) ||
+          normalizeTravelPace(userTravelPace),
+        interest_tags: handoffTravelInterests.length
+          ? handoffTravelInterests
+          : normalizeListToOptions(
+              userTravelInterests,
+              TRAVEL_INTEREST_OPTIONS,
+            ),
+        dietary_needs: handoffDietaryPreferences.length
+          ? handoffDietaryPreferences
+          : normalizeListToOptions(userDietaryPreferences, DIETARY_OPTIONS),
+        dietary_other: "",
+        mobility_constraints: handoffMobilityConstraints.length
+          ? handoffMobilityConstraints
+          : normalizeListToOptions(userMobilityConstraints, MOBILITY_OPTIONS),
+        mobility_other: "",
       };
     }
 
@@ -252,7 +360,12 @@ const PreferencesStep = ({
       mobility_other: "",
     };
   }, [
+    handoffDietaryPreferences,
+    handoffMobilityConstraints,
+    handoffTravelInterests,
+    hasSavedPlanningPreferences,
     hasTripPreferences,
+    planningHandoff,
     savedPreferences.dietary_other,
     savedPreferences.mobility_other,
     tripDietaryPreferences,
@@ -510,7 +623,7 @@ const PreferencesStep = ({
 
           <OptionGroup title="Interest Tags">
             <div className="flex flex-wrap gap-2">
-              {TRAVEL_INTEREST_OPTIONS.map((option) => (
+              {availableTravelInterestOptions.map((option) => (
                 <ToggleOption
                   key={option}
                   selected={resolvedInterests.includes(option)}
@@ -529,7 +642,7 @@ const PreferencesStep = ({
 
           <OptionGroup title="Dietary Needs">
             <div className="flex flex-wrap gap-2">
-              {DIETARY_OPTIONS.map((option) => (
+              {availableDietaryOptions.map((option) => (
                 <ToggleOption
                   key={option}
                   selected={resolvedDietaryNeeds.includes(option)}
@@ -558,7 +671,7 @@ const PreferencesStep = ({
 
           <OptionGroup title="Mobility Constraints">
             <div className="flex flex-wrap gap-2">
-              {MOBILITY_OPTIONS.map((option) => (
+              {availableMobilityOptions.map((option) => (
                 <ToggleOption
                   key={option}
                   selected={resolvedMobilityConstraints.includes(option)}

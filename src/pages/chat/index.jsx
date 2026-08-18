@@ -7,11 +7,18 @@ import React, {
 } from "react";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 
 import useDebounce from "@/hooks/useDebounce";
 import useMobileBottomNavbar from "@/hooks/useMobileBottomNavbar";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
+import PreviewContent from "@/components/shared/preview-content";
+import { Button } from "@/components/ui/button";
+import { destinationApiSlice } from "@/features/destination/destinationApiSlice";
 import {
   chatApiSlice,
   useAskChatQuestionMutation,
@@ -23,6 +30,9 @@ import {
 import ChatInterface from "./components/chat-interface";
 import ChatSessionList from "./components/session-list";
 import { Container } from "@/components/ui/container";
+import TripPlanningDrawer from "@/pages/trips/trip-create";
+
+const SESSION_QUERY_PARAM = "session_id";
 
 const toDisplayMessage = (message) => ({
   id: message.id,
@@ -37,6 +47,8 @@ const AgentChatPage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedSessionId = searchParams.get(SESSION_QUERY_PARAM) || null;
   const initialMessage =
     typeof location.state?.initialMessage === "string"
       ? location.state.initialMessage.trim()
@@ -46,10 +58,10 @@ const AgentChatPage = () => {
   const messageSearchInputRef = useRef(null);
   const composerRef = useRef(null);
   const pendingMessageIdRef = useRef(1);
+  const tripPlanningContextIdRef = useRef(1);
   const shouldRefocusComposerRef = useRef(false);
 
-  const [activeSessionId, setActiveSessionId] = useState(null);
-  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+  const [closedMobileSessionId, setClosedMobileSessionId] = useState(null);
   const [sessionSearch, setSessionSearch] = useState("");
   const [isMessageSearchOpen, setIsMessageSearchOpen] = useState(false);
   const [isSessionSearchOpen, setIsSessionSearchOpen] = useState(false);
@@ -58,7 +70,12 @@ const AgentChatPage = () => {
   const [pendingMessage, setPendingMessage] = useState(null);
   const [isReconcilingMessage, setIsReconcilingMessage] = useState(false);
   const [activeSessionSnapshot, setActiveSessionSnapshot] = useState(null);
-  const isMobileConversationOpen = isMobileChatOpen && Boolean(activeSessionId);
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] =
+    useState(false);
+  const [tripPlanningContext, setTripPlanningContext] = useState(null);
+  const [isTripPlanningOpen, setIsTripPlanningOpen] = useState(false);
+  const isMobileConversationOpen =
+    Boolean(selectedSessionId) && closedMobileSessionId !== selectedSessionId;
   useMobileBottomNavbar({ hidden: isMobileConversationOpen });
 
   const debouncedSessionSearch = useDebounce(sessionSearch.trim(), 350);
@@ -80,7 +97,6 @@ const AgentChatPage = () => {
     () => sessionListResponse?.data || [],
     [sessionListResponse?.data],
   );
-  const selectedSessionId = activeSessionId;
   const listedActiveSession = sessions.find(
     (session) => session.id === selectedSessionId,
   );
@@ -114,6 +130,63 @@ const AgentChatPage = () => {
   const [askChatQuestion, { isLoading: isSendingMessage }] =
     useAskChatQuestionMutation();
   const isChatBusy = isSendingMessage || isReconcilingMessage;
+
+  const selectSession = useCallback(
+    (sessionId) => {
+      setSearchParams(
+        (currentParams) => {
+          const nextParams = new URLSearchParams(currentParams);
+
+          if (sessionId) {
+            nextParams.set(SESSION_QUERY_PARAM, sessionId);
+          } else {
+            nextParams.delete(SESSION_QUERY_PARAM);
+          }
+
+          return nextParams;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const openTripPlanning = useCallback(
+    async ({ destination: handoffDestination, handoff }) => {
+      const destinationReference =
+        handoff?.destination_slug || handoff?.destination_id;
+
+      if (!destinationReference) {
+        toast.error("The destination is missing from this planning summary.");
+        return;
+      }
+
+      try {
+        const response = await dispatch(
+          destinationApiSlice.endpoints.destinationDetail.initiate(
+            destinationReference,
+            { subscribe: false },
+          ),
+        ).unwrap();
+        const destination = response?.data || response;
+
+        if (!destination?.id && !destination?.slug) {
+          throw new Error("Destination details are unavailable.");
+        }
+
+        setTripPlanningContext({
+          id: tripPlanningContextIdRef.current,
+          destination: { ...handoffDestination, ...destination },
+          handoff,
+        });
+        tripPlanningContextIdRef.current += 1;
+        setIsTripPlanningOpen(true);
+      } catch {
+        toast.error("Could not load this destination for trip planning.");
+      }
+    },
+    [dispatch],
+  );
 
   const messages = useMemo(() => {
     const serverMessages = (messageListResponse?.data || [])
@@ -169,10 +242,10 @@ const AgentChatPage = () => {
 
       if (session?.id) {
         setActiveSessionSnapshot(session);
-        setActiveSessionId(session.id);
+        selectSession(session.id);
       }
       setSessionSearch("");
-      setIsMobileChatOpen(true);
+      setClosedMobileSessionId(null);
       setMessage("");
       toast.success(response?.message || "Chat session created.");
     } catch (error) {
@@ -181,7 +254,10 @@ const AgentChatPage = () => {
   };
 
   const deleteActiveSession = async () => {
-    if (!selectedSessionId) return;
+    if (!selectedSessionId) {
+      setIsDeleteConfirmationOpen(false);
+      return;
+    }
 
     try {
       const deletingId = selectedSessionId;
@@ -189,9 +265,10 @@ const AgentChatPage = () => {
       const nextSession = sessions.find((session) => session.id !== deletingId);
 
       setActiveSessionSnapshot(nextSession || null);
-      setActiveSessionId(nextSession?.id || null);
-      setIsMobileChatOpen(Boolean(nextSession?.id));
+      selectSession(nextSession?.id || null);
+      setClosedMobileSessionId(null);
       setMessage("");
+      setIsDeleteConfirmationOpen(false);
       toast.success(response?.message || "Chat session deleted.");
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Could not delete this session."));
@@ -285,7 +362,7 @@ const AgentChatPage = () => {
             );
           }
 
-          setActiveSessionId(sessionId);
+          selectSession(sessionId);
         }
       } catch (error) {
         setMessage(trimmedMessage);
@@ -295,17 +372,26 @@ const AgentChatPage = () => {
         setPendingMessage(null);
       }
     },
-    [askChatQuestion, dispatch, isChatBusy, selectedSessionId],
+    [askChatQuestion, dispatch, isChatBusy, selectSession, selectedSessionId],
   );
 
   useEffect(() => {
     if (!initialMessage || forwardedMessageSentRef.current) return;
 
     forwardedMessageSentRef.current = true;
-    setIsMobileChatOpen(true);
+    setClosedMobileSessionId(null);
     submitMessage(initialMessage);
-    navigate(location.pathname, { replace: true, state: null });
-  }, [initialMessage, location.pathname, navigate, submitMessage]);
+    navigate(
+      { pathname: location.pathname, search: location.search },
+      { replace: true, state: null },
+    );
+  }, [
+    initialMessage,
+    location.pathname,
+    location.search,
+    navigate,
+    submitMessage,
+  ]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ block: "end" });
@@ -346,8 +432,8 @@ const AgentChatPage = () => {
             setActiveSessionSnapshot(
               sessions.find((session) => session.id === sessionId) || null,
             );
-            setActiveSessionId(sessionId);
-            setIsMobileChatOpen(true);
+            selectSession(sessionId);
+            setClosedMobileSessionId(null);
             setMessage("");
             setMessageSearch("");
           }}
@@ -374,19 +460,69 @@ const AgentChatPage = () => {
           selectedSessionId={selectedSessionId}
           trimmedMessageSearch={trimmedMessageSearch}
           onBack={() => {
-            setIsMobileChatOpen(false);
+            setClosedMobileSessionId(selectedSessionId);
             closeMessageSearch();
           }}
           onCloseMessageSearch={closeMessageSearch}
-          onDeleteSession={deleteActiveSession}
+          onDeleteSession={() => setIsDeleteConfirmationOpen(true)}
           onDownloadSession={downloadActiveSession}
           onMessageChange={setMessage}
           onMessageSearchChange={setMessageSearch}
           onOpenMessageSearch={openMessageSearch}
           onRefetchMessages={refetchMessages}
+          onStartPlanning={openTripPlanning}
           onSubmitMessage={submitMessage}
         />
       </section>
+
+      {tripPlanningContext && (
+        <TripPlanningDrawer
+          key={tripPlanningContext.id}
+          destination={tripPlanningContext.destination}
+          planningHandoff={tripPlanningContext.handoff}
+          open={isTripPlanningOpen}
+          onOpenChange={setIsTripPlanningOpen}
+        />
+      )}
+
+      <PreviewContent
+        open={isDeleteConfirmationOpen}
+        onOpenChange={(open) => {
+          if (!isDeletingSession) setIsDeleteConfirmationOpen(open);
+        }}
+        title="Delete chat session?"
+        description="This permanently deletes the chat session and all of its messages."
+        className="h-fit p-6 !max-w-lg md:p-8"
+      >
+        <h2 className="mt-2 text-lg font-bold text-slate-950 md:mt-0">
+          Delete chat session?
+        </h2>
+        <p className="mt-4 text-slate-500">
+          {`This permanently deletes ${
+            activeSession?.title ? `“${activeSession.title}”` : "this chat"
+          } and all of its messages. This action cannot be undone.`}
+        </p>
+        <div className="mt-8 flex w-full flex-col gap-3 md:flex-row md:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isDeletingSession}
+            onClick={() => setIsDeleteConfirmationOpen(false)}
+            className="w-full md:w-auto"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isDeletingSession}
+            onClick={deleteActiveSession}
+            className="w-full md:w-auto"
+          >
+            {isDeletingSession ? "Deleting..." : "Delete session"}
+          </Button>
+        </div>
+      </PreviewContent>
     </Container>
   );
 };
