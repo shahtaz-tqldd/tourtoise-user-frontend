@@ -225,16 +225,16 @@ const FeatureDetails = ({ feature, destinationSlug, open, onOpenChange }) => {
   return (
     <PreviewContent open={open} onOpenChange={onOpenChange}>
       {isLoading ? (
-        <div className="center min-h-80 flex-col gap-3 text-slate-500">
+        <div className="center min-h-80 flex-col gap-3 text-subtle">
           <LoaderCircle className="animate-spin text-primary" size={28} />
           <p className="text-sm font-medium">Loading details...</p>
         </div>
       ) : isError ? (
         <div className="center min-h-80 flex-col px-6 text-center">
-          <h2 className="font-semibold text-slate-900">
+          <h2 className="font-semibold text-heading">
             Could not load these details
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-subtle">
             Please check your connection and try again.
           </p>
           <button
@@ -286,7 +286,7 @@ function FeatureDetailContent({ feature }) {
             {item.name}
           </Title>
           {leadLine && (
-            <p className="mt-2 flex items-start gap-2 text-sm text-slate-500">
+            <p className="mt-2 flex items-start gap-2 text-sm text-subtle">
               {category === "cuisine" ? (
                 <>
                   <Utensils
@@ -311,7 +311,7 @@ function FeatureDetailContent({ feature }) {
               )}
             </p>
           )}
-          <p className="mt-4 leading-7 text-slate-600 text-sm">
+          <p className="mt-4 leading-7 text-body text-sm">
             {item.description}
           </p>
           {tags.length > 0 && (
@@ -334,7 +334,7 @@ function FeatureDetailContent({ feature }) {
           <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-4">
             {features.map((item, index) => (
               <SnapshotCard
-                className="border border-slate-200 rounded-xl p-4"
+                className="border border-line rounded-xl p-4"
                 key={index}
                 {...item}
               />
@@ -343,9 +343,9 @@ function FeatureDetailContent({ feature }) {
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="border border-slate-200 rounded-xl p-4">
+          <div className="border border-line rounded-xl p-4">
             <Title variant="xs">Reasons to add {item.name} to your list</Title>
-            <div className="mt-4 text-slate-600">
+            <div className="mt-4 text-body">
               {item.picking_reasons?.length ? (
                 <ul className="list-disc space-y-2">
                   {item.picking_reasons.map((tip) => (
@@ -360,9 +360,9 @@ function FeatureDetailContent({ feature }) {
               )}
             </div>
           </div>
-          <div className="border border-slate-200 rounded-xl p-4 overflow-hidden">
+          <div className="border border-line rounded-xl p-4 overflow-hidden">
             <Title variant="xs">Consider this before going {item.name}</Title>
-            <div className="mt-4 text-slate-600">
+            <div className="mt-4 text-body">
               {item.notes?.length ? (
                 <ul className="list-disc space-y-2">
                   {item.notes.map((tip) => (
@@ -381,9 +381,9 @@ function FeatureDetailContent({ feature }) {
 
         {extraSections.length > 0
           ? extraSections.map((section) => (
-              <div key={section.title} className="p-4 bg-slate-100 rounded-xl">
+              <div key={section.title} className="p-4 bg-surface-muted rounded-xl">
                 <h3 className="text-sm font-bold">{section.title}</h3>
-                <p className="mt-2 leading-7 text-slate-500 text-sm">
+                <p className="mt-2 leading-7 text-subtle text-sm">
                   {section.body}
                 </p>
               </div>

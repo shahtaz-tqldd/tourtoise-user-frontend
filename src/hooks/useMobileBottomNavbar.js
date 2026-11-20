@@ -1,6 +1,6 @@
 import React from "react";
 
-import { MobileBottomNavbarContext } from "@/components/navbar/mobile-bottom-navbar-context";
+import { MobileBottomNavbarContext } from "@/components/layout/mobile-bottom-navbar-context";
 
 const useMobileBottomNavbar = ({ hidden = false } = {}) => {
   const context = React.useContext(MobileBottomNavbarContext);

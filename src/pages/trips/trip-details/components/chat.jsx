@@ -10,7 +10,7 @@ import Card from "@/components/ui/card";
 import TabMenu from "@/components/ui/tab";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
-import ChatInputForm from "@/pages/chat/components/chat-input-form";
+import ChatInputForm from "@/components/shared/chat-input-form";
 import { AuthorMessage } from "@/components/shared/utils";
 import EmptyItems from "@/components/shared/empty-items";
 import { cn } from "@/lib/utils";
@@ -75,7 +75,7 @@ const MessageSkeleton = ({ compact = false }) => (
       >
         <div
           className={cn(
-            "h-12 rounded-2xl bg-slate-100",
+            "h-12 rounded-2xl bg-surface-muted",
             index % 2 ? "w-44 rounded-tr-md" : "w-56 rounded-tl-md",
           )}
         />
@@ -87,7 +87,7 @@ const MessageSkeleton = ({ compact = false }) => (
 const SystemMessageDivider = ({ message }) => (
   <div className="flex items-center gap-3 py-2">
     <span className="h-px flex-1 bg-slate-200" />
-    <span className="max-w-[72%] rounded-full bg-white px-3 text-center text-[11px] font-semibold leading-5 text-slate-500">
+    <span className="max-w-[72%] rounded-full bg-white px-3 text-center text-2xs font-semibold leading-5 text-subtle">
       {message}
     </span>
     <span className="h-px flex-1 bg-slate-200" />
@@ -97,7 +97,7 @@ const SystemMessageDivider = ({ message }) => (
 const UnreadMessagesDivider = ({ count }) => (
   <div className="flex items-center gap-3 py-1" role="separator">
     <span className="h-px flex-1 bg-red-200" />
-    <span className="rounded-full bg-red-50 px-3 py-1 text-[11px] font-semibold text-red-600">
+    <span className="rounded-full bg-red-50 px-3 py-1 text-2xs font-semibold text-red-600">
       {count} unread message{count === 1 ? "" : "s"}
     </span>
     <span className="h-px flex-1 bg-red-200" />
@@ -437,14 +437,14 @@ const ChatSection = ({
           />
         )}
         {isSendingMessage && (
-          <p className="px-1 text-xs font-semibold text-slate-400">
+          <p className="px-1 text-xs font-semibold text-faint">
             turtle is typing
           </p>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="shrink-0 border-t border-slate-200 bg-white px-2.5 pb-2 pt-3 md:px-0 md:pb-0">
+      <div className="shrink-0 border-t border-line bg-white px-2.5 pb-2 pt-3 md:px-0 md:pb-0">
         <ChatInputForm
           composerRef={composerRef}
           message={message}
@@ -468,7 +468,7 @@ const NotificationSection = ({
       scopeParams={{ trip_id: tripId }}
       pageSize={20}
       className="flex min-h-0 flex-1 flex-col py-4 pr-1"
-      itemClassName="bg-slate-50"
+      itemClassName="bg-surface-subtle"
       emptyMessage="No trip notifications available yet."
       onNotificationRead={onNotificationRead}
       onAllNotificationsRead={onAllNotificationsRead}

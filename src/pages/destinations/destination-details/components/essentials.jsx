@@ -9,16 +9,16 @@ const TripEssentials = ({ destination }) => {
   return (
     <div className="grid md:grid-cols-2 gap-4">
       <Card>
-        <h3 className="font-bold text-slate-900">
+        <h3 className="font-bold text-heading">
           Getting Around {destination.name}
         </h3>
-        <div className="mt-4 leading-7 text-slate-600">{getting_around}</div>
+        <div className="mt-4 leading-7 text-body">{getting_around}</div>
       </Card>
       <Card>
-        <h3 className="font-bold text-slate-900">
+        <h3 className="font-bold text-heading">
           Visa notes for {destination.name}
         </h3>
-        <p className="mt-4 leading-7 text-slate-600">{visa_notes}</p>
+        <p className="mt-4 leading-7 text-body">{visa_notes}</p>
       </Card>
     </div>
   );

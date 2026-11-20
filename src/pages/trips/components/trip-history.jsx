@@ -86,7 +86,7 @@ export const TripHistoryDrawer = ({
       <Button
         type="button"
         variant="outline"
-        className="h-12 w-12 rounded-full border-slate-200 lg:hidden"
+        className="h-12 w-12 rounded-full border-line lg:hidden"
         aria-label="Open trip history"
       >
         <History size={16} />
@@ -97,12 +97,12 @@ export const TripHistoryDrawer = ({
       className="w-screen gap-0 overflow-hidden p-0"
       showCloseButton={false}
     >
-      <SheetHeader className="border-b border-slate-100 pr-12 text-left">
+      <SheetHeader className="border-b border-line-subtle pr-12 text-left">
         <div className="mb-4 flex h-10 items-center gap-2">
           <SheetClose asChild>
             <button
               type="button"
-              className="-ml-2 flex size-10 shrink-0 items-center justify-center rounded-full text-slate-700 transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+              className="-ml-2 flex size-10 shrink-0 items-center justify-center rounded-full text-body transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
               aria-label="Close profile menu"
             >
               <ArrowLeft className="size-5" />

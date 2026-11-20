@@ -8,10 +8,10 @@ const DestinationOverview = ({ destination, className }) => {
   return (
     <div className={cn("grid md:grid-cols-2 gap-4", className)}>
       <Card>
-        <h3 className="font-bold text-slate-900">
+        <h3 className="font-bold text-heading">
           Why {destination.name} is a great choice
         </h3>
-        <div className="mt-4 text-slate-600">
+        <div className="mt-4 text-body">
           {picking_reasons?.length ? (
             <ul className="list-disc space-y-2">
               {picking_reasons.map((tip) => (
@@ -29,10 +29,10 @@ const DestinationOverview = ({ destination, className }) => {
         </div>
       </Card>
       <Card>
-        <h3 className="font-bold text-slate-900">
+        <h3 className="font-bold text-heading">
           What {destination.name} feels like
         </h3>
-        <p className="mt-4 leading-7 text-slate-600">
+        <p className="mt-4 leading-7 text-body">
           {destination.description || (
             <span className="opacity-75">
               No description available for this destination.

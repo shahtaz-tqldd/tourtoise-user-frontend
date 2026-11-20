@@ -6,8 +6,10 @@ import { toast } from "sonner";
 // components
 import JournalFeed from "./components/journal-feed";
 import JournalPageHeader, {
-  JournalScopeFilter,
+  JournalComposerPrompt,
+  JournalScopeTabs,
 } from "./components/journal-page-header";
+import JournalSidebar from "./components/journal-sidebar";
 import ConfirmDialog from "@/components/shared/confirm-dialog";
 
 import {
@@ -19,11 +21,13 @@ import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { normalizeJournals } from "./journal-utils";
 import useTitle from "@/hooks/useTitle";
 import JournalFormDialog from "./components/journal-form-dialog";
+import { useAuthGate } from "@/features/auth/auth-gate-context";
 import { Container } from "@/components/ui/container";
 
 const TravelJournalPage = () => {
   useTitle("tourtoise - travel journal");
   const navigate = useNavigate();
+  const { requireAuth } = useAuthGate();
   const [formOpen, setFormOpen] = useState(false);
   const [editingJournal, setEditingJournal] = useState(null);
   const [deletingJournal, setDeletingJournal] = useState(null);
@@ -56,9 +60,13 @@ const TravelJournalPage = () => {
     [data],
   );
 
-  const toggleSavedJournal = async (journal) => {
+  const toggleSavedJournal = (journal) => {
     if (!journal?.id || isSaving) return;
 
+    requireAuth(() => handleSaveJournal(journal), { reason: "journal" });
+  };
+
+  const handleSaveJournal = async (journal) => {
     try {
       const response = await saveJournal({
         journal_id: journal.id,
@@ -75,14 +83,23 @@ const TravelJournalPage = () => {
     }
   };
 
+  const changeScope = (scope) =>
+    scope === "mine"
+      ? requireAuth(() => setJournalScope(scope), { reason: "journal" })
+      : setJournalScope(scope);
+
   const openCreate = () => {
-    setEditingJournal(null);
-    setFormOpen(true);
+    requireAuth(() => {
+      setEditingJournal(null);
+      setFormOpen(true);
+    }, { reason: "journal" });
   };
 
   const openEdit = (journal) => {
-    setEditingJournal(journal);
-    setFormOpen(true);
+    requireAuth(() => {
+      setEditingJournal(journal);
+      setFormOpen(true);
+    }, { reason: "journal" });
   };
 
   const handleDeleteJournal = async () => {
@@ -105,32 +122,35 @@ const TravelJournalPage = () => {
   };
 
   return (
-    <Container childClassName="max-w-3xl">
-      <JournalPageHeader onCreate={openCreate} />
-      <JournalScopeFilter
-        value={journalScope}
-        onValueChange={setJournalScope}
-      />
-      <JournalFeed
-        journals={journals}
-        isLoading={isLoading}
-        isError={isError}
-        onRetry={refetch}
-        hasMore={hasNextPage}
-        isFetchingMore={isFetchingNextPage}
-        onLoadMore={fetchNextPage}
-        onSaveToggle={toggleSavedJournal}
-        onEditJournal={openEdit}
-        onDeleteJournal={setDeletingJournal}
-        canManageJournal={isOwnJournal}
-        scope={journalScope}
-        onCreate={openCreate}
-        emptyDescription={
-          journalScope === "mine"
-            ? "Create your first travel journal to see it here."
-            : "No public travel journals are available yet."
-        }
-      />
+    <Container>
+      <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="min-w-0 space-y-4">
+          <JournalPageHeader />
+          <JournalScopeTabs value={journalScope} onValueChange={changeScope} />
+          <JournalComposerPrompt onCreate={openCreate} />
+          <JournalFeed
+            journals={journals}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            hasMore={hasNextPage}
+            isFetchingMore={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            onSaveToggle={toggleSavedJournal}
+            onEditJournal={openEdit}
+            onDeleteJournal={setDeletingJournal}
+            canManageJournal={isOwnJournal}
+            scope={journalScope}
+            onCreate={openCreate}
+            emptyDescription={
+              journalScope === "mine"
+                ? "Write about a trip you loved — it only takes a minute."
+                : "Be the first to share a story from the road."
+            }
+          />
+        </div>
+        <JournalSidebar onCreate={openCreate} onShowMine={() => changeScope("mine")} />
+      </div>
       {formOpen && (
         <JournalFormDialog
           key={editingJournal?.id || "new-journal"}
@@ -142,8 +162,8 @@ const TravelJournalPage = () => {
       <ConfirmDialog
         open={Boolean(deletingJournal)}
         onOpenChange={(open) => !open && setDeletingJournal(null)}
-        title="Delete journal?"
-        description="This permanently deletes this journal and all its comments."
+        title="Delete post?"
+        description="This permanently deletes the post and all its comments."
         confirmLabel="Delete"
         variant="destructive"
         isLoading={isDeleting}

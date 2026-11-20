@@ -90,22 +90,22 @@ const HeadsUpListSkeleton = () => (
     {Array.from({ length: 3 }).map((_, index) => (
       <div
         key={index}
-        className="rounded-xl border border-slate-200 bg-white p-4"
+        className="rounded-xl border border-line bg-white p-4"
       >
         <div className="flex items-start gap-3">
-          <div className="mt-1 h-5 w-4 animate-pulse rounded bg-slate-100" />
+          <div className="mt-1 h-5 w-4 animate-pulse rounded bg-surface-muted" />
           <div className="min-w-0 flex-1 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
               <div className="h-5 w-20 animate-pulse rounded-full bg-primary/10" />
-              <div className="h-5 w-16 animate-pulse rounded-full bg-slate-100" />
+              <div className="h-5 w-16 animate-pulse rounded-full bg-surface-muted" />
             </div>
             <div className="space-y-2">
-              <div className="h-3 w-full animate-pulse rounded-full bg-slate-100" />
-              <div className="h-3 w-4/5 animate-pulse rounded-full bg-slate-100" />
+              <div className="h-3 w-full animate-pulse rounded-full bg-surface-muted" />
+              <div className="h-3 w-4/5 animate-pulse rounded-full bg-surface-muted" />
             </div>
           </div>
-          <div className="size-8 animate-pulse rounded-full bg-slate-100" />
+          <div className="size-8 animate-pulse rounded-full bg-surface-muted" />
         </div>
       </div>
     ))}
@@ -382,7 +382,7 @@ const HeadsUpCard = ({
   if (isEditing) {
     return (
       <form
-        className="rounded-xl bg-white border border-primary/50 p-4 text-sm font-medium text-slate-700"
+        className="rounded-xl bg-white border border-primary/50 p-4 text-sm font-medium text-body"
         onSubmit={handleSubmit}
       >
         <input
@@ -390,7 +390,7 @@ const HeadsUpCard = ({
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           disabled={isUpdating}
-          className="min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400 disabled:opacity-60"
+          className="min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-heading outline-none placeholder:text-faint disabled:opacity-60"
           required
         />
         <textarea
@@ -401,9 +401,9 @@ const HeadsUpCard = ({
           disabled={isUpdating}
           required
           rows={1}
-          className="mt-2 block w-full resize-none overflow-hidden border-none bg-transparent text-sm leading-6 text-slate-500 outline-none placeholder:text-slate-400 disabled:opacity-60"
+          className="mt-2 block w-full resize-none overflow-hidden border-none bg-transparent text-sm leading-6 text-subtle outline-none placeholder:text-faint disabled:opacity-60"
         />
-        <div className="gap-2 border-t border-slate-200/80 mt-4 pt-3 -mx-4 px-4 flex justify-end">
+        <div className="gap-2 border-t border-line/80 mt-4 pt-3 -mx-4 px-4 flex justify-end">
           <Button
             type="button"
             variant="outline"
@@ -429,10 +429,10 @@ const HeadsUpCard = ({
 
   return (
     <article
-      className={cn("h-full rounded-xl border p-4 border-slate-200 bg-white")}
+      className={cn("h-full rounded-xl border p-4 border-line bg-white")}
     >
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-sm font-semibold text-slate-900">{item.title}</h3>
+        <h3 className="text-sm font-semibold text-heading">{item.title}</h3>
         <PreviewActionsDropdown
           title="Heads-up actions"
           description="Choose an action for this heads-up."
@@ -443,7 +443,7 @@ const HeadsUpCard = ({
               variant="ghost"
               size="icon-sm"
               aria-label="Heads-up actions"
-              className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 -mt-2 -mr-2"
+              className="text-subtle hover:bg-surface-muted hover:text-heading -mt-2 -mr-2"
             >
               <MoreVertical size={16} />
             </Button>
@@ -465,7 +465,7 @@ const HeadsUpCard = ({
           ]}
         />
       </div>
-      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-500">
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-subtle">
         {getHeadsUpDetails(item)}
       </p>
     </article>
@@ -522,7 +522,7 @@ const HeadsUpCreateDialog = ({ open, onOpenChange, tripId, onCreated }) => {
       className="md:p-8 p-6 !max-w-xl h-fit"
     >
       <h2 className="text-lg font-bold mt-2 md:mt-0">Create heads-up</h2>
-      <p className="text-sm mt-1 text-slate-500">
+      <p className="text-sm mt-1 text-subtle">
         Add important information travelers should review before the trip.
       </p>
       <form className="mt-6 space-y-5" onSubmit={handleSubmit}>

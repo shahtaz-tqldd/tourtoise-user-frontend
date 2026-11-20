@@ -175,20 +175,20 @@ const DocumentListSkeleton = () => (
     {Array.from({ length: 6 }).map((_, index) => (
       <div
         key={index}
-        className="rounded-xl border border-slate-200 bg-white p-4"
+        className="rounded-xl border border-line bg-white p-4"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <div className="h-4 w-32 animate-pulse rounded-full bg-slate-200" />
-              <div className="h-5 w-20 animate-pulse rounded-full bg-slate-100" />
+              <div className="h-5 w-20 animate-pulse rounded-full bg-surface-muted" />
             </div>
             <div className="space-y-2">
-              <div className="h-3 w-full animate-pulse rounded-full bg-slate-100" />
-              <div className="h-3 w-3/4 animate-pulse rounded-full bg-slate-100" />
+              <div className="h-3 w-full animate-pulse rounded-full bg-surface-muted" />
+              <div className="h-3 w-3/4 animate-pulse rounded-full bg-surface-muted" />
             </div>
           </div>
-          <div className="size-8 animate-pulse rounded-full bg-slate-100" />
+          <div className="size-8 animate-pulse rounded-full bg-surface-muted" />
         </div>
         <div className="mt-4 h-7 w-24 animate-pulse rounded-md bg-primary/10" />
       </div>
@@ -635,7 +635,7 @@ const DocumentItemCard = ({
   };
 
   const cardClass =
-    "rounded-xl bg-white border border-primary/50 p-4 text-sm font-medium text-slate-700";
+    "rounded-xl bg-white border border-primary/50 p-4 text-sm font-medium text-body";
 
   if (isEditing) {
     return (
@@ -648,7 +648,7 @@ const DocumentItemCard = ({
                 value={documentName}
                 onChange={(event) => setDocumentName(event.target.value)}
                 disabled={isUpdating}
-                className="w-full border-none bg-transparent p-0 text-sm font-semibold text-slate-900 outline-none disabled:opacity-60"
+                className="w-full border-none bg-transparent p-0 text-sm font-semibold text-heading outline-none disabled:opacity-60"
                 required
               />
               <InlinePillSelect
@@ -656,14 +656,14 @@ const DocumentItemCard = ({
                 onValueChange={setRequiredLevel}
                 disabled={isUpdating}
                 options={requiredLevelOptions}
-                className={"border-slate-200 bg-white text-slate-500"}
+                className={"border-line bg-white text-subtle"}
               />
             </div>
             <textarea
               value={additionalNote}
               onChange={(event) => setAdditionalNote(event.target.value)}
               disabled={isUpdating}
-              className="resize-none block w-full border-none bg-transparent p-0 text-sm font-normal leading-5 text-slate-500 outline-none disabled:opacity-60"
+              className="resize-none block w-full border-none bg-transparent p-0 text-sm font-normal leading-5 text-subtle outline-none disabled:opacity-60"
               placeholder="Additional note"
             />
             {documentFileName ? (
@@ -674,12 +674,12 @@ const DocumentItemCard = ({
                   value={documentFileName}
                   onChange={(event) => setDocumentFileName(event.target.value)}
                   disabled={isUpdating}
-                  className="block w-fit border-none bg-transparent p-0 text-sm font-normal leading-5 text-slate-500 outline-none disabled:opacity-60"
+                  className="block w-fit border-none bg-transparent p-0 text-sm font-normal leading-5 text-subtle outline-none disabled:opacity-60"
                 />
               </div>
             ) : null}
 
-            <div className="gap-2 border-t border-slate-200/80 mt-4 pt-3 -mx-4 px-4 flex justify-end">
+            <div className="gap-2 border-t border-line/80 mt-4 pt-3 -mx-4 px-4 flex justify-end">
               <Button
                 type="button"
                 variant="outline"
@@ -711,7 +711,7 @@ const DocumentItemCard = ({
         "h-full rounded-xl border p-4",
         item.is_packed
           ? "border-primary/15 bg-primary/[0.02]"
-          : "border-slate-200 bg-white",
+          : "border-line bg-white",
       )}
     >
       <div className="flex items-start gap-3">
@@ -730,8 +730,8 @@ const DocumentItemCard = ({
                     className={cn(
                       "font-semibold",
                       item.is_packed
-                        ? "text-slate-400 line-through"
-                        : "text-slate-900",
+                        ? "text-faint line-through"
+                        : "text-heading",
                     )}
                   >
                     {getDocumentName(item)}
@@ -739,7 +739,7 @@ const DocumentItemCard = ({
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       levelStyles[getDocumentLevel(item)] ||
-                      "bg-slate-100 text-slate-600"
+                      "bg-surface-muted text-body"
                     }`}
                   >
                     {formatLabel(getDocumentLevel(item))}
@@ -755,7 +755,7 @@ const DocumentItemCard = ({
                       variant="ghost"
                       size="icon-sm"
                       aria-label="Document actions"
-                      className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 -mt-1 -mr-2"
+                      className="text-subtle hover:bg-surface-muted hover:text-heading -mt-1 -mr-2"
                       disabled={isDisabled}
                     >
                       <MoreVertical size={16} />
@@ -779,7 +779,7 @@ const DocumentItemCard = ({
                 />
               </div>
               {getDocumentNote(item) ? (
-                <p className="mt-2 text-sm font-normal leading-6 text-slate-600">
+                <p className="mt-2 text-sm font-normal leading-6 text-body">
                   {getDocumentNote(item)}
                 </p>
               ) : null}
@@ -891,7 +891,7 @@ const DocumentCreateDialog = ({ open, onOpenChange, isLoading, onSubmit }) => {
       className="md:p-8 p-6 !max-w-xl h-fit"
     >
       <h2 className="text-lg font-bold mt-2 md:mt-0">Create document</h2>
-      <p className="text-sm mt-1 text-slate-500">
+      <p className="text-sm mt-1 text-subtle">
         Add a document item and optionally attach the uploaded file now.
       </p>
       <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
@@ -921,7 +921,7 @@ const DocumentCreateDialog = ({ open, onOpenChange, isLoading, onSubmit }) => {
           textareaClassName="min-h-32 leading-7"
         />
 
-        <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+        <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-medium text-body transition hover:bg-surface-subtle">
           <Upload size={14} />
           {documentFile ? "Change file" : "Choose file"}
           <input
@@ -933,7 +933,7 @@ const DocumentCreateDialog = ({ open, onOpenChange, isLoading, onSubmit }) => {
           />
         </label>
         {documentFile ? (
-          <p className="text-xs font-medium text-slate-500">
+          <p className="text-xs font-medium text-subtle">
             {documentFile.name}
           </p>
         ) : null}

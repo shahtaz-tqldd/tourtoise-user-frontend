@@ -1,7 +1,7 @@
 import React from "react";
 
 const SkeletonBlock = ({ className = "" }) => (
-  <div className={`rounded-full bg-slate-100 ${className}`} />
+  <div className={`rounded-full bg-surface-muted ${className}`} />
 );
 
 const FeedCardSkeleton = ({ index }) => {
@@ -63,7 +63,7 @@ const HistoryCardSkeleton = ({ index }) => {
 
   return (
     <article
-      className="rounded-3xl border border-slate-100 bg-white p-4 md:border-none md:p-6"
+      className="rounded-3xl border border-line-subtle bg-white p-4 md:border-none md:p-6"
       aria-hidden="true"
     >
       <div className="flex gap-2">

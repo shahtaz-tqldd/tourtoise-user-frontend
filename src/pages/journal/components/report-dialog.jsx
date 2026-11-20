@@ -40,8 +40,8 @@ const ReportDialog = ({
       className="h-fit p-6 md:p-8 md:max-w-lg"
     >
       <form onSubmit={handleSubmit}>
-        <h2 className="text-lg font-bold text-slate-950">Report {subject}</h2>
-        <p className="mt-2 text-sm text-slate-500">
+        <h2 className="text-lg font-bold text-heading">Report {subject}</h2>
+        <p className="mt-2 text-sm text-subtle">
           Tell us why this {subject} should be reviewed.
         </p>
         <Textarea

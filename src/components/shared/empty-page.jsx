@@ -42,7 +42,7 @@ const EmptyPage = ({
         >
           <span className="absolute left-3 top-1/2 size-3 -translate-y-1/2 rounded-full bg-primary/20 ring-4 ring-primary/5 sm:left-4" />
           <span className="absolute right-3 top-1/2 size-3 -translate-y-1/2 rounded-full bg-amber-300/70 ring-4 ring-amber-100/70 sm:right-4" />
-          <span className="absolute left-6 right-6 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-slate-200 sm:left-8 sm:right-8" />
+          <span className="absolute left-6 right-6 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-line sm:left-8 sm:right-8" />
 
           <span className="relative flex size-16 -rotate-6 items-center justify-center rounded-2xl border-4 border-white bg-primary text-white shadow-xl shadow-primary/20 sm:size-20">
             {React.createElement(icon, {
@@ -57,7 +57,7 @@ const EmptyPage = ({
         <h2
           id={titleId}
           className={cn(
-            "mt-3 text-2xl font-bold tracking-tight text-slate-950 sm:text-2xl",
+            "mt-3 text-2xl font-bold tracking-tight text-heading sm:text-2xl",
           )}
         >
           {title}
@@ -65,7 +65,7 @@ const EmptyPage = ({
         {description ? (
           <p
             className={cn(
-              "mx-auto mt-3 text-slate-500 text-sm",
+              "mx-auto mt-3 text-subtle text-sm",
               size === "sm"
                 ? "md:text-md max-w-[260px]"
                 : "md:text-base max-w-md",

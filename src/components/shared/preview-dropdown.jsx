@@ -68,7 +68,7 @@ const PreviewDropdown = ({
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          "flex w-[min(calc(100vw-2rem),420px)] flex-col overflow-hidden rounded-2xl border-slate-200 bg-white p-0 shadow-xl",
+          "flex w-[min(calc(100vw-2rem),420px)] flex-col overflow-hidden rounded-2xl border-line bg-white p-0 shadow-xl",
           className,
           desktopClassName,
         )}

@@ -1,0 +1,11 @@
+/* Style entry point. Order matters: Tailwind → tokens → base → helpers. */
+@import "tw-animate-css";
+@import "tailwindcss";
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./utilities.css";
+@import "./vendors.css";
+@import "./animation.css";
+
+@custom-variant dark (&:is(.dark *));

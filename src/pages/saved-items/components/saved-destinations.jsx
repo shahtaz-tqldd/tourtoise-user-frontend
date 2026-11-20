@@ -157,10 +157,10 @@ const DestinationItem = ({ destination, isRemoving, onRemove }) => {
         </div>
 
         <div className="min-w-0 flex-1 p-4">
-          <h2 className="truncate text-base font-bold text-slate-950">
+          <h2 className="truncate text-base font-bold text-heading">
             {destination.name || "Unnamed destination"}
           </h2>
-          <p className="mt-1.5 mb-4 flex min-w-0 items-center gap-1 text-sm text-slate-500">
+          <p className="mt-1.5 mb-4 flex min-w-0 items-center gap-1 text-sm text-subtle">
             <MapPin size={14} className="shrink-0" />
             <span className="truncate">{location || "Destination"}</span>
           </p>
@@ -195,13 +195,13 @@ const DestinationSkeleton = () => (
     {Array.from({ length: 6 }).map((_, index) => (
       <div
         key={index}
-        className="flex gap-3 rounded-2xl bg-white p-3 ring-1 ring-slate-200/60 sm:gap-4 sm:p-4"
+        className="flex gap-3 rounded-2xl bg-white p-3 ring-1 ring-line/60 sm:gap-4 sm:p-4"
       >
         <div className="size-20 shrink-0 animate-pulse rounded-xl bg-slate-200 sm:size-24" />
         <div className="min-w-0 flex-1 space-y-3 py-1">
           <div className="h-4 w-full animate-pulse rounded bg-slate-200" />
-          <div className="h-4 w-4/5 animate-pulse rounded bg-slate-100" />
-          <div className="h-3 w-1/2 animate-pulse rounded bg-slate-100" />
+          <div className="h-4 w-4/5 animate-pulse rounded bg-surface-muted" />
+          <div className="h-3 w-1/2 animate-pulse rounded bg-surface-muted" />
         </div>
       </div>
     ))}

@@ -363,8 +363,8 @@ const TripPlanInitialInput = ({
           }. Let's start with some basic infomation first.`}
         />
 
-        <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-5">
-          <p className="text-sm font-semibold text-slate-950">
+        <div className="rounded-xl border border-line bg-white p-4 space-y-5">
+          <p className="text-sm font-semibold text-heading">
             Basic Information
           </p>
           <LocationInput
@@ -404,7 +404,7 @@ const TripPlanInitialInput = ({
           </div>
 
           {form.start_date && form.days && (
-            <p className="-mt-2 text-xs text-slate-500">
+            <p className="-mt-2 text-xs text-subtle">
               End date will be {getEndDate(form.start_date, form.days)}.
             </p>
           )}
@@ -456,7 +456,7 @@ const TripPlanInitialInput = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 border-t border-line bg-white p-4 md:grid-cols-2">
         {onClose && (
           <Button
             type="button"

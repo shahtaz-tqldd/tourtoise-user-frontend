@@ -57,9 +57,9 @@ const PreviewActionsDropdown = ({
       desktopClassName={cn("w-40", contentClassName)}
       trigger={trigger}
     >
-      <div className="border-b border-slate-100 px-4 pb-4 pt-2 md:hidden">
-        <h2 className="font-bold text-slate-950">{title}</h2>
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
+      <div className="border-b border-line-subtle px-4 pb-4 pt-2 md:hidden">
+        <h2 className="font-bold text-heading">{title}</h2>
+        <p className="mt-1 text-sm text-subtle">{description}</p>
       </div>
       <div className="space-y-1 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {actions.map((action) => (
@@ -68,10 +68,10 @@ const PreviewActionsDropdown = ({
             type="button"
             disabled={action.disabled}
             className={cn(
-              "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-50",
+              "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-50",
               action.destructive
                 ? "text-destructive hover:bg-destructive/10"
-                : "text-slate-700",
+                : "text-body",
               action.className,
             )}
             onClick={() => selectAction(action)}

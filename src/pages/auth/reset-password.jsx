@@ -7,6 +7,7 @@ import { FloatingInput } from "@/components/ui/input";
 import { useResetPasswordMutation } from "@/features/auth/authApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import AuthContainer from "./components/container";
+import FormAlert from "@/features/auth/components/form-alert";
 
 const ResetPasswordPage = () => {
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
@@ -55,17 +56,11 @@ const ResetPasswordPage = () => {
   return (
     <AuthContainer
       title="Set new password"
-      description="Choose a new password for your
-      tourtoise account."
+      description="Choose a new password for your tourtoise account."
     >
-      {error && (
-        <div
-          key={errorAnimationKey}
-          className="error-bounce mb-6 -mt-4 rounded-lg border border-red-200 bg-red-100 p-2 text-center text-xs"
-        >
-          <span className="text-red-500">{error}</span>
-        </div>
-      )}
+      <FormAlert key={errorAnimationKey} className="mb-6">
+        {error}
+      </FormAlert>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <Controller
           name="email"
@@ -143,7 +138,7 @@ const ResetPasswordPage = () => {
           {isLoading ? "Resetting..." : "Reset Password"}
         </Button>
       </form>
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="mt-6 text-center text-sm text-subtle">
         Back to{" "}
         <Link to="/login" className="font-medium text-primary hover:underline">
           sign in

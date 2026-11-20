@@ -64,7 +64,7 @@ const DestinationHighlights = ({ destination, setActiveFeature }) => {
           )}
         />
       ) : (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
+        <div className="rounded-2xl border border-dashed border-line-strong bg-white p-6 text-sm text-subtle">
           No attractions available yet.
         </div>
       )}
@@ -72,7 +72,7 @@ const DestinationHighlights = ({ destination, setActiveFeature }) => {
         <button
           type="button"
           onClick={() => setIsExpanded((expanded) => !expanded)}
-          className="mx-auto hidden items-center gap-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-primary shadow-xs transition hover:border-primary/30 hover:bg-primary/5 lg:flex"
+          className="mx-auto hidden items-center gap-1 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-primary shadow-xs transition hover:border-primary/30 hover:bg-primary/5 lg:flex"
         >
           {isExpanded
             ? "Show less"
@@ -93,7 +93,7 @@ const HighlightItemCard = ({ item, onSelect }) => {
       onClick={() => onSelect(item)}
       className="group h-full w-full overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
     >
-      <div className="relative aspect-[5/3] overflow-hidden bg-slate-100">
+      <div className="relative aspect-[5/3] overflow-hidden bg-surface-muted">
         <Image
           src={item.cover_image}
           alt={item.name}
@@ -114,19 +114,19 @@ const HighlightItemCard = ({ item, onSelect }) => {
         <p className="text-xs font-semibold uppercase text-primary">
           {formatLabel(item?.attraction_type)}
         </p>
-        <h3 className="mt-1.5 line-clamp-2 font-medium leading-tight text-slate-950">
+        <h3 className="mt-1.5 line-clamp-2 font-medium leading-tight text-heading">
           {item.name}
         </h3>
 
         {item.address && (
-          <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+          <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-subtle">
             <MapPin size={13} className="shrink-0 text-primary" />
             <span className="truncate">{item.address}</span>
           </p>
         )}
 
         {tags.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5 border-t border-slate-100 pt-3">
+          <div className="mt-3 flex flex-wrap gap-1.5 border-t border-line-subtle pt-3">
             {tags.map((tag, index) => {
               const label =
                 typeof tag === "string"

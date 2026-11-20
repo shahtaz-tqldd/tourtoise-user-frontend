@@ -1,28 +1,16 @@
-import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/section";
 
-const ListingHeader = ({
-  title,
-  description,
-  filters = null,
-  className = "",
-}) => (
-  <div
-    className={cn(
-      "flex w-full flex-col gap-4 md:flex-row md:items-center",
-      className,
-    )}
-  >
-    <div className="shrink-0">
-      <h1 className="text-xl font-bold text-slate-800 md:text-2xl">{title}</h1>
-      {description && (
-        <p className="mt-1.5 max-w-xl text-sm font-medium text-slate-500">
-          {description}
-        </p>
-      )}
-    </div>
-
-    {filters && <div className="min-w-0 flex-1">{filters}</div>}
-  </div>
+/** Page title + optional filter bar. Thin wrapper over <PageHeader>. */
+const ListingHeader = ({ id, level, title, description, eyebrow, filters = null, className = "" }) => (
+  <PageHeader
+    id={id}
+    level={level}
+    eyebrow={eyebrow}
+    title={title}
+    description={description}
+    actions={filters}
+    className={className}
+  />
 );
 
 export default ListingHeader;

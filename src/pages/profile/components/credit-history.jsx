@@ -66,7 +66,7 @@ const transactionStyles = {
   },
   admin_adjustment: {
     icon: SlidersHorizontal,
-    iconClassName: "bg-slate-100 text-slate-600",
+    iconClassName: "bg-surface-muted text-body",
   },
 };
 
@@ -168,7 +168,7 @@ const CreditHistory = () => {
                 </div>
               ) : creditHistoryList.length ? (
                 <div>
-                  <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
+                  <div className="overflow-hidden rounded-2xl border border-line-subtle bg-white">
                     {creditHistoryList.map((transaction) => (
                       <CreditCard key={transaction.id} data={transaction} />
                     ))}
@@ -230,14 +230,14 @@ const CreditBalancePanel = ({
         <Coins size={20} aria-hidden="true" />
       </span>
       <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase text-slate-500 sm:text-xs">
+        <p className="text-3xs font-semibold uppercase text-subtle sm:text-xs">
           Current balance
         </p>
         <p className="flex items-baseline gap-1.5 leading-none">
-          <span className="text-2xl font-bold tracking-tight text-slate-950 tabular-nums">
+          <span className="text-2xl font-bold tracking-tight text-heading tabular-nums">
             {credit}
           </span>
-          <span className="text-xs font-semibold text-slate-500">credits</span>
+          <span className="text-xs font-semibold text-subtle">credits</span>
         </p>
       </div>
     </div>
@@ -245,7 +245,7 @@ const CreditBalancePanel = ({
     <div className="hidden h-9 w-px shrink-0 bg-slate-200 sm:block" />
 
     {hasPendingRequest ? (
-      <div className="ml-auto flex min-w-0 items-center gap-2 text-slate-600">
+      <div className="ml-auto flex min-w-0 items-center gap-2 text-body">
         <BadgeCheck className="size-4 shrink-0" aria-hidden="true" />
         <p className="text-xs font-medium leading-4">
           You've requested for credits, an admin will review it shortly.
@@ -253,7 +253,7 @@ const CreditBalancePanel = ({
       </div>
     ) : (
       <>
-        <p className="hidden min-w-0 flex-1 text-xs leading-5 text-slate-600 md:block">
+        <p className="hidden min-w-0 flex-1 text-xs leading-5 text-body md:block">
           Credits are used for planning trip, trip assistance and turtle chat
           <br />
           Need more for trip planning or travel assistance?
@@ -305,10 +305,10 @@ const CreditRequestDialog = ({ open, onOpenChange, onRequest, isLoading }) => {
         <span className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <HandCoins size={21} aria-hidden="true" />
         </span>
-        <h2 className="mt-5 text-xl font-bold text-slate-950">
+        <h2 className="mt-5 text-xl font-bold text-heading">
           Request credits
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+        <p className="mt-2 text-sm leading-6 text-subtle">
           Explain why you need more credits. An admin will review your request.
         </p>
         <Textarea
@@ -342,12 +342,12 @@ const CreditCard = ({ data }) => {
   const isCredit = amount > 0;
   const transactionStyle = transactionStyles[data?.transaction_type] ?? {
     icon: Coins,
-    iconClassName: "bg-slate-100 text-slate-600",
+    iconClassName: "bg-surface-muted text-body",
   };
   const Icon = transactionStyle.icon;
 
   return (
-    <article className="flex items-center gap-3 border-b border-slate-100 p-4 last:border-b-0 sm:gap-4 sm:px-5">
+    <article className="flex items-center gap-3 border-b border-line-subtle p-4 last:border-b-0 sm:gap-4 sm:px-5">
       <span
         className={cn(
           "flex size-10 shrink-0 items-center justify-center rounded-xl sm:size-11",
@@ -360,12 +360,12 @@ const CreditCard = ({ data }) => {
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="truncate text-sm font-semibold text-slate-900">
+            <h3 className="truncate text-sm font-semibold text-heading">
               {data?.transaction_type_display ||
                 titleCase(data?.transaction_type) ||
                 "Credit transaction"}
             </h3>
-            <p className="mt-0.5 line-clamp-1 text-xs text-slate-500 sm:text-sm">
+            <p className="mt-0.5 line-clamp-1 text-xs text-subtle sm:text-sm">
               {data?.description || "Credit balance updated"}
             </p>
           </div>
@@ -373,7 +373,7 @@ const CreditCard = ({ data }) => {
           <p
             className={cn(
               "shrink-0 text-sm font-bold tabular-nums sm:text-base",
-              isCredit ? "text-emerald-600" : "text-slate-900",
+              isCredit ? "text-emerald-600" : "text-heading",
             )}
           >
             {isCredit ? "+" : ""}
@@ -383,7 +383,7 @@ const CreditCard = ({ data }) => {
 
         <time
           dateTime={data?.created_at}
-          className="mt-1.5 block text-[11px] font-medium text-slate-400"
+          className="mt-1.5 block text-2xs font-medium text-faint"
         >
           {formatTransactionDate(data?.created_at)}
         </time>
@@ -393,19 +393,19 @@ const CreditCard = ({ data }) => {
 };
 
 const CreditSkeleton = () => (
-  <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
+  <div className="overflow-hidden rounded-2xl border border-line-subtle bg-white">
     {Array.from({ length: 5 }).map((_, index) => (
       <div
         key={index}
-        className="flex animate-pulse items-center gap-4 border-b border-slate-100 p-4 last:border-b-0 sm:px-5"
+        className="flex animate-pulse items-center gap-4 border-b border-line-subtle p-4 last:border-b-0 sm:px-5"
       >
-        <span className="size-11 shrink-0 rounded-xl bg-slate-100" />
+        <span className="size-11 shrink-0 rounded-xl bg-surface-muted" />
         <span className="min-w-0 flex-1 space-y-2">
           <span className="block h-3.5 w-1/3 rounded-full bg-slate-200" />
-          <span className="block h-3 w-2/3 rounded-full bg-slate-100" />
-          <span className="block h-2.5 w-1/4 rounded-full bg-slate-100" />
+          <span className="block h-3 w-2/3 rounded-full bg-surface-muted" />
+          <span className="block h-2.5 w-1/4 rounded-full bg-surface-muted" />
         </span>
-        <span className="h-4 w-16 rounded-full bg-slate-100" />
+        <span className="h-4 w-16 rounded-full bg-surface-muted" />
       </div>
     ))}
   </div>

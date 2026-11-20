@@ -44,7 +44,7 @@ function FloatingSelect({
         >
           <SelectTrigger
             className={cn(
-              "!h-auto min-h-[54px] w-full rounded-xl border border-slate-300 bg-white px-4 pt-5 pb-3 text-left text-sm text-slate-900 focus:border-primary focus:ring-4 focus:ring-primary/10",
+              "!h-auto min-h-[54px] w-full rounded-xl border border-line-strong bg-white px-4 pt-5 pb-3 text-left text-sm text-heading focus:border-primary focus:ring-4 focus:ring-primary/10",
               !hasValue && !open && "data-[placeholder]:text-transparent",
               triggerClassName,
             )}
@@ -56,7 +56,7 @@ function FloatingSelect({
 
         <label
           className={cn(
-            "pointer-events-none absolute left-4 z-10 origin-[0] bg-white px-1 py-1 text-sm text-slate-500 transition-all duration-200",
+            "pointer-events-none absolute left-4 z-10 origin-[0] bg-white px-1 py-1 text-sm text-subtle transition-all duration-200",
             hasValue || open
               ? "top-0 -translate-y-1/2 scale-90 text-primary"
               : "top-1/2 -translate-y-1/2 scale-100",

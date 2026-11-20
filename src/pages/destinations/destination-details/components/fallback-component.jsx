@@ -12,11 +12,11 @@ export const EmptyDestination = () => {
         <ArrowLeft size={16} />
         Destinations
       </Link>
-      <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
-        <h1 className="text-xl font-bold text-slate-950">
+      <div className="rounded-xl border border-line bg-white p-8 text-center">
+        <h1 className="text-xl font-bold text-heading">
           Destination not found
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-subtle">
           The selected destination could not be loaded.
         </p>
       </div>

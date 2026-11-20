@@ -52,7 +52,7 @@ const RescheduleDialog = ({
       className="md:p-8 p-6 !max-w-xl h-fit"
     >
       <h2 className="text-lg font-bold mt-2 md:mt-0">Reschedule trip</h2>
-      <p className="text-sm mt-1 text-slate-500">
+      <p className="text-sm mt-1 text-subtle">
         Update the trip start date and total duration.
       </p>
 
@@ -79,9 +79,9 @@ const RescheduleDialog = ({
           />
         </div>
         {endDate && (
-          <p className="-mt-2 text-xs text-slate-500">
+          <p className="-mt-2 text-xs text-subtle">
             End date will be{" "}
-            <span className="text-slate-700 font-medium">{formatDate(endDate)}</span>
+            <span className="text-body font-medium">{formatDate(endDate)}</span>
           </p>
         )}
         <div className="mt-8 flex md:flex-row flex-col w-full md:justify-end gap-3">

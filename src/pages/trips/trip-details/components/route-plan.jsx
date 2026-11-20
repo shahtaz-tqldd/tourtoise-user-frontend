@@ -129,7 +129,7 @@ const RoutePlanSkeleton = () => (
     {Array.from({ length: 2 }).map((_, groupIndex) => (
       <section
         key={groupIndex}
-        className="rounded-lg border border-slate-200 bg-slate-50 p-3 md:p-4"
+        className="rounded-lg border border-line bg-surface-subtle p-3 md:p-4"
       >
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
@@ -141,15 +141,15 @@ const RoutePlanSkeleton = () => (
               {itemIndex === 0 ? (
                 <span className="absolute left-4 top-9 h-[calc(100%+1rem)] w-px bg-slate-200 md:left-5 md:top-11" />
               ) : null}
-              <div className="z-10 size-8 shrink-0 animate-pulse rounded-full bg-white ring-1 ring-slate-200 md:size-10" />
-              <div className="min-w-0 flex-1 rounded-lg bg-white p-3 ring-1 ring-slate-200 md:p-4">
+              <div className="z-10 size-8 shrink-0 animate-pulse rounded-full bg-white ring-1 ring-line md:size-10" />
+              <div className="min-w-0 flex-1 rounded-lg bg-white p-3 ring-1 ring-line md:p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0 flex-1 space-y-3">
                     <div className="h-4 w-48 animate-pulse rounded-full bg-slate-200" />
-                    <div className="h-3 w-20 animate-pulse rounded-full bg-slate-100" />
+                    <div className="h-3 w-20 animate-pulse rounded-full bg-surface-muted" />
                     <div className="flex gap-2">
-                      <div className="h-6 w-14 animate-pulse rounded-md bg-slate-100" />
-                      <div className="h-6 w-16 animate-pulse rounded-md bg-slate-100" />
+                      <div className="h-6 w-14 animate-pulse rounded-md bg-surface-muted" />
+                      <div className="h-6 w-16 animate-pulse rounded-md bg-surface-muted" />
                     </div>
                   </div>
                   <div className="h-6 w-20 animate-pulse rounded-md bg-primary/10" />
@@ -172,31 +172,31 @@ const RouteSegmentCard = ({ segment, isLast }) => {
       {!isLast && (
         <span className="absolute left-4 top-9 h-[calc(100%+1rem)] w-px bg-slate-300 md:left-5 md:top-11" />
       )}
-      <div className="z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-primary ring-1 ring-slate-200 md:size-10">
+      <div className="z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-primary ring-1 ring-line md:size-10">
         <RouteIcon mode={segment.transport_mode} />
       </div>
-      <div className="min-w-0 flex-1 rounded-lg bg-white p-3 ring-1 ring-slate-200 md:p-4">
+      <div className="min-w-0 flex-1 rounded-lg bg-white p-3 ring-1 ring-line md:p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-950">
+            <p className="text-sm font-semibold text-heading">
               {segment.from_point} to {segment.to_point}
             </p>
-            <p className="mt-1 text-xs font-medium text-slate-400">
+            <p className="mt-1 text-xs font-medium text-faint">
               {formatTime(segment.start_time)}
             </p>
             {/* {segment.notes ? (
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-body">
                 {segment.notes}
               </p>
             ) : null} */}
             <div className="flx gap-2 mt-2">
               {duration ? (
-                <span className="w-fit rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                <span className="w-fit rounded-md bg-surface-muted px-2.5 py-1 text-xs font-semibold text-body">
                   {duration}
                 </span>
               ) : null}
               {cost ? (
-                <span className="w-fit rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                <span className="w-fit rounded-md bg-surface-muted px-2.5 py-1 text-xs font-semibold text-body">
                   {cost}
                 </span>
               ) : null}
@@ -264,13 +264,13 @@ const TripRoutePlan = ({ tripId, routes: providedRoutes }) => {
             {routeGroups.map(([date, routes]) => (
               <section
                 key={date}
-                className="rounded-xl border border-slate-200 bg-slate-50 p-3 md:p-4"
+                className="rounded-xl border border-line bg-surface-subtle p-3 md:p-4"
               >
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold text-slate-950">
+                  <h3 className="text-sm font-semibold text-heading">
                     {formatDate(date === "unscheduled" ? "" : date)}
                   </h3>
-                  <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
+                  <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-subtle">
                     {routes.length} route{routes.length === 1 ? "" : "s"}
                   </span>
                 </div>

@@ -65,7 +65,7 @@ const DestinationCuisine = ({ destination, setActiveFeature }) => {
           )}
         />
       ) : (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
+        <div className="rounded-2xl border border-dashed border-line-strong bg-white p-6 text-sm text-subtle">
           No cuisines available yet.
         </div>
       )}
@@ -73,7 +73,7 @@ const DestinationCuisine = ({ destination, setActiveFeature }) => {
         <button
           type="button"
           onClick={() => setIsExpanded((expanded) => !expanded)}
-          className="mx-auto hidden items-center gap-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-primary shadow-xs transition hover:border-primary/30 hover:bg-primary/5 lg:flex"
+          className="mx-auto hidden items-center gap-1 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-primary shadow-xs transition hover:border-primary/30 hover:bg-primary/5 lg:flex"
         >
           {isExpanded
             ? "Show less"
@@ -94,7 +94,7 @@ export const CuisineCard = ({ item, metaItems, onSelect }) => {
       onClick={() => onSelect(item)}
       className="group flex h-full w-full flex-col overflow-hidden rounded-[24px] bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
     >
-      <div className="relative aspect-[5/3] w-full shrink-0 overflow-hidden bg-slate-100">
+      <div className="relative aspect-[5/3] w-full shrink-0 overflow-hidden bg-surface-muted">
         <Image
           src={item?.cover_image}
           alt={item?.name}
@@ -116,12 +116,12 @@ export const CuisineCard = ({ item, metaItems, onSelect }) => {
         <p className="text-xs font-semibold uppercase text-primary">
           {formatLabel(item.cuisine_type)}
         </p>
-        <h3 className="mt-1.5 line-clamp-2 min-h-10 font-medium leading-5 text-slate-950">
+        <h3 className="mt-1.5 line-clamp-2 min-h-10 font-medium leading-5 text-heading">
           {item.name}
         </h3>
 
-        <div className="-mx-4 mt-auto border-t border-slate-100" />
-        <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5 text-xs font-semibold text-slate-600">
+        <div className="-mx-4 mt-auto border-t border-line-subtle" />
+        <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5 text-xs font-semibold text-body">
           {visibleMetaItems.map((meta, index) => (
             <Badge icon={meta.icon} key={index}>
               {meta.value}

@@ -44,15 +44,15 @@ const formatTime = (value) => {
 };
 
 const DetailMetric = ({ icon: Icon, label, value }) => (
-  <div className="rounded-2xl border border-slate-200 bg-white p-4">
-    <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+  <div className="rounded-2xl border border-line bg-white p-4">
+    <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-faint">
       {React.createElement(Icon, {
         className: "size-4 text-primary",
         "aria-hidden": "true",
       })}
       {label}
     </span>
-    <p className="mt-2 text-sm font-semibold text-slate-900">{value}</p>
+    <p className="mt-2 text-sm font-semibold text-heading">{value}</p>
   </div>
 );
 
@@ -62,7 +62,7 @@ const ItemStatusIcon = ({ complete }) => (
       "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full",
       complete
         ? "bg-primary text-white"
-        : "bg-slate-100 text-slate-400",
+        : "bg-surface-muted text-faint",
     )}
   >
     {complete ? (
@@ -94,26 +94,26 @@ const PackingReminderContent = ({ metadata }) => {
 
       {packingItems.length ? (
         <section>
-          <h3 className="mb-3 text-sm font-bold text-slate-950">
+          <h3 className="mb-3 text-sm font-bold text-heading">
             Packing checklist
           </h3>
           <div className="space-y-2">
             {packingItems.map((item, index) => (
               <article
                 key={`${item.item}-${index}`}
-                className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-3"
+                className="flex gap-3 rounded-2xl border border-line bg-white p-3"
               >
                 <ItemStatusIcon complete={item.is_packed} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="text-sm font-semibold text-heading">
                     {item.item}
                   </p>
                   <div className="mt-1.5 flex flex-wrap gap-2">
-                    <span className="rounded-md bg-primary/10 px-2 py-1 text-[11px] font-semibold capitalize text-primary">
+                    <span className="rounded-md bg-primary/10 px-2 py-1 text-2xs font-semibold capitalize text-primary">
                       {titleCase(item.priority) || "Item"}
                     </span>
                     {item.quantity ? (
-                      <span className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-500">
+                      <span className="rounded-md bg-surface-muted px-2 py-1 text-2xs font-semibold text-subtle">
                         Quantity: {item.quantity}
                       </span>
                     ) : null}
@@ -127,27 +127,27 @@ const PackingReminderContent = ({ metadata }) => {
 
       {documents.length ? (
         <section>
-          <h3 className="mb-3 text-sm font-bold text-slate-950">
+          <h3 className="mb-3 text-sm font-bold text-heading">
             Required documents
           </h3>
           <div className="space-y-2">
             {documents.map((document, index) => (
               <article
                 key={`${document.name}-${index}`}
-                className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-3"
+                className="flex gap-3 rounded-2xl border border-line bg-white p-3"
               >
                 <ItemStatusIcon complete={document.is_packed} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-start justify-between gap-2">
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm font-semibold text-heading">
                       {document.name}
                     </p>
-                    <span className="rounded-md bg-amber-50 px-2 py-1 text-[11px] font-semibold capitalize text-amber-700">
+                    <span className="rounded-md bg-amber-50 px-2 py-1 text-2xs font-semibold capitalize text-amber-700">
                       {titleCase(document.required_level) || "Required"}
                     </span>
                   </div>
                   {document.notes ? (
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                    <p className="mt-2 text-sm leading-6 text-subtle">
                       {document.notes}
                     </p>
                   ) : null}
@@ -167,7 +167,7 @@ const TripStartedContent = ({ metadata }) => {
   return (
     <div className="space-y-5">
       <section className="rounded-2xl bg-primary p-5 text-white">
-        <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide">
+        <span className="rounded-full bg-white/15 px-2.5 py-1 text-2xs font-bold uppercase tracking-wide">
           {titleCase(metadata.status) || "Trip started"}
         </span>
         <h3 className="mt-3 text-lg font-bold">
@@ -202,8 +202,8 @@ const TripStartedContent = ({ metadata }) => {
       </div>
 
       {destinations.length ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-4">
-          <h3 className="flex items-center gap-2 text-sm font-bold text-slate-950">
+        <section className="rounded-2xl border border-line bg-white p-4">
+          <h3 className="flex items-center gap-2 text-sm font-bold text-heading">
             <MapPin className="size-4 text-primary" aria-hidden="true" />
             Destinations
           </h3>
@@ -235,13 +235,13 @@ const DailySummaryContent = ({ metadata }) => {
           </span>
         ) : null}
         {metadata.destination ? (
-          <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+          <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-body ring-1 ring-line">
             <MapPin className="size-3.5 text-primary" aria-hidden="true" />
             {metadata.destination}
           </span>
         ) : null}
         {metadata.date ? (
-          <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+          <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-body ring-1 ring-line">
             <CalendarDays className="size-3.5 text-primary" aria-hidden="true" />
             {formatDate(metadata.date)}
           </span>
@@ -249,14 +249,14 @@ const DailySummaryContent = ({ metadata }) => {
       </div>
 
       {metadata.summary ? (
-        <p className="rounded-2xl bg-primary/5 p-4 text-sm leading-6 text-slate-600">
+        <p className="rounded-2xl bg-primary/5 p-4 text-sm leading-6 text-body">
           {metadata.summary}
         </p>
       ) : null}
 
       {items.length ? (
         <section>
-          <h3 className="mb-3 text-sm font-bold text-slate-950">
+          <h3 className="mb-3 text-sm font-bold text-heading">
             Today&apos;s plan
           </h3>
           <div className="space-y-3">
@@ -273,12 +273,12 @@ const DailySummaryContent = ({ metadata }) => {
                     <span className="mt-2 min-h-5 w-px flex-1 bg-slate-200" />
                   ) : null}
                 </div>
-                <div className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white p-4">
-                  <h4 className="text-sm font-bold text-slate-950">
+                <div className="min-w-0 flex-1 rounded-2xl border border-line bg-white p-4">
+                  <h4 className="text-sm font-bold text-heading">
                     {item.title}
                   </h4>
                   {item.description ? (
-                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                    <p className="mt-1 text-sm leading-6 text-body">
                       {item.description}
                     </p>
                   ) : null}
@@ -316,16 +316,16 @@ const TripNotificationDetails = ({ notification, onOpenChange }) => {
       desktopClassName="sm:max-w-3xl"
     >
       {notification && Content ? (
-        <div className="min-h-full bg-slate-50">
-          <header className="border-b border-slate-200 bg-white px-5 py-5 pr-12 md:px-6 md:py-6 md:pr-14">
+        <div className="min-h-full bg-surface-subtle">
+          <header className="border-b border-line bg-white px-5 py-5 pr-12 md:px-6 md:py-6 md:pr-14">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
               {titleCase(metadata.event_type)}
             </p>
-            <h2 className="mt-2 text-xl font-bold text-slate-950">
+            <h2 className="mt-2 text-xl font-bold text-heading">
               {notification.title}
             </h2>
             {notification.message ? (
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="mt-2 text-sm leading-6 text-subtle">
                 {notification.message}
               </p>
             ) : null}

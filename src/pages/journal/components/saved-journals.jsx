@@ -40,7 +40,7 @@ const SavedJournalList = ({
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="h-24 animate-pulse rounded-2xl bg-slate-100"
+            className="h-24 animate-pulse rounded-2xl bg-surface-muted"
           />
         ))}
       </div>
@@ -85,7 +85,7 @@ const SavedJournalList = ({
           <article
             key={journal.id}
             className={cn(
-              "flex min-w-0 cursor-pointer items-center gap-3 rounded-2xl bg-white transition hover:bg-slate-50",
+              "flex min-w-0 cursor-pointer items-center gap-3 rounded-2xl bg-white transition hover:bg-surface-subtle",
               coverImage ? "p-3" : "p-4",
             )}
             role="button"
@@ -99,7 +99,7 @@ const SavedJournalList = ({
             }}
           >
             {coverImage ? (
-              <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+              <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-surface-muted">
                 <img
                   src={coverImage}
                   alt=""
@@ -108,7 +108,7 @@ const SavedJournalList = ({
               </div>
             ) : null}
             <div className="min-w-0 flex-1">
-              <p className="line-clamp-2 text-sm leading-6 text-slate-600">
+              <p className="line-clamp-2 text-sm leading-6 text-body">
                 {journal.body || "Untitled travel journal"}
               </p>
               <div className="mt-3 flx gap-2">
@@ -124,11 +124,11 @@ const SavedJournalList = ({
                   </div>
                 )}
                 <div>
-                  <p className="truncate text-xs font-semibold text-slate-800">
+                  <p className="truncate text-xs font-semibold text-heading">
                     {journal.author?.name || "Unknown traveler"}
                   </p>
                   {journal.date && (
-                    <p className="mt-1 text-xs font-medium text-slate-400">
+                    <p className="mt-1 text-xs font-medium text-faint">
                       {journal.date}
                     </p>
                   )}
@@ -217,7 +217,7 @@ export const SavedJournalsDrawer = ({
       <Button
         type="button"
         variant="outline"
-        className="h-12 w-12 rounded-full border-slate-200 lg:hidden"
+        className="h-12 w-12 rounded-full border-line lg:hidden"
         aria-label="Open saved journals"
       >
         <Bookmark size={16} />
@@ -228,7 +228,7 @@ export const SavedJournalsDrawer = ({
       className="w-[min(92vw,400px)] gap-0 overflow-y-auto p-0"
       showCloseButton={false}
     >
-      <SheetHeader className="border-b border-slate-100 pr-12 text-left">
+      <SheetHeader className="border-b border-line-subtle pr-12 text-left">
         <SheetTitle>Saved Journals</SheetTitle>
         <SheetDescription>Your bookmarked travel stories.</SheetDescription>
       </SheetHeader>

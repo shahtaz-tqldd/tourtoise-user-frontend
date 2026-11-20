@@ -74,35 +74,35 @@ const sortDayItems = (items = []) =>
 const DayWisePlanSkeleton = () => (
   <div className="space-y-3" aria-label="Loading day-wise plan">
     {Array.from({ length: 3 }).map((_, dayIndex) => (
-      <article key={dayIndex} className="rounded-lg border border-slate-200">
+      <article key={dayIndex} className="rounded-lg border border-line">
         <div className="flex items-start justify-between gap-4 p-4">
           <div className="min-w-0 flex-1 space-y-2">
             <div className="h-3 w-36 animate-pulse rounded-full bg-primary/10" />
             <div className="h-4 w-48 animate-pulse rounded-full bg-slate-200" />
           </div>
-          <div className="mt-1 size-5 animate-pulse rounded bg-slate-100" />
+          <div className="mt-1 size-5 animate-pulse rounded bg-surface-muted" />
         </div>
         {dayIndex === 0 ? (
-          <div className="space-y-4 border-t border-slate-200 p-4">
+          <div className="space-y-4 border-t border-line p-4">
             <div className="space-y-2">
-              <div className="h-3 w-full animate-pulse rounded-full bg-slate-100" />
-              <div className="h-3 w-3/4 animate-pulse rounded-full bg-slate-100" />
+              <div className="h-3 w-full animate-pulse rounded-full bg-surface-muted" />
+              <div className="h-3 w-3/4 animate-pulse rounded-full bg-surface-muted" />
             </div>
             <div className="grid gap-3">
               {Array.from({ length: 2 }).map((_, itemIndex) => (
                 <div
                   key={itemIndex}
-                  className="rounded-lg bg-white p-4 ring-1 ring-slate-200"
+                  className="rounded-lg bg-white p-4 ring-1 ring-line"
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <div className="h-6 w-16 animate-pulse rounded-md bg-slate-100" />
+                    <div className="h-6 w-16 animate-pulse rounded-md bg-surface-muted" />
                     <div className="h-6 w-20 animate-pulse rounded-md bg-primary/10" />
-                    <div className="h-6 w-14 animate-pulse rounded-md bg-slate-100" />
+                    <div className="h-6 w-14 animate-pulse rounded-md bg-surface-muted" />
                   </div>
                   <div className="mt-3 h-4 w-44 animate-pulse rounded-full bg-slate-200" />
                   <div className="mt-3 space-y-2">
-                    <div className="h-3 w-full animate-pulse rounded-full bg-slate-100" />
-                    <div className="h-3 w-2/3 animate-pulse rounded-full bg-slate-100" />
+                    <div className="h-3 w-full animate-pulse rounded-full bg-surface-muted" />
+                    <div className="h-3 w-2/3 animate-pulse rounded-full bg-surface-muted" />
                   </div>
                 </div>
               ))}
@@ -182,12 +182,12 @@ const DayPlanItem = ({ item }) => {
   const itemTypeLabel = formatLabel(item.item_type || "Other");
 
   return (
-    <div className="rounded-xl bg-white p-4 ring-1 ring-slate-200">
+    <div className="rounded-xl bg-white p-4 ring-1 ring-line">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             {time ? (
-              <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+              <span className="inline-flex items-center gap-1 rounded-md bg-surface-muted px-2.5 py-1 text-xs font-semibold text-body">
                 <Clock3 size={13} />
                 {time}
               </span>
@@ -201,16 +201,16 @@ const DayPlanItem = ({ item }) => {
               <span>{formatLabel(item.item_type)}</span>
             </div>
           </div>
-          <h4 className="mt-3 text-sm font-semibold text-slate-950">
+          <h4 className="mt-3 text-sm font-semibold text-heading">
             {item.title}
           </h4>
           {item.description ? (
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-body">
               {item.description}
             </p>
           ) : null}
           {item.notes ? (
-            <div className="mt-3 flex items-start gap-2 rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">
+            <div className="mt-3 flex items-start gap-2 rounded-lg bg-surface-subtle p-3 text-sm leading-6 text-body">
               <Info size={15} className="mt-1 shrink-0 text-primary" />
               <span>{item.notes}</span>
             </div>
@@ -239,7 +239,7 @@ const DayAccordion = ({ days, showCompletion = true }) => {
             key={day.id || day.day}
             className={cn(
               "rounded-xl border  overflow-hidden",
-              isOpen ? "border-primary/30" : "border-slate-200",
+              isOpen ? "border-primary/30" : "border-line",
             )}
           >
             <button
@@ -250,7 +250,7 @@ const DayAccordion = ({ days, showCompletion = true }) => {
                 showCompletion && day.is_complete
                   ? isOpen
                     ? "bg-green-50"
-                    : "bg-slate-100"
+                    : "bg-surface-muted"
                   : isOpen
                     ? "bg-primary/10"
                     : "bg-white",
@@ -270,7 +270,7 @@ const DayAccordion = ({ days, showCompletion = true }) => {
                   <p className="text-xs font-semibold uppercase text-primary">
                     Day {day.day} - {formatDate(day.date)}
                   </p>
-                  <h3 className="mt-1 font-semibold text-slate-950">
+                  <h3 className="mt-1 font-semibold text-heading">
                     {day.title}
                   </h3>
                 </div>
@@ -278,7 +278,7 @@ const DayAccordion = ({ days, showCompletion = true }) => {
               <div className="flex shrink-0 items-center gap-2">
                 <ChevronDown
                   size={18}
-                  className={`mt-1 shrink-0 text-slate-400 transition ${
+                  className={`mt-1 shrink-0 text-faint transition ${
                     isOpen ? "rotate-180" : ""
                   }`}
                 />
@@ -288,7 +288,7 @@ const DayAccordion = ({ days, showCompletion = true }) => {
             {isOpen && (
               <div className="space-y-4 border-t border-primary/30 p-4 bg-primary/5">
                 {day.summary ? (
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm leading-6 text-body">
                     {day.summary}
                   </p>
                 ) : null}
@@ -302,7 +302,7 @@ const DayAccordion = ({ days, showCompletion = true }) => {
                     ))}
                   </div>
                 ) : (
-                  <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">
+                  <p className="rounded-lg bg-surface-subtle p-3 text-sm text-subtle">
                     No activities listed for this day.
                   </p>
                 )}

@@ -87,7 +87,7 @@ const ProfileCard = ({
               <>
                 <label
                   htmlFor="profile-avatar"
-                  className="absolute -bottom-2 -right-2 center size-8 cursor-pointer rounded-full bg-white text-slate-700 shadow-sm"
+                  className="absolute -bottom-2 -right-2 center size-8 cursor-pointer rounded-full bg-white text-body shadow-sm"
                   aria-label="Update profile picture"
                 >
                   <Camera size={16} />
@@ -108,7 +108,7 @@ const ProfileCard = ({
           <div className="mt-4 w-full">
             {!isEditing ? (
               <>
-                <h1 className="truncate text-2xl font-bold text-slate-950">
+                <h1 className="truncate text-2xl font-bold text-heading">
                   {profile.name}
                 </h1>
                 <span className="truncate text-sm text-primary">
@@ -142,7 +142,7 @@ const ProfileCard = ({
                 />
                 <p
                   id="bio-word-count"
-                  className="mt-1.5 text-right text-xs font-medium text-slate-400"
+                  className="mt-1.5 text-right text-xs font-medium text-faint"
                   aria-live="polite"
                 >
                   {bioWordCount} / {BIO_WORD_LIMIT} words
@@ -168,24 +168,24 @@ const ProfileCard = ({
             </div>
           ) : (
             <>
-              <div className="mt-4 flex max-w-full flex-col items-center gap-1.5 text-sm text-slate-500">
+              <div className="mt-4 flex max-w-full flex-col items-center gap-1.5 text-sm text-subtle">
                 <span className="inline-flex max-w-full items-center gap-1.5">
                   <MapPin size={15} />{" "}
                   {displayLocation ? (
                     <span className="truncate">{displayLocation}</span>
                   ) : (
-                    <span className="text-slate-400">
+                    <span className="text-faint">
                       Address was not added
                     </span>
                   )}
                 </span>
               </div>
               {profile.bio ? (
-                <p className="mt-4 text-sm leading-6 text-slate-600">
+                <p className="mt-4 text-sm leading-6 text-body">
                   {profile.bio}
                 </p>
               ) : (
-                <p className="mt-4 text-sm leading-6 text-slate-400">
+                <p className="mt-4 text-sm leading-6 text-faint">
                   No bio has been added to the profile
                 </p>
               )}
@@ -194,11 +194,11 @@ const ProfileCard = ({
         </div>
 
         {!isEditing ? (
-          <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-2">
+          <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-surface-subtle p-2">
             {profile.stats.map((stat) => (
               <div key={stat.label} className="min-w-0 px-2 py-2 text-center">
-                <p className="text-lg font-bold text-slate-950">{stat.value}</p>
-                <p className="truncate text-xs font-medium text-slate-500">
+                <p className="text-lg font-bold text-heading">{stat.value}</p>
+                <p className="truncate text-xs font-medium text-subtle">
                   {stat.label}
                 </p>
               </div>

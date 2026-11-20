@@ -89,10 +89,10 @@ const TripCard = ({ trip, compact = false }) => {
               </div>
 
               <div>
-                <h3 className="line-clamp-2 text-sm font-semibold leading-5 text-slate-950">
+                <h3 className="line-clamp-2 text-sm font-semibold leading-5 text-heading">
                   {displayedTrip.title || "Untitled trip"}
                 </h3>
-                <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs font-medium text-slate-500">
+                <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs font-medium text-subtle">
                   <MapPin size={13} className="shrink-0 text-primary" />
                   <span className="truncate">
                     {destinationMeta || getDestinationLabel(displayedTrip)}
@@ -102,9 +102,9 @@ const TripCard = ({ trip, compact = false }) => {
             </div>
           </div>
 
-          <div className="mt-4 gap-2 text-xs text-slate-600 flex flex-wrap">
-            <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-2">
-              <CalendarDays size={14} className="shrink-0 text-slate-400" />
+          <div className="mt-4 gap-2 text-xs text-body flex flex-wrap">
+            <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-surface-subtle px-2.5 py-2">
+              <CalendarDays size={14} className="shrink-0 text-faint" />
               <span className="truncate">
                 {formatDateRange(
                   displayedTrip.start_date,
@@ -113,8 +113,8 @@ const TripCard = ({ trip, compact = false }) => {
               </span>
             </span>
 
-            <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-2">
-              <Users size={14} className="shrink-0 text-slate-400" />
+            <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-surface-subtle px-2.5 py-2">
+              <Users size={14} className="shrink-0 text-faint" />
               <span className="truncate capitalize">
                 {formatTravelers(displayedTrip)}
               </span>
@@ -150,13 +150,13 @@ const TripCard = ({ trip, compact = false }) => {
             {/* Title + destination */}
             <div>
               <h2
-                className={`line-clamp-2 font-semibold text-slate-950 ${
+                className={`line-clamp-2 font-semibold text-heading ${
                   compact ? "text-base" : "text-[17px]"
                 }`}
               >
                 {displayedTrip.title || "Untitled trip"}
               </h2>
-              <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-slate-500">
+              <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-subtle">
                 <MapPin size={14} className="shrink-0 text-primary" />
                 <span className="truncate">
                   {destinationMeta || getDestinationLabel(displayedTrip)}
@@ -165,8 +165,8 @@ const TripCard = ({ trip, compact = false }) => {
             </div>
 
             {/* Date */}
-            <div className="flex items-center gap-1.5 text-sm text-slate-500">
-              <CalendarDays size={15} className="shrink-0 text-slate-400" />
+            <div className="flex items-center gap-1.5 text-sm text-subtle">
+              <CalendarDays size={15} className="shrink-0 text-faint" />
               {formatDateRange(
                 displayedTrip.start_date,
                 displayedTrip.end_date,
@@ -178,14 +178,14 @@ const TripCard = ({ trip, compact = false }) => {
 
           {/* Pills */}
           <div className="flex flex-wrap gap-2">
-            <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
-              <Users size={14} className="shrink-0 text-slate-400" />
+            <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-surface-subtle px-3 py-1.5 text-sm text-body">
+              <Users size={14} className="shrink-0 text-faint" />
               <span className="truncate capitalize">
                 {formatTravelers(displayedTrip)}
               </span>
             </span>
-            <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
-              <MapPin size={14} className="shrink-0 text-slate-400" />
+            <span className="flex min-w-0 items-center gap-1.5 rounded-lg bg-surface-subtle px-3 py-1.5 text-sm text-body">
+              <MapPin size={14} className="shrink-0 text-faint" />
               <span className="truncate capitalize">
                 {displayedTrip.updated_at
                   ? `Updated ${formatUpdatedAt(displayedTrip.updated_at)}`

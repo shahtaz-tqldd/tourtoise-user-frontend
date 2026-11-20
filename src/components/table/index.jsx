@@ -20,7 +20,7 @@ import { useState } from "react";
 
 function TableSkeleton({ columns, rows = 5 }) {
   return Array.from({ length: rows }).map((_, rowIndex) => (
-    <TableRow key={rowIndex} className="border-slate-100 hover:bg-transparent">
+    <TableRow key={rowIndex} className="border-line-subtle hover:bg-transparent">
       {columns.map((column, columnIndex) => (
         <TableCell
           key={column.accessorKey}
@@ -77,14 +77,14 @@ const ReusableTable = ({
 
   return (
     <section className={className}>
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70">
+      <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm shadow-slate-200/70">
         <Table>
-          <TableHeader className="bg-slate-50/90">
-            <TableRow className="border-slate-200 hover:bg-transparent">
+          <TableHeader className="bg-surface-subtle/90">
+            <TableRow className="border-line hover:bg-transparent">
               {columns.map((column, i) => (
                 <TableHead
                   key={column.accessorKey}
-                  className={`h-14 px-5 text-xs font-semibold uppercase tracking-[0.04em] text-slate-500 ${
+                  className={`h-14 px-5 text-xs font-semibold uppercase tracking-[0.04em] text-subtle ${
                     i === columns.length - 1 ? "text-right" : ""
                   }`}
                 >
@@ -102,11 +102,11 @@ const ReusableTable = ({
             ) : !hasData ? (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={columns.length} className="h-56 p-5">
-                  <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 text-center">
-                    <p className="text-sm font-semibold text-slate-700">
+                  <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-surface-subtle/70 text-center">
+                    <p className="text-sm font-semibold text-body">
                       No entry found
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-subtle">
                       There are no records to show right now.
                     </p>
                   </div>
@@ -116,21 +116,21 @@ const ReusableTable = ({
               data.map((item, i) => (
                 <TableRow
                   key={i}
-                  className="border-slate-100 transition-colors hover:bg-primary/5"
+                  className="border-line-subtle transition-colors hover:bg-primary/5"
                 >
                   {columns.map((column, j) => (
                     <TableCell
                       key={j}
-                      className={`px-5 py-4 text-slate-700 ${
+                      className={`px-5 py-4 text-body ${
                         j === columns.length - 1 ? "text-right" : ""
                       }`}
                     >
                       {column.accessorKey === "action" ? (
                         <DropdownMenu>
-                          <DropdownMenuTrigger className="rounded-full outline-none transition hover:bg-slate-100 focus-visible:ring-4 focus-visible:ring-primary/10">
-                            <Ellipsis className="h-9 w-9 rounded-full p-2.5 text-slate-500" />
+                          <DropdownMenuTrigger className="rounded-full outline-none transition hover:bg-surface-muted focus-visible:ring-4 focus-visible:ring-primary/10">
+                            <Ellipsis className="h-9 w-9 rounded-full p-2.5 text-subtle" />
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="rounded-2xl border-slate-200 p-1 shadow-lg">
+                          <DropdownMenuContent align="end" className="rounded-2xl border-line p-1 shadow-lg">
                             {table_options?.map((option, idx) => (
                               <DropdownMenuItem
                                 key={idx}
@@ -161,7 +161,7 @@ const ReusableTable = ({
           </TableBody>
         </Table>
         {shouldShowPagination && (
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 bg-white px-5 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line bg-white px-5 py-4">
             <div className="flx gap-3">
               <Select
                 value={String(pageSize)}
@@ -170,7 +170,7 @@ const ReusableTable = ({
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-10 rounded-2xl border-slate-200 bg-slate-50 px-4">
+                <SelectTrigger className="h-10 rounded-2xl border-line bg-surface-subtle px-4">
                   {pageSize}
                 </SelectTrigger>
                 <SelectContent>

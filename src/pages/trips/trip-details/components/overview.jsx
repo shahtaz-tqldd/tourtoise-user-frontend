@@ -55,10 +55,10 @@ const SummaryMetric = ({ icon, label, value, component }) => (
   <div className="rounded-xl bg-primary/5 p-4">
     <div className="flx gap-2">
       {React.createElement(icon, { className: "text-primary", size: 14 })}
-      <p className="text-xs font-semibold uppercase text-slate-500">{label}</p>
+      <p className="text-xs font-semibold uppercase text-subtle">{label}</p>
     </div>
     <div className="flex flex-col mt-4 gap-2">
-      <p className="text-sm font-semibold text-slate-950">{value}</p>
+      <p className="text-sm font-semibold text-heading">{value}</p>
       {component ? component : null}
     </div>
   </div>
@@ -70,12 +70,12 @@ const BudgetBreakdownDialog = ({ open, onOpenChange, budget, currency }) => {
   return (
     <PreviewContent open={open} onOpenChange={onOpenChange} className="h-fit">
       <div className="flex min-h-full flex-col bg-white pt-2 md:pt-0">
-        <div className="border-b border-slate-200 px-5 py-5 md:px-6">
+        <div className="border-b border-line px-5 py-5 md:px-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-950">
+            <h2 className="text-lg font-bold text-heading">
               Budget breakdown
             </h2>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-subtle">
               Estimated costs for this trip.
             </p>
           </div>
@@ -84,10 +84,10 @@ const BudgetBreakdownDialog = ({ open, onOpenChange, budget, currency }) => {
         <div className="space-y-6 p-5 md:p-6">
           {budgetRows.map((row) => (
             <div key={row.key} className="flbx gap-4">
-              <span className="text-sm font-semibold text-slate-600">
+              <span className="text-sm font-semibold text-body">
                 {row.label}
               </span>
-              <span className="text-sm font-bold text-slate-950">
+              <span className="text-sm font-bold text-heading">
                 {formatMoney(budget?.[row.key], currency)}
               </span>
             </div>
@@ -101,7 +101,7 @@ const BudgetBreakdownDialog = ({ open, onOpenChange, budget, currency }) => {
           </div>
 
           {budget?.note && (
-            <p className="rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+            <p className="rounded-xl bg-surface-subtle p-4 text-sm leading-6 text-body">
               {budget.note}
             </p>
           )}
@@ -173,8 +173,8 @@ const DestinationSlider = ({
     <section className="space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-950">Destinations</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <h2 className="text-lg font-bold text-heading">Destinations</h2>
+          <p className="mt-1 text-sm text-subtle">
             {destinations.length} destination
             {destinations.length === 1 ? "" : "s"} added to this plan.
           </p>
@@ -205,7 +205,7 @@ const DestinationSlider = ({
       </div>
 
       <article
-        className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+        className="overflow-hidden rounded-2xl border border-line bg-white"
         onTouchStart={(event) => setTouchStart(event.touches[0].clientX)}
         onTouchEnd={handleTouchEnd}
       >
@@ -221,11 +221,11 @@ const DestinationSlider = ({
             <div>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h3 className="text-2xl font-bold text-slate-950">
+                  <h3 className="text-2xl font-bold text-heading">
                     {activeDestination.name}
                   </h3>
                   {destinationLocation && (
-                    <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-500">
+                    <p className="mt-2 flex items-center gap-1.5 text-sm text-subtle">
                       <MapPin size={15} className="shrink-0" />
                       <span className="truncate">{destinationLocation}</span>
                     </p>
@@ -250,7 +250,7 @@ const DestinationSlider = ({
             </div>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex gap-2 text-slate-500">
+              <div className="flex gap-2 text-subtle">
                 <Calendar size={14} />
                 {hasMultipleDestinations ? (
                   <div className="space-y-2">
@@ -324,12 +324,12 @@ const TripOverview = ({ trip, readOnly = false }) => {
             </div>
           )}
           <h1
-            className={`${readOnly ? "mt-0" : "mt-5"} text-2xl md:text-3xl font-bold text-slate-950`}
+            className={`${readOnly ? "mt-0" : "mt-5"} text-2xl md:text-3xl font-bold text-heading`}
           >
             {trip.title}
           </h1>
           {trip.overview && (
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-body">
               {trip.overview}
             </p>
           )}
@@ -339,7 +339,7 @@ const TripOverview = ({ trip, readOnly = false }) => {
             trip={trip}
             destination={trip.primary_destination || trip.destinations?.[0]}
             onDeleted={() => navigate("/trips")}
-            triggerClassName="self-start border border-slate-200 bg-white shadow-sm"
+            triggerClassName="self-start border border-line bg-white shadow-sm"
           />
         )}
       </div>
@@ -350,7 +350,7 @@ const TripOverview = ({ trip, readOnly = false }) => {
           label="Start date"
           value={formatDate(trip.start_date)}
           component={
-            <span className="text-xs text-slate-500 font-medium capitalize">
+            <span className="text-xs text-subtle font-medium capitalize">
               Ending {formatDate(trip.end_date)}
             </span>
           }
@@ -364,7 +364,7 @@ const TripOverview = ({ trip, readOnly = false }) => {
               : `${trip.duration_days || "-"} days`
           }
           component={
-            <span className="text-xs text-slate-500 font-medium capitalize">
+            <span className="text-xs text-subtle font-medium capitalize">
               within {trip.duration_days} days
             </span>
           }
@@ -376,7 +376,7 @@ const TripOverview = ({ trip, readOnly = false }) => {
             Number(trip.travelers_count || 1) === 1 ? "" : "s"
           }`}
           component={
-            <span className="text-xs text-slate-500 font-medium capitalize">
+            <span className="text-xs text-subtle font-medium capitalize">
               {trip.traveler_type} tour
             </span>
           }
@@ -398,15 +398,15 @@ const TripOverview = ({ trip, readOnly = false }) => {
         />
       </div>
       {startAddress && (
-        <div className="mt-4 flex items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-600 md:bg-slate-50">
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-line bg-white p-3 text-sm text-body md:bg-surface-subtle">
           <MapPin size={16} className="mt-0.5 shrink-0 text-primary" />
           <div>
-            <p className="font-semibold text-slate-950">Start location</p>
+            <p className="font-semibold text-heading">Start location</p>
             <p className="mt-1 leading-6">{startAddress}</p>
           </div>
         </div>
       )}
-      <hr className="border-t border-slate-200/80 my-6 -mx-6" />
+      <hr className="border-t border-line/80 my-6 -mx-6" />
 
       <DestinationSlider
         destinations={trip.destinations}

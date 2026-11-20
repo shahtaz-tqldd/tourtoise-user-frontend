@@ -1,0 +1,105 @@
+.spinner {
+  --spinner-color: var(--color-brand-800);
+  --spinner-muted: color-mix(in oklab, var(--color-brand-800) 30%, transparent);
+
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  position: relative;
+  animation: rotate 1s linear infinite;
+}
+
+.spinner-white {
+  --spinner-color: #ffffff;
+  --spinner-muted: rgba(255, 255, 255, 0.4);
+}
+.spinner::before,
+.spinner::after {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--spinner-muted);
+  animation: prixClipFix 2s linear infinite;
+}
+
+.spinner::after {
+  transform: rotate3d(90, 90, 0, 180deg);
+  border-color: var(--spinner-color);
+}
+
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes prixClipFix {
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0);
+  }
+  50% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0);
+  }
+  75%,
+  100% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%);
+  }
+}
+
+/* Short shake used to draw attention to a form error. */
+.error-bounce {
+  animation: error-bounce 360ms ease-in-out;
+}
+
+@keyframes error-bounce {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Slow rotation for decorative stamps/badges. */
+.animate-spin-slow {
+  animation: spin-slow 22s linear infinite;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Gentle vertical drift for floating decorations. */
+.animate-float-soft {
+  animation: float-soft 6s ease-in-out infinite;
+}
+
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .error-bounce,
+  .animate-spin-slow,
+  .animate-float-soft {
+    animation: none;
+  }
+}

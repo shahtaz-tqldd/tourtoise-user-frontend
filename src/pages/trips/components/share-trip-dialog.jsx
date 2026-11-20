@@ -121,20 +121,20 @@ const ShareTripDialogContent = ({ trip, onOpenChange, onTripChange }) => {
   return (
     <>
       <h2 className="text-lg font-bold mt-2 md:mt-0">Share trip</h2>
-      <p className="text-sm mt-1 text-slate-500">Share this trip with others</p>
+      <p className="text-sm mt-1 text-subtle">Share this trip with others</p>
 
       <div className="mt-6 space-y-5">
         {!shareUrl ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-2xl border border-line bg-surface-subtle p-4">
             <div className="flex gap-3">
-              <div className="center size-9 shrink-0 rounded-full bg-white text-slate-500">
+              <div className="center size-9 shrink-0 rounded-full bg-white text-subtle">
                 <Lock size={16} />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-slate-950">
+                <h3 className="text-sm font-semibold text-heading">
                   Your trip is currently private.
                 </h3>
-                <p className="mt-1 text-sm leading-6 text-slate-500">
+                <p className="mt-1 text-sm leading-6 text-subtle">
                   Generate a shareable link when you are ready to let others
                   view this trip.
                 </p>
@@ -143,12 +143,12 @@ const ShareTripDialogContent = ({ trip, onOpenChange, onTripChange }) => {
           </div>
         ) : (
           <>
-            <p className="text-sm leading-6 text-slate-500">
+            <p className="text-sm leading-6 text-subtle">
               {visibility === "private"
                 ? "Your trip is currently private. The link is saved here for when sharing is enabled again."
                 : "Anyone with this link can view the shared trip."}
             </p>
-            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-blue-50 px-4 py-3">
+            <div className="flex items-center gap-2 rounded-lg border border-line bg-blue-50 px-4 py-3">
               <span className="text-sm text-blue-700 truncate">{shareUrl}</span>
               <Button
                 type="button"

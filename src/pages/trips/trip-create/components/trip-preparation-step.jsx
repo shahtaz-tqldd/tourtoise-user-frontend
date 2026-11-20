@@ -22,13 +22,13 @@ const tabs = [
 const priorityStyles = {
   essential: "bg-red-50 text-red-700 border-red-100",
   recommended: "bg-primary/10 text-primary border-primary/10",
-  optional: "bg-slate-100 text-slate-600 border-slate-200",
+  optional: "bg-surface-muted text-body border-line",
 };
 
 const documentLevelStyles = {
   required: "bg-red-50 text-red-700 border-red-100",
   recommended: "bg-primary/10 text-primary border-primary/10",
-  optional: "bg-slate-100 text-slate-600 border-slate-200",
+  optional: "bg-surface-muted text-body border-line",
 };
 
 const severityStyles = {
@@ -77,18 +77,18 @@ const PrepSkeleton = () => (
       {[0, 1, 2].map((index) => (
         <div
           key={index}
-          className="h-14 animate-pulse rounded-xl bg-slate-100"
+          className="h-14 animate-pulse rounded-xl bg-surface-muted"
         />
       ))}
     </div>
     {[0, 1, 2, 3].map((index) => (
       <div
         key={index}
-        className="rounded-xl border border-slate-200 bg-white p-4"
+        className="rounded-xl border border-line bg-white p-4"
       >
         <div className="mb-3 h-4 w-1/2 animate-pulse rounded-full bg-slate-200" />
-        <div className="h-3 w-full animate-pulse rounded-full bg-slate-100" />
-        <div className="mt-2 h-3 w-4/5 animate-pulse rounded-full bg-slate-100" />
+        <div className="h-3 w-full animate-pulse rounded-full bg-surface-muted" />
+        <div className="mt-2 h-3 w-4/5 animate-pulse rounded-full bg-surface-muted" />
       </div>
     ))}
   </div>
@@ -96,8 +96,8 @@ const PrepSkeleton = () => (
 
 const StatusPill = ({ value, styles }) => (
   <span
-    className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
-      styles[value] || "border-slate-200 bg-slate-100 text-slate-600"
+    className={`rounded-full border px-2.5 py-1 text-2xs font-semibold ${
+      styles[value] || "border-line bg-surface-muted text-body"
     }`}
   >
     {formatLabel(value)}
@@ -106,8 +106,8 @@ const StatusPill = ({ value, styles }) => (
 
 const SectionHeader = ({ title, count }) => (
   <div className="mb-3 flex items-center justify-between gap-3">
-    <h3 className="text-sm font-semibold text-slate-950">{title}</h3>
-    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+    <h3 className="text-sm font-semibold text-heading">{title}</h3>
+    <span className="rounded-full bg-surface-muted px-2.5 py-1 text-xs font-medium text-subtle">
       {count} item{count === 1 ? "" : "s"}
     </span>
   </div>
@@ -121,7 +121,7 @@ const PackingList = ({ items }) => {
       {Object.entries(groupedItems).map(([category, categoryItems]) => (
         <div
           key={category}
-          className="rounded-xl border border-slate-200 bg-white p-4"
+          className="rounded-xl border border-line bg-white p-4"
         >
           <SectionHeader
             title={formatLabel(category)}
@@ -131,20 +131,20 @@ const PackingList = ({ items }) => {
             {categoryItems.map((item) => (
               <div
                 key={item.id || `${category}-${item.item}`}
-                className="flex items-start gap-3 rounded-xl bg-slate-50 p-3"
+                className="flex items-start gap-3 rounded-xl bg-surface-subtle p-3"
               >
-                <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white">
-                  <CheckCircle2 size={13} className="text-slate-400" />
+                <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-line-strong bg-white">
+                  <CheckCircle2 size={13} className="text-faint" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-semibold text-slate-950">
+                    <p className="text-sm font-semibold text-heading">
                       {item.item}
                     </p>
                     <StatusPill value={item.priority} styles={priorityStyles} />
                   </div>
                   {getItemNote(item) && (
-                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                    <p className="mt-1 text-sm leading-6 text-body">
                       {getItemNote(item)}
                     </p>
                   )}
@@ -163,7 +163,7 @@ const DocumentsList = ({ items }) => (
     {bySortOrder(items).map((item) => (
       <div
         key={item.id || getDocumentName(item)}
-        className="rounded-xl border border-slate-200 bg-white p-4"
+        className="rounded-xl border border-line bg-white p-4"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
@@ -171,11 +171,11 @@ const DocumentsList = ({ items }) => (
               <FileText size={16} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-950">
+              <p className="text-sm font-semibold text-heading">
                 {getDocumentName(item)}
               </p>
               {getItemNote(item) && (
-                <p className="mt-1 text-sm leading-6 text-slate-600">
+                <p className="mt-1 text-sm leading-6 text-body">
                   {getItemNote(item)}
                 </p>
               )}
@@ -196,7 +196,7 @@ const HeadsUpList = ({ items }) => (
     {bySortOrder(items).map((item) => (
       <div
         key={item.id || `${item.category}-${item.title}`}
-        className="rounded-xl border border-slate-200 bg-white p-4"
+        className="rounded-xl border border-line bg-white p-4"
       >
         <div className="flex items-start gap-3">
           <div className="center mt-0.5 size-8 shrink-0 rounded-full bg-amber-50 text-amber-700">
@@ -205,17 +205,17 @@ const HeadsUpList = ({ items }) => (
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-slate-950">
+                <p className="text-sm font-semibold text-heading">
                   {item.title}
                 </p>
-                <p className="mt-1 text-xs font-medium uppercase text-slate-400">
+                <p className="mt-1 text-xs font-medium uppercase text-faint">
                   {formatLabel(item.category)}
                 </p>
               </div>
               <StatusPill value={item.severity} styles={severityStyles} />
             </div>
             {getItemNote(item) && (
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-body">
                 {getItemNote(item)}
               </p>
             )}
@@ -227,7 +227,7 @@ const HeadsUpList = ({ items }) => (
 );
 
 const EmptyState = ({ children }) => (
-  <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+  <div className="rounded-xl border border-dashed border-line-strong p-4 text-sm text-subtle">
     {children}
   </div>
 );
@@ -317,7 +317,7 @@ const TripPreparationStep = ({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 border-t border-line bg-white p-4 md:grid-cols-2">
         <Button
           type="button"
           variant="outline"

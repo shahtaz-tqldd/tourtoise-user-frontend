@@ -8,7 +8,7 @@ export const SingleItemSelectGroup = ({
 }) => {
   return (
     <fieldset>
-      <legend className="text-sm font-medium text-slate-800">{title}</legend>
+      <legend className="text-sm font-medium text-heading">{title}</legend>
 
       <div className="mt-4 flex flex-wrap gap-2.5">
         {options.map((option) => {
@@ -24,7 +24,7 @@ export const SingleItemSelectGroup = ({
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
                 isSelected
                   ? "bg-primary text-white"
-                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  : "bg-surface-muted text-body hover:bg-slate-200"
               }`}
             >
               {Icon ? <Icon aria-hidden="true" className="size-4" /> : null}

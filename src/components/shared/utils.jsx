@@ -35,17 +35,17 @@ export const AuthorMessage = ({
           {author}
         </span>
         {title && (
-          <h3 className="text-sm font-semibold text-slate-950 mb-1">{title}</h3>
+          <h3 className="text-sm font-semibold text-heading mb-1">{title}</h3>
         )}
         {renderHtml ? (
           <div
-            className="text-sm md:leading-6 text-slate-700 [&_p+p]:mt-2 [&_strong]:font-bold"
+            className="text-sm md:leading-6 text-body [&_p+p]:mt-2 [&_strong]:font-bold"
             dangerouslySetInnerHTML={{
               __html: renderRichMessage(message),
             }}
           />
         ) : (
-          <p className="text-sm md:leading-6 text-slate-700">{message}</p>
+          <p className="text-sm md:leading-6 text-body">{message}</p>
         )}
         {component && component}
       </div>
@@ -69,9 +69,9 @@ export const NotificationCard = ({
 
         <div>
           {title && (
-            <h3 className="text-sm font-semibold text-slate-950">{title}</h3>
+            <h3 className="text-sm font-semibold text-heading">{title}</h3>
           )}
-          <p className="mt-1 text-sm leading-6 text-slate-600">{message}</p>
+          <p className="mt-1 text-sm leading-6 text-body">{message}</p>
         </div>
       </div>
     </div>
@@ -82,12 +82,12 @@ export const Logo = ({ className = "flex" }) => {
   return (
     <Link
       to="/"
-      className={cn("items-center gap-2", className)}
+      className={cn("flx items-center gap-2", className)}
       aria-label="tourtoise"
     >
       <img src="/logo.png" className="h-7 md:h-8" alt="" />
       <span className="min-w-0">
-        <span className="block md:pt-1 truncate text-xl md:text-2xl logo-font font-bold text-primary">
+        <span className="block truncate font-display text-xl font-extrabold tracking-tight text-primary md:text-2xl">
           tourtoise
         </span>
       </span>
@@ -106,7 +106,7 @@ export const PageTitle = ({
       <h1
         className={cn(
           "text-xl md:text-2xl font-bold",
-          variant === "dark" ? "text-slate-800" : "text-white",
+          variant === "dark" ? "text-heading" : "text-white",
         )}
       >
         {title}
@@ -114,7 +114,7 @@ export const PageTitle = ({
       <p
         className={cn(
           "mt-1.5 max-w-xl text-sm md:text-base md:leading-7",
-          variant === "dark" ? "text-slate-600" : "text-slate-200",
+          variant === "dark" ? "text-body" : "text-slate-200",
         )}
       >
         {text}
@@ -137,9 +137,9 @@ export const SectionHeader = ({
         </div>
       )}
       <div>
-        <h2 className="font-bold text-slate-950">{title}</h2>
+        <h2 className="font-bold text-heading">{title}</h2>
         {description && (
-          <p className="mt-0.5 text-[13px] text-slate-500 line-clamp-1">
+          <p className="mt-0.5 text-caption text-subtle line-clamp-1">
             {description}
           </p>
         )}
@@ -156,8 +156,8 @@ export const EmptyState = ({ title, description, onClear, className = "" }) => (
     )}
   >
     <BoxIcon size={12} />
-    <h2 className="mt-4 font-semibold text-slate-950 text-base">{title}</h2>
-    <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+    <h2 className="mt-4 font-semibold text-heading text-base">{title}</h2>
+    <p className="mx-auto mt-2 max-w-md text-sm text-subtle">
       {description}
     </p>
     {onClear && (
@@ -173,9 +173,9 @@ export const VisibilityStatus = ({ visibility }) => {
   return (
     <span
       className={cn(
-        "flx gap-1 rounded-md bg-slate-100 ring pl-2 pr-2.5 py-1 text-xs font-semibold capitalize",
+        "flx gap-1 rounded-md bg-surface-muted ring pl-2 pr-2.5 py-1 text-xs font-semibold capitalize",
         isPrivate
-          ? "bg-slate-100 ring-slate-200 text-slate-700"
+          ? "bg-surface-muted ring-line text-body"
           : "bg-green-100 ring-green-200 text-green-700",
       )}
     >

@@ -31,14 +31,14 @@ const InfiniteScroll = ({
     <div
       ref={sentinelRef}
       className={cn(
-        "flex min-h-10 items-center justify-center py-3 text-xs font-medium text-slate-500",
+        "flex min-h-10 items-center justify-center py-3 text-xs font-medium text-subtle",
         className,
       )}
       aria-live="polite"
     >
       {isLoading && (
         <>
-          <span className="mr-2 size-4 animate-spin rounded-full border-2 border-slate-200 border-t-primary" />
+          <span className="mr-2 size-4 animate-spin rounded-full border-2 border-line border-t-primary" />
           {loadingLabel}
         </>
       )}

@@ -1,24 +1,26 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 
-const Card = ({ children, className = "" }) => {
+const Card = ({ children, className = "", ...props }) => {
   return (
     <div
       className={cn(
-        "rounded-3xl md:rounded-3xl p-4 md:p-6 bg-white overflow-hidden",
+        "overflow-hidden rounded-card bg-surface p-4 md:p-6",
         className,
       )}
+      {...props}
     >
       {children}
     </div>
   );
 };
 
+/** Card on desktop, flat (no surface) on mobile. */
 export const PreviewCard = ({ children, className = "" }) => {
   return (
     <div
       className={cn(
-        "md:rounded-3xl p-0 pt-5 md:p-6 md:pt-6 bg-transparent md:bg-white overflow-hidden",
+        "overflow-hidden bg-transparent p-0 pt-5 md:rounded-card md:bg-surface md:p-6 md:pt-6",
         className,
       )}
     >

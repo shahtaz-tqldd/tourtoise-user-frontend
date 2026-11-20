@@ -56,7 +56,7 @@ const itemTypeStyles = {
   transfer: "bg-sky-50 text-sky-700",
   activity: "bg-emerald-50 text-emerald-700",
   tour_spot: "bg-primary/10 text-primary",
-  rest: "bg-slate-100 text-slate-600",
+  rest: "bg-surface-muted text-body",
   free_time: "bg-violet-50 text-violet-700",
 };
 
@@ -69,12 +69,12 @@ const ItinerarySkeleton = () => (
     {[0, 1, 2].map((index) => (
       <div
         key={index}
-        className="rounded-xl border border-slate-200 bg-white p-4"
+        className="rounded-xl border border-line bg-white p-4"
       >
         <div className="mb-4 h-4 w-1/2 animate-pulse rounded-full bg-slate-200" />
         <div className="space-y-3">
-          <div className="h-16 animate-pulse rounded-xl bg-slate-100" />
-          <div className="h-16 animate-pulse rounded-xl bg-slate-100" />
+          <div className="h-16 animate-pulse rounded-xl bg-surface-muted" />
+          <div className="h-16 animate-pulse rounded-xl bg-surface-muted" />
         </div>
       </div>
     ))}
@@ -94,7 +94,7 @@ const DayTabs = ({ days, activeDay, onChange }) => (
           className={`min-w-[92px] rounded-lg border px-3 py-2 text-left transition ${
             isActive
               ? "border-primary bg-primary/10 text-primary"
-              : "border-slate-200 bg-white text-slate-600 hover:border-primary/40"
+              : "border-line bg-white text-body hover:border-primary/40"
           }`}
         >
           <span className="block text-sm font-semibold">Day {day.day}</span>
@@ -107,7 +107,7 @@ const DayTabs = ({ days, activeDay, onChange }) => (
 
 const TimelineItem = ({ item, isLast }) => (
   <div className="relative flex gap-2 md:gap-3">
-    <div className="hidden w-16 shrink-0 justify-end pt-1 text-xs font-medium text-slate-500 md:flex">
+    <div className="hidden w-16 shrink-0 justify-end pt-1 text-xs font-medium text-subtle md:flex">
       {formatTime(item.time)}
     </div>
     <div className="relative flex flex-col items-center">
@@ -115,34 +115,34 @@ const TimelineItem = ({ item, isLast }) => (
       {!isLast && <span className="h-full w-px bg-slate-200" />}
     </div>
     <div className="min-w-0 flex-1 pb-4">
-      <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="rounded-xl border border-line bg-white p-3 shadow-sm">
         <div className="mb-2 flex flex-wrap items-center gap-2 md:flex-nowrap md:items-start md:gap-3">
-          <h4 className="order-last w-full text-sm font-semibold leading-5 text-slate-950 md:order-none md:w-auto md:flex-1">
+          <h4 className="order-last w-full text-sm font-semibold leading-5 text-heading md:order-none md:w-auto md:flex-1">
             {item.title}
           </h4>
-          <span className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary md:hidden">
+          <span className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-2xs font-semibold text-primary md:hidden">
             {formatTime(item.time)}
           </span>
           {item.item_type && (
             <span
-              className={`ml-auto shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold ${
-                itemTypeStyles[item.item_type] || "bg-slate-100 text-slate-600"
+              className={`ml-auto shrink-0 rounded-full px-2 py-1 text-2xs font-semibold ${
+                itemTypeStyles[item.item_type] || "bg-surface-muted text-body"
               }`}
             >
               {formatLabel(item.item_type)}
             </span>
           )}
         </div>
-        <p className="text-sm leading-6 text-slate-600">{item.description}</p>
+        <p className="text-sm leading-6 text-body">{item.description}</p>
         <div className="mt-3 flex flex-wrap gap-2 text-xs">
           {item.estimated_cost !== null &&
             item.estimated_cost !== undefined && (
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600">
+              <span className="rounded-full bg-surface-muted px-2.5 py-1 font-medium text-body">
                 {formatMoney(item.estimated_cost) || "Free"}
               </span>
             )}
           {item.notes && (
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600">
+            <span className="rounded-full bg-surface-muted px-2.5 py-1 font-medium text-body">
               {item.notes}
             </span>
           )}
@@ -153,34 +153,34 @@ const TimelineItem = ({ item, isLast }) => (
 );
 
 const RouteCard = ({ route }) => (
-  <div className="rounded-xl border border-slate-200 bg-white p-3">
+  <div className="rounded-xl border border-line bg-white p-3">
     <div className="mb-2 flex items-start justify-between gap-3">
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-slate-950">
+        <p className="text-sm font-semibold text-heading">
           {route.from_point} to {route.to_point}
         </p>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-subtle">
           {formatDate(route.date)} · {formatTime(route.start_time)}
         </p>
       </div>
-      <span className="rounded-full bg-sky-50 px-2 py-1 text-[11px] font-semibold text-sky-700">
+      <span className="rounded-full bg-sky-50 px-2 py-1 text-2xs font-semibold text-sky-700">
         {formatLabel(route.transport_mode)}
       </span>
     </div>
-    <div className="flex flex-wrap gap-2 text-xs text-slate-600">
+    <div className="flex flex-wrap gap-2 text-xs text-body">
       {route.estimated_duration && (
-        <span className="rounded-full bg-slate-100 px-2.5 py-1">
+        <span className="rounded-full bg-surface-muted px-2.5 py-1">
           {route.estimated_duration}
         </span>
       )}
       {route.estimated_cost && (
-        <span className="rounded-full bg-slate-100 px-2.5 py-1">
+        <span className="rounded-full bg-surface-muted px-2.5 py-1">
           {formatMoney(route.estimated_cost)}
         </span>
       )}
     </div>
     {route.notes && (
-      <p className="mt-2 text-sm leading-6 text-slate-600">{route.notes}</p>
+      <p className="mt-2 text-sm leading-6 text-body">{route.notes}</p>
     )}
   </div>
 );
@@ -188,7 +188,7 @@ const RouteCard = ({ route }) => (
 const BudgetRow = ({ label, value, highlight }) => (
   <div
     className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 ${
-      highlight ? "bg-primary/10 text-primary" : "bg-slate-50 text-slate-700"
+      highlight ? "bg-primary/10 text-primary" : "bg-surface-subtle text-body"
     }`}
   >
     <span className="text-sm font-medium">{label}</span>
@@ -254,7 +254,7 @@ const ItineraryStep = ({
 
   if (!days.length) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+      <div className="rounded-xl border border-dashed border-line-strong p-4 text-sm text-subtle">
         No itinerary has been generated yet.
       </div>
     );
@@ -283,15 +283,15 @@ const ItineraryStep = ({
               activeDay={activeDayPlan.day}
               onChange={setActiveDay}
             />
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 md:p-4">
+            <div className="rounded-xl border border-line bg-surface-subtle p-3 md:p-4">
               <div className="mb-4">
-                <p className="text-xs font-medium uppercase text-slate-500">
+                <p className="text-xs font-medium uppercase text-subtle">
                   Day {activeDayPlan.day} · {formatDate(activeDayPlan.date)}
                 </p>
-                <h3 className="mt-1 text-base font-semibold text-slate-950">
+                <h3 className="mt-1 text-base font-semibold text-heading">
                   {activeDayPlan.title}
                 </h3>
-                <p className="mt-1 text-sm leading-6 text-slate-600">
+                <p className="mt-1 text-sm leading-6 text-body">
                   {activeDayPlan.summary}
                 </p>
               </div>
@@ -310,7 +310,7 @@ const ItineraryStep = ({
 
         {view === "routes" && (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
+            <div className="flex items-center gap-2 text-sm font-semibold text-heading">
               <MapPinned size={16} className="text-primary" />
               Route plan
             </div>
@@ -322,7 +322,7 @@ const ItineraryStep = ({
                 />
               ))
             ) : (
-              <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+              <div className="rounded-xl border border-dashed border-line-strong p-4 text-sm text-subtle">
                 No route plan available.
               </div>
             )}
@@ -330,8 +330,8 @@ const ItineraryStep = ({
         )}
 
         {view === "budget" && (
-          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
+          <div className="space-y-3 rounded-xl border border-line bg-white p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-heading">
               <Wallet size={16} className="text-primary" />
               Rough budget
             </div>
@@ -351,7 +351,7 @@ const ItineraryStep = ({
               />
             </div>
             {budget.budget_note && (
-              <p className="text-sm leading-6 text-slate-600">
+              <p className="text-sm leading-6 text-body">
                 {budget.budget_note}
               </p>
             )}
@@ -359,7 +359,7 @@ const ItineraryStep = ({
         )}
 
         {itinerary.revision_instruction && (
-          <div className="rounded-xl bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700">
+          <div className="rounded-xl bg-surface-muted px-4 py-3 text-sm leading-6 text-body">
             {itinerary.revision_instruction}
           </div>
         )}
@@ -372,7 +372,7 @@ const ItineraryStep = ({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 border-t border-line bg-white p-4 md:grid-cols-2">
         <Button
           type="button"
           variant="outline"

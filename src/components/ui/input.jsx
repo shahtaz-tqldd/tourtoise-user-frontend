@@ -44,7 +44,7 @@ function FloatingInput({
     <div className={cn("w-full", className)}>
       <div className="relative">
         {prefix && (
-          <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-slate-500">
+          <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-subtle">
             {prefix}
           </span>
         )}
@@ -58,11 +58,11 @@ function FloatingInput({
           autoComplete={autoComplete}
           placeholder={placeholder}
           className={cn(
-            `peer w-full rounded-xl border bg-white px-4 pt-5 pb-3 text-sm text-slate-900 outline-none transition-all duration-200 placeholder:text-transparent focus:placeholder:text-slate-400
+            `peer w-full rounded-xl border bg-white px-4 pt-5 pb-3 text-sm text-heading outline-none transition-all duration-200 placeholder:text-transparent focus:placeholder:text-faint
             ${
               error
                 ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-100"
-                : "border-slate-300 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                : "border-line-strong focus:border-primary focus:ring-4 focus:ring-primary/10"
             }
             dark:border-white/15 dark:bg-slate-950 dark:text-white dark:focus:ring-white/10
             ${isPassword ? "pr-12" : ""}
@@ -77,7 +77,7 @@ function FloatingInput({
           htmlFor={name}
           className={cn(
             `
-    absolute left-4 top-0 z-10 origin-[0] bg-white px-1 py-1 text-sm text-slate-500 pointer-events-none dark:bg-slate-950 dark:text-slate-400
+    absolute left-4 top-0 z-10 origin-[0] bg-white px-1 py-1 text-sm text-subtle pointer-events-none dark:bg-slate-950 dark:text-faint
     transform transition-all duration-200
 
     scale-90 -translate-y-1/2

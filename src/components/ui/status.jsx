@@ -10,17 +10,17 @@ const StatusBadge = ({ status }) => {
     draft: "bg-blue-100 text-blue-800",
     cancelled: "bg-red-100 text-red-700",
     active: "bg-green-100 text-emerald-700",
-    inactive: "bg-gray-100 text-gray-700",
+    inactive: "bg-gray-100 text-body",
     blocked: "bg-red-100 text-red-700",
     pending: "bg-yellow-100 text-yellow-700",
     accepted: "bg-emerald-100 text-emerald-700",
     in_progress: "bg-primary/10 text-primary",
     processing: "bg-purple-100 text-purple-700",
     published: "bg-emerald-100 text-emerald-700",
-    archived: "bg-gray-100 text-gray-700",
+    archived: "bg-gray-100 text-body",
   };
 
-  const appliedStyle = styles[normalized] ?? "bg-gray-100 text-gray-700";
+  const appliedStyle = styles[normalized] ?? "bg-gray-100 text-body";
   const displayStatus = normalized.replace(/_/g, " ");
   const isRipple = ["in_progress", "processing"].includes(normalized);
 

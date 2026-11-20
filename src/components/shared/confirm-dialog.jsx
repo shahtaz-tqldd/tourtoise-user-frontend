@@ -25,7 +25,7 @@ const ConfirmDialog = ({
       className="md:p-8 p-6 !max-w-xl h-fit"
     >
       <h2 className="text-lg font-bold">{title}</h2>
-      <p className="mt-4 text-slate-500">
+      <p className="mt-4 text-subtle">
         {description || "Are you sure you want to proceed with this action?"}
       </p>
       <div className="mt-8 flex w-full justify-end gap-3">
@@ -73,7 +73,7 @@ const DeleteDialog = ({
       className="md:p-8 p-6 md:max-w-lg h-fit"
     >
       <h2 className="text-lg font-bold mt-2 md:mt-0">{title}</h2>
-      <p className="mt-4 text-slate-500">
+      <p className="mt-4 text-subtle">
         {description || "Are you sure you want to proceed with this action?"}
       </p>
       <div className="mt-8 flex md:flex-row flex-col w-full md:justify-end gap-3">

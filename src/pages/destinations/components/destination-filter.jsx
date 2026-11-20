@@ -81,7 +81,7 @@ const OptionGroup = ({ title, icon, options, selectedValues, onToggle }) => {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase text-subtle">
         <GroupIcon size={14} />
         {title}
       </div>
@@ -97,7 +97,7 @@ const OptionGroup = ({ title, icon, options, selectedValues, onToggle }) => {
                 "flex w-fit cursor-pointer gap-2 rounded-full py-2 pl-3 pr-4 text-sm font-semibold transition",
                 isSelected
                   ? "bg-primary text-white"
-                  : "bg-slate-100 text-slate-700 hover:bg-primary/10",
+                  : "bg-surface-muted text-body hover:bg-primary/10",
               )}
             >
               <Checkbox
@@ -122,7 +122,7 @@ const CountrySelect = ({ countries, selectedValue, onValueChange }) => (
     placeholder="Select Country"
     value={selectedValue || undefined}
     onValueChange={onValueChange}
-    contentClassName="max-h-64 rounded-xl border-slate-200 bg-white"
+    contentClassName="max-h-64 rounded-xl border-line bg-white"
   >
     {countries.map((country) => (
       <SelectItem key={country.value} value={country.value}>
@@ -239,16 +239,16 @@ const DestinationFilter = ({
             <Button
               type="button"
               variant="outline"
-              className="h-12 w-12 rounded-full border-slate-200"
+              className="h-12 w-12 rounded-full border-line"
               aria-label="Open destination filters"
             >
               <SlidersHorizontal size={16} />
             </Button>
           }
         >
-          <div className="border-b border-slate-100 p-4">
+          <div className="border-b border-line-subtle p-4">
             <div className="flex items-start justify-between gap-3">
-              <h2 className="text-base font-bold text-slate-950">
+              <h2 className="text-base font-bold text-heading">
                 Filter Destination
               </h2>
             </div>
@@ -291,7 +291,7 @@ const DestinationFilter = ({
             />
           </div>
 
-          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-slate-100 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-line-subtle bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <Button
               type="button"
               variant="outline"
@@ -306,7 +306,7 @@ const DestinationFilter = ({
           </div>
         </PreviewDropdown>
         {appliedFilterCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
+          <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-2xs font-bold text-white">
             {appliedFilterCount}
           </span>
         )}

@@ -92,17 +92,17 @@ const getItemMeta = (item, categoryKey) => {
 
 const SkeletonCard = ({ index }) => (
   <div
-    className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+    className="overflow-hidden rounded-xl border border-line bg-white"
     style={{ animationDelay: `${index * 80}ms` }}
   >
-    <div className="h-32 animate-pulse bg-slate-100" />
+    <div className="h-32 animate-pulse bg-surface-muted" />
     <div className="space-y-3 p-3">
       <div className="h-4 w-2/3 animate-pulse rounded-full bg-slate-200" />
-      <div className="h-3 w-full animate-pulse rounded-full bg-slate-100" />
-      <div className="h-3 w-4/5 animate-pulse rounded-full bg-slate-100" />
+      <div className="h-3 w-full animate-pulse rounded-full bg-surface-muted" />
+      <div className="h-3 w-4/5 animate-pulse rounded-full bg-surface-muted" />
       <div className="flex gap-2">
-        <div className="h-6 w-16 animate-pulse rounded-full bg-slate-100" />
-        <div className="h-6 w-20 animate-pulse rounded-full bg-slate-100" />
+        <div className="h-6 w-16 animate-pulse rounded-full bg-surface-muted" />
+        <div className="h-6 w-20 animate-pulse rounded-full bg-surface-muted" />
       </div>
     </div>
   </div>
@@ -123,7 +123,7 @@ const RecommendationSkeleton = () => (
 );
 
 const InfoPill = ({ children }) => (
-  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+  <span className="rounded-full bg-surface-muted px-2.5 py-1 text-xs font-medium text-body">
     {children}
   </span>
 );
@@ -141,10 +141,10 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
 
   return (
     <article
-      className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-in fade-in slide-in-from-bottom-2"
+      className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm animate-in fade-in slide-in-from-bottom-2"
       style={{ animationDelay: `${index * 70}ms` }}
     >
-      <div className="relative aspect-[5/3] bg-slate-100">
+      <div className="relative aspect-[5/3] bg-surface-muted">
         <Image src={image} alt={item.name} loading="lazy" />
         {item.is_featured || item.is_must_try ? (
           <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-primary shadow-sm">
@@ -157,22 +157,22 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
       <div className="space-y-3 p-3">
         <div>
           <div className="flex items-start justify-between gap-3">
-            <h4 className="text-sm font-semibold leading-5 text-slate-950">
+            <h4 className="text-sm font-semibold leading-5 text-heading">
               {item.name}
             </h4>
             {type && (
-              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary">
+              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-2xs font-semibold text-primary">
                 {formatLabel(type)}
               </span>
             )}
           </div>
-          {/* <p className="mt-1 text-sm leading-6 text-slate-600">
+          {/* <p className="mt-1 text-sm leading-6 text-body">
             {item.description}
           </p> */}
         </div>
 
         {item.address && (
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs text-subtle">
             <MapPin size={14} />
             <span className="truncate">{item.address}</span>
           </div>
@@ -184,7 +184,7 @@ const RecommendationCard = ({ item, categoryKey, index }) => {
           ))}
         </div>
 
-        <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
+        <div className="flex items-center justify-between border-t border-line-subtle pt-3 text-xs text-subtle">
           <span className="flex items-center gap-1.5">
             <Wallet size={14} />
             {price || "Flexible budget"}
@@ -211,7 +211,7 @@ const RecommendationTabContent = ({ category, items, message }) => (
   <div className="space-y-3">
     {message && <NotificationCard message={message} />}
 
-    <h3 className="text-sm font-semibold text-slate-950">{category.title}</h3>
+    <h3 className="text-sm font-semibold text-heading">{category.title}</h3>
 
     {items.length ? (
       <div className="grid md:grid-cols-2 gap-3">
@@ -225,7 +225,7 @@ const RecommendationTabContent = ({ category, items, message }) => (
         ))}
       </div>
     ) : (
-      <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+      <div className="rounded-xl border border-dashed border-line-strong p-4 text-sm text-subtle">
         {category.empty}
       </div>
     )}
@@ -307,7 +307,7 @@ const RecommendationsStep = ({
           </div>
         )}
       </div>
-      <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 border-t border-line bg-white p-4 md:grid-cols-2">
         <Button
           type="button"
           variant="outline"

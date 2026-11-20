@@ -35,7 +35,7 @@ const TabMenu = ({
     <div
       ref={tabListRef}
       className={cn(
-        "flex items-center gap-2 border-b border-slate-200",
+        "flex items-center gap-2 border-b border-line",
         scrollable
           ? "flex-nowrap overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           : "flex-wrap",
@@ -76,7 +76,7 @@ const TabButton = ({ tab, active, onClick, scrollable, buttonRef }) => {
         scrollable && "shrink-0 whitespace-nowrap",
         active
           ? "border-primary text-primary"
-          : "border-transparent text-slate-500 hover:text-slate-900",
+          : "border-transparent text-subtle hover:text-heading",
         hasCount ? "pl-3.5 pr-2.5" : "px-2 md:px-3.5",
       )}
     >
@@ -85,7 +85,7 @@ const TabButton = ({ tab, active, onClick, scrollable, buttonRef }) => {
       {(hasCount || isComplete) && (
         <span
           className={cn(
-            "h-5 min-w-5 px-1 text-xs font-semibold center rounded-full bg-slate-100",
+            "h-5 min-w-5 px-1 text-xs font-semibold center rounded-full bg-surface-muted",
             isComplete && "bg-primary/10 text-primary",
           )}
         >

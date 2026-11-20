@@ -28,7 +28,7 @@ const PlanningStepRail = ({
   }, [activeStep]);
 
   return (
-    <div className="border-b border-slate-200 px-4 py-3">
+    <div className="border-b border-line px-4 py-3">
       <div
         ref={railRef}
         className="flex overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -58,8 +58,8 @@ const PlanningStepRail = ({
                 isActive
                   ? "bg-primary/10 text-primary"
                   : isComplete
-                    ? "text-slate-700 hover:bg-slate-100"
-                    : "text-slate-400"
+                    ? "text-body hover:bg-surface-muted"
+                    : "text-faint"
               } ${!isAvailable ? "cursor-not-allowed opacity-60" : ""}`}
             >
               <StepIcon
@@ -69,7 +69,7 @@ const PlanningStepRail = ({
                 }`}
                 size={14}
               />
-              <span className="text-[11px] font-medium leading-4">
+              <span className="text-2xs font-medium leading-4">
                 {step.title}
               </span>
             </button>

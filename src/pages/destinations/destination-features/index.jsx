@@ -90,7 +90,7 @@ const FeatureCard = ({ item, config, onSelect }) => {
       onClick={() => onSelect(item)}
       className="group h-full w-full overflow-hidden rounded-3xl bg-white text-left shadow-xs outline-none ring-primary/30 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+      <div className="relative aspect-[4/3] overflow-hidden bg-surface-muted">
         <Image
           src={coverImage}
           alt={item.name}
@@ -98,7 +98,7 @@ const FeatureCard = ({ item, config, onSelect }) => {
           className="transition duration-500 group-hover:scale-105"
         />
         {item.is_featured || item.is_must_try ? (
-          <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-slate-800 shadow-sm backdrop-blur">
+          <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-heading shadow-sm backdrop-blur">
             {item.is_must_try ? "Must try" : "Featured"}
           </span>
         ) : null}
@@ -108,11 +108,11 @@ const FeatureCard = ({ item, config, onSelect }) => {
         <p className="truncate text-xs font-semibold uppercase text-primary">
           {formatLabel(config.getType(item))}
         </p>
-        <h2 className="line-clamp-2 min-h-10 text-base font-semibold leading-5 text-slate-900">
+        <h2 className="line-clamp-2 min-h-10 text-base font-semibold leading-5 text-heading">
           {item.name}
         </h2>
         {metaItems.length ? (
-          <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3 text-xs font-medium text-slate-600">
+          <div className="flex flex-wrap gap-2 border-t border-line-subtle pt-3 text-xs font-medium text-body">
             {metaItems.slice(0, 2).map((meta) => (
               <span
                 key={meta}
@@ -199,7 +199,7 @@ const DestinationFeatureListPage = () => {
         >
           <ArrowLeft size={16} /> Back to destination
         </Link>
-        <h1 className="mt-6 text-2xl font-bold text-slate-900">
+        <h1 className="mt-6 text-2xl font-bold text-heading">
           Category not found
         </h1>
       </section>
@@ -213,11 +213,11 @@ const DestinationFeatureListPage = () => {
           <div className="flx gap-2">
             <Link
               to={`/destinations/${destinationSlug}`}
-              className="h-10 w-10 center bg-slate-100 rounded-full hover:bg-primary/10 tr"
+              className="h-10 w-10 center bg-surface-muted rounded-full hover:bg-primary/10 tr"
             >
               <ChevronLeft size={14} />
             </Link>
-            <h1 className="text-xl font-bold text-slate-900 md:text-2xl">
+            <h1 className="text-xl font-bold text-heading md:text-2xl">
               {config.title} in {destinationName}
             </h1>
           </div>
@@ -231,7 +231,7 @@ const DestinationFeatureListPage = () => {
         </div>
 
         {!isInitialLoading && !isSearchSettling && !isError && (
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-subtle">
             {total} {total === 1 ? config.singular : config.title.toLowerCase()}{" "}
             found
           </p>
@@ -251,7 +251,7 @@ const DestinationFeatureListPage = () => {
             {Array.from({ length: PAGE_SIZE }, (_, index) => (
               <div
                 key={index}
-                className="overflow-hidden rounded-lg border border-slate-200 bg-white"
+                className="overflow-hidden rounded-lg border border-line bg-white"
               >
                 <div className="aspect-[4/3] animate-pulse bg-slate-200" />
                 <div className="space-y-3 p-4">

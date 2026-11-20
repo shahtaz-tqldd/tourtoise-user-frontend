@@ -53,14 +53,14 @@ const NotesListSkeleton = () => (
     {Array.from({ length: 3 }).map((_, index) => (
       <div
         key={index}
-        className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+        className="rounded-xl border border-line bg-surface-subtle p-4"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="size-6 animate-pulse rounded-full bg-slate-200" />
             <div className="h-3 w-32 animate-pulse rounded-full bg-slate-200" />
           </div>
-          <div className="size-8 animate-pulse rounded-full bg-slate-100" />
+          <div className="size-8 animate-pulse rounded-full bg-surface-muted" />
         </div>
         <div className="mt-4 space-y-2">
           <div className="h-3 w-full animate-pulse rounded-full bg-slate-200" />
@@ -141,7 +141,7 @@ const TripNotes = ({ tripId }) => {
         {isFetching ? <NotesListSkeleton /> : null}
 
         {!isFetching && notes.length ? (
-          <span className="text-sm text-slate-500 font-semibold block mb-4">
+          <span className="text-sm text-subtle font-semibold block mb-4">
             {notes.length} saved notes
           </span>
         ) : null}
@@ -272,13 +272,13 @@ const NoteCard = ({
   if (isEditing) {
     return (
       <form
-        className="rounded-xl border border-slate-200 bg-slate-50 p-4 pb-3"
+        className="rounded-xl border border-line bg-surface-subtle p-4 pb-3"
         onSubmit={handleSubmit}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <UserAvatar className="size-6" />
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-faint">
               Created on {formatNoteDate(note.created_at || note.updated_at)}
             </span>
           </div>
@@ -310,18 +310,18 @@ const NoteCard = ({
           disabled={isUpdating}
           required
           rows={1}
-          className="mt-4 block w-full resize-none overflow-hidden border-none bg-transparent text-sm leading-7 text-slate-500 outline-none placeholder:text-slate-400 disabled:opacity-60"
+          className="mt-4 block w-full resize-none overflow-hidden border-none bg-transparent text-sm leading-7 text-subtle outline-none placeholder:text-faint disabled:opacity-60"
         />
       </form>
     );
   }
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4 pb-3">
+    <article className="rounded-xl border border-line bg-white p-4 pb-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <UserAvatar className="size-6" />
-          <span className="text-xs font-medium text-slate-400">
+          <span className="text-xs font-medium text-faint">
             Created on {formatNoteDate(note.created_at || note.updated_at)}
           </span>
         </div>
@@ -335,7 +335,7 @@ const NoteCard = ({
               variant="ghost"
               size="icon-sm"
               aria-label="Note actions"
-              className="text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+              className="text-subtle hover:bg-surface-muted hover:text-heading"
             >
               <MoreVertical size={16} />
             </Button>
@@ -359,7 +359,7 @@ const NoteCard = ({
       </div>
       <p
         className={cn(
-          "mt-2 whitespace-pre-wrap !leading-7 text-sm text-slate-500",
+          "mt-2 whitespace-pre-wrap !leading-7 text-sm text-subtle",
           isLonger && !isExpanded ? "cursor-pointer" : "",
         )}
         onClick={() => {
@@ -441,7 +441,7 @@ const NotesCreateDialog = ({ open, onOpenChange, tripId, noteId }) => {
       <h2 className="text-lg font-bold mt-2 md:mt-0">
         {isEditing ? "Update note" : "Create a new note"}
       </h2>
-      <p className="text-sm mt-1 text-slate-500">
+      <p className="text-sm mt-1 text-subtle">
         Keep important details for your trip here.
       </p>
       <form key={formKey} className="mt-6 space-y-5" onSubmit={handleSubmit}>

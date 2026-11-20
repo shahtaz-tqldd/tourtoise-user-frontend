@@ -124,10 +124,10 @@ const JourneySection = ({
           {step.number} · {step.label}
         </span>
       </div>
-      <h2 className="mt-5 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl lg:text-4xl">
+      <h2 className="mt-5 text-2xl font-bold tracking-tight text-heading sm:text-3xl lg:text-4xl">
         {step.title}
       </h2>
-      <p className="mt-4 max-w-xl text-sm leading-7 text-slate-500 sm:text-base">
+      <p className="mt-4 max-w-xl text-sm leading-7 text-subtle sm:text-base">
         {step.description}
       </p>
       <Link
@@ -150,10 +150,10 @@ const DiscoveryVisual = () => (
         <Bot className="size-4" aria-hidden="true" />
       </span>
       <div className="min-w-0">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-primary">
-          Ask Turtle
+        <p className="text-2xs font-bold uppercase tracking-wider text-primary">
+          Pick with AI
         </p>
-        <p className="mt-0.5 text-sm text-slate-600">
+        <p className="mt-0.5 text-sm text-body">
           “Where should I go for culture, food, and a relaxed pace?”
         </p>
       </div>
@@ -185,10 +185,10 @@ const DiscoveryVisual = () => (
               className: "mx-auto size-4 text-primary",
               "aria-hidden": true,
             })}
-            <p className="mt-2 text-xs font-bold text-slate-800">
+            <p className="mt-2 text-xs font-bold text-heading">
               {item.label}
             </p>
-            <p className="mt-0.5 hidden text-[10px] text-slate-400 sm:block">
+            <p className="mt-0.5 hidden text-3xs text-faint sm:block">
               {item.detail}
             </p>
           </div>
@@ -221,17 +221,17 @@ const PlanningVisual = () => (
               "aria-hidden": true,
             })}
           </span>
-          <span className="text-xs font-medium text-slate-600 sm:text-sm">
+          <span className="text-xs font-medium text-body sm:text-sm">
             {feature.label}
           </span>
         </div>
       ))}
     </div>
 
-    <div className="mt-7 rounded-2xl bg-white p-4 text-slate-900">
+    <div className="mt-7 rounded-2xl bg-white p-4 text-heading">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-primary">
+          <p className="text-3xs font-bold uppercase tracking-wider text-primary">
             Day 2
           </p>
           <p className="mt-0.5 text-sm font-bold">Culture and local flavors</p>
@@ -247,7 +247,7 @@ const PlanningVisual = () => (
           <React.Fragment key={time}>
             <div className="min-w-0 flex-1">
               <p className="text-[9px] font-bold text-primary">{time}</p>
-              <p className="mt-0.5 truncate text-[10px] text-slate-500">
+              <p className="mt-0.5 truncate text-3xs text-subtle">
                 {activity}
               </p>
             </div>
@@ -290,7 +290,7 @@ const GuidanceVisual = () => (
       ].map((item) => (
         <div
           key={item.label}
-          className="relative ml-10 flex items-start gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-md shadow-slate-200/40 sm:ml-12"
+          className="relative ml-10 flex items-start gap-3 rounded-2xl border border-line-subtle bg-white p-4 shadow-md shadow-slate-200/40 sm:ml-12"
         >
           <span
             className={`absolute -left-[52px] flex size-8 items-center justify-center rounded-full ring-4 ring-white sm:-left-[58px] ${item.tone}`}
@@ -301,10 +301,10 @@ const GuidanceVisual = () => (
             })}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-primary">
+            <p className="text-3xs font-bold uppercase tracking-wider text-primary">
               {item.label}
             </p>
-            <p className="mt-1 text-sm font-semibold leading-5 text-slate-800">
+            <p className="mt-1 text-sm font-semibold leading-5 text-heading">
               {item.title}
             </p>
           </div>
@@ -328,10 +328,10 @@ const BeyondTheTrip = () => (
         <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-primary">
           Remember & inspire
         </p>
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
+        <h2 className="mt-2 text-2xl font-bold text-heading">
           Turn your journey into a <span className="text-primary">journal</span>
         </h2>
-        <p className="mt-3 text-sm leading-7 text-slate-500">
+        <p className="mt-3 text-sm leading-7 text-subtle">
           Capture your experiences, share the story with other travelers, and
           discover journals that can inspire a future trip.
         </p>
@@ -403,11 +403,11 @@ const Cover = () => {
           Welcome to tourtoise
         </span>
 
-        <h1 className="mt-5 max-w-xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl lg:text-5xl lg:leading-[1.2]">
+        <h1 className="mt-5 max-w-xl text-3xl font-bold tracking-tight text-heading sm:text-4xl lg:text-5xl lg:leading-[1.2]">
           Your smart <span className="text-primary">travel</span> companion
         </h1>
 
-        <p className="mt-6 max-w-[220px] md:max-w-xl text-sm leading-6 md:leading-8 text-slate-700 sm:text-lg">
+        <p className="mt-6 max-w-[220px] md:max-w-xl text-sm leading-6 md:leading-8 text-body sm:text-lg">
           tourtoise is an AI-powered travel companion that helps you discover
           destinations, plan personalized trips, and stay guided throughout your
           journey.
@@ -422,7 +422,7 @@ const Cover = () => {
               <span className="hidden text-xs font-black text-primary/40 sm:block">
                 {step.number}
               </span>
-              <span className="text-xs font-bold text-slate-700 transition group-hover:text-primary sm:text-sm">
+              <span className="text-xs font-bold text-body transition group-hover:text-primary sm:text-sm">
                 {step.label}
               </span>
             </a>

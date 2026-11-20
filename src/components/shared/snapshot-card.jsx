@@ -10,8 +10,8 @@ const SnapshotCard = ({ icon: Icon, label, value, className = "" }) => {
           className: "shrink-0 text-primary",
         })}
       </div>
-      <h4 className="truncate text-xs text-slate-500 mt-3">{label}</h4>
-      <p className="mt-1 break-words text-sm font-semibold text-slate-950 text-center capitalize">
+      <h4 className="truncate text-xs text-subtle mt-3">{label}</h4>
+      <p className="mt-1 break-words text-sm font-semibold text-heading text-center capitalize">
         {value}
       </p>
     </div>

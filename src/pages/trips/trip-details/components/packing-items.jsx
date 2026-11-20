@@ -121,24 +121,24 @@ const PackingListSkeleton = () => (
     {Array.from({ length: 4 }).map((_, index) => (
       <div
         key={index}
-        className="rounded-xl border border-slate-200 bg-white p-4"
+        className="rounded-xl border border-line bg-white p-4"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-1 gap-3">
-            <div className="mt-1 size-5 animate-pulse rounded bg-slate-100" />
+            <div className="mt-1 size-5 animate-pulse rounded bg-surface-muted" />
             <div className="min-w-0 flex-1 space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="h-4 w-36 animate-pulse rounded-full bg-slate-200" />
-                <div className="h-5 w-16 animate-pulse rounded-full bg-slate-100" />
+                <div className="h-5 w-16 animate-pulse rounded-full bg-surface-muted" />
                 <div className="h-5 w-24 animate-pulse rounded-full bg-primary/10" />
               </div>
               <div className="space-y-2">
-                <div className="h-3 w-full animate-pulse rounded-full bg-slate-100" />
-                <div className="h-3 w-2/3 animate-pulse rounded-full bg-slate-100" />
+                <div className="h-3 w-full animate-pulse rounded-full bg-surface-muted" />
+                <div className="h-3 w-2/3 animate-pulse rounded-full bg-surface-muted" />
               </div>
             </div>
           </div>
-          <div className="size-8 animate-pulse rounded-full bg-slate-100" />
+          <div className="size-8 animate-pulse rounded-full bg-surface-muted" />
         </div>
       </div>
     ))}
@@ -485,7 +485,7 @@ const PackingItemCard = ({
   };
 
   const cardClass =
-    "rounded-xl bg-white border border-primary/50 p-4 text-sm font-medium text-slate-700";
+    "rounded-xl bg-white border border-primary/50 p-4 text-sm font-medium text-body";
 
   if (isEditing) {
     return (
@@ -499,14 +499,14 @@ const PackingItemCard = ({
                   value={itemName}
                   onChange={(event) => setItemName(event.target.value)}
                   disabled={isUpdating}
-                  className="w-full border-none bg-transparent p-0 text-sm font-semibold text-slate-900 outline-none disabled:opacity-60"
+                  className="w-full border-none bg-transparent p-0 text-sm font-semibold text-heading outline-none disabled:opacity-60"
                   required
                 />
                 <input
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
                   disabled={isUpdating}
-                  className="mt-2 block w-full border-none bg-transparent p-0 text-sm font-normal leading-5 text-slate-500 outline-none disabled:opacity-60"
+                  className="mt-2 block w-full border-none bg-transparent p-0 text-sm font-normal leading-5 text-subtle outline-none disabled:opacity-60"
                   placeholder="Additional notes"
                 />
               </div>
@@ -519,7 +519,7 @@ const PackingItemCard = ({
                   value={quantity}
                   onChange={(event) => setQuantity(event.target.value)}
                   disabled={isUpdating}
-                  className="h-7 w-16 rounded-full border border-slate-200 bg-white px-2 text-center text-xs font-semibold text-slate-600 outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
+                  className="h-7 w-16 rounded-full border border-line bg-white px-2 text-center text-xs font-semibold text-body outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
                   aria-label="Quantity"
                 />
                 <InlinePillSelect
@@ -527,7 +527,7 @@ const PackingItemCard = ({
                   onValueChange={setCategory}
                   disabled={isUpdating}
                   options={categoryOptions}
-                  className="border-slate-200 bg-white text-slate-500"
+                  className="border-line bg-white text-subtle"
                 />
                 <InlinePillSelect
                   value={priority}
@@ -536,14 +536,14 @@ const PackingItemCard = ({
                   options={priorityOptions}
                   className={
                     priorityStyles[priority] ||
-                    "border-slate-200 bg-white text-slate-500"
+                    "border-line bg-white text-subtle"
                   }
                 />
               </div>
             </div>
           </div>
         </div>
-        <div className="flx gap-2 border-t border-slate-200/80 mt-4 pt-3 -mx-4 px-4 flex justify-end">
+        <div className="flx gap-2 border-t border-line/80 mt-4 pt-3 -mx-4 px-4 flex justify-end">
           <Button
             type="button"
             variant="outline"
@@ -573,7 +573,7 @@ const PackingItemCard = ({
         "h-full rounded-xl border p-4",
         item.is_packed
           ? "border-primary/15 bg-primary/[0.02]"
-          : "border-slate-200 bg-white",
+          : "border-line bg-white",
       )}
     >
       <div className="flex items-start gap-3">
@@ -591,8 +591,8 @@ const PackingItemCard = ({
                   <h2
                     className={`font-semibold text-sm ${
                       item.is_packed
-                        ? "text-slate-400 line-through"
-                        : "text-slate-900"
+                        ? "text-faint line-through"
+                        : "text-heading"
                     }`}
                   >
                     {item.item}
@@ -613,7 +613,7 @@ const PackingItemCard = ({
                       variant="ghost"
                       size="icon-sm"
                       aria-label="Packing item actions"
-                      className="text-slate-500 hover:bg-slate-100 hover:text-slate-900 -mt-2 -mr-2"
+                      className="text-subtle hover:bg-surface-muted hover:text-heading -mt-2 -mr-2"
                       disabled={isDisabled}
                     >
                       <MoreVertical size={16} />
@@ -637,7 +637,7 @@ const PackingItemCard = ({
                 />
               </div>
               {item.additional_notes ? (
-                <p className="mt-1 text-sm font-normal leading-5 text-slate-500">
+                <p className="mt-1 text-sm font-normal leading-5 text-subtle">
                   {item.additional_notes}
                 </p>
               ) : null}
@@ -650,7 +650,7 @@ const PackingItemCard = ({
               </span>
               <span
                 className={`text-xs py-0.5 px-2 rounded-full font-semibold ${
-                  priorityStyles[item.priority] || "text-slate-500"
+                  priorityStyles[item.priority] || "text-subtle"
                 }`}
               >
                 {formatLabel(item.priority)}
@@ -708,7 +708,7 @@ const PackingItemCreateDialog = ({
       className="md:p-8 p-6 !max-w-xl h-fit"
     >
       <h2 className="text-lg font-bold mt-2 md:mt-0">Create packing item</h2>
-      <p className="text-sm mt-1 text-slate-500">
+      <p className="text-sm mt-1 text-subtle">
         Add an item to prepare before the trip.
       </p>
       <form className="mt-6 space-y-5" onSubmit={handleSubmit}>

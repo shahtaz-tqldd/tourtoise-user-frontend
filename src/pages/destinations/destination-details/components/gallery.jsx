@@ -60,7 +60,7 @@ const Gallery = ({ destination }) => {
           <h2 className="font-bold">Gallery Highlights</h2>
           <button
             onClick={() => openPreview(0)}
-            className="text-xs text-slate-500 font-bold"
+            className="text-xs text-subtle font-bold"
           >
             View All
           </button>
@@ -71,7 +71,7 @@ const Gallery = ({ destination }) => {
               type="button"
               key={`${image.url}-${index}`}
               onClick={() => openPreview(index)}
-              className="group relative aspect-[1] overflow-hidden rounded-xl bg-slate-100 text-left outline-none ring-primary/30 focus-visible:ring-2"
+              className="group relative aspect-[1] overflow-hidden rounded-xl bg-surface-muted text-left outline-none ring-primary/30 focus-visible:ring-2"
             >
               <Image
                 src={image?.url}

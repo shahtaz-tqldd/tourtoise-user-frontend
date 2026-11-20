@@ -49,11 +49,11 @@ const BrokenPage = ({
         </span>
 
         <span
-          className="absolute bottom-3 left-5 h-px w-16 border-t-2 border-dashed border-slate-200 sm:left-7 sm:w-24"
+          className="absolute bottom-3 left-5 h-px w-16 border-t-2 border-dashed border-line sm:left-7 sm:w-24"
           aria-hidden="true"
         />
         <span
-          className="absolute right-5 top-5 h-px w-16 border-t-2 border-dashed border-slate-200 sm:right-7 sm:w-24"
+          className="absolute right-5 top-5 h-px w-16 border-t-2 border-dashed border-line sm:right-7 sm:w-24"
           aria-hidden="true"
         />
       </div>
@@ -63,11 +63,11 @@ const BrokenPage = ({
       </p>
       <h1
         id="broken-page-title"
-        className="mt-3 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl"
+        className="mt-3 text-2xl font-bold tracking-tight text-heading sm:text-3xl"
       >
         {title}
       </h1>
-      <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500 sm:text-base">
+      <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-subtle sm:text-base">
         {description}
       </p>
 

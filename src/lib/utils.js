@@ -1,5 +1,36 @@
 import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { extendTailwindMerge } from "tailwind-merge";
+
+// Teach tailwind-merge the custom scales from src/styles/tokens.css. Without
+// this, e.g. `text-h2` (a size) and `text-heading` (a color) are both read as
+// colors and one silently overrides the other.
+const twMerge = extendTailwindMerge({
+  extend: {
+    theme: {
+      text: [
+        "display-xl",
+        "display-lg",
+        "display",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "body-lg",
+        "body-md",
+        "body-sm",
+        "caption",
+        "overline",
+        "2xs",
+        "3xs",
+      ],
+      radius: ["control", "card", "sheet"],
+      shadow: ["card", "raised", "overlay", "brand"],
+      container: ["page", "prose"],
+      spacing: ["gutter", "section"],
+      font: ["display"],
+    },
+  },
+});
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));

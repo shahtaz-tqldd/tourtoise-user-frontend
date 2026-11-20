@@ -24,14 +24,17 @@ import { MapPinned } from "lucide-react";
 import BrokenPage from "@/components/shared/broken-page";
 import { Container } from "@/components/ui/container";
 import useTitle from "@/hooks/useTitle";
+import { useSelector } from "react-redux";
 
 const DestinationDetailsPage = () => {
   const { destination_id } = useParams();
   const [planningOpen, setPlanningOpen] = useState(false);
   const [activeFeature, setActiveFeature] = useState(null);
   const planningHistoryEntryRef = useRef(false);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-  const { data, isFetching, error } = useDestinationDetailQuery(destination_id);
+  const { data, isFetching, error, refetch } =
+    useDestinationDetailQuery(destination_id);
   const destination = data?.data || {};
 
   useTitle(`tourtoise - ${destination?.name}`);
@@ -88,19 +91,43 @@ const DestinationDetailsPage = () => {
     return <DestinationLoader />;
   }
 
-  if (!destination) {
-    return <EmptyDestination />;
+  if (error?.status === 404) {
+    return (
+      <Container>
+        <BrokenPage
+          className="mt-0"
+          title="Destination not found"
+          description={`We couldn't find any destination with the ${destination_id}, Check the destination slug or explore somewhere else.`}
+          icon={MapPinned}
+          actionLabel="Explore destinations"
+        />
+      </Container>
+    );
   }
 
-  if (error?.status === 404 || !destination) {
+  if (error) {
+    // RTK reports non-JSON 5xx bodies as "PARSING_ERROR" with originalStatus.
+    const statusCode = Number.isInteger(error.status)
+      ? error.status
+      : error.originalStatus || 500;
+
     return (
-      <BrokenPage
-        title="Destination not found"
-        description={`We couldn't find any destination with the ${destination_id}, Check the destination slug or explore somewhere else.`}
-        icon={MapPinned}
-        actionLabel="Explore destinations"
-      />
+      <Container>
+        <BrokenPage
+          className="mt-0"
+          statusCode={String(statusCode)}
+          title="Couldn't load this destination"
+          description="Something went wrong on our side. Please try again in a moment."
+          icon={MapPinned}
+          actionLabel="Explore destinations"
+          onRetry={refetch}
+        />
+      </Container>
     );
+  }
+
+  if (!destination?.slug && !destination?.name) {
+    return <EmptyDestination />;
   }
 
   return (
@@ -159,11 +186,14 @@ const DestinationDetailsPage = () => {
         </aside>
       </div>
 
-      <TripPlanningDrawer
-        destination={destination}
-        open={planningOpen}
-        onOpenChange={handlePlanningOpenChange}
-      />
+      {/* The planner loads member-only data, so it only mounts for members. */}
+      {isAuthenticated && (
+        <TripPlanningDrawer
+          destination={destination}
+          open={planningOpen}
+          onOpenChange={handlePlanningOpenChange}
+        />
+      )}
       <FeatureDetails
         feature={activeFeature}
         destinationSlug={destination.slug || destination_id}

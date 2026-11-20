@@ -1,0 +1,94 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Bookmark, Heart, MessageCircle, PenLine, Sparkles } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { useAuthGate } from "@/features/auth/auth-gate-context";
+import AuthorAvatar from "./author-avatar";
+
+const GUEST_PERKS = [
+  { icon: PenLine, text: "Share stories and photos from your trips" },
+  { icon: MessageCircle, text: "Ask travelers questions in the comments" },
+  { icon: Bookmark, text: "Save posts for your next trip" },
+];
+
+const LINK_ROW =
+  "flx gap-3 rounded-xl px-3 py-2.5 text-body-sm font-semibold text-body transition hover:bg-surface-muted hover:text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+/** Desktop side panel: a join card for guests, shortcuts for members. */
+const JournalSidebar = ({ onCreate, onShowMine }) => {
+  const user = useSelector((state) => state.auth.user);
+  const { isAuthenticated, openAuth } = useAuthGate();
+
+  return (
+    <aside className="hidden lg:block">
+      <div className="sticky top-[92px] space-y-4">
+        {isAuthenticated ? (
+          <section aria-label="Your journal" className="rounded-card bg-surface p-4 ring-1 ring-line-subtle">
+            <div className="flx gap-3 px-1">
+              <AuthorAvatar src={user?.avatar_url} name={user?.name} />
+              <div className="min-w-0">
+                <p className="truncate text-body-sm font-semibold text-heading">{user?.name}</p>
+                <p className="text-caption text-subtle">Your travel journal</p>
+              </div>
+            </div>
+            <nav aria-label="Journal shortcuts" className="mt-3 space-y-0.5">
+              <button type="button" onClick={onCreate} className={`${LINK_ROW} w-full`}>
+                <PenLine className="size-4 text-brand-text" aria-hidden="true" />
+                Write a post
+              </button>
+              <button type="button" onClick={onShowMine} className={`${LINK_ROW} w-full`}>
+                <Heart className="size-4 text-brand-text" aria-hidden="true" />
+                My posts
+              </button>
+              <Link to="/saved-items" className={LINK_ROW}>
+                <Bookmark className="size-4 text-brand-text" aria-hidden="true" />
+                Saved posts
+              </Link>
+            </nav>
+          </section>
+        ) : (
+          <section aria-labelledby="journal-join-title" className="rounded-card bg-surface p-5 ring-1 ring-line-subtle">
+            <h2 id="journal-join-title" className="font-display text-h4 text-heading">
+              Join the travel community
+            </h2>
+            <ul role="list" className="mt-3 space-y-2.5">
+              {GUEST_PERKS.map(({ icon: Icon, text }) => (
+                <li key={text} className="flex gap-2.5 text-body-sm text-body">
+                  <Icon className="mt-0.5 size-4 shrink-0 text-brand-text" aria-hidden="true" />
+                  {text}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-5 grid gap-2">
+              <Button variant="soft" className="rounded-full" onClick={() => openAuth("register", "journal")}>
+                Create free account
+              </Button>
+              <Button variant="ghost" className="rounded-full" onClick={() => openAuth("login", "journal")}>
+                Sign in
+              </Button>
+            </div>
+          </section>
+        )}
+
+        <Link
+          to="/"
+          className="group flex items-start gap-3 rounded-card bg-accent p-4 transition hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <span className="center size-9 shrink-0 rounded-full bg-surface text-brand-text">
+            <Sparkles className="size-4" aria-hidden="true" />
+          </span>
+          <span>
+            <span className="block text-body-sm font-semibold text-heading">Inspired? Plan your own</span>
+            <span className="block text-caption text-body">
+              Pick a destination and Turtle builds the trip.
+            </span>
+          </span>
+        </Link>
+      </div>
+    </aside>
+  );
+};
+
+export default JournalSidebar;

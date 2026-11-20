@@ -169,11 +169,11 @@ const ProfilePage = () => {
 
 const ProfileSkeleton = () => (
   <section className="space-y-6 py-5">
-    <div className="h-80 animate-pulse rounded-3xl bg-slate-100" />
-    <div className="h-12 animate-pulse rounded-xl bg-slate-100" />
+    <div className="h-80 animate-pulse rounded-3xl bg-surface-muted" />
+    <div className="h-12 animate-pulse rounded-xl bg-surface-muted" />
     <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
-      <div className="h-64 animate-pulse rounded-3xl bg-slate-100" />
-      <div className="h-64 animate-pulse rounded-3xl bg-slate-100" />
+      <div className="h-64 animate-pulse rounded-3xl bg-surface-muted" />
+      <div className="h-64 animate-pulse rounded-3xl bg-surface-muted" />
     </div>
   </section>
 );

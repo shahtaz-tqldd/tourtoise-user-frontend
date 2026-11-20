@@ -8,6 +8,9 @@ import {
   X,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { LockKeyhole } from "lucide-react";
+import { useAuthGate } from "@/features/auth/auth-gate-context";
 
 import EmptyPage from "@/components/shared/empty-page";
 import InfiniteScroll from "@/components/shared/infinite-scroll";
@@ -38,6 +41,7 @@ const SearchPage = () => {
   useTitle("Search");
   const navigate = useNavigate();
   const location = useLocation();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const urlParams = useMemo(
     () => new URLSearchParams(location.search),
     [location.search],
@@ -77,7 +81,7 @@ const SearchPage = () => {
     hasNextPage: hasNextTripPage,
     isFetchingNextPage: isFetchingNextTripPage,
   } = useTripInfiniteListInfiniteQuery(searchParams, {
-    skip: activeTab !== "trips" || !hasSearchQuery,
+    skip: activeTab !== "trips" || !hasSearchQuery || !isAuthenticated,
   });
 
   const {
@@ -89,7 +93,7 @@ const SearchPage = () => {
     hasNextPage: hasNextJournalPage,
     isFetchingNextPage: isFetchingNextJournalPage,
   } = useJournalInfiniteListInfiniteQuery(searchParams, {
-    skip: activeTab !== "journals" || !hasSearchQuery,
+    skip: activeTab !== "journals" || !hasSearchQuery || !isAuthenticated,
   });
 
   const destinations = useMemo(
@@ -202,7 +206,7 @@ const SearchPage = () => {
       />
 
       <form className="relative mt-4 w-full md:hidden" onSubmit={submitSearch}>
-        <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-faint" />
         <Input
           value={urlSearch}
           onChange={(event) => updateSearch(event.target.value)}
@@ -214,7 +218,7 @@ const SearchPage = () => {
           <button
             type="button"
             onClick={() => updateSearch("")}
-            className="absolute right-12 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="absolute right-12 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-faint transition hover:bg-surface-muted hover:text-body"
             aria-label="Clear search"
           >
             <X size={15} />
@@ -245,6 +249,7 @@ const SearchPage = () => {
         onClearSearch={() => updateSearch("")}
         debouncedSearchQuery={debouncedSearchQuery}
         hasSearchQuery={hasSearchQuery}
+        isLocked={activeTab !== "destinations" && !isAuthenticated}
       />
     </Container>
   );
@@ -257,7 +262,10 @@ const SearchResults = ({
   onClearSearch,
   debouncedSearchQuery,
   hasSearchQuery,
+  isLocked,
 }) => {
+  if (isLocked) return <MemberOnlyResults tab={activeTab} />;
+
   if (!hasSearchQuery) {
     return (
       <EmptyPage
@@ -345,6 +353,22 @@ const SearchResults = ({
   );
 };
 
+const MemberOnlyResults = ({ tab }) => {
+  const { openAuth } = useAuthGate();
+
+  return (
+    <EmptyPage
+      icon={LockKeyhole}
+      eyebrow="Members only"
+      title={`Sign in to search ${tab}`}
+      description="Destinations are open to everyone. Trips and journals are available once you sign in."
+      actionLabel="Sign in"
+      onAction={() => openAuth("login", tab === "trips" ? "trips" : "journal")}
+      className="min-h-0 flex-1 sm:min-h-0"
+    />
+  );
+};
+
 const SearchSkeleton = ({ activeTab }) => {
   if (activeTab === "destinations") {
     return (
@@ -352,7 +376,7 @@ const SearchSkeleton = ({ activeTab }) => {
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
-            className="aspect-square animate-pulse rounded-[28px] bg-slate-100"
+            className="aspect-square animate-pulse rounded-[28px] bg-surface-muted"
           />
         ))}
       </div>
@@ -364,7 +388,7 @@ const SearchSkeleton = ({ activeTab }) => {
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
-          className="h-56 animate-pulse rounded-3xl bg-slate-100"
+          className="h-56 animate-pulse rounded-3xl bg-surface-muted"
         />
       ))}
     </div>

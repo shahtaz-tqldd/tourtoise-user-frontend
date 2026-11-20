@@ -147,7 +147,7 @@ const mergeConversationMessages = (serverMessages, localMessages) => {
 const SystemMessageDivider = ({ message }) => (
   <div className="flex items-center gap-3 py-2">
     <span className="h-px flex-1 bg-slate-200" />
-    <span className="max-w-[72%] rounded-full bg-white px-3 text-center text-[11px] font-semibold leading-5 text-slate-500">
+    <span className="max-w-[72%] rounded-full bg-white px-3 text-center text-2xs font-semibold leading-5 text-subtle">
       {message}
     </span>
     <span className="h-px flex-1 bg-slate-200" />
@@ -162,7 +162,7 @@ const ToggleOption = ({ selected, children, onClick }) => {
       className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
         selected
           ? "border-primary bg-primary text-white"
-          : "border-slate-200 bg-white text-slate-700 hover:border-primary/40"
+          : "border-line bg-white text-body hover:border-primary/40"
       }`}
     >
       {children}
@@ -173,7 +173,7 @@ const ToggleOption = ({ selected, children, onClick }) => {
 const OptionGroup = ({ title, children }) => {
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-slate-950">{title}</h3>
+      <h3 className="text-sm font-semibold text-heading">{title}</h3>
       {children}
     </div>
   );
@@ -185,7 +185,7 @@ const AgentThinkingMessage = () => (
       <div className="mt-1 flex size-8 shrink-0">
         <img src="/logo.png" className="h-full object-contain" />
       </div>
-      <div className="w-fit rounded-xl rounded-tl-md bg-primary/10 px-4 py-3 text-sm text-slate-700">
+      <div className="w-fit rounded-xl rounded-tl-md bg-primary/10 px-4 py-3 text-sm text-body">
         <span className="text-primary text-xs font-semibold uppercase tracking-wider">
           Turtle
         </span>
@@ -594,7 +594,7 @@ const PreferencesStep = ({
       <div className="custom-scrollbar space-y-4 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:[scrollbar-gutter:stable]">
         <AuthorMessage message="Great. I have your basic trip details. Now I'll understand what kind of trip experience you want so I can recommend the right places, food, activities, and pace." />
 
-        <div className="space-y-5 rounded-xl border border-slate-200 bg-white p-4">
+        <div className="space-y-5 rounded-xl border border-line bg-white p-4">
           <OptionGroup title="Travel Pace">
             <div className="grid gap-2">
               {TRAVEL_PACE_OPTIONS.map((option) => (
@@ -607,13 +607,13 @@ const PreferencesStep = ({
                   className={`rounded-xl border p-3 text-left transition ${
                     resolvedTravelPace === option.value
                       ? "border-primary bg-primary/10"
-                      : "border-slate-200 hover:border-primary/40"
+                      : "border-line hover:border-primary/40"
                   }`}
                 >
-                  <span className="block text-sm font-semibold text-slate-950">
+                  <span className="block text-sm font-semibold text-heading">
                     {option.label}
                   </span>
-                  <span className="mt-1 block text-sm leading-5 text-slate-600">
+                  <span className="mt-1 block text-sm leading-5 text-body">
                     {option.description}
                   </span>
                 </button>
@@ -715,7 +715,7 @@ const PreferencesStep = ({
         {(isConversationAvailable || isAgentThinking) && (
           <div className="space-y-3 pb-2">
             {isPreferenceFetching && !conversationMessages.length && (
-              <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-600">
+              <div className="flex items-center gap-2 rounded-2xl bg-surface-muted px-4 py-3 text-sm text-body">
                 <Loader2 className="animate-spin text-primary" size={16} />
                 Loading conversation...
               </div>
@@ -762,7 +762,7 @@ const PreferencesStep = ({
                       className={`w-fit rounded-xl px-4 py-3 text-sm ${
                         isUser
                           ? "rounded-br-md bg-primary text-white"
-                          : "rounded-tl-md bg-primary/10 text-slate-700"
+                          : "rounded-tl-md bg-primary/10 text-body"
                       }`}
                     >
                       {!isUser && (
@@ -786,7 +786,7 @@ const PreferencesStep = ({
       </div>
 
       {!isAgentActive ? (
-        <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 border-t border-line bg-white p-4 md:grid-cols-2">
           <Button
             type="button"
             variant="outline"
@@ -808,7 +808,7 @@ const PreferencesStep = ({
           </Button>
         </div>
       ) : isStepComplete ? (
-        <div className="grid grid-cols-1 gap-3 border-t border-slate-200 bg-white p-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 border-t border-line bg-white p-4 md:grid-cols-2">
           <Button
             type="button"
             variant="outline"
@@ -828,7 +828,7 @@ const PreferencesStep = ({
       ) : (
         <form
           onSubmit={handleSendMessage}
-          className="flex gap-2 border-t border-slate-200 bg-white p-4"
+          className="flex gap-2 border-t border-line bg-white p-4"
         >
           <input
             type="text"
@@ -836,7 +836,7 @@ const PreferencesStep = ({
             onChange={(event) => setMessage(event.target.value)}
             placeholder="Reply to the trip agent..."
             disabled={isSendingMessage}
-            className="h-11 min-w-0 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+            className="h-11 min-w-0 flex-1 rounded-full border border-line bg-surface-subtle px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
           />
           <Button
             type="submit"

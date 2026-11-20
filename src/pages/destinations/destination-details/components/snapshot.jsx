@@ -51,7 +51,7 @@ const TripSnapshot = ({ destination }) => {
 
   return (
     <Card>
-      <h2 className="font-bold text-slate-950">Trip Snapshot</h2>
+      <h2 className="font-bold text-heading">Trip Snapshot</h2>
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         {snapshots.map(({ title, icon: Icon, value }) => (
@@ -62,8 +62,8 @@ const TripSnapshot = ({ destination }) => {
                 className: "shrink-0 text-primary",
               })}
             </div>
-            <h4 className="truncate text-sm text-slate-500 mt-3">{title}</h4>
-            <p className="mt-1 break-words text-xs font-semibold text-slate-950 text-center">
+            <h4 className="truncate text-sm text-subtle mt-3">{title}</h4>
+            <p className="mt-1 break-words text-xs font-semibold text-heading text-center">
               {value}
             </p>
           </div>

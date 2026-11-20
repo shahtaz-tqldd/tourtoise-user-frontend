@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import { INITIAL_REDIRECT_SESSION_KEY } from "@/constants/session";
 import { useProfileStatesQuery } from "@/features/auth/authApiSlice";
@@ -8,7 +9,10 @@ const useInitialTripRedirect = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const handledRef = useRef(false);
-  const { data, isSuccess } = useProfileStatesQuery();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const { data, isSuccess } = useProfileStatesQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
   useEffect(() => {
     if (!isSuccess || handledRef.current) return;

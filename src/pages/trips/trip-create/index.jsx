@@ -404,16 +404,16 @@ const TripPlanningDrawer = ({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="bottom"
-        className="h-dvh w-full max-w-full overflow-hidden p-0 md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:h-screen md:w-screen md:-translate-x-1/2 md:-translate-y-1/2 md:border md:border-slate-200"
+        className="h-dvh w-full max-w-full overflow-hidden p-0 md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:h-screen md:w-screen md:-translate-x-1/2 md:-translate-y-1/2 md:border md:border-line"
       >
         <div className="flex h-full flex-col max-w-xl w-full mx-auto bg-white">
-          <SheetHeader className="border-b border-slate-200 pr-12 text-left">
+          <SheetHeader className="border-b border-line pr-12 text-left">
             <section className="flex justify-between items-start">
               <div className="flx gap-3">
                 <SheetClose asChild>
                   <button
                     type="button"
-                    className="-ml-2 flex size-10 shrink-0 items-center justify-center rounded-full text-slate-700 transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+                    className="-ml-2 flex size-10 shrink-0 items-center justify-center rounded-full text-body transition hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
                     aria-label="Close profile menu"
                   >
                     <ArrowLeft />
@@ -426,7 +426,7 @@ const TripPlanningDrawer = ({
                       aria-label="Trip title"
                       value={currentTripTitle}
                       onChange={(event) => setTripTitle(event.target.value)}
-                      className="min-w-0 flex-1 bg-transparent p-0 text-xl font-semibold text-slate-950 outline-none"
+                      className="min-w-0 flex-1 bg-transparent p-0 text-xl font-semibold text-heading outline-none"
                     />
                   </SheetTitle>
                   <SheetDescription className="mt-2">
@@ -442,14 +442,14 @@ const TripPlanningDrawer = ({
                     <button
                       type="button"
                       aria-label="Trip plan actions"
-                      className="center size-9 shrink-0 rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 translate-x-12"
+                      className="center size-9 shrink-0 rounded-full text-subtle transition hover:bg-surface-muted hover:text-heading focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 translate-x-12"
                     >
                       <Ellipsis size={18} />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-56 rounded-xl border-slate-200 p-1 shadow-lg"
+                    className="w-56 rounded-xl border-line p-1 shadow-lg"
                   >
                     <DropdownMenuItem
                       className="rounded-lg px-3 py-2"
@@ -501,7 +501,7 @@ const TripPlanningDrawer = ({
           )}
 
           {showInitialLoader && (
-            <div className="center flex-1 text-sm text-slate-500">
+            <div className="center flex-1 text-sm text-subtle">
               <Loader2 className="mr-2 animate-spin text-primary" size={18} />
               {isCheckingTrips
                 ? "Checking previous trip planning..."
@@ -542,10 +542,10 @@ const TripPlanningDrawer = ({
                 <div className="flex items-start gap-3">
                   <Sparkles className="mt-0.5 text-primary" size={18} />
                   <div>
-                    <h3 className="text-sm font-semibold text-slate-950">
+                    <h3 className="text-sm font-semibold text-heading">
                       Choose a plan to continue
                     </h3>
-                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                    <p className="mt-1 text-sm leading-6 text-body">
                       I found existing plans for {resolvedDestination?.name}.
                       Continue one of them or start a separate plan.
                     </p>
@@ -573,24 +573,24 @@ const TripPlanningDrawer = ({
                       }
                       type="button"
                       onClick={() => handleSelectTrip(trip)}
-                      className="rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-primary/40 hover:bg-primary/5"
+                      className="rounded-xl border border-line bg-white p-4 text-left transition hover:border-primary/40 hover:bg-primary/5"
                     >
-                      <p className="text-sm font-semibold text-slate-950">
+                      <p className="text-sm font-semibold text-heading">
                         {getTripTitle(trip, resolvedDestination)}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-subtle">
                         {formatDate(trip?.start_date)} -
                         {formatDate(trip?.end_date)}
                       </p>
                       {trip?.trip_pace && (
-                        <p className="mt-2 text-xs font-medium uppercase text-slate-400">
+                        <p className="mt-2 text-xs font-medium uppercase text-faint">
                           {trip.trip_pace}
                         </p>
                       )}
                     </button>
                   ))
                 ) : (
-                  <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+                  <div className="rounded-xl border border-dashed border-line-strong p-4 text-sm text-subtle">
                     No previous plans found for this destination.
                   </div>
                 )}

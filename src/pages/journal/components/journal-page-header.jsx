@@ -1,120 +1,106 @@
-import { useState } from "react";
+import React from "react";
+import { useSelector } from "react-redux";
+import { Globe2, ImagePlus, Lock, UserRound } from "lucide-react";
 
-import ListingHeader from "@/components/shared/listing-header";
-import PreviewDropdown from "@/components/shared/preview-dropdown";
-import { UserAvatar } from "@/components/shared/user-profile";
+import { Button } from "@/components/ui/button";
+import { Heading, Text } from "@/components/ui/typography";
+import { useAuthGate } from "@/features/auth/auth-gate-context";
 import { cn } from "@/lib/utils";
-import { Globe2, Plus, UserRound } from "lucide-react";
+import AuthorAvatar from "./author-avatar";
 
-const journalScopeOptions = [
-  { value: "public", label: "Public Journal", icon: Globe2 },
-  { value: "mine", label: "My Journal", icon: UserRound },
+const SCOPE_OPTIONS = [
+  { value: "public", label: "Community", icon: Globe2 },
+  { value: "mine", label: "My journal", icon: UserRound },
 ];
 
-const JournalPageHeader = ({ onCreate }) => (
-  <ListingHeader
-    title="Travel Journal"
-    filters={
-      <div className="flex w-full items-center gap-2 md:justify-end">
-        <CreateJournalTrigger onCreate={onCreate} />
-      </div>
-    }
-  />
+const JournalPageHeader = () => (
+  <div>
+    <Heading level={1}>Travel Journal</Heading>
+    <Text tone="subtle" className="mt-1">
+      Real stories, tips and photos from travelers on the road.
+    </Text>
+  </div>
 );
 
-export const JournalScopeFilter = ({ value, onValueChange }) => {
-  const [open, setOpen] = useState(false);
-  const activeOption =
-    journalScopeOptions.find((option) => option.value === value) ??
-    journalScopeOptions[0];
-  const ActiveIcon = activeOption.icon;
-
-  const selectScope = (scope) => {
-    if (scope !== value) onValueChange(scope);
-    setOpen(false);
-  };
+/** Community / My journal. "My journal" asks guests to sign in. */
+export const JournalScopeTabs = ({ value, onValueChange }) => {
+  const { isAuthenticated } = useAuthGate();
 
   return (
-    <div className="relative shrink-0">
-      <PreviewDropdown
-        open={open}
-        onOpenChange={setOpen}
-        title="Filter journals"
-        description="Choose public journals or journals you created."
-        desktopClassName="w-[min(calc(100vw-2rem),320px)]"
-        align="start"
-        trigger={
+    <div role="group" aria-label="Show journals" className="flex gap-2">
+      {SCOPE_OPTIONS.map(({ value: option, label, icon: Icon }) => {
+        const isActive = option === value;
+        const isLocked = option === "mine" && !isAuthenticated;
+        return (
           <button
+            key={option}
             type="button"
-            className="flx w-fit cursor-pointer gap-1 rounded-full bg-primary/10 py-1.5 pr-3 pl-2 text-xs font-semibold text-primary ring ring-primary/30 transition hover:bg-primary/15"
-            aria-label={`${activeOption.label}. Change journal type`}
+            aria-pressed={isActive}
+            onClick={() => onValueChange(option)}
+            className={cn(
+              "flx h-9 gap-1.5 rounded-full px-4 text-body-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+              isActive
+                ? "bg-ink-900 text-white"
+                : "bg-surface text-body ring-1 ring-line hover:bg-surface-muted hover:text-heading",
+            )}
           >
-            <ActiveIcon size={12} />
-            <span>
-              {activeOption.value === "mine"
-                ? "My journals"
-                : "Public journals"}
-            </span>
+            <Icon className="size-4" aria-hidden="true" />
+            {label}
+            {isLocked && <Lock className="size-3 text-faint" aria-label="Sign in required" />}
           </button>
-        }
-      >
-        <div className="border-b border-slate-100 p-4">
-          <h2 className="text-base font-bold text-slate-950">
-            Filter journals
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Choose which journals to show.
-          </p>
-        </div>
-
-        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4">
-          <div
-            className="flex flex-wrap gap-2 mt-2 pb-4"
-            role="radiogroup"
-            aria-label="Journal type"
-          >
-            {journalScopeOptions.map((option) => {
-              const OptionIcon = option.icon;
-
-              return (
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={value === option.value}
-                  key={option.value}
-                  onClick={() => selectScope(option.value)}
-                  className={cn(
-                    "flex flex-1 md:flex-none justify-center cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition",
-                    value === option.value
-                      ? "bg-primary text-white"
-                      : "bg-slate-100 text-slate-700 hover:bg-primary/10",
-                  )}
-                >
-                  <OptionIcon size={15} />
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </PreviewDropdown>
+        );
+      })}
     </div>
   );
 };
 
-const CreateJournalTrigger = ({ onCreate }) => (
-  <button
-    type="button"
-    className="max-w-100 flex w-full cursor-pointer gap-2"
-    onClick={onCreate}
-  >
-    <UserAvatar className="size-10" />
-    <div className="flex w-full flex-1 items-center gap-2 rounded-full border bg-white px-4 py-3 text-slate-400">
-      <Plus size={15} />
-      <span className="text-sm whitespace-nowrap truncate">
-        Write Your Travel Journal
-      </span>
+/** "What's on your mind" prompt for members; a join card for guests. */
+export const JournalComposerPrompt = ({ onCreate }) => {
+  const user = useSelector((state) => state.auth.user);
+  const { isAuthenticated, openAuth } = useAuthGate();
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col gap-3 rounded-card bg-surface p-4 ring-1 ring-line-subtle sm:flex-row sm:items-center sm:justify-between sm:p-5 lg:hidden">
+        <div>
+          <p className="font-display text-h4 text-heading">Been somewhere good?</p>
+          <p className="text-body-sm text-subtle">
+            Sign in to share your trip, like posts and join the conversation.
+          </p>
+        </div>
+        <Button
+          variant="soft"
+          className="shrink-0 rounded-full"
+          onClick={() => openAuth("register", "journal")}
+        >
+          Join free
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-card bg-surface p-3 ring-1 ring-line-subtle sm:p-4">
+      <div className="flex items-center gap-3">
+        <AuthorAvatar src={user?.avatar_url} name={user?.name} />
+        <button
+          type="button"
+          onClick={onCreate}
+          className="h-11 min-w-0 flex-1 truncate rounded-full bg-surface-muted px-4 text-left text-body-sm text-subtle transition hover:bg-ink-200/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Share a moment from your trip…
+        </button>
+        <button
+          type="button"
+          onClick={onCreate}
+          className="center size-11 shrink-0 rounded-full text-brand-text transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="Add photos to a new post"
+        >
+          <ImagePlus className="size-5" aria-hidden="true" />
+        </button>
+      </div>
     </div>
-  </button>
-);
+  );
+};
+
 export default JournalPageHeader;

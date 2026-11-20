@@ -127,15 +127,15 @@ const OnboardingPage = () => {
   return (
     <main className="min-h-screen bg-gradient-to-br center from-emerald-50 via-white to-cyan-50 px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto w-full max-w-2xl">
-        <section className="md:rounded-3xl md:border border-slate-200 md:bg-white md:p-8 md:shadow-xl shadow-slate-200/60">
+        <section className="md:rounded-3xl md:border border-line md:bg-white md:p-8 md:shadow-xl shadow-slate-200/60">
           <div>
             <img src="/logo.png" className="h-12 object-contain mb-2" alt="" />
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
+                <h1 className="text-xl font-semibold text-heading sm:text-2xl">
                   {steps[step].title}
                 </h1>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-subtle">
                   {steps[step].description}
                 </p>
               </div>
@@ -178,7 +178,7 @@ const OnboardingPage = () => {
             )}
           </div>
 
-          <footer className="pt-5 flex items-center justify-between gap-3 border-t border-slate-100">
+          <footer className="pt-5 flex items-center justify-between gap-3 border-t border-line-subtle">
             <Button
               variant="outline"
               disabled={step === 0 || isLoading}
@@ -252,7 +252,7 @@ const PersonalStep = ({ form, updateField }) => (
       ))}
     </FloatingSelect>
     <div className="sm:col-span-2 mt-2">
-      <h2 className="mb-4 text-sm font-semibold text-slate-900">
+      <h2 className="mb-4 text-sm font-semibold text-heading">
         Emergency contact
       </h2>
       <div className="grid gap-5 sm:grid-cols-2">
@@ -354,8 +354,8 @@ const TravelStep = ({ form, toggleValue }) => (
 
 const ChoiceGroup = ({ title, description, options, values, onToggle }) => (
   <fieldset>
-    <legend className="text-sm font-semibold text-slate-950">{title}</legend>
-    <p className="mt-1 text-xs text-slate-500">{description}</p>
+    <legend className="text-sm font-semibold text-heading">{title}</legend>
+    <p className="mt-1 text-xs text-subtle">{description}</p>
     <div className="mt-3 flex flex-wrap gap-2">
       {options.map((option) => {
         const selected = values.includes(option);
@@ -369,7 +369,7 @@ const ChoiceGroup = ({ title, description, options, values, onToggle }) => (
               "rounded-full border px-3.5 py-2 text-xs font-semibold transition focus:outline-none focus:ring-4 focus:ring-primary/10",
               selected
                 ? "border-primary bg-primary text-white"
-                : "border-slate-200 bg-white text-slate-700 hover:border-primary/50 hover:bg-primary/5",
+                : "border-line bg-white text-body hover:border-primary/50 hover:bg-primary/5",
             )}
           >
             {option}

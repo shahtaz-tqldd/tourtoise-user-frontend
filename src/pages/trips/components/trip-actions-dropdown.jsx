@@ -29,10 +29,10 @@ const ActionButton = ({ icon, children, destructive, onClick }) => (
   <button
     type="button"
     className={cn(
-      "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+      "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
       destructive
         ? "text-destructive hover:bg-destructive/10"
-        : "text-slate-700",
+        : "text-body",
     )}
     onClick={onClick}
   >
@@ -174,7 +174,7 @@ const TripActionsDropdown = ({
             variant="ghost"
             size="icon-sm"
             className={cn(
-              "rounded-full bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-900 !border-none !shadow-none",
+              "rounded-full bg-surface-subtle text-subtle hover:bg-surface-muted hover:text-heading !border-none !shadow-none",
               triggerClassName,
             )}
             aria-label={ariaLabel}
@@ -183,9 +183,9 @@ const TripActionsDropdown = ({
           </Button>
         }
       >
-        <div className="border-b border-slate-100 px-4 pb-4 pt-2 md:hidden">
-          <h2 className="font-bold text-slate-950">Trip actions</h2>
-          <p className="mt-1 text-sm text-slate-500">
+        <div className="border-b border-line-subtle px-4 pb-4 pt-2 md:hidden">
+          <h2 className="font-bold text-heading">Trip actions</h2>
+          <p className="mt-1 text-sm text-subtle">
             Choose an action for this trip.
           </p>
         </div>

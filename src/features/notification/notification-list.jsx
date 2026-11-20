@@ -41,14 +41,14 @@ const NotificationListSkeleton = ({ compact }) => (
     {Array.from({ length: compact ? 3 : 5 }, (_, index) => (
       <div
         key={index}
-        className="flex animate-pulse items-start gap-3 rounded-2xl border border-slate-100 bg-white p-3"
+        className="flex animate-pulse items-start gap-3 rounded-2xl border border-line-subtle bg-white p-3"
       >
         <span className="size-9 shrink-0 rounded-full bg-slate-200" />
         <span className="min-w-0 flex-1 space-y-2 py-1">
           <span className="block h-3 w-2/5 rounded-full bg-slate-200" />
-          <span className="block h-3 w-full rounded-full bg-slate-100" />
-          <span className="block h-3 w-3/4 rounded-full bg-slate-100" />
-          <span className="block h-2.5 w-1/4 rounded-full bg-slate-100" />
+          <span className="block h-3 w-full rounded-full bg-surface-muted" />
+          <span className="block h-3 w-3/4 rounded-full bg-surface-muted" />
+          <span className="block h-2.5 w-1/4 rounded-full bg-surface-muted" />
         </span>
       </div>
     ))}
@@ -193,7 +193,7 @@ const NotificationList = ({
                 className={cn(
                   "relative overflow-hidden rounded-2xl border text-left transition",
                   notification.is_read
-                    ? "border-slate-200 bg-slate-50"
+                    ? "border-line bg-surface-subtle"
                     : "border-primary/20 bg-primary/10 hover:bg-primary/15",
                   itemClassName,
                 )}
@@ -233,7 +233,7 @@ const NotificationList = ({
                       className={cn(
                         "mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full",
                         notification.is_read
-                          ? "bg-slate-100 text-slate-500"
+                          ? "bg-surface-muted text-subtle"
                           : "bg-primary text-white",
                       )}
                     >
@@ -244,7 +244,7 @@ const NotificationList = ({
                         <Title
                           variant="xxs"
                           className={cn(
-                            !notification?.is_read ? "text-slate-900" : "",
+                            !notification?.is_read ? "text-heading" : "",
                           )}
                         >
                           {notification.title}
@@ -258,7 +258,7 @@ const NotificationList = ({
                         variant="sm"
                         className={cn(
                           "mt-2 leading-6",
-                          !notification?.is_read ? "text-slate-800" : "",
+                          !notification?.is_read ? "text-heading" : "",
                         )}
                       >
                         {notification.message}
@@ -278,7 +278,7 @@ const NotificationList = ({
                         </span>
                       ) : null}
 
-                      <span className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                      <span className="mt-2 flex flex-wrap items-center gap-2 text-xs text-faint">
                         <span>
                           {titleCase(notification.notification_type) ||
                             "Notification"}
@@ -307,7 +307,7 @@ const NotificationList = ({
         )}
 
         {isFetching && notifications.length > 0 && (
-          <p className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-500">
+          <p className="flex items-center gap-2 rounded-2xl bg-surface-muted px-4 py-3 text-sm text-subtle">
             <Loader2 className="size-4 animate-spin" />
             Loading notifications...
           </p>

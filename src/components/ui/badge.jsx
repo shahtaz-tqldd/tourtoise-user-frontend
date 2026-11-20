@@ -1,23 +1,33 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 
-const Badge = ({ children, variant = "primary-accent", icon: Icon = null }) => {
-  const colors = {
-    "primary-accent": "bg-primary/10 text-primary",
-    primary: "bg-primary text-white",
-    secondary: "bg-white/90 text-slate-900",
-    alert: "bg-orange-100 text-orange-600",
-    accent: "bg-amber-100/60 text-amber-600 border border-amber-100",
-    danger: "bg-red-100/50 text-red-600 border border-red-100",
-  };
+const BADGE_VARIANTS = {
+  "primary-accent": "bg-accent text-accent-foreground",
+  primary: "bg-primary text-primary-foreground",
+  secondary: "bg-white/90 text-heading",
+  neutral: "bg-surface-muted text-body",
+  alert: "bg-warning-soft text-warning",
+  accent: "border border-sand-100 bg-sand-50 text-sand-600",
+  info: "bg-info-soft text-info",
+  success: "bg-success-soft text-success",
+  danger: "border border-danger-soft bg-danger-soft/50 text-danger",
+};
+
+const Badge = ({
+  children,
+  variant = "primary-accent",
+  icon: Icon = null,
+  className,
+}) => {
   return (
     <span
       className={cn(
-        "w-fit rounded-full px-2.5 py-1.5 text-xs font-semibold backdrop-blur capitalize flex items-center gap-1.5",
-        colors[variant],
+        "flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1.5 text-caption font-semibold capitalize backdrop-blur",
+        BADGE_VARIANTS[variant],
+        className,
       )}
     >
-      {Icon && <Icon size={12} />}
+      {Icon && <Icon size={12} aria-hidden="true" />}
       {children}
     </span>
   );

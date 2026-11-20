@@ -167,7 +167,7 @@ const ProfileSettings = () => {
   const handleLogout = () => {
     dispatch(userLoggedOut());
     dispatch(resetApiState());
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true });
   };
 
   const handleDownloadData = () => {
@@ -286,10 +286,10 @@ const ProfileSettings = () => {
         description="Use a strong password that you do not reuse elsewhere."
         className="h-fit p-6 !max-w-xl md:p-8"
       >
-        <h2 className="mt-2 text-lg font-bold text-slate-950 md:mt-0">
+        <h2 className="mt-2 text-lg font-bold text-heading md:mt-0">
           Update Password
         </h2>
-        <p className="mt-1 text-sm leading-6 text-slate-500">
+        <p className="mt-1 text-sm leading-6 text-subtle">
           Use a strong password that you do not reuse elsewhere.
         </p>
 
@@ -405,8 +405,8 @@ const SwitchRow = ({
           <Icon size={18} />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-slate-950">{title}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
+          <p className="text-sm font-semibold text-heading">{title}</p>
+          <p className="mt-1 text-sm leading-6 text-subtle">{description}</p>
         </div>
       </div>
       <button
@@ -419,7 +419,7 @@ const SwitchRow = ({
           "relative h-7 w-12 shrink-0 rounded-full border transition disabled:cursor-not-allowed disabled:opacity-60",
           checked
             ? "border-primary bg-primary"
-            : "border-slate-300 bg-slate-200",
+            : "border-line-strong bg-slate-200",
         )}
       >
         <span
@@ -463,13 +463,13 @@ const ActionRow = ({
         <div className="min-w-0">
           <h3
             className={cn(
-              "text-sm font-semibold text-slate-950",
+              "text-sm font-semibold text-heading",
               destructive ? "text-red-600" : "",
             )}
           >
             {title}
           </h3>
-          <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
+          <p className="mt-1 text-sm leading-6 text-subtle">{description}</p>
         </div>
       </div>
       <Button
@@ -496,8 +496,8 @@ const ActivityRow = ({ icon, label, value }) => {
         <Icon size={18} />
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-slate-950">{label}</p>
-        <p className="mt-1 break-words text-sm leading-6 text-slate-500">
+        <p className="text-sm font-semibold text-heading">{label}</p>
+        <p className="mt-1 break-words text-sm leading-6 text-subtle">
           {value}
         </p>
       </div>

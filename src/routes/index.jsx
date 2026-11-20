@@ -1,7 +1,9 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
-import MainLayout from "@/layouts/main";
-import PrivateRoute from "./private-route";
+import RootLayout from "@/layouts/root-layout";
+import AppLayout from "@/layouts/app-layout";
+import RequireAuth from "./require-auth";
+import GuestOnly from "./guest-only";
 
 // auth
 const LoginPage = lazy(() => import("@/pages/auth/login"));
@@ -32,9 +34,6 @@ const PublicTripDetailsPage = lazy(
   () => import("@/pages/trips/public-trip-details"),
 );
 
-// chat
-const AgentChatPage = lazy(() => import("@/pages/chat"));
-
 // journal
 const TravelJournalPage = lazy(() => import("@/pages/journal"));
 const JournalDetailsPage = lazy(
@@ -45,108 +44,68 @@ const JournalDetailsPage = lazy(
 const SavedItemsPage = lazy(() => import("@/pages/saved-items"));
 const SearchPage = lazy(() => import("@/pages/search"));
 const AppFeaturesPage = lazy(() => import("@/pages/app-features"));
+const DesignSystemPage = lazy(() => import("@/pages/design-system"));
+
 
 const withSuspense = (element) => (
   <Suspense fallback={null}>{element}</Suspense>
 );
 
+/** Member-only page: guests see a sign-in prompt and the auth modal. */
+const member = (element, reason) =>
+  withSuspense(<RequireAuth reason={reason}>{element}</RequireAuth>);
+
+/** Standalone auth page: signed-in users are redirected away. */
+const guest = (element) => withSuspense(<GuestOnly>{element}</GuestOnly>);
+
 export const routes = createBrowserRouter([
   {
-    path: "/",
-    element: (
-      <PrivateRoute>
-        <MainLayout />
-      </PrivateRoute>
-    ),
+    element: <RootLayout />,
     children: [
       {
-        path: "/",
-        element: withSuspense(<DestiantionPage />),
+        element: <AppLayout />,
+        children: [
+          // ---------- Public: discover places ----------
+          { path: "/", element: withSuspense(<DestiantionPage />) },
+          {
+            path: "/destinations/:destination_id",
+            element: withSuspense(<DestinationDetailsPage />),
+          },
+          {
+            path: "/destinations/:destination_id/:feature_type",
+            element: withSuspense(<DestinationFeatureListPage />),
+          },
+          { path: "/search", element: withSuspense(<SearchPage />) },
+          { path: "/app-features", element: withSuspense(<AppFeaturesPage />) },
+          { path: "/design-system", element: withSuspense(<DesignSystemPage />) },
+          { path: "/travel-journal", element: withSuspense(<TravelJournalPage />) },
+          {
+            path: "/travel-journal/:journalId",
+            element: withSuspense(<JournalDetailsPage />),
+          },
+
+          // ---------- Members: plan & travel ----------
+          { path: "/trips", element: member(<TripsPage />, "trips") },
+          { path: "/trips/:trip_id", element: member(<TripDetailPage />, "trips") },
+          { path: "/saved-items", element: member(<SavedItemsPage />, "save") },
+          { path: "/profile/credit-history", element: member(<CreditHistoryPage />) },
+          { path: "/profile/settings", element: member(<SettingsPage />) },
+          { path: "/profile/:username", element: member(<ProfilePage />) },
+        ],
       },
+
+      // ---------- Full-screen pages ----------
+      { path: "/onboarding", element: member(<OnboardingPage />) },
+      { path: "/login", element: guest(<LoginPage />) },
+      { path: "/register", element: guest(<RegisterPage />) },
+      // Not GuestOnly: verification signs the user in, then routes to onboarding.
+      { path: "/verify-otp", element: withSuspense(<VerifyOTPPage />) },
+      { path: "/forgot-password", element: guest(<ForgotPasswordPage />) },
+      { path: "/reset-password", element: withSuspense(<ResetPasswordPage />) },
       {
-        path: "/destinations/:destination_id",
-        element: withSuspense(<DestinationDetailsPage />),
-      },
-      {
-        path: "/destinations/:destination_id/:feature_type",
-        element: withSuspense(<DestinationFeatureListPage />),
-      },
-      {
-        path: "/trips",
-        element: withSuspense(<TripsPage />),
-      },
-      {
-        path: "/trips/:trip_id",
-        element: withSuspense(<TripDetailPage />),
-      },
-      {
-        path: "/ask-turtle",
-        element: withSuspense(<AgentChatPage />),
-      },
-      {
-        path: "/travel-journal",
-        element: withSuspense(<TravelJournalPage />),
-      },
-      {
-        path: "/travel-journal/:journalId",
-        element: withSuspense(<JournalDetailsPage />),
-      },
-      {
-        path: "/saved-items",
-        element: withSuspense(<SavedItemsPage />),
-      },
-      {
-        path: "/search",
-        element: withSuspense(<SearchPage />),
-      },
-      {
-        path: "/profile/:username",
-        element: withSuspense(<ProfilePage />),
-      },
-      {
-        path: "/profile/credit-history",
-        element: withSuspense(<CreditHistoryPage />),
-      },
-      {
-        path: "/profile/settings",
-        element: withSuspense(<SettingsPage />),
-      },
-      {
-        path: "/app-features",
-        element: withSuspense(<AppFeaturesPage />),
+        path: "/trip/public/:tripToken",
+        element: withSuspense(<PublicTripDetailsPage />),
       },
     ],
-  },
-  {
-    path: "/login",
-    element: withSuspense(<LoginPage />),
-  },
-  {
-    path: "/register",
-    element: withSuspense(<RegisterPage />),
-  },
-  {
-    path: "/verify-otp",
-    element: withSuspense(<VerifyOTPPage />),
-  },
-  {
-    path: "/onboarding",
-    element: withSuspense(
-      <PrivateRoute>
-        <OnboardingPage />
-      </PrivateRoute>,
-    ),
-  },
-  {
-    path: "/forgot-password",
-    element: withSuspense(<ForgotPasswordPage />),
-  },
-  {
-    path: "/reset-password",
-    element: withSuspense(<ResetPasswordPage />),
-  },
-  {
-    path: "/trip/public/:tripToken",
-    element: withSuspense(<PublicTripDetailsPage />),
   },
 ]);
