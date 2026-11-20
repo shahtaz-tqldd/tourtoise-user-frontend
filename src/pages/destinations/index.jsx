@@ -137,7 +137,7 @@ const DestinationPage = () => {
         )}
       </section>
 
-      <CompanionStrip />
+      {/* <CompanionStrip /> */}
     </Container>
   );
 };

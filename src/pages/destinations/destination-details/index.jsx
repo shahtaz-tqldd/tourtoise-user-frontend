@@ -1,30 +1,28 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { MapPinned } from "lucide-react";
 
-// query
 import { useDestinationDetailQuery } from "@/features/destination/destinationApiSlice";
-
-// comonents
-import Gallery from "./components/gallery";
-import DestinationCover from "./components/cover";
 import TripPlanningDrawer from "@/pages/trips/trip-create";
-import TripSnapshot from "./components/snapshot";
-import DestinationHighlights from "./components/highlights";
-import DestinationFeatures from "./components/activities";
-import DestinationCuisine from "./components/cuisine";
+import BrokenPage from "@/components/shared/broken-page";
+import { Container } from "@/components/ui/container";
+import useTitle from "@/hooks/useTitle";
+
+import DestinationHeader from "./components/destination-header";
+import PhotoHero from "./components/photo-hero";
+import QuickFacts from "./components/quick-facts";
+import PlanCard from "./components/plan-card";
+import About from "./components/about";
+import PlaceSection from "./components/place-section";
+import GoodToKnow from "./components/good-to-know";
 import FeatureDetails from "./components/feature-details";
-import TripEssentials from "./components/essentials";
-import DestinationOverview from "./components/overview";
-import TripPlan from "./components/trip-plan";
 import {
   DestinationLoader,
   EmptyDestination,
 } from "./components/fallback-component";
-import { MapPinned } from "lucide-react";
-import BrokenPage from "@/components/shared/broken-page";
-import { Container } from "@/components/ui/container";
-import useTitle from "@/hooks/useTitle";
-import { useSelector } from "react-redux";
+import { getDestinationPhotos } from "./detail-utils";
+import { PLACE_KINDS } from "./place-kinds";
 
 const DestinationDetailsPage = () => {
   const { destination_id } = useParams();
@@ -35,7 +33,8 @@ const DestinationDetailsPage = () => {
 
   const { data, isFetching, error, refetch } =
     useDestinationDetailQuery(destination_id);
-  const destination = data?.data || {};
+  const destination = useMemo(() => data?.data || {}, [data]);
+  const photos = useMemo(() => getDestinationPhotos(destination), [destination]);
 
   useTitle(`tourtoise - ${destination?.name}`);
 
@@ -130,59 +129,42 @@ const DestinationDetailsPage = () => {
     return <EmptyDestination />;
   }
 
+  const openPlanner = () => handlePlanningOpenChange(true);
+  const destinationSlug = destination.slug || destination_id;
+  const selectPlace = (kindKey) => (item) => {
+    const kind = PLACE_KINDS[kindKey];
+    setActiveFeature({
+      title: kind.featureTitle,
+      icon: kind.icon,
+      featureType: kindKey,
+      item,
+    });
+  };
+
   return (
     <Container>
-      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="min-w-0 flex flex-col gap-6">
-          <DestinationCover destination={destination} />
-          <DestinationOverview destination={destination} />
-          <div className="xl:hidden">
-            <TripSnapshot
-              destination={destination}
-              setPlanningOpen={setPlanningOpen}
+      {/* Phones lead with the photos; larger screens lead with the title. */}
+      <DestinationHeader destination={destination} className="order-2 md:order-1" />
+      <PhotoHero photos={photos} name={destination.name} className="order-1 md:order-2" />
+
+      <div className="order-3 grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="flex min-w-0 flex-col gap-10">
+          <QuickFacts destination={destination} />
+          <PlanCard destination={destination} onPlan={openPlanner} className="shadow-none lg:hidden" />
+          <About destination={destination} />
+          {Object.keys(PLACE_KINDS).map((kindKey) => (
+            <PlaceSection
+              key={kindKey}
+              kindKey={kindKey}
+              items={destination[kindKey]}
+              onSelect={selectPlace(kindKey)}
             />
-          </div>
-
-          <div className="xl:hidden">
-            <Gallery destination={destination} />
-          </div>
-          <DestinationHighlights
-            destination={destination}
-            setActiveFeature={setActiveFeature}
-          />
-          <DestinationFeatures
-            destination={destination}
-            setActiveFeature={setActiveFeature}
-          />
-          <DestinationCuisine
-            destination={destination}
-            setActiveFeature={setActiveFeature}
-          />
-
-          <TripEssentials destination={destination} />
-
-          <div className="xl:hidden">
-            <TripPlan
-              destination={destination}
-              handlePlanningOpenChange={handlePlanningOpenChange}
-            />
-          </div>
+          ))}
+          <GoodToKnow destination={destination} />
         </div>
 
-        <aside className="min-w-0 flex flex-col gap-6 md:sticky md:top-[90px] md:h-[calc(100vh-110px)] md:pr-1.5 md:overscroll-contain custom-scrollbar">
-          <div className="hidden xl:block space-y-4">
-            <TripSnapshot
-              destination={destination}
-              setPlanningOpen={setPlanningOpen}
-            />
-            <TripPlan
-              destination={destination}
-              handlePlanningOpenChange={handlePlanningOpenChange}
-            />
-          </div>
-          <div className="hidden xl:block">
-            <Gallery destination={destination} />
-          </div>
+        <aside className="hidden lg:block">
+          <PlanCard destination={destination} onPlan={openPlanner} className="sticky top-[92px]" />
         </aside>
       </div>
 
@@ -196,7 +178,7 @@ const DestinationDetailsPage = () => {
       )}
       <FeatureDetails
         feature={activeFeature}
-        destinationSlug={destination.slug || destination_id}
+        destinationSlug={destinationSlug}
         open={Boolean(activeFeature)}
         onOpenChange={(open) => {
           if (!open) setActiveFeature(null);

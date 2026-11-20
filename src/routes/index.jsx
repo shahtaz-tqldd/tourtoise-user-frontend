@@ -23,9 +23,6 @@ const DestiantionPage = lazy(() => import("@/pages/destinations"));
 const DestinationDetailsPage = lazy(
   () => import("@/pages/destinations/destination-details"),
 );
-const DestinationFeatureListPage = lazy(
-  () => import("@/pages/destinations/destination-features"),
-);
 
 // trips
 const TripsPage = lazy(() => import("@/pages/trips"));
@@ -70,10 +67,6 @@ export const routes = createBrowserRouter([
           {
             path: "/destinations/:destination_id",
             element: withSuspense(<DestinationDetailsPage />),
-          },
-          {
-            path: "/destinations/:destination_id/:feature_type",
-            element: withSuspense(<DestinationFeatureListPage />),
           },
           { path: "/search", element: withSuspense(<SearchPage />) },
           { path: "/app-features", element: withSuspense(<AppFeaturesPage />) },

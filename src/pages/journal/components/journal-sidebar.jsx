@@ -1,14 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Bookmark, MessageCircle, PenLine, Sparkles } from "lucide-react";
+import { Bookmark, PenLine, Sparkles, Share2, UserRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAuthGate } from "@/features/auth/auth-gate-context";
 import { JournalComposerPrompt } from "./journal-page-header";
 
 const GUEST_PERKS = [
-  { icon: PenLine, text: "Share stories and photos from your trips" },
-  { icon: MessageCircle, text: "Ask travelers questions in the comments" },
+  { icon: PenLine, text: "Share your travel stories and photos with the community" },
+  { icon: UserRound, text: "Engage with tourists on their travel stories" },
   { icon: Bookmark, text: "Save posts for your next trip" },
 ];
 
@@ -22,14 +22,14 @@ const JournalSidebar = ({ onCreate }) => {
         {isAuthenticated ? (
           <JournalComposerPrompt onCreate={onCreate} />
         ) : (
-          <section aria-labelledby="journal-join-title" className="rounded-card bg-surface p-5 ring-1 ring-line-subtle">
+          <section aria-labelledby="journal-join-title" className="rounded-card bg-surface p-6 ring-1 ring-line-subtle">
             <h2 id="journal-join-title" className="font-display text-h4 text-heading">
               Join the travel community
             </h2>
             <ul role="list" className="mt-3 space-y-2.5">
               {GUEST_PERKS.map(({ icon: Icon, text }) => (
                 <li key={text} className="flex gap-2.5 text-body-sm text-body">
-                  <Icon className="mt-0.5 size-4 shrink-0 text-brand-text" aria-hidden="true" />
+                  <Icon className="mt-1 size-3.5 shrink-0 text-brand-text" aria-hidden="true" />
                   {text}
                 </li>
               ))}

@@ -1,16 +1,52 @@
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { useSelector } from "react-redux";
-import { Sparkles } from "lucide-react";
+import { Dot, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Heading, Text } from "@/components/ui/typography";
 import { useAuthGate } from "@/features/auth/auth-gate-context";
 import { setHeroInView } from "@/hooks/useHeroInView";
 
-const Dot = () => (
-  <span aria-hidden="true" className="px-1 text-faint">
-    ·
-  </span>
+/** Dotted journey line with waypoints, sweeping behind the band. */
+const RouteBackdrop = () => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 1200 220"
+    preserveAspectRatio="xMaxYMid slice"
+    className="pointer-events-none absolute inset-0 h-full w-full text-brand-300 opacity-40"
+  >
+    <g
+      stroke="currentColor"
+      strokeWidth="1.5"
+      fill="none"
+      className="text-brand-100"
+    >
+      <circle cx="1100" cy="60" r="26" />
+      <circle cx="1100" cy="60" r="46" />
+    </g>
+
+    <path
+      d="M -30 150 C 120 160, 200 70, 360 86 C 520 102, 560 168, 720 150 C 880 132, 940 48, 1100 60 C 1160 65, 1210 48, 1260 30"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3.5"
+      strokeLinecap="round"
+      strokeDasharray="0.5 11"
+    />
+
+    <g fill="#ffffff" stroke="currentColor" strokeWidth="2.5">
+      <circle cx="360" cy="86" r="6" />
+      <circle cx="720" cy="150" r="6" />
+    </g>
+    <circle
+      cx="1100"
+      cy="60"
+      r="7"
+      fill="var(--color-sand-300)"
+      stroke="var(--color-sand-600)"
+      strokeWidth="2.5"
+    />
+  </svg>
 );
 
 /** Reports whether the hero is on screen so the header can hide its CTA. */
@@ -36,7 +72,7 @@ const useReportHeroVisibility = (ref) => {
 
 /** Identity band: one quiet line of what tourtoise is, then the destinations
  *  below take over. Guests get the primary CTA here; signed-in users get the
- *  mark and the line only, so nothing competes with the grid. */
+ *  line only, so nothing competes with the grid. */
 const JourneyHero = () => {
   const sectionRef = useRef(null);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -47,28 +83,29 @@ const JourneyHero = () => {
     <section
       ref={sectionRef}
       aria-labelledby="journey-hero-title"
-      className="rounded-sheet bg-surface px-5 py-4 ring-1 ring-line-subtle sm:px-8 sm:py-5 xl:px-10"
+      className="relative overflow-hidden rounded-sheet bg-gradient-to-br from-brand-50 via-surface to-sand-50 ring-1 ring-line-subtle px-5 py-4 sm:px-8 sm:py-5"
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-        <div className="flex min-w-0 items-center gap-3.5 sm:gap-4">
-          <img
-            src="/logo.png"
-            alt=""
-            className="size-10 shrink-0 object-contain"
-            decoding="async"
-          />
-          <div className="min-w-0">
-            <Heading as="h1" level={3} id="journey-hero-title">
-              Your personal travel buddy
-            </Heading>
-            <Text size="sm" tone="subtle" className="mt-0.5 text-pretty">
-              Knows your taste
-              <Dot />
-              plans your trip
-              <Dot />
-              travels with you
+      <RouteBackdrop />
+
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="min-w-0">
+          <div className="mb-2 flex items-center gap-2">
+            <Sparkles size={12} className="text-brand-500" aria-hidden="true" />
+            <Text size="xs" tone="subtle">
+             Welcome to tourtoise
             </Text>
           </div>
+
+          <Heading as="h1" level={3} id="journey-hero-title">
+            Your personal AI travel companion
+          </Heading>
+          <Text size="sm" tone="subtle" className="mt-1 text-pretty flx">
+            Understands your travel style
+            <Dot />
+            Makes smart planning
+            <Dot />
+            Guides through your tour
+          </Text>
         </div>
 
         {!isAuthenticated && (
@@ -80,7 +117,7 @@ const JourneyHero = () => {
             }
           >
             <Sparkles aria-hidden="true" />
-            Plan a trip free
+            Let&apos;s Plan a Trip
           </Button>
         )}
       </div>

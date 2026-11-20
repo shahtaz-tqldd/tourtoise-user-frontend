@@ -89,69 +89,6 @@ export const destinationApiSlice = apiSlice.injectEndpoints({
       ],
     }),
 
-    destinationFeatureList: builder.query({
-      query: ({
-        destination_slug,
-        feature_type,
-        page = 1,
-        page_size = 12,
-        search,
-      }) => {
-        const queryParams = new URLSearchParams({
-          page: String(page),
-          page_size: String(page_size),
-        });
-
-        if (search) queryParams.set("search", search);
-
-        return {
-          url: `/destinations/${destination_slug}/${feature_type}/?${queryParams.toString()}`,
-          method: "GET",
-        };
-      },
-      providesTags: (result, error, { destination_slug, feature_type }) => [
-        { type: "destination-detail", id: destination_slug },
-        {
-          type: "destination-feature-list",
-          id: `${destination_slug}-${feature_type}`,
-        },
-      ],
-    }),
-
-    destinationFeatureInfiniteList: builder.infiniteQuery({
-      query: ({ queryArg = {}, pageParam }) => {
-        const {
-          destination_slug,
-          feature_type,
-          page_size = 12,
-          search,
-        } = queryArg;
-
-        const queryParams = new URLSearchParams({
-          page: String(pageParam),
-          page_size: String(page_size),
-        });
-
-        if (search) queryParams.set("search", search);
-
-        return {
-          url: `/destinations/${destination_slug}/${feature_type}/?${queryParams.toString()}`,
-          method: "GET",
-        };
-      },
-      infiniteQueryOptions: {
-        initialPageParam: 1,
-        getNextPageParam: nextDestinationFeaturePage,
-      },
-      providesTags: (result, error, { destination_slug, feature_type }) => [
-        { type: "destination-detail", id: destination_slug },
-        {
-          type: "destination-feature-list",
-          id: `${destination_slug}-${feature_type}`,
-        },
-      ],
-    }),
-
     saveDestination: builder.mutation({
       query: ({ destination_slug, save }) => {
         return {
@@ -212,8 +149,6 @@ export const {
   useDestinationDetailQuery,
   useDestinationShortDetailQuery,
   useDestinationFeatureDetailQuery,
-  useDestinationFeatureListQuery,
-  useDestinationFeatureInfiniteListInfiniteQuery,
   useSaveDestinationListQuery,
   useSaveDestinationInfiniteListInfiniteQuery,
   useSaveDestinationMutation,

@@ -23,7 +23,7 @@ const Header = ({ children, className }) => {
         className,
       )}
     >
-      <div className="mx-auto flex h-16 w-full max-w-page items-center gap-3 px-4 md:h-[72px]">
+      <div className="mx-auto flex h-16 w-full max-w-page items-center gap-3 md:h-[72px]">
         {children}
       </div>
     </header>
