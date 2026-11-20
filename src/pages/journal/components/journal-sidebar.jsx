@@ -1,11 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { Bookmark, Heart, MessageCircle, PenLine, Sparkles } from "lucide-react";
+import { Bookmark, MessageCircle, PenLine, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAuthGate } from "@/features/auth/auth-gate-context";
-import AuthorAvatar from "./author-avatar";
+import { JournalComposerPrompt } from "./journal-page-header";
 
 const GUEST_PERKS = [
   { icon: PenLine, text: "Share stories and photos from your trips" },
@@ -13,41 +12,15 @@ const GUEST_PERKS = [
   { icon: Bookmark, text: "Save posts for your next trip" },
 ];
 
-const LINK_ROW =
-  "flx gap-3 rounded-xl px-3 py-2.5 text-body-sm font-semibold text-body transition hover:bg-surface-muted hover:text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
-
-/** Desktop side panel: a join card for guests, shortcuts for members. */
-const JournalSidebar = ({ onCreate, onShowMine }) => {
-  const user = useSelector((state) => state.auth.user);
+/** Desktop side panel: the composer for members, a join card for guests. */
+const JournalSidebar = ({ onCreate }) => {
   const { isAuthenticated, openAuth } = useAuthGate();
 
   return (
     <aside className="hidden lg:block">
       <div className="sticky top-[92px] space-y-4">
         {isAuthenticated ? (
-          <section aria-label="Your journal" className="rounded-card bg-surface p-4 ring-1 ring-line-subtle">
-            <div className="flx gap-3 px-1">
-              <AuthorAvatar src={user?.avatar_url} name={user?.name} />
-              <div className="min-w-0">
-                <p className="truncate text-body-sm font-semibold text-heading">{user?.name}</p>
-                <p className="text-caption text-subtle">Your travel journal</p>
-              </div>
-            </div>
-            <nav aria-label="Journal shortcuts" className="mt-3 space-y-0.5">
-              <button type="button" onClick={onCreate} className={`${LINK_ROW} w-full`}>
-                <PenLine className="size-4 text-brand-text" aria-hidden="true" />
-                Write a post
-              </button>
-              <button type="button" onClick={onShowMine} className={`${LINK_ROW} w-full`}>
-                <Heart className="size-4 text-brand-text" aria-hidden="true" />
-                My posts
-              </button>
-              <Link to="/saved-items" className={LINK_ROW}>
-                <Bookmark className="size-4 text-brand-text" aria-hidden="true" />
-                Saved posts
-              </Link>
-            </nav>
-          </section>
+          <JournalComposerPrompt onCreate={onCreate} />
         ) : (
           <section aria-labelledby="journal-join-title" className="rounded-card bg-surface p-5 ring-1 ring-line-subtle">
             <h2 id="journal-join-title" className="font-display text-h4 text-heading">

@@ -46,11 +46,10 @@ const ProfileMenu = () => {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="hidden h-11 items-center gap-1.5 rounded-full border border-line bg-surface py-1 pl-1 pr-2.5 transition hover:border-primary/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 md:flex"
+          className="hidden p-1 rounded-full border border-line bg-surface transition hover:border-primary/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 md:flex"
           aria-label="Open account menu"
         >
           <Avatar user={user} />
-          <ChevronDown className="size-4 text-subtle" aria-hidden="true" />
         </button>
       </DropdownMenuTrigger>
 
@@ -79,7 +78,10 @@ const ProfileMenu = () => {
         </DropdownMenuLabel>
 
         <div className="py-1">
-          <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2.5">
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer rounded-lg px-3 py-2.5"
+          >
             <Link to={profilePath}>
               <UserRound className="size-4 text-primary" />
               <span className="text-body-sm font-medium text-heading">

@@ -85,11 +85,17 @@ const JournalFeed = ({
     ) : (
       <EmptyPage
         icon={Newspaper}
-        eyebrow={scope === "mine" ? "Your travel stories" : "Community stories"}
-        title={scope === "mine" ? "You haven't posted yet" : "No stories yet"}
+        eyebrow={
+          { mine: "Your travel stories", saved: "Saved posts" }[scope] ||
+          "Community stories"
+        }
+        title={
+          { mine: "You haven't posted yet", saved: "Nothing saved yet" }[scope] ||
+          "No stories yet"
+        }
         description={emptyDescription}
-        actionLabel="Write a post"
-        onAction={onCreate}
+        actionLabel={scope === "saved" ? undefined : "Write a post"}
+        onAction={scope === "saved" ? undefined : onCreate}
         className="min-h-0 flex-1 sm:min-h-0"
       />
     )}

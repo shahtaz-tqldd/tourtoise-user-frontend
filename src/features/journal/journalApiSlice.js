@@ -39,7 +39,10 @@ export const journalApiSlice = apiSlice.injectEndpoints({
       query: ({ queryArg = {}, pageParam }) => {
         const { scope = "public", ...params } = queryArg;
         const path =
-          scope === "mine" ? "/journals/mine/list/" : "/journals/list/";
+          {
+            mine: "/journals/mine/list/",
+            saved: "/journals/saved/list/",
+          }[scope] || "/journals/list/";
 
         return `${path}?${paginationParams({
           ...params,

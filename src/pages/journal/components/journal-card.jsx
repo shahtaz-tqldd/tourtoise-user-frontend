@@ -363,7 +363,7 @@ const PhotoGallery = ({ images }) => (
     <Swiper
       modules={[Pagination]}
       pagination={images.length > 1 ? { clickable: true, dynamicBullets: true } : false}
-      className="journal-image-slider aspect-[4/3] w-full bg-ink-100"
+      className="journal-image-slider aspect-[4/3] w-full bg-ink-100 lg:aspect-[16/10]"
     >
       {images.map((image, index) => (
         <SwiperSlide key={`${image}-${index}`}>

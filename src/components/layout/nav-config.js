@@ -56,10 +56,16 @@ export const isNavItemActive = (link, pathname) => {
 
 export const DRAWER_MENU_ITEMS = [
   {
-    label: "Saved items",
-    description: "Places and journals you saved",
+    label: "Saved places",
+    description: "Destinations for your bucket list",
     to: "/saved-items",
     icon: Bookmark,
+  },
+  {
+    label: "Saved posts",
+    description: "Journal stories you saved",
+    to: "/travel-journal?view=saved",
+    icon: BookText,
   },
   {
     label: "Credit history",

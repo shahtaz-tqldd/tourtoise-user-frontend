@@ -102,3 +102,10 @@ export const getJournalTags = (journal) =>
   (Array.isArray(journal?.tags) ? journal.tags : [])
     .map((tag) => (typeof tag === "string" ? tag : tag?.name))
     .filter(Boolean);
+
+/** Feed views; anything but "public" is members-only. Kept in `?view=`. */
+export const JOURNAL_SCOPES = [
+  { value: "public", label: "Community" },
+  { value: "mine", label: "My posts" },
+  { value: "saved", label: "Saved" },
+];

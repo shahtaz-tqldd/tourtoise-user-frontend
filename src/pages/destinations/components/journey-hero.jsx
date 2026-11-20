@@ -1,36 +1,15 @@
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { useSelector } from "react-redux";
-import { Compass, Navigation, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Display, Text } from "@/components/ui/typography";
+import { Heading, Text } from "@/components/ui/typography";
 import { useAuthGate } from "@/features/auth/auth-gate-context";
 import { setHeroInView } from "@/hooks/useHeroInView";
 
-const STEPS = [
-  { icon: Compass, title: "Find your vibe", text: "Your pace, tastes and style" },
-  { icon: Sparkles, title: "Get an AI plan", text: "Day by day, built around you" },
-  { icon: Navigation, title: "Travel with a guide", text: "Live nudges and re-plans" },
-];
-
-/** Lightweight underline accent for a word in the headline. */
-const Underline = ({ children }) => (
-  <span className="relative inline-block">
-    {children}
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 120 12"
-      preserveAspectRatio="none"
-      className="absolute -bottom-1 left-0 h-2 w-full text-sand-400"
-    >
-      <path
-        d="M2 8 Q 13 2 25 7 T 49 7 T 73 7 T 97 7 T 118 6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
-    </svg>
+const Dot = () => (
+  <span aria-hidden="true" className="px-1 text-faint">
+    ·
   </span>
 );
 
@@ -55,68 +34,55 @@ const useReportHeroVisibility = (ref) => {
   }, [ref]);
 };
 
-/** Compact intro band: the destinations below are the main event. */
-const JourneyHero = ({ exploreId = "explore" }) => {
+/** Identity band: one quiet line of what tourtoise is, then the destinations
+ *  below take over. Guests get the primary CTA here; signed-in users get the
+ *  mark and the line only, so nothing competes with the grid. */
+const JourneyHero = () => {
   const sectionRef = useRef(null);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const { requireAuth } = useAuthGate();
   useReportHeroVisibility(sectionRef);
 
-  const scrollToExplore = () =>
-    document
-      .getElementById(exploreId)
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
-
   return (
     <section
       ref={sectionRef}
       aria-labelledby="journey-hero-title"
-      className="rounded-sheet bg-surface px-5 py-6 ring-1 ring-line-subtle sm:px-8 xl:px-10"
+      className="rounded-sheet bg-surface px-5 py-4 ring-1 ring-line-subtle sm:px-8 sm:py-5 xl:px-10"
     >
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
-        <div className="min-w-0">
-          <Display id="journey-hero-title" size="md" className="text-balance">
-            Tell Turtle{" "}
-            <span className="whitespace-nowrap">
-              <Underline>your vibe</Underline>.
-            </span>{" "}
-            Pack your bags.
-          </Display>
-          <Text tone="subtle" className="mt-2 max-w-xl">
-            Turtle learns how you travel, plans your trip with AI, and guides
-            you on the road.
-          </Text>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="flex min-w-0 items-center gap-3.5 sm:gap-4">
+          <img
+            src="/logo.png"
+            alt=""
+            className="size-10 shrink-0 object-contain"
+            decoding="async"
+          />
+          <div className="min-w-0">
+            <Heading as="h1" level={3} id="journey-hero-title">
+              Your personal travel buddy
+            </Heading>
+            <Text size="sm" tone="subtle" className="mt-0.5 text-pretty">
+              Knows your taste
+              <Dot />
+              plans your trip
+              <Dot />
+              travels with you
+            </Text>
+          </div>
+        </div>
 
+        {!isAuthenticated && (
           <Button
             size="lg"
-            className="mt-4 rounded-full"
+            className="shrink-0 self-start rounded-full sm:self-auto"
             onClick={() =>
-              isAuthenticated
-                ? scrollToExplore()
-                : requireAuth(null, { reason: "plan", view: "register" })
+              requireAuth(null, { reason: "plan", view: "register" })
             }
           >
             <Sparkles aria-hidden="true" />
-            {isAuthenticated ? "Find a place to plan" : "Plan a trip free"}
+            Plan a trip free
           </Button>
-        </div>
-
-        <ol
-          aria-label="How Turtle works"
-          className="hidden shrink-0 gap-3 rounded-card bg-accent p-4 lg:grid"
-        >
-          {STEPS.map(({ icon: Icon, title, text }) => (
-            <li key={title} className="flex items-center gap-3">
-              <span className="center size-9 shrink-0 rounded-full bg-surface text-brand-text ring-1 ring-brand-100">
-                <Icon className="size-4" aria-hidden="true" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-body-sm font-semibold text-heading">{title}</span>
-                <span className="block text-caption text-subtle">{text}</span>
-              </span>
-            </li>
-          ))}
-        </ol>
+        )}
       </div>
     </section>
   );

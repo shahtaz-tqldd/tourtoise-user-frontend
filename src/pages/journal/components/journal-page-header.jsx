@@ -1,17 +1,13 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Globe2, ImagePlus, Lock, UserRound } from "lucide-react";
+import { ImagePlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Heading, Text } from "@/components/ui/typography";
 import { useAuthGate } from "@/features/auth/auth-gate-context";
 import { cn } from "@/lib/utils";
 import AuthorAvatar from "./author-avatar";
-
-const SCOPE_OPTIONS = [
-  { value: "public", label: "Community", icon: Globe2 },
-  { value: "mine", label: "My journal", icon: UserRound },
-];
+import { JOURNAL_SCOPES } from "../journal-utils";
 
 const JournalPageHeader = () => (
   <div>
@@ -22,46 +18,41 @@ const JournalPageHeader = () => (
   </div>
 );
 
-/** Community / My journal. "My journal" asks guests to sign in. */
-export const JournalScopeTabs = ({ value, onValueChange }) => {
-  const { isAuthenticated } = useAuthGate();
-
-  return (
-    <div role="group" aria-label="Show journals" className="flex gap-2">
-      {SCOPE_OPTIONS.map(({ value: option, label, icon: Icon }) => {
-        const isActive = option === value;
-        const isLocked = option === "mine" && !isAuthenticated;
-        return (
-          <button
-            key={option}
-            type="button"
-            aria-pressed={isActive}
-            onClick={() => onValueChange(option)}
-            className={cn(
-              "flx h-9 gap-1.5 rounded-full px-4 text-body-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-              isActive
-                ? "bg-ink-900 text-white"
-                : "bg-surface text-body ring-1 ring-line hover:bg-surface-muted hover:text-heading",
-            )}
-          >
-            <Icon className="size-4" aria-hidden="true" />
-            {label}
-            {isLocked && <Lock className="size-3 text-faint" aria-label="Sign in required" />}
-          </button>
-        );
-      })}
-    </div>
-  );
-};
+/** Compact segmented control. Members only — guests just see the community. */
+export const JournalScopeTabs = ({ value, onValueChange }) => (
+  <div
+    role="group"
+    aria-label="Show posts"
+    className="inline-flex w-fit rounded-full bg-surface p-1 ring-1 ring-line-subtle"
+  >
+    {JOURNAL_SCOPES.map(({ value: option, label }) => {
+      const isActive = option === value;
+      return (
+        <button
+          key={option}
+          type="button"
+          aria-pressed={isActive}
+          onClick={() => onValueChange(option)}
+          className={cn(
+            "h-7 rounded-full px-3 text-caption font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            isActive ? "bg-ink-900 text-white" : "text-body hover:text-heading",
+          )}
+        >
+          {label}
+        </button>
+      );
+    })}
+  </div>
+);
 
 /** "What's on your mind" prompt for members; a join card for guests. */
-export const JournalComposerPrompt = ({ onCreate }) => {
+export const JournalComposerPrompt = ({ onCreate, className }) => {
   const user = useSelector((state) => state.auth.user);
   const { isAuthenticated, openAuth } = useAuthGate();
 
   if (!isAuthenticated) {
     return (
-      <div className="flex flex-col gap-3 rounded-card bg-surface p-4 ring-1 ring-line-subtle sm:flex-row sm:items-center sm:justify-between sm:p-5 lg:hidden">
+      <div className={cn("flex flex-col gap-3 rounded-card bg-surface p-4 ring-1 ring-line-subtle sm:flex-row sm:items-center sm:justify-between sm:p-5", className)}>
         <div>
           <p className="font-display text-h4 text-heading">Been somewhere good?</p>
           <p className="text-body-sm text-subtle">
@@ -80,7 +71,7 @@ export const JournalComposerPrompt = ({ onCreate }) => {
   }
 
   return (
-    <div className="rounded-card bg-surface p-3 ring-1 ring-line-subtle sm:p-4">
+    <div className={cn("rounded-card bg-surface p-3 ring-1 ring-line-subtle sm:p-4", className)}>
       <div className="flex items-center gap-3">
         <AuthorAvatar src={user?.avatar_url} name={user?.name} />
         <button

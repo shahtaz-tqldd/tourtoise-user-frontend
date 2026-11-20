@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 // components
@@ -18,7 +18,7 @@ import {
   useSaveJournalMutation,
 } from "@/features/journal/journalApiSlice";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
-import { normalizeJournals } from "./journal-utils";
+import { JOURNAL_SCOPES, normalizeJournals } from "./journal-utils";
 import useTitle from "@/hooks/useTitle";
 import JournalFormDialog from "./components/journal-form-dialog";
 import { useAuthGate } from "@/features/auth/auth-gate-context";
@@ -27,11 +27,17 @@ import { Container } from "@/components/ui/container";
 const TravelJournalPage = () => {
   useTitle("tourtoise - travel journal");
   const navigate = useNavigate();
-  const { requireAuth } = useAuthGate();
+  const { requireAuth, isAuthenticated } = useAuthGate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formOpen, setFormOpen] = useState(false);
   const [editingJournal, setEditingJournal] = useState(null);
   const [deletingJournal, setDeletingJournal] = useState(null);
-  const [journalScope, setJournalScope] = useState("public");
+  const requestedScope = searchParams.get("view");
+  // Guests only ever see the community feed.
+  const journalScope =
+    isAuthenticated && JOURNAL_SCOPES.some(({ value }) => value === requestedScope)
+      ? requestedScope
+      : "public";
   const currentUser = useSelector((state) => state.auth.user);
   const {
     data,
@@ -56,8 +62,12 @@ const TravelJournalPage = () => {
   }, [navigate]);
 
   const journals = useMemo(
-    () => normalizeJournals(data?.pages.flatMap((page) => page.data)),
-    [data],
+    () =>
+      normalizeJournals(data?.pages.flatMap((page) => page.data)).map((journal) =>
+        // The saved list may omit `is_saved`; everything in it is saved.
+        journalScope === "saved" ? { ...journal, is_saved: journal.is_saved ?? true } : journal,
+      ),
+    [data, journalScope],
   );
 
   const toggleSavedJournal = (journal) => {
@@ -84,9 +94,14 @@ const TravelJournalPage = () => {
   };
 
   const changeScope = (scope) =>
-    scope === "mine"
-      ? requireAuth(() => setJournalScope(scope), { reason: "journal" })
-      : setJournalScope(scope);
+    setSearchParams(
+      (params) => {
+        if (scope === "public") params.delete("view");
+        else params.set("view", scope);
+        return params;
+      },
+      { replace: true },
+    );
 
   const openCreate = () => {
     requireAuth(() => {
@@ -123,11 +138,15 @@ const TravelJournalPage = () => {
 
   return (
     <Container>
-      <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      {/* Feed capped at a comfortable reading width; the sidebar takes the rest. */}
+      <div className="grid w-full gap-6 lg:grid-cols-[minmax(0,780px)_minmax(320px,1fr)]">
         <div className="min-w-0 space-y-4">
           <JournalPageHeader />
-          <JournalScopeTabs value={journalScope} onValueChange={changeScope} />
-          <JournalComposerPrompt onCreate={openCreate} />
+          {isAuthenticated && (
+            <JournalScopeTabs value={journalScope} onValueChange={changeScope} />
+          )}
+          {/* Desktop shows the composer in the sidebar instead. */}
+          <JournalComposerPrompt onCreate={openCreate} className="lg:hidden" />
           <JournalFeed
             journals={journals}
             isLoading={isLoading}
@@ -143,13 +162,14 @@ const TravelJournalPage = () => {
             scope={journalScope}
             onCreate={openCreate}
             emptyDescription={
-              journalScope === "mine"
-                ? "Write about a trip you loved — it only takes a minute."
-                : "Be the first to share a story from the road."
+              {
+                mine: "Write about a trip you loved — it only takes a minute.",
+                saved: "Tap Save on any post to keep it here for your next trip.",
+              }[journalScope] || "Be the first to share a story from the road."
             }
           />
         </div>
-        <JournalSidebar onCreate={openCreate} onShowMine={() => changeScope("mine")} />
+        <JournalSidebar onCreate={openCreate} />
       </div>
       {formOpen && (
         <JournalFormDialog
