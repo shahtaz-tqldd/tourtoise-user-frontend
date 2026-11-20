@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn, userLoggedOut } from "@/features/auth/authSlice";
 import { getTokens } from "@/hooks/useToken";
 
-const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_APP_BASE_URL;
 let refreshPromise = null;
 
 const getTokenPayload = (data = {}) => data.data || data;

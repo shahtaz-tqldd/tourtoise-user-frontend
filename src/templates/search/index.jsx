@@ -1,0 +1,389 @@
+"use client";
+
+import React, { useCallback, useMemo } from "react";
+import {
+  CalendarDays,
+  MapPin,
+  Newspaper,
+  PlaneTakeoff,
+  Search,
+  X,
+} from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useSelector } from "react-redux";
+import { LockKeyhole } from "lucide-react";
+import { useAuthGate } from "@/features/auth/auth-gate-context";
+
+import EmptyPage from "@/components/shared/empty-page";
+import InfiniteScroll from "@/components/shared/infinite-scroll";
+import TabMenu from "@/components/ui/tab";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import useDebounce from "@/hooks/useDebounce";
+import useTitle from "@/hooks/useTitle";
+import { useDestinationInfiniteListInfiniteQuery } from "@/features/destination/destinationApiSlice";
+import { useTripInfiniteListInfiniteQuery } from "@/features/trips/tripApiSlice";
+import { useJournalInfiniteListInfiniteQuery } from "@/features/journal/journalApiSlice";
+import DestinationCard from "@/templates/destinations/components/destination-card";
+import TripCard from "@/templates/trips/components/trip-card";
+import JournalCard from "@/templates/journal/components/journal-card";
+import { normalizeJournals } from "@/templates/journal/journal-utils";
+import { Container } from "@/components/ui/container";
+import ListingHeader from "@/components/shared/listing-header";
+
+const SEARCH_TABS = [
+  { value: "destinations", label: "Destinations", icon: MapPin },
+  { value: "trips", label: "Trips", icon: CalendarDays },
+  { value: "journals", label: "Journals", icon: Newspaper },
+];
+
+const isValidTab = (tab) => SEARCH_TABS.some((item) => item.value === tab);
+
+const SearchPage = () => {
+  useTitle("Search");
+  const router = useRouter();
+  const urlParams = useSearchParams();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const urlSearch = urlParams?.get("q") || "";
+  const urlTab = urlParams?.get("tab") || "destinations";
+  const activeTab = isValidTab(urlTab) ? urlTab : "destinations";
+  const debouncedSearchQuery = useDebounce(urlSearch.trim(), 400);
+  const hasSearchQuery = Boolean(debouncedSearchQuery);
+
+  const searchParams = useMemo(
+    () => ({
+      page_size: 12,
+      search: debouncedSearchQuery || undefined,
+    }),
+    [debouncedSearchQuery],
+  );
+
+  const {
+    data: destinationData,
+    isLoading: isDestinationLoading,
+    isFetching: isDestinationFetching,
+    isError: isDestinationError,
+    fetchNextPage: fetchNextDestinationPage,
+    hasNextPage: hasNextDestinationPage,
+    isFetchingNextPage: isFetchingNextDestinationPage,
+  } = useDestinationInfiniteListInfiniteQuery(searchParams, {
+    skip: activeTab !== "destinations" || !hasSearchQuery,
+  });
+
+  const {
+    data: tripData,
+    isLoading: isTripLoading,
+    isFetching: isTripFetching,
+    isError: isTripError,
+    fetchNextPage: fetchNextTripPage,
+    hasNextPage: hasNextTripPage,
+    isFetchingNextPage: isFetchingNextTripPage,
+  } = useTripInfiniteListInfiniteQuery(searchParams, {
+    skip: activeTab !== "trips" || !hasSearchQuery || !isAuthenticated,
+  });
+
+  const {
+    data: journalData,
+    isLoading: isJournalLoading,
+    isFetching: isJournalFetching,
+    isError: isJournalError,
+    fetchNextPage: fetchNextJournalPage,
+    hasNextPage: hasNextJournalPage,
+    isFetchingNextPage: isFetchingNextJournalPage,
+  } = useJournalInfiniteListInfiniteQuery(searchParams, {
+    skip: activeTab !== "journals" || !hasSearchQuery || !isAuthenticated,
+  });
+
+  const destinations = useMemo(
+    () => destinationData?.pages?.flatMap((page) => page?.data || []) || [],
+    [destinationData],
+  );
+  const trips = useMemo(
+    () => tripData?.pages?.flatMap((page) => page?.data) || [],
+    [tripData],
+  );
+  const journals = useMemo(
+    () =>
+      normalizeJournals(
+        journalData?.pages?.flatMap((page) => page?.data || []) || [],
+      ),
+    [journalData],
+  );
+
+  const isSearching = urlSearch.trim() !== debouncedSearchQuery;
+  const activeState = {
+    destinations: {
+      items: hasSearchQuery ? destinations : [],
+      isLoading:
+        isDestinationLoading ||
+        (isDestinationFetching && !destinationData?.pages?.length) ||
+        isSearching,
+      isError: isDestinationError,
+      hasMore: hasNextDestinationPage,
+      isFetchingMore: isFetchingNextDestinationPage,
+      fetchNextPage: fetchNextDestinationPage,
+      loadingLabel: "Loading more destinations...",
+      emptyTitle: "No destinations found",
+      emptyIcon: MapPin,
+    },
+    trips: {
+      items: hasSearchQuery ? trips : [],
+      isLoading:
+        isTripLoading ||
+        (isTripFetching && !tripData?.pages?.length) ||
+        isSearching,
+      isError: isTripError,
+      hasMore: hasNextTripPage,
+      isFetchingMore: isFetchingNextTripPage,
+      fetchNextPage: fetchNextTripPage,
+      loadingLabel: "Loading more trips...",
+      emptyTitle: "No trips found",
+      emptyIcon: PlaneTakeoff,
+    },
+    journals: {
+      items: hasSearchQuery ? journals : [],
+      isLoading:
+        isJournalLoading ||
+        (isJournalFetching && !journalData?.pages?.length) ||
+        isSearching,
+      isError: isJournalError,
+      hasMore: hasNextJournalPage,
+      isFetchingMore: isFetchingNextJournalPage,
+      fetchNextPage: fetchNextJournalPage,
+      loadingLabel: "Loading more journals...",
+      emptyTitle: "No journals found",
+      emptyIcon: Newspaper,
+    },
+  }[activeTab];
+
+  const updateTab = (tab) => {
+    const nextParams = new URLSearchParams(urlParams?.toString());
+
+    nextParams.set("tab", tab);
+    if (urlSearch.trim()) nextParams.set("q", urlSearch.trim());
+    else nextParams.delete("q");
+
+    router.push(`/search?${nextParams.toString()}`);
+  };
+
+  const updateSearch = (value, options = {}) => {
+    const nextParams = new URLSearchParams(urlParams?.toString());
+    const trimmedValue = value.trim();
+
+    if (trimmedValue) nextParams.set("q", value);
+    else nextParams.delete("q");
+    nextParams.set("tab", activeTab);
+
+    const nextUrl = `/search?${nextParams.toString()}`;
+    if (options.replace ?? true) router.replace(nextUrl);
+    else router.push(nextUrl);
+  };
+
+  const submitSearch = (event) => {
+    event.preventDefault();
+    updateSearch(urlSearch, { replace: false });
+  };
+
+  const loadMore = useCallback(() => {
+    if (!activeState?.hasMore || activeState?.isFetchingMore) return;
+    activeState.fetchNextPage();
+  }, [activeState]);
+
+  return (
+    <Container>
+      <ListingHeader
+        title="Search"
+        description="Search destinations, trips, and journals"
+      />
+
+      <form className="relative mt-4 w-full md:hidden" onSubmit={submitSearch}>
+        <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-faint" />
+        <Input
+          value={urlSearch}
+          onChange={(event) => updateSearch(event.target.value)}
+          placeholder="Search destinations, trips, journals"
+          className="h-12 rounded-full border-primary/15 bg-white pl-11 pr-20 text-sm shadow-none focus-visible:ring-primary/20"
+          autoFocus
+        />
+        {urlSearch && (
+          <button
+            type="button"
+            onClick={() => updateSearch("")}
+            className="absolute right-12 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-faint transition hover:bg-surface-muted hover:text-body"
+            aria-label="Clear search"
+          >
+            <X size={15} />
+          </button>
+        )}
+        <Button
+          type="submit"
+          size="icon-sm"
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full"
+          aria-label="Search"
+        >
+          <Search size={15} />
+        </Button>
+      </form>
+
+      <TabMenu
+        tabs={SEARCH_TABS}
+        activeTab={activeTab}
+        setActiveTab={updateTab}
+        scrollable
+        className="bg-transparent"
+      />
+
+      <SearchResults
+        activeTab={activeTab}
+        state={activeState}
+        onLoadMore={loadMore}
+        onClearSearch={() => updateSearch("")}
+        debouncedSearchQuery={debouncedSearchQuery}
+        hasSearchQuery={hasSearchQuery}
+        isLocked={activeTab !== "destinations" && !isAuthenticated}
+      />
+    </Container>
+  );
+};
+
+const SearchResults = ({
+  activeTab,
+  state,
+  onLoadMore,
+  onClearSearch,
+  debouncedSearchQuery,
+  hasSearchQuery,
+  isLocked,
+}) => {
+  if (isLocked) return <MemberOnlyResults tab={activeTab} />;
+
+  if (!hasSearchQuery) {
+    return (
+      <EmptyPage
+        icon={Search}
+        eyebrow="Search across tourtoise"
+        title="Start a search"
+        description="Enter a search term to find matching destinations, trips, or journals."
+        className="min-h-0 flex-1 sm:min-h-0"
+      />
+    );
+  }
+
+  if (state.isLoading) return <SearchSkeleton activeTab={activeTab} />;
+
+  if (state.isError) {
+    return (
+      <EmptyPage
+        icon={Search}
+        eyebrow="Search unavailable"
+        title="Could not load results"
+        description="Check the search endpoint and try again."
+        className="min-h-0 flex-1 sm:min-h-0"
+      />
+    );
+  }
+
+  if (!state.items.length) {
+    return (
+      <EmptyPage
+        icon={state.emptyIcon}
+        eyebrow="No matching results"
+        title={state.emptyTitle}
+        description={
+          debouncedSearchQuery
+            ? "Try a different search term or switch tabs."
+            : "Start typing to narrow the results."
+        }
+        actionLabel="Clear search"
+        onAction={onClearSearch}
+        className="min-h-0 flex-1 sm:min-h-0"
+      />
+    );
+  }
+
+  return (
+    <>
+      {activeTab === "destinations" && (
+        <div className="grid gap-4 xl:grid-cols-3">
+          {state.items.map((destination) => (
+            <DestinationCard
+              key={destination.slug || destination.id}
+              destination={destination}
+            />
+          ))}
+        </div>
+      )}
+
+      {activeTab === "trips" && (
+        <div className="max-w-3xl flex flex-col gap-5">
+          {state.items.map((trip) => (
+            <TripCard key={trip.id || trip.trip_id || trip.uuid} trip={trip} />
+          ))}
+        </div>
+      )}
+
+      {activeTab === "journals" && (
+        <div className="mx-auto max-w-3xl space-y-6 md:space-y-4">
+          {state.items.map((journal) => (
+            <JournalCard
+              key={journal.id}
+              journal={journal}
+              isSaved={journal.is_saved}
+            />
+          ))}
+        </div>
+      )}
+
+      <InfiniteScroll
+        hasMore={state.hasMore}
+        isLoading={state.isFetchingMore}
+        onLoadMore={onLoadMore}
+        loadingLabel={state.loadingLabel}
+      />
+    </>
+  );
+};
+
+const MemberOnlyResults = ({ tab }) => {
+  const { openAuth } = useAuthGate();
+
+  return (
+    <EmptyPage
+      icon={LockKeyhole}
+      eyebrow="Members only"
+      title={`Sign in to search ${tab}`}
+      description="Destinations are open to everyone. Trips and journals are available once you sign in."
+      actionLabel="Sign in"
+      onAction={() => openAuth("login", tab === "trips" ? "trips" : "journal")}
+      className="min-h-0 flex-1 sm:min-h-0"
+    />
+  );
+};
+
+const SearchSkeleton = ({ activeTab }) => {
+  if (activeTab === "destinations") {
+    return (
+      <div className="grid gap-4 xl:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="aspect-square animate-pulse rounded-[28px] bg-surface-muted"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={index}
+          className="h-56 animate-pulse rounded-3xl bg-surface-muted"
+        />
+      ))}
+    </div>
+  );
+};
+
+export default SearchPage;

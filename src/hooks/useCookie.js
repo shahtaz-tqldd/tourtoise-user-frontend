@@ -15,7 +15,7 @@ export const setAuthCookie = (auth, name = "tourtoise", path = "/") => {
     let cookieFlags = "; SameSite=Strict";
 
     // Add Secure flag in production
-    if (import.meta.env.PROD) {
+    if (process.env.NODE_ENV === "production") {
       cookieFlags += "; Secure";
     }
 
@@ -64,9 +64,10 @@ export const getAuthCookie = (name = "tourtoise") => {
 };
 
 export const removeAuthCookie = (name = "tourtoise", path = "/") => {
-  const cookieFlags = import.meta.env.PROD
-    ? "; Secure; SameSite=Strict"
-    : "; SameSite=Strict";
+  const cookieFlags =
+    process.env.NODE_ENV === "production"
+      ? "; Secure; SameSite=Strict"
+      : "; SameSite=Strict";
 
   // Remove cookies by setting immediate expiration
   document.cookie = `${name}_access=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}${cookieFlags}`;

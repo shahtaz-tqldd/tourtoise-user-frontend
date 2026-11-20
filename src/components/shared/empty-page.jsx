@@ -1,6 +1,6 @@
 import React, { useId } from "react";
 import { Compass } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -79,7 +79,7 @@ const EmptyPage = ({
           <div className="mt-8 flex justify-center">
             {actionTo ? (
               <Button asChild className="w-full sm:w-auto">
-                <Link to={actionTo}>{actionLabel}</Link>
+                <Link href={actionTo}>{actionLabel}</Link>
               </Button>
             ) : (
               <Button

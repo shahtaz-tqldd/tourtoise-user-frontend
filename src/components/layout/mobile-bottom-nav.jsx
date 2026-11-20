@@ -1,5 +1,6 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import NavDrawer from "./nav-drawer";
 import { useMobileNavVisibility } from "@/lib/mobile-visible";
@@ -13,9 +14,9 @@ const GRID_COLUMNS = {
 };
 
 const MobileBottomNav = () => {
-  const location = useLocation();
-  const isActiveRoute = (link) => isNavItemActive(link, location.pathname);
-  const isMobileNavVisible = useMobileNavVisibility(location.key);
+  const pathname = usePathname();
+  const isActiveRoute = (link) => isNavItemActive(link, pathname);
+  const isMobileNavVisible = useMobileNavVisibility(pathname);
   const { isHidden } = useMobileBottomNavbar();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const shouldShow = isMobileNavVisible && !isHidden;
@@ -45,7 +46,7 @@ const MobileBottomNav = () => {
           return (
             <Link
               key={item.id}
-              to={item.link}
+              href={item.link}
               className={`group relative flex h-12 w-[54px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
                 isActive
                   ? "bg-accent text-primary"

@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { usePathname, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 
 import { INITIAL_REDIRECT_SESSION_KEY } from "@/constants/session";
 import { useProfileStatesQuery } from "@/features/auth/authApiSlice";
 
 const useInitialTripRedirect = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   const handledRef = useRef(false);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const { data, isSuccess } = useProfileStatesQuery(undefined, {
@@ -40,10 +40,10 @@ const useInitialTripRedirect = () => {
     if (!tripId) return;
 
     const tripPath = `/trips/${tripId}`;
-    if (location.pathname !== tripPath) {
-      navigate(tripPath, { replace: true });
+    if (pathname !== tripPath) {
+      router.replace(tripPath);
     }
-  }, [data, isSuccess, location.pathname, navigate]);
+  }, [data, isSuccess, pathname, router]);
 };
 
 export default useInitialTripRedirect;

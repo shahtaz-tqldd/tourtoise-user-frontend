@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ChevronDown, LogOut, UserRound } from "lucide-react";
 
 import {
@@ -60,7 +60,7 @@ const ProfileMenu = () => {
       >
         <DropdownMenuLabel className="p-0">
           <Link
-            to={profilePath}
+            href={profilePath}
             className="flex items-center gap-3 rounded-xl bg-surface-subtle p-3 transition hover:bg-accent"
           >
             <Avatar user={user} className="size-11" />
@@ -82,7 +82,7 @@ const ProfileMenu = () => {
             asChild
             className="cursor-pointer rounded-lg px-3 py-2.5"
           >
-            <Link to={profilePath}>
+            <Link href={profilePath}>
               <UserRound className="size-4 text-primary" />
               <span className="text-body-sm font-medium text-heading">
                 My profile
@@ -95,7 +95,7 @@ const ProfileMenu = () => {
               asChild
               className="cursor-pointer rounded-lg px-3 py-2.5"
             >
-              <Link to={to}>
+              <Link href={to}>
                 <Icon className="size-4 text-primary" />
                 <span className="text-body-sm font-medium text-heading">
                   {label}

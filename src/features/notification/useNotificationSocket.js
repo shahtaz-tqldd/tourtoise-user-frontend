@@ -4,7 +4,7 @@ import { getTokens } from "@/hooks/useToken";
 const getNotificationSocketUrl = (accessToken) => {
   if (!accessToken) return "";
 
-  const baseUrl = import.meta.env.VITE_APP_SOCKET_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_SOCKET_URL;
   if (!baseUrl) return "";
 
   try {

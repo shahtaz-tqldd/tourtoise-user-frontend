@@ -9,7 +9,7 @@ export const store = configureStore({
     [apiSlice.reducerPath]: apiSlice.reducer,
     auth: authReducer,
   },
-  devTools: import.meta.env.VITE_ENV !== "PRODUCTION",
+  devTools: process.env.NODE_ENV !== "production",
   middleware: (gDM) => gDM().concat([apiSlice.middleware]),
 });
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 import { cn, getInitials } from "@/lib/utils";
@@ -17,7 +17,7 @@ const ProfileBar = ({ className, ...props }) => {
 
   return (
     <Link
-      to={profilePath}
+      href={profilePath}
       className={cn(
         "flex items-center gap-3 rounded-2xl border border-line bg-surface-subtle p-3 transition hover:border-primary/25 hover:bg-accent",
         className,

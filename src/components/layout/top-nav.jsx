@@ -1,5 +1,6 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { Lock } from "lucide-react";
 
@@ -8,7 +9,7 @@ import { NAV_ITEMS, isNavItemActive } from "./nav-config";
 
 /** Horizontal primary navigation shown in the header from `md` up. */
 const TopNav = ({ className }) => {
-  const { pathname } = useLocation();
+  const pathname = usePathname();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   return (
@@ -24,7 +25,7 @@ const TopNav = ({ className }) => {
           return (
             <li key={item.id}>
               <Link
-                to={item.link}
+                href={item.link}
                 aria-current={isActive ? "page" : undefined}
                 title={isLocked ? "Sign in required" : undefined}
                 className={cn(

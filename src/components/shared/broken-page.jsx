@@ -1,6 +1,6 @@
 import React from "react";
 import { MapPinOff, RefreshCw } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -74,7 +74,7 @@ const BrokenPage = ({
       <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
         {actionTo && actionLabel ? (
           <Button asChild className="w-full sm:w-auto">
-            <Link to={actionTo}>
+            <Link href={actionTo}>
               {/* <ArrowLeft aria-hidden="true" /> */}
               {actionLabel}
             </Link>

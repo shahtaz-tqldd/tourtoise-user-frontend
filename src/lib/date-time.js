@@ -1,4 +1,3 @@
-import moment from "moment";
 const monthLabels = [
   "Jan",
   "Feb",
@@ -108,27 +107,25 @@ export const formatUpdatedAt = (value) => {
   }).format(new Date(value));
 };
 
+const UNITS = [
+  { ms: 365.25 * 24 * 60 * 60 * 1000, label: "y" },
+  { ms: 30.44 * 24 * 60 * 60 * 1000, label: "mo" },
+  { ms: 24 * 60 * 60 * 1000, label: "d" },
+  { ms: 60 * 60 * 1000, label: "h" },
+  { ms: 60 * 1000, label: "m" },
+  { ms: 1000, label: "s" },
+];
+
 export const duration = (time) => {
-  const duration = moment.duration(moment().diff(moment(time)));
+  let remaining = Date.now() - new Date(time).getTime();
 
-  const years = duration.years();
-  const months = duration.months();
-  const days = duration.days();
-  const hours = duration.hours();
-  const minutes = duration.minutes();
-  const seconds = duration.seconds();
+  if (!Number.isFinite(remaining) || remaining < 0) return "0s ago";
 
-  if (years > 0) {
-    return `${years}y ago`;
-  } else if (months > 0) {
-    return `${months}mo ago`;
-  } else if (days > 0) {
-    return `${days}d ago`;
-  } else if (hours > 0) {
-    return `${hours}h ago`;
-  } else if (minutes > 0) {
-    return `${minutes}m ago`;
-  } else {
-    return `${seconds}s ago`;
+  for (const unit of UNITS) {
+    const value = Math.floor(remaining / unit.ms);
+    if (value > 0) return `${value}${unit.label} ago`;
+    remaining %= unit.ms;
   }
+
+  return "0s ago";
 };

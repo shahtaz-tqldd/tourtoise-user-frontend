@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 import { apiSlice } from "@/features/api/apiSlice";
 import { userLoggedIn } from "@/features/auth/authSlice";
@@ -53,7 +53,7 @@ const runAfterOverlayClosed = (callback) => {
  */
 const AuthGateProvider = ({ children }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const router = useRouter();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   const [state, setState] = useState({
@@ -110,8 +110,8 @@ const AuthGateProvider = ({ children }) => {
   // New accounts go through onboarding before anything else.
   const handleVerified = useCallback(
     (tokens) =>
-      completeSignIn(tokens, () => navigate("/onboarding", { replace: true })),
-    [completeSignIn, navigate],
+      completeSignIn(tokens, () => router.replace("/onboarding")),
+    [completeSignIn, router],
   );
 
   const handleRegistered = useCallback((email) => {

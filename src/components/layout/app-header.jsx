@@ -1,5 +1,6 @@
 import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Bell, MessageCircle, PlaneTakeoff, Search, Sparkles } from "lucide-react";
 import { useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
@@ -21,20 +22,21 @@ const formatUnreadCount = (count) => (count > 99 ? "99+" : count);
 const AppHeader = () => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const { openAuth } = useAuthGate();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   // Landing hero has its own primary CTA: keep one green button at a time.
-  const isLanding = location.pathname === "/";
+  const isLanding = pathname === "/";
   const heroInView = useHeroInView();
   const showPlanCta = !(isLanding && heroInView);
   const [searchQuery, setSearchQuery] = React.useState(() => {
-    if (location.pathname !== "/search") return "";
+    if (typeof window === "undefined" || window.location.pathname !== "/search")
+      return "";
 
-    return new URLSearchParams(location.search).get("q") || "";
+    return new URLSearchParams(window.location.search).get("q") || "";
   });
 
   const navigateToSearch = React.useCallback(() => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(window.location.search);
     const trimmedSearch = searchQuery.trim();
 
     if (trimmedSearch) params.set("q", trimmedSearch);
@@ -42,11 +44,8 @@ const AppHeader = () => {
 
     if (!params.get("tab")) params.set("tab", "destinations");
 
-    navigate({
-      pathname: "/search",
-      search: `?${params.toString()}`,
-    });
-  }, [location.search, navigate, searchQuery]);
+    router.push(`/search?${params.toString()}`);
+  }, [router, searchQuery]);
 
   const { data, refetch: refetchProfileStates } = useProfileStatesQuery(
     undefined,
@@ -91,7 +90,7 @@ const AppHeader = () => {
       <div className="ml-auto flex shrink-0 items-center gap-2 xl:ml-0">
         {inProgressTrip?.trip_id && (
           <Link
-            to={`/trips/${inProgressTrip.trip_id}`}
+            href={`/trips/${inProgressTrip.trip_id}`}
             className="group relative flex size-9 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-white text-primary transition hover:border-primary/25 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 xl:h-11 xl:w-auto xl:max-w-[22rem] xl:justify-start xl:gap-3 xl:px-2"
             aria-label={`Open in-progress trip ${inProgressTrip.name}. ${tripUnreadNotificationCount} unread notifications and ${tripUnreadMessageCount} unread messages.`}
           >

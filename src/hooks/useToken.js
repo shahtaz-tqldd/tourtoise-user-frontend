@@ -1,6 +1,13 @@
 import { getAuthCookie, removeAuthCookie } from "./useCookie";
 
+const isBrowser = typeof window !== "undefined";
+
 export const getTokens = () => {
+  // Called at module init by authSlice: must stay safe during SSR/prerender.
+  if (!isBrowser) {
+    return { accessToken: null, refreshToken: null, rememberMe: false };
+  }
+
   const { accessToken: cookieAccessToken, refreshToken: cookieRefreshToken } =
     getAuthCookie();
 

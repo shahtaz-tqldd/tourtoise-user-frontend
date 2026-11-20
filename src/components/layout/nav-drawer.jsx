@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 
 import {
@@ -25,7 +26,7 @@ import { MEDIA_CONTENT_TYPE } from "@/constants/content";
 
 const NavDrawer = () => {
   const [open, setOpen] = React.useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { openAuth } = useAuthGate();
   const menuItems = isAuthenticated ? DRAWER_MENU_ITEMS : GUEST_DRAWER_ITEMS;
@@ -34,7 +35,7 @@ const NavDrawer = () => {
   const fullName = user?.name;
   const profilePath = `/profile/${username || "my-profile"}`;
   const profileImage = user?.avatar_url;
-  const isProfileActive = location.pathname === profilePath;
+  const isProfileActive = pathname === profilePath;
 
   const logout = useLogout();
   const handleLogout = () => {
@@ -146,11 +147,11 @@ const NavDrawer = () => {
             <nav className="space-y-1" aria-label="Profile menu links">
               {menuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname.startsWith(item.to);
+                const isActive = pathname.startsWith(item.to);
                 return (
                   <Link
                     key={item.label}
-                    to={item.to}
+                    href={item.to}
                     replace
                     onClick={() => setOpen(false)}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 ${

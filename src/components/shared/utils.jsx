@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Globe, Sparkles, User } from "lucide-react";
 import React from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { BoxIcon } from "@/assets/icons/svg-icons";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
@@ -81,7 +81,7 @@ export const NotificationCard = ({
 export const Logo = ({ className = "flex" }) => {
   return (
     <Link
-      to="/"
+      href="/"
       className={cn("flx items-center gap-2", className)}
       aria-label="tourtoise"
     >

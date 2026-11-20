@@ -1,0 +1,304 @@
+import { AuthorMessage, NotificationCard } from "@/components/shared/utils";
+import { Button } from "@/components/ui/button";
+import { useTripActivateMutation } from "@/features/trips/tripApiSlice";
+import { formatLabel } from "@/lib/utils";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  CheckCircle2,
+  Loader2,
+  MapPin,
+  Plus,
+  Route,
+  UserRound,
+  Wallet,
+} from "lucide-react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { planningStepValues } from "../planning-step-utils";
+import { useTripPlanningStep } from "../hooks/use-trip-planning-step";
+
+const getTripId = (trip) => trip?.id || trip?.trip_id || trip?.uuid;
+
+const formatDateRange = (startDate, endDate) => {
+  if (!startDate && !endDate) return "Dates not set";
+  if (startDate && !endDate) return `Starts ${startDate}`;
+
+  const formatter = new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+
+  return `${formatter.format(new Date(`${startDate}T00:00:00`))} - ${formatter.format(new Date(`${endDate}T00:00:00`))}`;
+};
+
+const OverviewSkeleton = () => (
+  <div className="space-y-4">
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+      <div className="h-4 w-3/4 animate-pulse rounded-full bg-amber-100" />
+      <div className="mt-3 h-3 w-full animate-pulse rounded-full bg-amber-100" />
+    </div>
+    {[0, 1, 2, 3].map((index) => (
+      <div
+        key={index}
+        className="rounded-xl border border-line bg-white p-4"
+      >
+        <div className="mb-4 h-4 w-1/2 animate-pulse rounded-full bg-slate-200" />
+        <div className="space-y-3">
+          <div className="h-3 w-full animate-pulse rounded-full bg-surface-muted" />
+          <div className="h-3 w-4/5 animate-pulse rounded-full bg-surface-muted" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const StatCard = ({ icon, label, value }) => (
+  <div className="rounded-xl border border-line bg-white p-3">
+    <div className="mb-2 flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+      {icon}
+    </div>
+    <p className="text-xs font-medium uppercase text-faint">{label}</p>
+    <p className="mt-1 text-sm font-semibold text-heading">{value}</p>
+  </div>
+);
+
+const CountCard = ({ label, value }) => (
+  <div className="rounded-lg bg-surface-subtle p-4 flex flex-col items-center justify-center text-center">
+    <p className="text-xs font-medium text-faint">{label}</p>
+    <p className="mt-1 text-lg font-bold text-heading">{value || 0}</p>
+  </div>
+);
+
+const SectionCard = ({ title, children }) => (
+  <section className="rounded-xl border border-line bg-white p-4">
+    <h3 className="text-sm font-semibold text-heading">{title}</h3>
+    <div className="mt-3">{children}</div>
+  </section>
+);
+
+const OverviewStep = ({
+  trip,
+  onTripUpdated,
+  onPlanningStateChange,
+  onStartNewPlan,
+}) => {
+  const tripId = getTripId(trip);
+  const [localTripStatus, setLocalTripStatus] = useState("");
+  const {
+    payload: overview,
+    isFetching,
+    isLoading,
+    isError,
+  } = useTripPlanningStep({
+    tripId,
+    step: planningStepValues.overview,
+    onPlanningStateChange,
+  });
+  const [activateTrip, { isLoading: isActivating }] = useTripActivateMutation();
+  const tripOverview = overview.trip || {};
+  const resolvedTripStatus =
+    localTripStatus || tripOverview.status || trip?.status || "";
+  const recommendations = overview.recommendations_overview || {};
+  const itinerary = overview.itinerary_overview || {};
+  const preparation = overview.preparation_overview || {};
+  const activation = overview.activation || {};
+  const router = useRouter();
+  const handleTripRedirect = (id) => {
+    router.push(`/trips/${id}`);
+  };
+
+  const handleActivateTrip = async () => {
+    if (!tripId) {
+      toast.error("Trip id is missing.");
+      return;
+    }
+
+    try {
+      const response = await activateTrip({ trip_id: tripId }).unwrap();
+      const updatedTrip = response?.data || response || {};
+
+      setLocalTripStatus("ready");
+      onTripUpdated?.({
+        ...trip,
+        ...updatedTrip,
+        id: getTripId(updatedTrip) || tripId,
+        status: updatedTrip.status || "ready",
+        current_step: planningStepValues.completed,
+        planning_stats: {
+          ...(trip?.planning_stats || {}),
+          ...(updatedTrip.planning_stats || {}),
+          agent_active: true,
+          is_qna_complete: true,
+          is_recommendation_complete: true,
+          is_itinerary_design_complete: true,
+          is_trip_preparation_complete: true,
+        },
+      });
+      toast.success("Trip is ready.");
+    } catch (error) {
+      const blockingMessage = error?.data?.errors?.blocking_steps?.[0];
+      toast.error(
+        blockingMessage ||
+          error?.data?.message ||
+          "Could not activate this trip.",
+      );
+    }
+  };
+
+  if (isLoading || isFetching) return <OverviewSkeleton />;
+
+  if (isError) {
+    return (
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+        Could not load the trip overview. Try reopening this step in a moment.
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-0 flex-col md:h-full">
+      <div className="custom-scrollbar space-y-4 p-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:[scrollbar-gutter:stable]">
+        {resolvedTripStatus === "draft" && (
+          <NotificationCard
+            title="This trip is saved as draft"
+            message="Review the overview below. You can proceed with this trip or
+              delete it and start again."
+          />
+        )}
+
+        <AuthorMessage
+          message={
+            preparation.summary ||
+            "Review the final planning summary before locking the trip."
+          }
+        />
+
+        {activation.blocking_steps?.length > 0 && (
+          <NotificationCard
+            title="Finish planning before activation"
+            message={activation.blocking_steps.join(" ")}
+          />
+        )}
+
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard
+            icon={<CalendarDays size={16} />}
+            label="Dates"
+            value={formatDateRange(
+              tripOverview.start_date,
+              tripOverview.end_date,
+            )}
+          />
+          <StatCard
+            icon={<Route size={16} />}
+            label="Duration"
+            value={`${tripOverview.duration_days || "-"} days`}
+          />
+          <StatCard
+            icon={<UserRound size={16} />}
+            label="Travelers"
+            value={`${tripOverview.travelers_count || "-"} ${formatLabel(
+              tripOverview.traveler_type || "traveler",
+            )}`}
+          />
+          <StatCard
+            icon={<Wallet size={16} />}
+            label="Est. Budget"
+            value={itinerary.total_estimated_budget}
+          />
+        </div>
+
+        <SectionCard title="Destinations">
+          <div className="space-y-2">
+            {(overview.destinations || []).map((destination) => (
+              <div
+                key={destination.id || destination.name}
+                className="flex items-center justify-between rounded-lg bg-surface-subtle px-3 py-2"
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <MapPin size={15} className="shrink-0 text-primary" />
+                  <span className="truncate text-sm font-medium text-heading">
+                    {destination.name}, {destination.country}
+                  </span>
+                </div>
+                {destination.is_primary && (
+                  <span className="rounded-full bg-primary/10 px-2 py-1 text-2xs font-semibold text-primary">
+                    Primary
+                  </span>
+                )}
+              </div>
+            ))}
+            {tripOverview.origin?.start_location && (
+              <p className="text-sm leading-6 text-body">
+                Starts from {tripOverview.origin.start_location}
+              </p>
+            )}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Plan coverage">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <CountCard
+              label="Spots"
+              value={recommendations.attractions_count}
+            />
+            <CountCard
+              label="Activities"
+              value={recommendations.activities_count}
+            />
+            <CountCard
+              label="Packing"
+              value={preparation.packing_items_count}
+            />
+            <CountCard label="Documents" value={preparation.documents_count} />
+          </div>
+          {itinerary.budget_note && (
+            <p className="mt-3 text-sm leading-6 text-body">
+              {itinerary.budget_note}
+            </p>
+          )}
+        </SectionCard>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 border-t border-line bg-white p-4 md:grid-cols-2">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isActivating}
+          onClick={onStartNewPlan}
+          className="rounded-full order-2 md:order-1"
+        >
+          <Plus size={17} />
+          Start a New Plan
+        </Button>
+        {resolvedTripStatus !== "ready" ? (
+          <Button
+            type="button"
+            onClick={handleActivateTrip}
+            disabled={isActivating || activation.can_activate === false}
+            className="rounded-full order-1 md:order-2"
+          >
+            {isActivating ? (
+              <Loader2 className="animate-spin" size={17} />
+            ) : (
+              <CheckCircle2 size={17} />
+            )}
+            Complete Trip Planning
+          </Button>
+        ) : (
+          <Button
+            onClick={() => handleTripRedirect(tripOverview.id || tripId)}
+            className="rounded-full order-1 md:order-2"
+          >
+            <ArrowUpRight size={17} />
+            View Your Trip
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default OverviewStep;

@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { ArrowUpRight, Bell, CheckCheck, Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { toast } from "sonner";
 import EmptyItems from "@/components/shared/empty-items";
 import { cn, titleCase } from "@/lib/utils";
@@ -210,7 +210,7 @@ const NotificationList = ({
                   />
                 ) : hasLink ? (
                   <Link
-                    to={link}
+                    href={link}
                     onClick={() => {
                       void markRead(notification);
                       onAction?.();

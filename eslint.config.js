@@ -1,33 +1,25 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import { FlatCompat } from "@eslint/eslintrc";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
-export default defineConfig([
-  globalIgnores(['dist']),
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+const eslintConfig = [
   {
-    files: ['**/*.{js,jsx}'],
-    extends: [
-      js.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+    ignores: [
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "public/sw.js*",
+      "public/workbox-*.js",
+      "public/swe-worker-*.js",
     ],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        ecmaFeatures: { jsx: true },
-        sourceType: 'module',
-      },
-    },
-    rules: {
-      'no-unused-vars': [
-        'error',
-        // Capitalised names are JSX components (e.g. `icon: Icon`, `as: Tag`).
-        { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^[A-Z_]' },
-      ],
-    },
   },
-])
+  ...compat.extends("next/core-web-vitals"),
+];
+
+export default eslintConfig;
