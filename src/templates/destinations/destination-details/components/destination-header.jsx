@@ -26,7 +26,9 @@ const SaveButton = ({ destination }) => {
       toast.error(
         getApiErrorMessage(
           error,
-          isSaved ? "Could not remove this place." : "Could not save this place.",
+          isSaved
+            ? "Could not remove this place."
+            : "Could not save this place.",
         ),
       );
     }
@@ -60,7 +62,8 @@ const ShareButton = ({ name }) => {
       await navigator.clipboard.writeText(url);
       toast.success("Link copied.");
     } catch (error) {
-      if (error?.name !== "AbortError") toast.error("Could not share this place.");
+      if (error?.name !== "AbortError")
+        toast.error("Could not share this place.");
     }
   };
 
@@ -74,25 +77,24 @@ const ShareButton = ({ name }) => {
 
 /** Name, one-line pitch, where it is, and the save/share actions. */
 const DestinationHeader = ({ destination, className }) => {
-  const tags = (destination.tags || []).map(getTagLabel).filter(Boolean).slice(0, 4);
+  const tags = (destination.tags || [])
+    .map(getTagLabel)
+    .filter(Boolean)
+    .slice(0, 4);
 
   return (
     <header className={cn("flex flex-col gap-4", className)}>
-      <Link
-        href="/"
-        className="hidden w-fit items-center gap-1.5 rounded-full text-body-sm font-semibold text-subtle transition hover:text-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex"
-      >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        All destinations
-      </Link>
-
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0">
           <Display as="h1" size="md" className="text-balance">
             {destination.name}
           </Display>
           {destination.tagline && (
-            <Text size="lg" tone="body" className="mt-1.5 max-w-2xl text-pretty">
+            <Text
+              size="lg"
+              tone="body"
+              className="mt-1.5 max-w-2xl text-pretty"
+            >
               {destination.tagline}
             </Text>
           )}
@@ -100,13 +102,18 @@ const DestinationHeader = ({ destination, className }) => {
             <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm text-subtle">
               {destination.country && (
                 <span className="inline-flex items-center gap-1 font-semibold text-heading">
-                  <MapPin className="size-4 text-brand-text" aria-hidden="true" />
+                  <MapPin
+                    className="size-4 text-brand-text"
+                    aria-hidden="true"
+                  />
                   {destination.country}
                 </span>
               )}
               {tags.map((tag) => (
                 <span key={tag} className="inline-flex items-center gap-2">
-                  <span aria-hidden="true" className="text-faint">·</span>
+                  <span aria-hidden="true" className="text-faint">
+                    ·
+                  </span>
                   {tag}
                 </span>
               ))}

@@ -7,15 +7,10 @@ import { Container } from "@/components/ui/container";
 export const EmptyDestination = () => {
   return (
     <Container>
-      <Link
-        href="/"
-        className="inline-flex w-fit items-center gap-1.5 text-body-sm font-semibold text-subtle hover:text-heading"
-      >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        All destinations
-      </Link>
       <div className="rounded-card bg-surface p-8 text-center ring-1 ring-line-subtle">
-        <h1 className="font-display text-h3 text-heading">Destination not found</h1>
+        <h1 className="font-display text-h3 text-heading">
+          Destination not found
+        </h1>
         <p className="mt-1 text-body-sm text-subtle">
           The selected destination could not be loaded.
         </p>
@@ -32,7 +27,11 @@ const Block = ({ className }) => (
 export const DestinationLoader = () => {
   return (
     <Container>
-      <div role="status" aria-label="Loading destination" className="flex flex-col gap-6">
+      <div
+        role="status"
+        aria-label="Loading destination"
+        className="flex flex-col gap-6"
+      >
         <div className="order-2 space-y-3 md:order-1">
           <Block className="hidden h-4 w-32 md:block" />
           <Block className="h-10 w-2/3 max-w-md" />

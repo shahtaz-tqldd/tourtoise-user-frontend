@@ -83,11 +83,11 @@ const JourneyHero = () => {
     <section
       ref={sectionRef}
       aria-labelledby="journey-hero-title"
-      className="relative overflow-hidden rounded-sheet bg-gradient-to-br from-brand-50 via-surface to-sand-50 ring-1 ring-line-subtle px-5 py-4 sm:px-8 sm:py-5"
+      className="relative w-full overflow-hidden border-b border-line-subtle bg-gradient-to-br from-brand-50 via-surface to-sand-50 px-2.5 py-4 sm:py-5 md:px-4"
     >
       <RouteBackdrop />
 
-      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      <div className="relative mx-auto flex w-full max-w-page flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="min-w-0">
           <div className="mb-2 flex items-center gap-2">
             <Sparkles size={12} className="text-brand-500" aria-hidden="true" />

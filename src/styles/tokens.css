@@ -152,7 +152,7 @@
   --brand-text: var(--color-brand-700);
 
   /* Surfaces */
-  --canvas: #eef7f3; /* app background behind cards (≈ brand-600 @ 7%) */
+  --canvas: #f5faf8; /* app background behind cards (≈ brand-600 @ 7%) */
   --surface: #ffffff;
   --surface-subtle: var(--color-ink-50);
   --surface-muted: var(--color-ink-100);

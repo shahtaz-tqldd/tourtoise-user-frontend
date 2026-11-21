@@ -1,0 +1,436 @@
+/**
+ * DEMO DATA — everything the planner shows before the backend exists.
+ * Shapes here are the ones the planner components consume, so they double as
+ * a first draft of the API/socket payloads.
+ */
+
+export const TRIP_TYPES = [
+  { value: "solo", label: "Solo", hint: "Just me", travelers: 1, emoji: "🎒" },
+  { value: "couple", label: "Couple", hint: "Two of us", travelers: 2, emoji: "💞" },
+  { value: "friends", label: "Friends", hint: "Small group", travelers: 4, emoji: "🙌" },
+  { value: "family", label: "Family", hint: "With kids/elders", travelers: 4, emoji: "👨‍👩‍👧" },
+];
+
+export const PACE_OPTIONS = [
+  { value: "slow", label: "Relaxed", hint: "2 things a day, long lunches", perDay: 2 },
+  { value: "moderate", label: "Balanced", hint: "3 things a day, some downtime", perDay: 3 },
+  { value: "fast", label: "Packed", hint: "4+ things, see it all", perDay: 4 },
+];
+
+export const STAY_TIERS = [
+  { value: "budget", label: "Budget", hint: "Guesthouses & hostels", perRoomNight: 22, foodPerDay: 14 },
+  { value: "comfort", label: "Comfort", hint: "3★ lakeside hotels", perRoomNight: 55, foodPerDay: 24 },
+  { value: "premium", label: "Premium", hint: "Resorts with a view", perRoomNight: 160, foodPerDay: 45 },
+];
+
+export const INTEREST_OPTIONS = [
+  "Nature", "Adventure", "Food", "Culture", "History", "Photography",
+  "Local experiences", "Hidden gems", "Nightlife", "Shopping",
+];
+
+export const DIETARY_OPTIONS = ["No restriction", "Vegetarian", "Vegan", "Halal", "Avoid pork"];
+
+/** Used when the signed-in user has not filled their travel profile yet. */
+export const EMPTY_PROFILE = {
+  travel_pace: "",
+  travel_interests: [],
+  dietary_preferences: [],
+  mobility_constraints: [],
+};
+
+/** Approximate rates from USD; display only. */
+export const FX = { USD: 1, BDT: 122, EUR: 0.92, GBP: 0.79, INR: 84, THB: 35, AED: 3.67, NPR: 134 };
+
+/* --------------------------------------------------------------------------
+   Pokhara catalogue. `cost` is USD per person. `slot` is when it works best.
+   -------------------------------------------------------------------------- */
+export const POKHARA_CANDIDATES = {
+  spots: [
+    {
+      id: "phewa-lake",
+      name: "Phewa Lake & Tal Barahi",
+      type: "Lake & island temple",
+      area: "Lakeside",
+      durationHrs: 2,
+      cost: 4,
+      slot: "afternoon",
+      tags: ["Nature", "Culture", "Photography"],
+      blurb: "Row out to the island pagoda while Machhapuchhre reflects on the water.",
+      intensity: 1,
+      hue: "from-ocean-500 to-brand-600",
+    },
+    {
+      id: "sarangkot",
+      name: "Sarangkot Sunrise",
+      type: "Viewpoint",
+      area: "Sarangkot",
+      durationHrs: 3,
+      cost: 3,
+      slot: "sunrise",
+      tags: ["Nature", "Photography"],
+      blurb: "Watch the Annapurna range light up pink before the city wakes.",
+      intensity: 2,
+      hue: "from-sand-400 to-rose-500",
+      note: "Leave by 5:15 am",
+    },
+    {
+      id: "peace-pagoda",
+      name: "World Peace Pagoda",
+      type: "Stupa on a hill",
+      area: "Anadu Hill",
+      durationHrs: 2,
+      cost: 2,
+      slot: "afternoon",
+      tags: ["Culture", "Photography", "Nature"],
+      blurb: "Hike up through forest for the best panorama over Phewa and the city.",
+      intensity: 2,
+      hue: "from-ink-200 to-ocean-600",
+    },
+    {
+      id: "davis-falls",
+      name: "Davis Falls & Gupteshwor Cave",
+      type: "Waterfall & cave",
+      area: "Chhorepatan",
+      durationHrs: 1.5,
+      cost: 3,
+      slot: "morning",
+      tags: ["Nature", "Hidden gems"],
+      blurb: "The falls vanish into a sinkhole — follow them underground into the cave.",
+      intensity: 1,
+      hue: "from-brand-500 to-ocean-700",
+    },
+    {
+      id: "mountain-museum",
+      name: "International Mountain Museum",
+      type: "Museum",
+      area: "Ratopahiro",
+      durationHrs: 2,
+      cost: 6,
+      slot: "afternoon",
+      tags: ["History", "Culture"],
+      blurb: "Everest expedition gear, Himalayan cultures and a mini climbing wall.",
+      intensity: 1,
+      hue: "from-ink-500 to-ink-800",
+    },
+    {
+      id: "begnas-lake",
+      name: "Begnas Lake",
+      type: "Quiet lake",
+      area: "Begnas",
+      durationHrs: 3,
+      cost: 5,
+      slot: "morning",
+      tags: ["Nature", "Hidden gems", "Local experiences"],
+      blurb: "Pokhara without the crowds — fish farms, paddy terraces and slow boats.",
+      intensity: 1,
+      hue: "from-brand-400 to-brand-800",
+    },
+    {
+      id: "old-bazaar",
+      name: "Old Bazaar & Bindhyabasini",
+      type: "Heritage quarter",
+      area: "Old Pokhara",
+      durationHrs: 1.5,
+      cost: 0,
+      slot: "morning",
+      tags: ["History", "Culture", "Local experiences", "Shopping"],
+      blurb: "Newari houses, brass shops and a hilltop temple buzzing at morning puja.",
+      intensity: 1,
+      hue: "from-sand-500 to-sand-700",
+    },
+    {
+      id: "seti-gorge",
+      name: "Seti River Gorge",
+      type: "Natural wonder",
+      area: "K.I. Singh Bridge",
+      durationHrs: 1,
+      cost: 0,
+      slot: "any",
+      tags: ["Nature", "Hidden gems", "Photography"],
+      blurb: "A milky-white river cut so deep you hear it long before you see it.",
+      intensity: 1,
+      hue: "from-ink-300 to-ocean-500",
+    },
+  ],
+  activities: [
+    {
+      id: "paragliding",
+      name: "Paragliding from Sarangkot",
+      type: "Tandem flight",
+      area: "Sarangkot",
+      durationHrs: 3,
+      cost: 85,
+      slot: "morning",
+      tags: ["Adventure", "Photography"],
+      blurb: "30 minutes riding thermals over Phewa with the Himalaya at eye level.",
+      intensity: 2,
+      hue: "from-sand-400 to-ocean-600",
+      note: "Book a day ahead",
+    },
+    {
+      id: "boating",
+      name: "Sunset boating on Phewa",
+      type: "Boat ride",
+      area: "Lakeside",
+      durationHrs: 1.5,
+      cost: 8,
+      slot: "evening",
+      tags: ["Nature", "Photography"],
+      blurb: "Hire a painted doonga and drift as the lake turns gold.",
+      intensity: 1,
+      hue: "from-sand-300 to-rose-500",
+    },
+    {
+      id: "zipline",
+      name: "Zip-flyer Nepal",
+      type: "Zipline",
+      area: "Sarangkot",
+      durationHrs: 2,
+      cost: 70,
+      slot: "morning",
+      tags: ["Adventure"],
+      blurb: "One of the steepest ziplines anywhere — 1.8 km at up to 120 km/h.",
+      intensity: 3,
+      hue: "from-rose-500 to-ink-800",
+    },
+    {
+      id: "australian-camp",
+      name: "Australian Camp day hike",
+      type: "Hike",
+      area: "Kande",
+      durationHrs: 6,
+      cost: 30,
+      slot: "morning",
+      tags: ["Nature", "Adventure", "Photography"],
+      blurb: "An easy ridge walk with a front-row Annapurna view and tea-house lunch.",
+      intensity: 3,
+      hue: "from-brand-500 to-ink-700",
+      note: "Needs ACAP permit",
+    },
+    {
+      id: "yoga",
+      name: "Lakeside sunrise yoga",
+      type: "Wellness",
+      area: "Lakeside",
+      durationHrs: 1.5,
+      cost: 12,
+      slot: "morning",
+      tags: ["Local experiences"],
+      blurb: "A gentle class on a rooftop facing the mountains. Chai included.",
+      intensity: 1,
+      hue: "from-brand-200 to-sand-400",
+    },
+    {
+      id: "cycling",
+      name: "Cycling around Phewa",
+      type: "Bike tour",
+      area: "Lakeside → Pame",
+      durationHrs: 3,
+      cost: 10,
+      slot: "afternoon",
+      tags: ["Nature", "Local experiences", "Adventure"],
+      blurb: "Flat lakeshore roads out to rice fields and village tea stops.",
+      intensity: 2,
+      hue: "from-ocean-500 to-brand-500",
+    },
+    {
+      id: "momo-class",
+      name: "Momo-making class",
+      type: "Cooking class",
+      area: "Lakeside",
+      durationHrs: 2.5,
+      cost: 25,
+      slot: "afternoon",
+      tags: ["Food", "Local experiences", "Culture"],
+      blurb: "Fold, pleat and steam your own momos with a local family.",
+      intensity: 1,
+      hue: "from-sand-300 to-sand-600",
+    },
+  ],
+  food: [
+    {
+      id: "thakali",
+      name: "Thakali thali",
+      type: "Set meal",
+      area: "Lakeside",
+      durationHrs: 1,
+      cost: 7,
+      slot: "lunch",
+      tags: ["Food", "Local experiences"],
+      blurb: "Dal, buckwheat, gundruk, ghee and endless refills — the mountain feast.",
+      intensity: 1,
+      hue: "from-sand-400 to-sand-700",
+      veg: true,
+    },
+    {
+      id: "momo",
+      name: "Jhol momo",
+      type: "Dumplings",
+      area: "Old Bazaar",
+      durationHrs: 0.75,
+      cost: 3,
+      slot: "lunch",
+      tags: ["Food"],
+      blurb: "Steamed momos drowned in a tangy sesame-tomato broth.",
+      intensity: 1,
+      hue: "from-rose-400 to-sand-600",
+      veg: true,
+    },
+    {
+      id: "fish-fry",
+      name: "Begnas fresh fish fry",
+      type: "Lake fish",
+      area: "Begnas",
+      durationHrs: 1,
+      cost: 9,
+      slot: "lunch",
+      tags: ["Food", "Hidden gems"],
+      blurb: "Crispy whole fish straight from the lake farms, eaten on the shore.",
+      intensity: 1,
+      hue: "from-ocean-500 to-sand-500",
+    },
+    {
+      id: "newari",
+      name: "Newari samay baji",
+      type: "Festive platter",
+      area: "Old Bazaar",
+      durationHrs: 1,
+      cost: 8,
+      slot: "dinner",
+      tags: ["Food", "Culture", "History"],
+      blurb: "Beaten rice, spiced buffalo, black soybeans and fiery achar.",
+      intensity: 1,
+      hue: "from-sand-600 to-rose-600",
+    },
+    {
+      id: "sel-roti",
+      name: "Sel roti & masala chai",
+      type: "Street breakfast",
+      area: "Old Bazaar",
+      durationHrs: 0.5,
+      cost: 2,
+      slot: "breakfast",
+      tags: ["Food", "Local experiences"],
+      blurb: "Sweet ring-shaped rice bread, best dunked in milky chai.",
+      intensity: 1,
+      hue: "from-sand-200 to-sand-500",
+      veg: true,
+    },
+    {
+      id: "lakeside-dinner",
+      name: "Lakeside live-music dinner",
+      type: "Evening out",
+      area: "Lakeside",
+      durationHrs: 2,
+      cost: 18,
+      slot: "dinner",
+      tags: ["Food", "Nightlife"],
+      blurb: "Wood-fired pizza, rooftop lanterns and a local band on the strip.",
+      intensity: 1,
+      hue: "from-ink-700 to-sand-500",
+      veg: true,
+    },
+  ],
+};
+
+/** "Did you know?" cards shown while the agent works. */
+export const POKHARA_FACTS = [
+  {
+    kind: "stat",
+    value: "6,993 m",
+    label: "Machhapuchhre",
+    text: "The 'Fishtail' peak you see from Lakeside has never been officially summited — it's sacred, and closed to climbers.",
+  },
+  {
+    kind: "fact",
+    text: "Davis Falls is named after a Swiss visitor swept into its sinkhole in 1961. Locals call it Patale Chhango — 'the underworld falls'.",
+  },
+  {
+    kind: "stat",
+    value: "800 → 8,000 m",
+    label: "In under 50 km",
+    text: "From Phewa's shore to Annapurna's summits — one of the steepest altitude rises on Earth.",
+  },
+  {
+    kind: "fact",
+    text: "Phewa is Nepal's second-largest lake. The Tal Barahi temple sits on an island you can only reach by boat.",
+  },
+  {
+    kind: "tip",
+    text: "Carry small notes. Boat counters, tea stalls and many Old Bazaar shops are cash-only.",
+  },
+  {
+    kind: "fact",
+    text: "Nepal's flag is the only national flag in the world that isn't a rectangle — two stacked pennants.",
+  },
+  {
+    kind: "tip",
+    text: "Sarangkot sunrise is clearest Oct–Dec. Mornings are crisp, so bring a warm layer.",
+  },
+];
+
+export const GENERIC_TIPS = [
+  { kind: "tip", text: "Turtle checks opening hours and travel time so you don't zig-zag across town." },
+  { kind: "tip", text: "Places near each other land on the same day — less commuting, more exploring." },
+  { kind: "tip", text: "Your 'must-do' picks get the best time slot of the day." },
+];
+
+/* --------------------------------------------------------------------------
+   Packing catalogue. `when` decides if an item applies to this trip.
+   -------------------------------------------------------------------------- */
+export const PACKING_CATALOGUE = [
+  {
+    group: "Documents",
+    icon: "documents",
+    items: [
+      { id: "passport", label: "Passport (6+ months valid)", why: "Needed for visa on arrival" },
+      { id: "visa-cash", label: "USD cash for visa fee", why: "Visa counters prefer exact cash" },
+      { id: "photos", label: "2 passport photos", why: "Visa form & permits" },
+      { id: "insurance", label: "Travel insurance print-out", why: "Covers adventure sports", when: "adventure" },
+      { id: "acap", label: "ACAP permit + copy", why: "Required for Australian Camp hike", when: "australian-camp" },
+      { id: "bookings", label: "Hotel & activity bookings (offline)", why: "Signal drops on the ridge" },
+    ],
+  },
+  {
+    group: "Clothing",
+    icon: "clothing",
+    items: [
+      { id: "layers", label: "Warm fleece / down jacket", why: "Mornings around 6°C in this season" },
+      { id: "tees", label: "Breathable t-shirts", why: "Afternoons warm up to ~22°C" },
+      { id: "shoes", label: "Comfortable walking shoes", why: "Pagoda & cave paths are uneven" },
+      { id: "boots", label: "Light hiking boots", why: "Ridge trail is rocky", when: "hike" },
+      { id: "modest", label: "Scarf / covered-shoulder top", why: "For temples and the stupa" },
+      { id: "sandals", label: "Sandals for Lakeside", why: "Boat rides & evening strolls" },
+    ],
+  },
+  {
+    group: "Gear",
+    icon: "gear",
+    items: [
+      { id: "daypack", label: "20L daypack", why: "Day trips & hikes" },
+      { id: "headlamp", label: "Headlamp", why: "Pre-dawn walk to Sarangkot", when: "sarangkot" },
+      { id: "bottle", label: "Refillable water bottle", why: "Refill stations around Lakeside" },
+      { id: "sunglasses", label: "Sunglasses & cap", why: "Glare off the lake and snow" },
+      { id: "gopro", label: "Action camera / phone strap", why: "For the paragliding flight", when: "paragliding" },
+    ],
+  },
+  {
+    group: "Health",
+    icon: "health",
+    items: [
+      { id: "sunscreen", label: "Sunscreen SPF 50", why: "Strong sun at altitude" },
+      { id: "meds", label: "Personal meds + stomach kit", why: "New food, new water" },
+      { id: "sanitizer", label: "Hand sanitizer & tissues", why: "Street food stops" },
+      { id: "motion", label: "Motion-sickness tablets", why: "Winding roads from Kathmandu" },
+    ],
+  },
+  {
+    group: "Tech",
+    icon: "tech",
+    items: [
+      { id: "adapter", label: "Type C/D plug adapter", why: "Nepal uses round-pin sockets" },
+      { id: "powerbank", label: "Power bank", why: "Load-shedding still happens" },
+      { id: "esim", label: "Local SIM / eSIM", why: "Ncell or NTC at the airport" },
+    ],
+  },
+];

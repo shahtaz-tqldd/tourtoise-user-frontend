@@ -86,64 +86,67 @@ const DestinationPage = () => {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return (
-    <Container>
+    <div className="flex flex-1 flex-col">
+      {/* Full-bleed band directly under the header; content aligns to the page width. */}
       <JourneyHero />
 
-      <section id="explore" aria-labelledby="explore-title" className="scroll-mt-24 space-y-6">
-        <div className="space-y-4">
-          <div>
-            <Heading level={2} id="explore-title">
-              Where&apos;s next?
-            </Heading>
-            <Text tone="subtle" className="mt-1">
-              Hand-picked places with guides, food and the best time to go.
-            </Text>
+      <Container>
+        <section id="explore" aria-labelledby="explore-title" className="scroll-mt-24 space-y-6">
+          <div className="space-y-4">
+            <div>
+              <Heading level={2} id="explore-title">
+                Where&apos;s next?
+              </Heading>
+              <Text tone="subtle" className="mt-1">
+                Hand-picked places with guides, food and the best time to go.
+              </Text>
+            </div>
+            <TypeChips value={type} onChange={setType} />
           </div>
-          <TypeChips value={type} onChange={setType} />
-        </div>
 
-        {isInitialLoading && <LoadingDestinationList />}
+          {isInitialLoading && <LoadingDestinationList />}
 
-        {!isInitialLoading && isError && (
-          <DestinationFetchError onRetry={refetch} />
-        )}
+          {!isInitialLoading && isError && (
+            <DestinationFetchError onRetry={refetch} />
+          )}
 
-        {!isInitialLoading && !isError && !destinations.length && (
-          <EmptyPage
-            icon={MapPinOff}
-            eyebrow={type === "all" ? "More places coming soon" : "No matching places"}
-            title={type === "all" ? "No destinations available" : `No ${typeLabel?.toLowerCase()} destinations yet`}
-            description={
-              type === "all"
-                ? "New destinations will appear here as soon as they are ready to explore."
-                : "Try another type, or browse everything."
-            }
-            actionLabel={type === "all" ? undefined : "Show all destinations"}
-            onAction={type === "all" ? undefined : () => setType("all")}
-          />
-        )}
-
-        {!isInitialLoading && !isError && destinations.length > 0 && (
-          <>
-            <ul role="list" className={DESTINATION_GRID_CLASS}>
-              {destinations.map((destination) => (
-                <li key={destination.slug}>
-                  <DestinationCard destination={destination} />
-                </li>
-              ))}
-            </ul>
-            <InfiniteScroll
-              hasMore={hasNextPage}
-              isLoading={isFetchingNextPage}
-              onLoadMore={handleLoadMore}
-              loadingLabel="Loading more destinations..."
+          {!isInitialLoading && !isError && !destinations.length && (
+            <EmptyPage
+              icon={MapPinOff}
+              eyebrow={type === "all" ? "More places coming soon" : "No matching places"}
+              title={type === "all" ? "No destinations available" : `No ${typeLabel?.toLowerCase()} destinations yet`}
+              description={
+                type === "all"
+                  ? "New destinations will appear here as soon as they are ready to explore."
+                  : "Try another type, or browse everything."
+              }
+              actionLabel={type === "all" ? undefined : "Show all destinations"}
+              onAction={type === "all" ? undefined : () => setType("all")}
             />
-          </>
-        )}
-      </section>
+          )}
 
-      {/* <CompanionStrip /> */}
-    </Container>
+          {!isInitialLoading && !isError && destinations.length > 0 && (
+            <>
+              <ul role="list" className={DESTINATION_GRID_CLASS}>
+                {destinations.map((destination) => (
+                  <li key={destination.slug}>
+                    <DestinationCard destination={destination} />
+                  </li>
+                ))}
+              </ul>
+              <InfiniteScroll
+                hasMore={hasNextPage}
+                isLoading={isFetchingNextPage}
+                onLoadMore={handleLoadMore}
+                loadingLabel="Loading more destinations..."
+              />
+            </>
+          )}
+        </section>
+
+        {/* <CompanionStrip /> */}
+      </Container>
+    </div>
   );
 };
 

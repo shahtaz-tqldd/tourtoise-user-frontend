@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "next/navigation";
-import { useSelector } from "react-redux";
+import React, { useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { MapPinned } from "lucide-react";
 
 import { useDestinationDetailQuery } from "@/features/destination/destinationApiSlice";
-import TripPlanningDrawer from "@/templates/trips/trip-create";
 import BrokenPage from "@/components/shared/broken-page";
 import { Container } from "@/components/ui/container";
 import useTitle from "@/hooks/useTitle";
@@ -28,10 +26,8 @@ import { PLACE_KINDS } from "./place-kinds";
 
 const DestinationDetailsPage = () => {
   const { destination_id } = useParams();
-  const [planningOpen, setPlanningOpen] = useState(false);
+  const router = useRouter();
   const [activeFeature, setActiveFeature] = useState(null);
-  const planningHistoryEntryRef = useRef(false);
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   const { data, isFetching, error, refetch } =
     useDestinationDetailQuery(destination_id);
@@ -39,54 +35,6 @@ const DestinationDetailsPage = () => {
   const photos = useMemo(() => getDestinationPhotos(destination), [destination]);
 
   useTitle(`tourtoise - ${destination?.name}`);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-
-    const handlePopState = () => {
-      if (!planningHistoryEntryRef.current) return;
-
-      planningHistoryEntryRef.current = false;
-      setPlanningOpen(false);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !planningOpen) return;
-    if (planningHistoryEntryRef.current) return;
-
-    window.history.pushState(
-      {
-        ...(window.history.state || {}),
-        tripPlanningDrawer: true,
-      },
-      "",
-      window.location.href,
-    );
-    planningHistoryEntryRef.current = true;
-  }, [planningOpen]);
-
-  const handlePlanningOpenChange = (nextOpen) => {
-    if (nextOpen) {
-      setPlanningOpen(true);
-      return;
-    }
-
-    if (
-      typeof window !== "undefined" &&
-      planningHistoryEntryRef.current &&
-      window.history.state?.tripPlanningDrawer
-    ) {
-      planningHistoryEntryRef.current = false;
-      window.history.back();
-    }
-
-    setPlanningOpen(false);
-  };
 
   if (isFetching) {
     return <DestinationLoader />;
@@ -131,8 +79,8 @@ const DestinationDetailsPage = () => {
     return <EmptyDestination />;
   }
 
-  const openPlanner = () => handlePlanningOpenChange(true);
   const destinationSlug = destination.slug || destination_id;
+  const openPlanner = () => router.push(`/destinations/${destinationSlug}/plan`);
   const selectPlace = (kindKey) => (item) => {
     const kind = PLACE_KINDS[kindKey];
     setActiveFeature({
@@ -170,14 +118,6 @@ const DestinationDetailsPage = () => {
         </aside>
       </div>
 
-      {/* The planner loads member-only data, so it only mounts for members. */}
-      {isAuthenticated && (
-        <TripPlanningDrawer
-          destination={destination}
-          open={planningOpen}
-          onOpenChange={handlePlanningOpenChange}
-        />
-      )}
       <FeatureDetails
         feature={activeFeature}
         destinationSlug={destinationSlug}
